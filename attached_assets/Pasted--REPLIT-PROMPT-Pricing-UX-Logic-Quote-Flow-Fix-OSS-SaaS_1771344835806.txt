@@ -1,0 +1,173 @@
+🔥 REPLIT PROMPT – Pricing UX, Logic & Quote Flow Fix (OSS SaaS Model)
+
+We are converting OSS into a true SaaS self-service model.
+
+Refactor and improve the Pricing and Quote system with the following changes:
+
+1️⃣ REMOVE CONFUSING FLOW
+
+Currently:
+User selects a plan → then clicks “Get Quote” → asked for more info.
+
+This is confusing.
+
+Required Fix:
+
+For Core Plans (Starter, Growth, Pro):
+
+Replace “Get Quote” with:
+
+“Start Free Trial” (primary button)
+
+“Subscribe Now” (secondary button)
+
+User should:
+
+Create account
+
+Choose plan
+
+Enter payment
+
+Activate instantly
+
+NO extra quote form for standard plans.
+
+2️⃣ KEEP “GET QUOTE” ONLY FOR ENTERPRISE
+
+Add logic:
+
+If:
+
+Hotel rooms > 100
+OR
+
+Custom integration required
+
+THEN show:
+“Request Enterprise Quote”
+
+Otherwise:
+Hide quote form.
+
+3️⃣ FIX i18n BUG
+
+Error:
+key 'quote.timezone (en)' returned an object instead of string
+
+Fix translation structure:
+
+Ensure all i18n keys return strings
+
+Remove object return issue
+
+Validate all pricing and quote translations
+
+4️⃣ PLAN FEATURE CLEANUP
+
+Avoid overlapping features.
+
+Refactor:
+
+Core Starter:
+
+PMS
+
+Booking
+
+Guest Management
+
+Staff Management
+
+Basic Reports
+
+Core Growth:
+
+Everything in Starter
+
+Multi-property support
+
+Advanced Analytics
+
+Core Pro:
+
+Everything in Growth
+
+Priority Support
+
+Custom Integrations
+
+Remove duplicated feature naming.
+
+5️⃣ SMART ROOM FEATURE LOCKING
+
+Important:
+
+Guest Panel must show features based on plan.
+
+Example:
+
+Smart Lite:
+
+Lights
+
+AC
+
+Lock
+
+Pre-check-in
+
+Smart Pro:
+
+Add automation rules
+
+Energy monitoring
+
+Scenes
+
+Smart AI:
+
+AI assistant
+
+AI wake-up
+
+Behavioral optimization
+
+Implement feature gating:
+If plan does not include feature → hide it completely.
+
+Do NOT show disabled premium blocks to basic users.
+
+6️⃣ IMPROVE PRICING UX
+
+Add:
+
+Monthly / Yearly toggle (Yearly = 15% discount)
+
+Dynamic room calculator
+
+Clear “Per room / per month” labeling
+
+Make pricing fully transparent.
+
+7️⃣ ADD STRIPE-READY STRUCTURE
+
+Prepare subscription structure:
+
+Plan ID
+
+Price ID
+
+Billing cycle
+
+Trial days (14 days default)
+
+Do not break current auth system.
+Keep multi-tenant structure intact.
+
+Clean up code.
+Remove unused quote logic for non-enterprise flow.
+Make architecture scalable.
+
+After refactoring:
+Provide a summary of what was changed.

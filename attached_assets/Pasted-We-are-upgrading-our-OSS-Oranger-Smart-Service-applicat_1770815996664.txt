@@ -1,0 +1,157 @@
+We are upgrading our OSS (Oranger Smart Service) application to a full SaaS multi-tenant architecture.
+
+MAIN GOAL:
+Convert the system from single hotel logic to OWNER-BASED multi-property system.
+
+---------------------------------------------------
+
+1. MULTI TENANT OWNER STRUCTURE
+
+Create a new main entity called OWNER.
+
+Each OWNER can have multiple PROPERTIES.
+Each PROPERTY can have multiple UNITS.
+
+Hierarchy must be:
+
+Owner
+  → Properties
+        → Units
+              → Bookings
+              → Devices
+              → Guests
+              → Staff
+
+---------------------------------------------------
+
+2. PROPERTY TYPES SUPPORT
+
+Each property must support type field:
+
+hotel
+resort
+villa_complex
+tiny_house_village
+apartment_rental
+glamping
+
+---------------------------------------------------
+
+3. UNIT TYPES SUPPORT
+
+Each unit must support:
+
+room
+villa
+tiny_house
+capsule
+bungalow
+apartment
+cabin
+a_frame
+
+---------------------------------------------------
+
+4. DATABASE CHANGES
+
+Create or update tables:
+
+owners
+properties
+units
+devices
+bookings
+users
+subscriptions
+
+All tables must include:
+
+owner_id
+property_id (where needed)
+
+---------------------------------------------------
+
+5. SUBSCRIPTION & PLAN SYSTEM
+
+Add SaaS plan support:
+
+basic
+pro
+enterprise
+
+Each owner must have:
+
+plan_type
+feature_flags JSON
+
+Example:
+
+feature_flags:
+{
+  smart_room: true,
+  ai_concierge: false,
+  analytics: true,
+  iot_devices: true
+}
+
+---------------------------------------------------
+
+6. ROLE SYSTEM UPDATE
+
+System must support:
+
+Super Admin
+Owner Admin
+Property Manager
+Staff
+Guest
+
+Permissions must be isolated per owner and property.
+
+---------------------------------------------------
+
+7. SECURITY (VERY IMPORTANT)
+
+Owners must never see data from other owners.
+All API endpoints must validate owner_id.
+
+---------------------------------------------------
+
+8. DASHBOARD CHANGES
+
+Owner Dashboard must show:
+
+- List of properties
+- Total units
+- Occupancy analytics
+- Revenue analytics
+- Device status
+- Staff overview
+
+---------------------------------------------------
+
+9. FUTURE IOT SUPPORT
+
+Units must be able to connect to smart devices.
+Devices must be linked to unit and property.
+
+---------------------------------------------------
+
+10. BACKWARD COMPATIBILITY
+
+Existing hotel records must be automatically converted into:
+
+Owner → Property → Units structure.
+
+---------------------------------------------------
+
+11. UI UPDATE
+
+Add property selector inside owner dashboard.
+Add ability to create multiple properties.
+
+---------------------------------------------------
+
+Please refactor backend models, APIs, and UI accordingly.
+Ensure clean scalable SaaS architecture.
+

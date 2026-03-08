@@ -1,0 +1,96 @@
+We need to properly implement PLAN SELECTION inside onboarding wizard.
+
+IMPORTANT:
+- System already uses DB-driven PLAN_CODE_FEATURES (runtime, no cache)
+- Do NOT modify billing logic
+- Do NOT modify trial logic
+- Clean and stabilize everything
+
+GOAL:
+Add Plan Selection as Step 7 in onboarding wizard and make feature gating fully backend-controlled.
+
+-----------------------------------------
+1️⃣ ONBOARDING FLOW ORDER
+
+1. Property Name
+2. Property Type
+3. Location
+4. Rooms
+5. IoT Setup
+6. Staff Invite
+7. Plan Selection (NEW)
+8. Review
+9. Activate
+
+-----------------------------------------
+2️⃣ HOTEL MODEL MUST INCLUDE:
+
+planCode: { type: String, default: "trial" }
+planStatus: { type: String, default: "active" }
+planStartDate: Date
+planEndDate: Date
+
+-----------------------------------------
+3️⃣ WHEN USER SELECTS A PLAN:
+
+On Step 7 submit:
+
+await Hotel.updateOne(
+ { _id: hotelId },
+ {
+   planCode: selectedPlan,
+   planStartDate: new Date(),
+   planStatus: "active"
+ }
+)
+
+If selectedPlan === "trial":
+Set planEndDate = 14 days from now
+
+-----------------------------------------
+4️⃣ REMOVE ANY AUTO DEFAULT PLAN ASSIGNMENTS
+
+If there is any:
+planCode = "core"
+or similar
+
+REMOVE IT.
+
+Onboarding decision must control planCode.
+
+-----------------------------------------
+5️⃣ BACKEND FEATURE GATING (CRITICAL)
+
+All protected routes must check:
+
+const features = PLAN_CODE_FEATURES[hotel.planCode]
+
+If feature not allowed:
+return 403 with message "Upgrade required"
+
+Frontend can disable UI,
+BUT backend must enforce limits.
+
+-----------------------------------------
+6️⃣ FIX PROPERTY / STAFF LIMIT BUG
+
+Before creating property or staff:
+
+Check features.propertyLimit
+Check features.staffLimit
+
+If limit exceeded → return 403
+
+-----------------------------------------
+7️⃣ CLEAN CODE
+
+- Remove duplicated plan logic
+- Remove old feature checks
+- Remove unused plan constants
+- Keep code clean and structured
+- No breaking changes
+
+-----------------------------------------
+
+After implementation:
+Explain clearly what files were modified.

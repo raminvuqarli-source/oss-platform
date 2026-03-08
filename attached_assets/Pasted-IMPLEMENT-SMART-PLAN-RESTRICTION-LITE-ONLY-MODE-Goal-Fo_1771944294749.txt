@@ -1,0 +1,167 @@
+IMPLEMENT SMART PLAN RESTRICTION (LITE ONLY MODE)
+
+Goal:
+For now ONLY SMART LITE must be active everywhere.
+
+SMART PRO and SMART AI must remain in the system but must be COMING SOON and disabled.
+
+Apply this to:
+
+- Landing Page (First Page)
+- Owner Dashboard
+- Guest Dashboard
+
+
+------------------------------------
+1. SMART LITE
+------------------------------------
+
+SMART LITE must remain:
+
+- Fully active
+- Selectable
+- Working normally
+- Buttons enabled
+- Devices controllable
+
+DO NOT change Smart Lite behavior.
+
+
+
+------------------------------------
+2. SMART PRO
+------------------------------------
+
+SMART PRO must:
+
+Show label:
+
+COMING SOON
+
+Rules:
+
+- Cannot be selected
+- Button disabled
+- Button text = Coming Soon
+- Cursor = not-allowed
+- Greyed design
+- No activation allowed
+- No API activation allowed
+
+
+
+------------------------------------
+3. SMART AI
+------------------------------------
+
+SMART AI must:
+
+Show label:
+
+COMING SOON
+
+Rules:
+
+- Cannot be selected
+- Button disabled
+- Button text = Coming Soon
+- Cursor = not-allowed
+- Greyed design
+- No activation allowed
+- No API activation allowed
+
+
+
+------------------------------------
+4. LANDING PAGE
+------------------------------------
+
+Smart Plans section:
+
+SMART LITE → Active
+
+SMART PRO → Coming Soon
+
+SMART AI → Coming Soon
+
+SMART PRO and SMART AI must look disabled.
+
+
+
+------------------------------------
+5. OWNER DASHBOARD
+------------------------------------
+
+Smart Plan selection:
+
+SMART LITE → Selectable
+
+SMART PRO → Disabled + Coming Soon
+
+SMART AI → Disabled + Coming Soon
+
+User must not be able to activate Smart Pro or Smart AI.
+
+
+
+------------------------------------
+6. GUEST DASHBOARD
+------------------------------------
+
+SMART LITE:
+
+- Fully working
+- Room control works normally
+
+SMART PRO:
+
+Disabled
+
+Show:
+
+Coming Soon
+
+
+SMART AI:
+
+Disabled
+
+Show:
+
+Coming Soon
+
+
+Buttons and controls must not work.
+
+
+
+------------------------------------
+7. BACKEND PROTECTION
+------------------------------------
+
+Allow only:
+
+SMART_LITE
+
+
+Block:
+
+SMART_PRO
+SMART_AI
+
+
+Return error:
+
+Smart Plan not available yet
+
+
+
+------------------------------------
+8. IMPORTANT
+------------------------------------
+
+Do NOT remove Smart Pro or Smart AI.
+
+They will be activated later.
+
+This is temporary Lite-only mode.

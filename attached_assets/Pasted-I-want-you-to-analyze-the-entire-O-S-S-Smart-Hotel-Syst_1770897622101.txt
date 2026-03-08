@@ -1,0 +1,105 @@
+I want you to analyze the entire O.S.S Smart Hotel System application and explain how the system is supposed to work in simple business language.
+
+This is NOT technical documentation.  
+This must be written as USER FLOW and ROLE BEHAVIOR explanation.
+
+----------------------------------------
+TASK
+----------------------------------------
+
+Describe how each type of user is expected to use the system step by step.
+
+Explain from real-world usage perspective.
+
+----------------------------------------
+ROLES TO ANALYZE
+----------------------------------------
+
+1. Hotel Owner / Property Owner
+2. Manager / Admin Staff
+3. Reception Staff
+4. Cleaning / Service Staff
+5. Guest
+6. OSS Internal Admin (if exists)
+
+----------------------------------------
+FOR EACH ROLE DESCRIBE:
+
+• What is their main purpose in the system
+• What screens they use
+• What actions they perform daily
+• What permissions they have
+• What they should NOT be allowed to do
+• How they interact with other roles
+
+----------------------------------------
+OWNER FLOW
+----------------------------------------
+Explain:
+
+How owner registers property  
+How owner creates staff  
+How owner manages rooms  
+How owner monitors bookings  
+How owner checks reports  
+How owner configures smart devices  
+How owner handles billing  
+How owner communicates with guests  
+
+----------------------------------------
+RECEPTION FLOW
+----------------------------------------
+Explain:
+
+How reception handles check-in  
+How reception creates bookings  
+How reception adds guest data  
+How reception assigns rooms  
+How reception manages guest requests  
+How reception communicates with cleaning staff  
+How reception handles payments  
+
+----------------------------------------
+GUEST FLOW
+----------------------------------------
+Explain:
+
+How guest receives credentials  
+How guest accesses guest panel  
+How guest controls smart room  
+How guest sends service requests  
+How guest checks booking info  
+How guest communicates with hotel  
+
+----------------------------------------
+CLEANING / SERVICE STAFF FLOW
+----------------------------------------
+Explain:
+
+How staff receives tasks  
+How tasks are updated  
+How room preparation is confirmed  
+How service requests are completed  
+
+----------------------------------------
+PROPERTY CREATION FLOW
+----------------------------------------
+Explain full onboarding process:
+
+Registration → Property Setup → Smart Infrastructure → Staff Setup → Billing → Ready to operate
+
+----------------------------------------
+OUTPUT FORMAT
+
+Write it as a structured manual like:
+
+ROLE → PURPOSE → DAILY WORKFLOW → PERMISSIONS → INTERACTIONS
+
+----------------------------------------
+IMPORTANT
+
+Do NOT explain code.
+Do NOT explain database.
+Explain ONLY how system should behave from user perspective.
+
+Make it clear, simple, and complete.

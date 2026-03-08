@@ -1,0 +1,151 @@
+NEW FEATURE REQUEST – SPECIAL ROOM PREPARATION / CELEBRATION ORDERS
+
+Please add a new module inside Guest Panel that allows guests to request special room preparation services from the hotel.
+
+FEATURE NAME:
+Special Occasion Room Preparation
+
+GOAL:
+Allow guests to order customized room decoration or preparation services before arrival or during stay.
+
+-----------------------------------
+GUEST PANEL REQUIREMENTS
+-----------------------------------
+
+1. Add new menu section inside Guest Dashboard:
+"Room Preparation & Celebration"
+
+2. Guest should be able to create a new request including:
+
+- Occasion Type (Dropdown)
+  • Birthday
+  • Honeymoon
+  • Anniversary
+  • Romantic Surprise
+  • Kids Decoration
+  • Custom Request
+
+- Preferred Date & Time
+
+- Decoration Style (Optional Dropdown)
+  • Romantic
+  • Luxury
+  • Kids Theme
+  • Minimal
+  • Custom Theme
+
+- Notes / Special Instructions (Text Area)
+
+- Budget Range Selector
+  • Basic
+  • Medium
+  • Premium
+  • Custom Budget Input
+
+- Upload Reference Photo (Optional)
+
+- Add-ons Selection (Checkbox List)
+  • Cake
+  • Flowers
+  • Balloons
+  • Champagne / Drinks
+  • Gift Box
+  • Music Setup
+  • Custom Lighting
+  • Other (Text input)
+
+3. After submission:
+- Request must appear inside guest request history
+- Status tracking must be visible:
+  Pending
+  Accepted
+  In Preparation
+  Ready
+  Delivered
+  Rejected
+
+-----------------------------------
+ADMIN / HOTEL PANEL REQUIREMENTS
+-----------------------------------
+
+1. Add new section:
+"Room Preparation Orders"
+
+2. Admin should be able to:
+- View request details
+- Accept / Reject request
+- Edit pricing
+- Assign staff
+- Add internal notes
+- Change status
+- Upload preparation photos
+- Send message to guest
+
+3. Admin must be able to generate invoice or add order to guest bill.
+
+-----------------------------------
+SUPER ADMIN REQUIREMENTS
+-----------------------------------
+
+- View all hotels preparation orders
+- Analytics dashboard:
+  • Most ordered occasion types
+  • Revenue tracking
+  • Popular add-ons
+
+-----------------------------------
+NOTIFICATION SYSTEM
+-----------------------------------
+
+- Guest receives push notification when:
+  • Order accepted
+  • Status changed
+  • Order completed
+  • Admin message received
+
+- Admin receives notification when:
+  • New preparation order arrives
+
+-----------------------------------
+DATABASE STRUCTURE
+-----------------------------------
+
+Create new table or collection:
+
+room_preparation_orders
+
+Fields:
+- order_id
+- guest_id
+- hotel_id
+- room_number
+- occasion_type
+- decoration_style
+- add_ons
+- notes
+- budget
+- preferred_datetime
+- reference_image
+- price
+- status
+- staff_assigned
+- admin_notes
+- timestamps
+
+-----------------------------------
+UI REQUIREMENTS
+-----------------------------------
+
+Use same OSS design style.
+Mobile responsive.
+Simple booking style interface.
+Progress timeline visualization.
+
+-----------------------------------
+OPTIONAL FUTURE READY:
+-----------------------------------
+
+- AI Suggestion engine for decoration packages
+- Auto price calculator
+- Vendor integration (cake / flower suppliers)
+

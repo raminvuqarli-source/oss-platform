@@ -1,0 +1,105 @@
+We have authentication and session issues after recent security/email infrastructure updates.
+
+Current Problems Observed:
+
+1. Cannot create staff accounts.
+   Error shown: "Unauthorized access"
+
+2. Logout endpoint is failing.
+   Error shown: "Failed to sign out. Please try again."
+
+These issues started after:
+- Session security updates
+- Cookie security updates
+- Email infrastructure integration
+- Possibly SESSION_SECRET changes or cookie configuration
+
+----------------------------------------
+GOAL
+----------------------------------------
+
+Find root cause, fix authentication/session flow, and fully verify all related features before reporting back.
+
+----------------------------------------
+REQUIRED INVESTIGATION
+----------------------------------------
+
+Please audit and verify:
+
+1. Session Handling
+- express-session configuration
+- SESSION_SECRET consistency
+- Session regeneration logic
+- Session destruction logic on logout
+- Cookie settings (secure, httpOnly, sameSite)
+- Proxy / HTTPS trust settings
+- Cross-origin cookie behavior
+
+2. Authentication Middleware
+- requireAuth logic
+- requireRole logic
+- Owner admin permission checks
+- Property-scoped authorization
+
+3. Staff Creation Endpoint
+- Verify correct role validation
+- Verify session user is recognized as owner_admin
+- Verify request headers and cookies are correctly read
+
+4. Logout Endpoint
+- Verify req.session.destroy() works correctly
+- Verify cookie clearing works
+- Ensure logout does not depend on stale session data
+
+5. Deployment / Environment Variables
+- Confirm SESSION_SECRET matches between deploys
+- Confirm no session store mismatch
+- Confirm cookies remain valid after republish
+
+----------------------------------------
+REQUIRED FIXES
+----------------------------------------
+
+Implement fixes that:
+
+- Ensure logout always invalidates session safely
+- Ensure owner_admin can create staff reliably
+- Ensure session persists correctly across navigation
+- Ensure session survives refresh
+- Ensure proper cookie handling in production environment
+
+----------------------------------------
+TESTING REQUIREMENTS
+----------------------------------------
+
+Perform full automated and manual simulation tests:
+
+1. Login → navigate dashboard → refresh → verify session persists
+2. Login as owner_admin → create staff → confirm success
+3. Login → logout → verify session fully cleared
+4. Login → staff invitation flow → confirm working
+5. Repeat above tests in production mode configuration
+
+----------------------------------------
+STABILITY REQUIREMENT
+----------------------------------------
+
+Do NOT introduce breaking changes.
+Maintain multi-tenant isolation.
+Maintain role-based access control.
+
+----------------------------------------
+DELIVERABLE
+----------------------------------------
+
+Return ONLY when:
+
+- Root cause is identified
+- Fix is implemented
+- All tests pass
+- Logout and staff creation both confirmed working
+
+Also include:
+- Root cause explanation
+- List of changes made
+- Any environment configuration required

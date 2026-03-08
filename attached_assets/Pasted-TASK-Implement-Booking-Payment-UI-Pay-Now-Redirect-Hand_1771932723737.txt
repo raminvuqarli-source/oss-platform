@@ -1,0 +1,93 @@
+TASK: Implement Booking Payment UI (Pay Now + Redirect Handling)
+
+CONTEXT:
+Booking details UI is in:
+client/src/pages/guests.tsx
+Component: GuestProfile (around line 616)
+
+Booking details are loaded from:
+GET /api/users/guests/${guestId}/details
+
+Data shape:
+data.booking.id
+data.booking.paymentStatus  // unpaid | paid | failed
+
+We have backend endpoint:
+POST /api/epoint/create-booking-order
+Body: { bookingId, amount }
+Response: { paymentUrl, orderId }
+
+No existing query-param handling exists in frontend.
+
+GOALS:
+1) Show booking payment status clearly in GuestProfile modal/details.
+2) Add a "Pay Now" button when paymentStatus != "paid".
+3) On click, create booking order and redirect to Epoint paymentUrl.
+4) After redirect back to /dashboard?payment=success&bookingId=... (or declined),
+show a toast/alert message and refresh booking details so paymentStatus updates.
+
+REQUIREMENTS:
+
+A) UI in GuestProfile
+- In the reservation details section, add a row:
+  "Ödəniş Statusu" with a badge:
+   - unpaid => "Ödənilməyib"
+   - paid   => "Ödənilib"
+   - failed => "Uğursuz"
+
+- Add button:
+  If paymentStatus === "paid": hide button
+  Else show button: "Ödəniş et (Pay Now)"
+
+- Button behavior:
+  - Disable while loading
+  - If booking is missing => show toast "Booking yoxdur"
+  - Determine amount:
+      Use data.booking.totalPrice if present (preferred).
+      If totalPrice is null/undefined, calculate:
+        nights = dateDiffInDays(checkInDate, checkOutDate)
+        amount = (nightlyRate * nights) - discount (if available)
+      Ensure amount > 0
+      If currency is not AZN, still send amount as number (keep current backend requirement) and show a warning toast: "Valyuta AZN deyil"
+
+- Call API:
+  await apiRequest("POST", "/api/epoint/create-booking-order", { bookingId: data.booking.id, amount })
+
+- On success:
+  redirect browser:
+    window.location.href = paymentUrl
+
+- Handle errors:
+  - If message == "BOOKING_ALREADY_PAID": toast "Bu rezervasiya artıq ödənilib"
+  - Otherwise show message from server.
+
+B) Redirect Handling on Dashboard
+- In the dashboard page component (client/src/pages/dashboard.tsx or wherever /dashboard route is rendered),
+add logic to read query params:
+  payment=success|declined
+  bookingId
+
+- When payment=success:
+  show toast: "Ödəniş uğurla tamamlandı"
+- When payment=declined:
+  show toast: "Ödəniş uğursuz oldu"
+
+- After showing toast:
+  remove query params from URL (clean URL) using history.replaceState
+
+- Also trigger a refresh of guest/booking data:
+  If GuestProfile is open, refetch details.
+  If not open, no need.
+
+C) Do NOT break subscription payments
+- Do not change existing settings page routes logic except optional: add same query param toast there too if easy.
+- Keep changes isolated to booking UI and dashboard query handler.
+
+D) Styling
+- Use existing button + badge styles in the project (no redesign).
+- Keep Azerbaijani text.
+
+DELIVERABLES:
+- Updated GuestProfile in guests.tsx with Payment Status badge + Pay Now button.
+- Dashboard query-param handler for payment success/declined with toast + URL cleanup.
+- Minimal, safe changes. No backend changes needed.

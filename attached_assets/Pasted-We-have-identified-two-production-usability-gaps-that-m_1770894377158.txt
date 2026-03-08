@@ -1,0 +1,103 @@
+We have identified two production usability gaps that must be fixed.
+
+Focus only on functionality and UI behavior. Do NOT redesign styling or layout.
+
+----------------------------------------
+ISSUE 1 — STAFF MANAGEMENT INCOMPLETE
+----------------------------------------
+
+Currently:
+
+- Staff members can be created
+- Invitations can be sent
+- Staff list is displayed
+
+But:
+
+- Staff details cannot be viewed
+- Staff cannot be edited
+- Invitations cannot be managed
+- Manage button / staff row click does nothing
+
+REQUIRED IMPLEMENTATION:
+
+1. Staff Detail View
+Clicking a staff member must open a detail modal or page showing:
+- Full name
+- Username
+- Email
+- Role
+- Status (active / pending invitation)
+- Property assignment
+- Created date
+
+2. Staff Edit Features (Owner Admin only)
+Allow:
+- Role change
+- Contact info update
+- Password reset
+- Activate / deactivate staff
+- Remove staff member
+
+3. Invitation Management
+Allow:
+- Resend invitation
+- Cancel invitation
+- Display invitation expiry state
+
+4. Add Manage / Edit action button per staff row
+Ensure click handlers work properly.
+
+----------------------------------------
+ISSUE 2 — MISSING SIGN OUT BUTTON
+----------------------------------------
+
+Currently the dashboard UI does not consistently display a Sign Out button in the top header/navigation area.
+
+This creates usability and session control problems.
+
+REQUIRED IMPLEMENTATION:
+
+1. Add global Sign Out button in header/navbar
+- Must be visible on ALL dashboard pages
+- Must call logout endpoint correctly
+- Must destroy session properly
+- Must redirect user to login screen after logout
+
+2. Ensure logout works reliably in production
+- Fix any session or cookie persistence issues
+- Verify logout API returns success
+- Confirm frontend clears auth state
+
+----------------------------------------
+TECHNICAL REQUIREMENTS
+----------------------------------------
+
+- Maintain multi-tenant isolation
+- Maintain role-based access control
+- Owner Admin controls staff lifecycle
+- Reuse existing endpoints where possible
+- Write clean modular React components
+
+----------------------------------------
+TEST REQUIREMENT
+----------------------------------------
+
+Verify:
+
+✔ Staff can be created
+✔ Staff details can be opened
+✔ Staff can be edited
+✔ Invitations can be managed
+✔ Sign Out works globally
+✔ Session ends correctly after logout
+
+----------------------------------------
+DELIVERABLE
+----------------------------------------
+
+Provide:
+
+1. Summary of implemented features
+2. List of new UI components
+3. Confirmation all flows tested

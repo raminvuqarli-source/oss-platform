@@ -1,0 +1,304 @@
+Implement OSS Global Contract System.
+
+IMPORTANT:
+Do NOT modify existing billing or subscription logic.
+Only ADD new components.
+
+Architecture:
+Express + React + Drizzle + PostgreSQL.
+
+----------------------------------
+
+STEP 1 — DATABASE TABLE
+
+Add new table in:
+
+shared/schema.ts
+
+Table name:
+
+contract_acceptances
+
+Columns:
+
+id → varchar primary key (uuid)
+
+ownerId → varchar (FK owners.id)
+
+tenantId → varchar
+
+userId → varchar (FK users.id)
+
+planCode → text
+
+planType → text
+
+smartPlanType → text
+
+contractVersion → text
+
+propertyName → text
+
+monthlyPrice → integer
+
+currency → text
+
+acceptedAt → timestamp
+
+ipAddress → text
+
+userAgent → text
+
+createdAt → timestamp default now()
+
+----------------------------------
+
+STEP 2 — STORAGE METHODS
+
+Add methods in:
+
+server/storage.ts
+
+Create:
+
+createContractAcceptance()
+
+getLatestContractAcceptance(ownerId)
+
+----------------------------------
+
+STEP 3 — API ROUTES
+
+Create file:
+
+server/routes/contracts.routes.ts
+
+Endpoints:
+
+POST /api/contracts/accept
+
+Body:
+
+{
+planCode,
+planType,
+smartPlanType
+}
+
+Server must:
+
+1) Detect userId from session
+
+req.session.userId
+
+2) Detect ownerId
+
+3) Detect tenantId
+
+4) Detect IP
+
+req.ip
+
+5) Detect userAgent
+
+req.headers['user-agent']
+
+6) Get propertyName
+
+storage.getPropertiesByOwner(ownerId)
+
+Use first property.
+
+7) Get price from:
+
+shared/planFeatures.ts
+
+PLAN_CODE_FEATURES
+
+SMART_PLAN_PRICING
+
+Calculate:
+
+monthlyPrice = mainPlanPrice + smartPlanPrice
+
+Currency:
+
+USD
+
+8) Save contract record
+
+contractVersion:
+
+v1.0
+
+----------------------------------
+
+GET /api/contracts/status
+
+Return:
+
+{
+
+accepted:true/false
+
+planCode
+
+smartPlanType
+
+date
+
+ip
+
+propertyName
+
+price
+
+}
+
+----------------------------------
+
+STEP 4 — REGISTER ROUTES
+
+Add to:
+
+server/routes/index.ts
+
+register:
+
+contracts.routes.ts
+
+----------------------------------
+
+STEP 5 — TERMS PAGE
+
+Modify existing page:
+
+client/src/pages/terms-of-service.tsx
+
+Title:
+
+OSS Service Agreement
+
+Add sections:
+
+Service Description
+
+Subscription Plans
+
+Starter Growth Pro
+
+Smart Lite Smart Pro Smart AI
+
+Payments
+
+Trial 14 days
+
+Hardware responsibility
+
+Limitation of liability
+
+Governing law:
+
+Azerbaijan Baku
+
+Electronic agreement validity
+
+----------------------------------
+
+STEP 6 — BILLING PAGE CHECKBOX
+
+Modify:
+
+client/src/pages/settings.tsx
+
+Before:
+
+Pay with Card
+
+Add:
+
+Checkbox:
+
+"I agree to OSS Service Agreement"
+
+Link:
+
+/terms-of-service
+
+User cannot proceed without checking.
+
+----------------------------------
+
+STEP 7 — SAVE CONTRACT BEFORE PAYMENT
+
+When user clicks:
+
+Pay with Card
+
+First call:
+
+POST /api/contracts/accept
+
+Then continue normal payment flow.
+
+Do NOT change payment logic.
+
+----------------------------------
+
+STEP 8 — OWNER DASHBOARD
+
+Modify:
+
+client/src/pages/owner-dashboard.tsx
+
+Add card:
+
+Service Agreement
+
+Show:
+
+Status:
+
+Accepted ✅ or Not Accepted
+
+Plan:
+
+CORE_GROWTH etc
+
+Smart Plan:
+
+smart_pro etc
+
+Date:
+
+IP:
+
+Property:
+
+Monthly Price:
+
+----------------------------------
+
+STEP 9 — SAFETY RULES
+
+Do NOT change:
+
+subscriptions table
+
+billing logic
+
+trial logic
+
+planResolver
+
+Only ADD contract system.
+
+----------------------------------
+
+STEP 10 — VALIDATION
+
+Block payment if contract not accepted.
+
+User must accept first.
+
+----------------------------------

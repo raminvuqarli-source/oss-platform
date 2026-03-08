@@ -1,0 +1,164 @@
+You are refactoring the entire O.S.S Smart Hotel System to implement a PROFESSIONAL, COMPLETE, and CENTRALIZED MULTILANGUAGE (i18n) ARCHITECTURE.
+
+GOAL:
+Eliminate all partial, broken, or hardcoded translations. The system must guarantee that every UI text always appears fully translated or safely falls back to English.
+
+--------------------------------------------------
+GLOBAL REQUIREMENTS
+--------------------------------------------------
+
+✔ Remove all hardcoded text from UI components
+✔ All visible text must come from translation files
+✔ Ensure consistency across ALL pages
+✔ Guarantee fallback language safety
+✔ Add automatic missing-translation detection
+
+--------------------------------------------------
+SUPPORTED LANGUAGES
+--------------------------------------------------
+
+Primary default language:
+- English (fallback)
+
+Additional supported languages:
+- Azerbaijani
+- Turkish
+- Russian
+- Persian
+
+Make the system easily expandable for future languages.
+
+--------------------------------------------------
+IMPLEMENT CENTRAL i18n SYSTEM
+--------------------------------------------------
+
+1️⃣ Create a centralized translation structure:
+
+/locales/
+  en.json
+  az.json
+  tr.json
+  ru.json
+  fa.json
+
+Each file must contain identical key structures.
+
+--------------------------------------------------
+2️⃣ IMPLEMENT GLOBAL TRANSLATION SERVICE
+
+Create a translation hook or service:
+
+Examples:
+- useTranslation()
+- t("dashboard.title")
+
+This service must:
+
+✔ Load selected language dynamically
+✔ Automatically fallback to English if missing
+✔ Log missing keys in console for developers
+✔ Prevent UI from showing partial strings
+
+--------------------------------------------------
+3️⃣ LANGUAGE STATE MANAGEMENT
+
+✔ Store selected language in:
+- user profile settings
+- localStorage fallback
+- server session if authenticated
+
+✔ On login:
+- Load user's saved language
+
+✔ On language switch:
+- Instantly refresh UI translations
+
+--------------------------------------------------
+4️⃣ FULL UI AUDIT
+
+Scan ENTIRE application including:
+
+- Landing pages
+- Dashboards
+- Settings
+- Booking flow
+- Finance Center
+- Notifications
+- Authentication pages
+- Admin panel
+- Device dashboards
+- Error messages
+- Modal dialogs
+- Toast notifications
+- Validation messages
+
+Replace every visible string with translation keys.
+
+--------------------------------------------------
+5️⃣ VALIDATION & SAFETY SYSTEM
+
+Create automatic translation validator:
+
+✔ Detect missing keys across languages
+✔ Generate developer warning report
+✔ Highlight untranslated UI elements
+✔ Prevent deployment if critical translations missing
+
+--------------------------------------------------
+6️⃣ FALLBACK PROTECTION
+
+If translation missing:
+
+Language → fallback to English  
+Never show:
+- Partial sentences
+- Mixed languages
+- Empty UI text
+
+--------------------------------------------------
+7️⃣ DEVELOPER MAINTENANCE TOOL
+
+Create script:
+
+npm run i18n-check
+
+This script must:
+✔ Compare all language JSON files
+✔ Detect missing or extra keys
+✔ Generate synchronization report
+
+--------------------------------------------------
+8️⃣ UI LANGUAGE SWITCHER
+
+✔ Add universal language selector component
+✔ Available in header or settings
+✔ Must update entire UI instantly
+
+--------------------------------------------------
+9️⃣ PERFORMANCE OPTIMIZATION
+
+✔ Lazy load translation files
+✔ Cache loaded language
+✔ Prevent UI flicker during switch
+
+--------------------------------------------------
+FINAL QUALITY RULES
+--------------------------------------------------
+
+• Maintain existing UI design
+• Do not break routing or state logic
+• Keep code modular and scalable
+• Ensure multilingual support for future mobile apps
+• Ensure RTL support for Persian (fa)
+
+--------------------------------------------------
+FINAL OUTPUT REQUIREMENT
+--------------------------------------------------
+
+After implementation generate a report including:
+
+✔ Total UI strings migrated
+✔ Missing translations fixed
+✔ Pages fully multilingual verified
+✔ Remaining translation risks
+✔ Validation script results

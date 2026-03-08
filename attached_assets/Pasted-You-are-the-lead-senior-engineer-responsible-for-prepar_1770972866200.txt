@@ -1,0 +1,189 @@
+You are the lead senior engineer responsible for preparing the O.S.S Smart Hotel System for FULL PRODUCTION RELEASE.
+
+Your goal is to COMPLETE and POLISH all remaining critical infrastructure so the platform becomes:
+
+• Monetization ready  
+• Production secure  
+• Pilot hotel ready  
+• Investor demonstration ready  
+• Scalable SaaS ready  
+
+DO NOT redesign existing working features. Only complete, stabilize, and integrate missing production-critical components.
+
+--------------------------------------------------
+PHASE 1 — PAYMENT & MONETIZATION (TOP PRIORITY)
+--------------------------------------------------
+
+Implement full Stripe integration:
+
+✔ SaaS Subscription Billing
+- Basic / Pro / Enterprise plans
+- Trial → Paid conversion flow
+- Plan upgrade/downgrade logic
+- Subscription cancellation handling
+
+✔ Invoice System
+- Auto invoice generation
+- PDF invoice export
+- Payment history tracking
+
+✔ Stripe Webhooks
+- payment success
+- failed payments
+- subscription renewal
+- cancellation events
+
+✔ Retry Logic
+- Automatic retry for failed payments
+- Account suspension rules if payment fails repeatedly
+
+✔ Connect billing to:
+- Subscription feature flags
+- Usage metering
+- Owner dashboard billing view
+
+--------------------------------------------------
+PHASE 2 — EMAIL & NOTIFICATION INFRASTRUCTURE
+--------------------------------------------------
+
+Upgrade email system to production level:
+
+✔ Configure custom domain email support
+- SPF
+- DKIM
+- DMARC
+
+✔ Implement transactional email templates:
+- Booking confirmation
+- Staff invitation
+- Password reset
+- Invoice delivery
+- Payment failure alerts
+- Subscription renewal reminders
+
+✔ Create notification service layer:
+- Email notifications
+- In-app notifications
+- Event-driven notification triggers
+
+--------------------------------------------------
+PHASE 3 — AUTHENTICATION & SECURITY HARDENING
+--------------------------------------------------
+
+✔ Complete OAuth login:
+- Google login
+- Facebook login
+
+✔ Security Improvements:
+- Rate limiting
+- Login attempt protection
+- CSRF protection
+- Session expiration controls
+- Role permission validation audit
+
+✔ Backup & Monitoring:
+- Database backup automation
+- Error logging system
+- Security audit logging
+
+--------------------------------------------------
+PHASE 4 — PILOT HOTEL PRODUCTION READINESS
+--------------------------------------------------
+
+Create full real-world testing flow:
+
+✔ Build demo seed data generator
+- Demo hotel
+- Demo rooms
+- Demo staff
+- Demo bookings
+- Demo finances
+
+✔ Validate complete workflow:
+- Booking → Check-in → Room control → Checkout → Finance recording
+
+✔ Validate staff workflows
+✔ Validate guest journey UX
+
+--------------------------------------------------
+PHASE 5 — IoT SMART ROOM STABILITY
+--------------------------------------------------
+
+✔ Stabilize device communication layer:
+- Raspberry command queue
+- Device heartbeat monitoring
+- Offline device fallback handling
+
+✔ Improve Device Dashboard:
+- Real-time device status
+- Telemetry visualization
+- Error reporting
+
+✔ Simulated device mode for demo environments
+
+--------------------------------------------------
+PHASE 6 — SALES & DEMO ENVIRONMENT
+--------------------------------------------------
+
+✔ Public Landing Page Improvements
+- Pricing page connected to real plans
+- Trial signup flow
+- Feature comparison table
+
+✔ Sales Demo Mode
+- One-click demo environment creation
+- Resettable demo data
+
+✔ Quote request CRM workflow polish
+
+--------------------------------------------------
+PHASE 7 — PRODUCTION DEPLOYMENT & SCALABILITY
+--------------------------------------------------
+
+✔ Production Infrastructure:
+- Domain + SSL configuration
+- CDN integration
+- Environment variable validation
+
+✔ Performance & Scaling:
+- Query optimization
+- Background job queue optimization
+- WebSocket scaling readiness
+
+✔ Observability:
+- Monitoring dashboards
+- Health checks
+- Performance metrics
+
+✔ Disaster Recovery:
+- Backup restore testing
+- Failover planning
+
+--------------------------------------------------
+FINAL QUALITY RULES
+--------------------------------------------------
+
+• Maintain modular architecture
+• Keep database migrations safe
+• Preserve backward compatibility
+• Document every new service or module
+• Ensure multi-tenant data isolation
+• Follow OSS dark UI design consistency
+• Optimize mobile responsiveness
+
+--------------------------------------------------
+FINAL DELIVERY REQUIREMENT
+--------------------------------------------------
+
+When all phases are complete:
+
+Generate a FINAL PRODUCTION READINESS REPORT including:
+
+✔ Completed infrastructure
+✔ Remaining risks
+✔ Performance readiness
+✔ Security status
+✔ Monetization readiness
+✔ Deployment checklist
+
+Work step-by-step through all phases until system is production ready.

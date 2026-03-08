@@ -1,0 +1,384 @@
+TASK: Upgrade Auto Housekeeping Engine to PRO architecture
+
+SAFE MODE:
+
+Do NOT break existing behavior.
+Do NOT remove any fields.
+Do NOT change API endpoints.
+
+Only extend functionality.
+
+
+--------------------------------------------------
+
+PART 1 — ADD bookingId SUPPORT
+
+File:
+shared/schema.ts
+
+Table:
+housekeepingTasks
+
+Add column:
+
+bookingId varchar nullable
+
+Requirements:
+
+- Must store booking.id when task is auto-created
+- Manual tasks may leave bookingId null
+- No migration errors allowed
+- Existing rows must remain valid
+
+
+--------------------------------------------------
+
+PART 2 — STORE bookingId ON AUTO TASKS
+
+File:
+server/storage.ts
+
+Function:
+autoCreateHousekeepingTask(unit, booking)
+
+Modify insert object:
+
+Add:
+
+bookingId: booking.id
+
+
+Example:
+
+await this.createHousekeepingTask({
+  tenantId: unit.tenantId,
+  propertyId: unit.propertyId,
+  unitId: unit.id,
+  bookingId: booking.id,
+  roomNumber: unit.unitNumber,
+  taskType: "cleaning",
+  cleaningType: "checkout",
+  status: "pending",
+  priority: "normal",
+  triggerSource: "checkout"
+})
+
+
+--------------------------------------------------
+
+PART 3 — STRONG DUPLICATE PREVENTION
+
+File:
+server/storage.ts
+
+Function:
+autoCreateHousekeepingTask()
+
+Replace duplicate logic.
+
+
+OLD:
+
+const openTasks =
+ await this.getOpenHousekeepingTasksForUnit(unit.id)
+
+if (openTasks.length > 0) return
+
+
+NEW:
+
+Duplicate prevention must check:
+
+Same unitId
+Same bookingId
+Open status
+
+Example:
+
+const duplicate = await db
+.select()
+.from(housekeepingTasks)
+.where(and(
+ eq(housekeepingTasks.unitId, unit.id),
+ eq(housekeepingTasks.bookingId, booking.id),
+ inArray(
+   housekeepingTasks.status,
+   ["pending","assigned","in_progress"]
+ )
+))
+.limit(1)
+
+if (duplicate.length > 0) {
+ console.log(
+   "HOUSEKEEPING SKIP duplicate booking task",
+   booking.id
+ )
+ return
+}
+
+
+Important:
+
+Still allow new task for next booking.
+
+
+--------------------------------------------------
+
+PART 4 — ADD PRIORITY ENGINE
+
+File:
+server/storage.ts
+
+Function:
+autoCreateHousekeepingTask()
+
+
+Add priority logic:
+
+
+Rule 1:
+
+If next booking starts today:
+
+priority = "urgent"
+
+
+Rule 2:
+
+If next booking starts tomorrow:
+
+priority = "high"
+
+
+Rule 3:
+
+Else:
+
+priority = "normal"
+
+
+
+Implementation:
+
+Find next booking for unit:
+
+checkInDate > now()
+
+Sort by date
+
+Take nearest.
+
+
+
+--------------------------------------------------
+
+PART 5 — IMPROVE STAFF ASSIGNMENT
+
+File:
+server/storage.ts
+
+Function:
+autoCreateHousekeepingTask()
+
+
+Replace RANDOM selection.
+
+
+OLD:
+
+Math.random()
+
+
+
+NEW:
+
+Select staff with LEAST OPEN TASKS
+
+
+Algorithm:
+
+1 Get all staff users:
+
+role === "staff"
+
+
+2 Count open tasks per staff:
+
+status in:
+
+pending
+assigned
+in_progress
+
+
+3 Select smallest count
+
+
+Example:
+
+Staff1 → 5 tasks
+Staff2 → 2 tasks
+Staff3 → 3 tasks
+
+Assign Staff2
+
+
+
+Fallback:
+
+If no staff → assignedTo null
+
+
+
+--------------------------------------------------
+
+PART 6 — ADD INSPECTION STATUS
+
+File:
+server/routes/housekeeping.routes.ts
+
+
+Extend:
+
+VALID_STATUSES
+
+
+OLD:
+
+pending
+assigned
+in_progress
+completed
+cancelled
+
+
+NEW:
+
+pending
+assigned
+in_progress
+inspection
+completed
+cancelled
+
+
+
+--------------------------------------------------
+
+PART 7 — INSPECTION FLOW
+
+
+When status becomes:
+
+inspection
+
+Do NOT change unit status.
+
+
+
+When status becomes:
+
+completed
+
+Unit becomes:
+
+ready
+
+
+
+--------------------------------------------------
+
+PART 8 — SEND CLEANING NOTIFICATION
+
+
+File:
+
+server/notifications.ts
+
+
+Add function:
+
+
+notifyCleaningTaskAssigned(task)
+
+
+
+Send notification to:
+
+assignedTo
+
+
+
+Title:
+
+Cleaning Task Assigned
+
+
+
+Message:
+
+Room {roomNumber} requires cleaning.
+
+
+
+Call it from:
+
+autoCreateHousekeepingTask()
+
+
+
+--------------------------------------------------
+
+PART 9 — DO NOT BREAK
+
+
+Must remain working:
+
+Overbooking protection
+Booking payment
+Online checkin
+Auto checkin
+Room status engine
+Manual tasks
+Demo sessions
+
+
+
+--------------------------------------------------
+
+PART 10 — TEST CHECKLIST
+
+Agent must verify:
+
+
+Checkout → task created
+
+Task has:
+
+bookingId
+unitId
+roomNumber
+
+
+Duplicate checkout → no duplicate
+
+
+Task completed →
+
+Unit ready
+
+
+Inspection →
+
+Unit unchanged
+
+
+Balanced assignment works
+
+
+Priority works
+
+
+--------------------------------------------------
+
+END

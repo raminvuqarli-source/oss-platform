@@ -1,0 +1,249 @@
+TASK: Implement Enterprise-Level Overbooking Protection (OSS PMS)
+
+IMPORTANT:
+This is a SAFE backend-only modification.
+
+DO NOT modify:
+- routes
+- frontend
+- payments
+- auth
+- demo system
+- calendar UI
+
+ONLY modify:
+
+server/storage.ts
+
+Function:
+
+createBooking()
+
+-------------------------------------
+
+PROJECT CONTEXT
+
+OSS PMS
+Express + Drizzle + PostgreSQL
+
+Bookings table columns:
+
+roomNumber (text NOT NULL)
+tenantId (varchar NOT NULL)
+propertyId (varchar nullable)
+unitId (varchar nullable)
+checkInDate (timestamp NOT NULL)
+checkOutDate (timestamp NOT NULL)
+status (text)
+
+Booking insert happens in:
+
+storage.createBooking()
+
+-------------------------------------
+
+GOAL
+
+Prevent overbooking when a room is already booked
+for overlapping dates inside the same tenant/property.
+
+-------------------------------------
+
+STEP 1 — Normalize roomNumber
+
+Inside createBooking()
+
+Before any database query:
+
+Create normalized value:
+
+const normalizedRoomNumber =
+booking.roomNumber.trim().toUpperCase();
+
+Use normalizedRoomNumber in comparisons.
+
+Do NOT change original value stored in database.
+
+-------------------------------------
+
+STEP 2 — Skip Demo Tenants
+
+If tenantId starts with:
+
+"demo_session_"
+
+Skip overbooking check completely
+and insert booking normally.
+
+Example:
+
+if (booking.tenantId?.startsWith("demo_session_")) {
+   return normal insert
+}
+
+-------------------------------------
+
+STEP 3 — Build Conflict Query Logic
+
+Conflict exists if:
+
+existing.checkInDate < booking.checkOutDate
+AND
+existing.checkOutDate > booking.checkInDate
+
+-------------------------------------
+
+STEP 4 — Room Matching Logic
+
+Priority order:
+
+1) If booking.unitId exists:
+
+Match by:
+
+tenantId + unitId
+
+Ignore roomNumber.
+
+-------------------------------------
+
+2) If unitId is NULL
+AND propertyId exists:
+
+Match by:
+
+tenantId + propertyId + normalized roomNumber
+
+Use TRIM + UPPER on existing roomNumber.
+
+-------------------------------------
+
+3) If propertyId is NULL:
+
+Match by:
+
+tenantId + normalized roomNumber
+
+-------------------------------------
+
+STEP 5 — Status Filter
+
+Block only if existing status is:
+
+booked
+confirmed
+checked_in
+
+Ignore:
+
+checked_out
+cancelled
+no_show
+arrival_info_submitted
+precheck_submitted
+
+-------------------------------------
+
+STEP 6 — Query Example Logic
+
+Pseudo logic:
+
+Find bookings where:
+
+tenantId = booking.tenantId
+
+AND status IN:
+
+booked
+confirmed
+checked_in
+
+AND overlapping dates:
+
+checkInDate < booking.checkOutDate
+AND checkOutDate > booking.checkInDate
+
+AND room match rules apply.
+
+-------------------------------------
+
+STEP 7 — If Conflict Found
+
+Throw error:
+
+throw new Error(
+"OVERBOOKING_BLOCKED: Room already booked for selected dates"
+);
+
+Do NOT insert booking.
+
+-------------------------------------
+
+STEP 8 — Logging
+
+Add log:
+
+console.log(
+"OVERBOOKING BLOCKED",
+booking.tenantId,
+booking.propertyId,
+booking.roomNumber,
+booking.checkInDate,
+booking.checkOutDate
+);
+
+-------------------------------------
+
+STEP 9 — If No Conflict
+
+Proceed normally:
+
+return db.insert(bookings).values(booking).returning();
+
+-------------------------------------
+
+EXPECTED RESULT
+
+Example 1:
+
+Existing:
+
+Room 202
+1 March → 5 March
+
+New:
+
+Room 202
+3 March → 6 March
+
+Result:
+
+BLOCKED
+
+-------------------------------------
+
+Example 2:
+
+Existing:
+
+Room 202
+1 March → 5 March
+
+New:
+
+Room 202
+5 March → 8 March
+
+Result:
+
+ALLOWED
+
+-------------------------------------
+
+IMPORTANT
+
+Keep tenant isolation working.
+
+Each tenant must only check its own bookings.
+
+DO NOT change database schema.

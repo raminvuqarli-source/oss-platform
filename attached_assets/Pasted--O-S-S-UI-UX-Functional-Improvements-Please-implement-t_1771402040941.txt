@@ -1,0 +1,130 @@
+🔧 O.S.S – UI/UX & Functional Improvements
+
+Please implement the following updates without breaking the existing system.
+Refactor and clean the codebase where necessary. Remove unused or duplicate code.
+All changes must be fully responsive (mobile optimized).
+
+1️⃣ Property Image Upload (Owner Panel)
+
+Each property should support 1 image upload
+
+Owner must be able to:
+
+Upload
+
+Replace
+
+Delete the image
+
+If no image exists, display a default placeholder
+
+Image must be saved in backend (store URL or upload properly)
+
+2️⃣ “Invite Staff” Email Input Issue
+
+Email input field is too small
+
+Make it full width
+
+Ensure typed email is fully visible
+
+Fix overflow / UI clipping issue
+
+3️⃣ Hotel Registration – “Count” Field Issue
+
+Default value “1” must be deletable
+
+User must be able to enter multi-digit numbers (e.g., 10, 25, etc.)
+
+Ensure input type="number" works correctly
+
+4️⃣ Add Message Icon in Staff Section
+
+Add a ✉️ (message) icon next to each staff member name
+
+Owner should be able to directly message staff from there
+
+Connect it to the existing internal chat system
+
+Do not create duplicate chat logic if one already exists
+
+5️⃣ Dashboard – Recurring Expenses Responsive Issue
+
+“Recurring Expenses” page overflows outside screen on mobile
+
+Fix width and overflow issues
+
+Ensure full mobile responsiveness
+
+6️⃣ Automatic Email When Staff Adds Guest
+
+Email system is already implemented.
+
+When a staff member creates a guest account:
+
+Automatically send an email containing:
+
+Guest name
+
+Hotel name
+
+Email (username)
+
+Password
+
+Login URL
+
+Important:
+
+Email template must be editable inside Admin Settings
+
+Use existing email system (do NOT create a new one)
+
+7️⃣ Datepicker Auto-Close Issue
+
+After selecting check-in or check-out date,
+the datepicker must automatically close
+
+User should NOT need to manually click outside
+
+8️⃣ Tourism Agency – Manual Input Field
+
+If Reservation Source = “Tourism Agency”:
+
+Display a new input field below
+
+Allow manual entry of agency name
+
+Save this value in backend database
+
+9️⃣ Automatic Total Stay Price Calculation
+
+Total Price must calculate automatically in real-time:
+
+Formula:
+
+Total Price = (Number of Nights) × (Nightly Rate) − Discount
+
+Requirements:
+
+Auto-update when:
+
+Dates change
+
+Nightly rate changes
+
+Discount changes
+
+Field must be readonly (not manually editable)
+
+Final Requirements
+
+Refactor and organize code structure
+
+Remove unused / duplicate logic
+
+Optimize components
+
+Generate a full backup download link after completion
+
+If you want, I can also prepare a strict senior-developer version (more technical wording) to make Replit AI even more precise.

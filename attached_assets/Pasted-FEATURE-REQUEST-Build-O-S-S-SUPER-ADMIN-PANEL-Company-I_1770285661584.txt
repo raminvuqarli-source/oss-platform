@@ -1,0 +1,180 @@
+FEATURE REQUEST: Build O.S.S SUPER ADMIN PANEL (Company Internal Only) + GET QUOTE CRM
+
+We need a separate internal admin panel for the O.S.S team (company admins), NOT for hotel customers.
+
+This “O.S.S Super Admin Panel” must be completely isolated from hotel dashboards and must only be accessible to O.S.S internal admins.
+
+------------------------------------------------------------
+1) PURPOSE
+------------------------------------------------------------
+- O.S.S team must manage all incoming GET QUOTE leads and customers.
+- Hotel customers MUST NOT see this panel or its data.
+
+------------------------------------------------------------
+2) ACCESS & SECURITY (CRITICAL)
+------------------------------------------------------------
+A) Create a new role:
+- OSS_SUPER_ADMIN
+
+B) Access rules:
+- Only users with role OSS_SUPER_ADMIN can access the Super Admin panel routes/API.
+- Hotel Admin / Reception / Guest must be blocked (frontend + backend).
+- If unauthorized user tries, return 403 and show a friendly “Access denied” page.
+
+C) Separate routes:
+- Use a dedicated route namespace, e.g. /oss-admin (preferred) or /super-admin
+Examples:
+- /oss-admin/login
+- /oss-admin/dashboard
+- /oss-admin/quotes
+- /oss-admin/hotels
+- /oss-admin/users
+
+D) Login:
+- Either reuse existing auth but enforce role OSS_SUPER_ADMIN,
+  OR create a separate login screen that still uses the same auth service but checks the role.
+- After login, redirect to /oss-admin/dashboard.
+
+------------------------------------------------------------
+3) SUPER ADMIN PANEL SECTIONS (MVP)
+------------------------------------------------------------
+A) Dashboard (Overview)
+- KPIs:
+  • New Quote Requests (last 7 days)
+  • Total Quote Requests
+  • Requests by Country
+  • Requests by Status (NEW/PROCESSING/CLOSED)
+  • Conversion pipeline counts (optional)
+- Simple charts/tables (keep clean and fast)
+
+B) Quote Requests (CRM Core)
+- List view table columns:
+  • Date
+  • Hotel Name
+  • Country / City
+  • Contact Person
+  • Phone
+  • Email
+  • Total Rooms
+  • Expected Smart Rooms
+  • Status (NEW / CONTACTED / DEMO_SCHEDULED / NEGOTIATION / CLOSED_WON / CLOSED_LOST)
+  • Assigned To (OSS team member)
+- Filters:
+  • Status
+  • Country
+  • Date range
+  • Search (hotel name / email / phone)
+- Detail view:
+  • Full submitted form data
+  • Interested features
+  • Preferred contact hours + timezone
+  • Source page (Landing/Login/Admin)
+  • Language
+  • CreatedAt
+  • Activity timeline
+  • Internal Notes (multi-note)
+  • Change Status
+  • Assign to team member
+  • “Mark as contacted” quick action
+
+C) Hotels (Customer Directory) – Basic
+- Create a simple directory of hotels that submitted quotes:
+  • Hotel Name, Country, City, Email, Phone, CreatedAt, Status
+- Ability to link quote request to a hotel record.
+
+D) OSS Team Users
+- Manage OSS_SUPER_ADMIN users only:
+  • list users with OSS_SUPER_ADMIN
+  • create / deactivate (if you already have user management)
+  • assign quotes to users
+
+------------------------------------------------------------
+4) DATABASE MODELS
+------------------------------------------------------------
+A) quote_requests table/collection (extend existing)
+Required fields:
+- id
+- hotelName
+- contactName
+- phone (E.164)
+- email
+- country
+- city
+- preferredContactHoursFrom
+- preferredContactHoursTo
+- timezone
+- preferredContactMethod (Phone/WhatsApp/Email)
+- totalRooms
+- expectedSmartRooms
+- interestedFeatures (array)
+- message (text)
+- sourcePage (Landing/Login/Admin)
+- language
+- status (enum: NEW, CONTACTED, DEMO_SCHEDULED, NEGOTIATION, CLOSED_WON, CLOSED_LOST)
+- assignedToUserId (nullable)
+- createdAt
+- updatedAt
+
+B) quote_notes table/collection
+- id
+- quoteRequestId
+- authorUserId (OSS_SUPER_ADMIN)
+- noteText
+- createdAt
+
+(Optional) quote_activity table/collection for timeline events.
+
+------------------------------------------------------------
+5) EMAIL NOTIFICATION (MUST)
+------------------------------------------------------------
+When a GET QUOTE is submitted:
+- Save to DB
+- Send email notification to:
+  Ramin.v@orange-studio.az
+
+Email subject:
+- "New GET QUOTE Request - {Hotel Name} ({Country}, {City})"
+
+Email body includes:
+- All key fields + features + message + preferred hours + source page + createdAt
+
+If email sending fails:
+- Still save to DB
+- Log the failure
+- Show success to user (do not expose technical errors)
+
+Use environment variables for SMTP/provider secrets.
+
+------------------------------------------------------------
+6) UI/UX REQUIREMENTS
+------------------------------------------------------------
+- Use existing design system / dark theme consistency
+- Mobile responsive (tables should become cards or horizontal scroll with sticky columns)
+- No overflow issues
+- Use shared components (cards, modals, inputs)
+- Use centralized error handling (no raw JSON errors)
+
+------------------------------------------------------------
+7) i18n REQUIREMENTS
+------------------------------------------------------------
+- Super Admin panel can be English-only for MVP OR support full i18n if already global.
+- GET QUOTE form remains fully multilingual.
+
+------------------------------------------------------------
+8) TESTING REQUIREMENTS
+------------------------------------------------------------
+- Verify unauthorized roles cannot access /oss-admin routes and APIs (403)
+- Submit GET QUOTE and confirm:
+  • DB record created
+  • Email delivered to Ramin.v@orange-studio.az
+  • Visible in /oss-admin/quotes list
+- Verify status change, assignment, notes saving
+- Verify mobile responsiveness and no layout breaking
+
+------------------------------------------------------------
+9) IMPORTANT FINAL REQUIREMENT
+------------------------------------------------------------
+This is a COMPANY INTERNAL PANEL.
+Hotel customers must not see it.
+Do not mix hotel admin dashboard with O.S.S Super Admin panel.
+Keep data isolation and RBAC enforcement strict.

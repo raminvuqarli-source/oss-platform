@@ -1,0 +1,253 @@
+PROMPT (FINAL VERSION):
+
+Explain the entire O.S.S Hotel System step-by-step for end users in a very simple way.
+
+Write it like a teacher explaining to a new hotel employee who has never used software before.
+
+Explain every small detail.
+
+Explain where to click, where to look, and what to do.
+
+Explain how users will find each page inside the system.
+
+Explain what buttons mean.
+
+Explain what happens after clicking each button.
+
+Explain real daily work situations.
+
+1️⃣ Hotel Owner (Admin)
+
+Explain step-by-step:
+
+First login
+
+Where the login page is
+
+How to enter email and password
+
+What happens after login
+
+Hotel Setup
+
+How to register hotel
+
+How to fill hotel information
+
+How to save
+
+Room Setup
+
+How to create rooms
+
+How to edit rooms
+
+How to delete rooms
+
+Devices
+
+How to add devices
+
+How to assign devices to rooms
+
+How to check device status
+
+Staff Management
+
+How to add staff
+
+How to edit staff
+
+How to remove staff
+
+Staff roles explanation
+
+Reports
+
+Where reports are
+
+How to open reports
+
+What numbers mean
+
+Payments
+
+Where payment page is
+
+How to pay subscription
+
+What happens if payment is late
+
+Subscription
+
+How to activate plan
+
+What features become active
+
+Daily Work
+
+What owner should check every day
+
+Weekly Work
+
+What owner should check every week
+
+2️⃣ Hotel Staff
+
+Explain step-by-step:
+
+Login
+
+Where staff logs in
+
+What to type
+
+What happens after login
+
+Dashboard
+
+What staff sees first
+
+What each section means
+
+Reservations
+
+How to see reservations
+
+How to open reservation
+
+How to check-in guest
+
+How to check-out guest
+
+Guests
+
+How to find a guest
+
+How to contact guest
+
+Housekeeping
+
+Where cleaning tasks appear
+
+How staff opens task
+
+How staff marks cleaning done
+
+Room Control
+
+How to open room control page
+
+How to turn lights ON/OFF
+
+How to control devices
+
+Messages
+
+Where messages appear
+
+How to reply
+
+Daily Work
+
+What staff should do step-by-step every day from morning to evening
+
+3️⃣ Guest (Customer)
+
+Explain step-by-step:
+
+Access
+
+How guest receives access link
+
+What guest should do first
+
+Login
+
+How guest logs in
+
+What guest sees first
+
+Room Control
+
+How guest opens room control
+
+How guest controls lights
+
+How guest controls devices
+
+Services
+
+How guest orders taxi
+
+How guest orders food
+
+How guest requests cleaning
+
+Contact Reception
+
+How guest sends message
+
+Checkout
+
+What guest should do before leaving
+
+Requirements:
+
+Use VERY SIMPLE English
+
+Short sentences.
+
+No technical words.
+
+Explain like a teacher teaching beginners.
+
+Explain even small things.
+
+Assume user has never used hotel software before.
+
+Explain where to click.
+
+Explain what each button does.
+
+Explain real examples.
+
+Explain common mistakes and how to fix them.
+
+Explain what to do if something does not work.
+
+Make the explanation very clear and calm.
+
+Output Format:
+
+Create a professional User Manual
+
+Format like a training book
+
+Use:
+
+Titles
+
+Subtitles
+
+Step-by-step instructions
+
+Numbered steps
+
+Add:
+
+Example screens (describe them)
+
+Example daily work
+
+Final Requirement:
+
+Export as a Microsoft Word (.docx) file
+
+Title:
+
+O.S.S Complete User Manual
+
+Subtitle:
+
+Simple Step-by-Step Guide for Hotel Owners, Staff and Guests

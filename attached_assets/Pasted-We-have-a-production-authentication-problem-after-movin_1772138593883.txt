@@ -1,0 +1,134 @@
+We have a production authentication problem after moving the OSS platform from Replit to a VPS server with Nginx + PM2.
+
+The backend is Node.js + Express with express-session and connect-pg-simple.
+
+Problem:
+
+Demo login works and returns user JSON correctly:
+
+POST /api/auth/demo-login
+Response: 200 OK with user object
+
+BUT:
+
+Subsequent requests return:
+
+401 Unauthorized
+
+Example:
+
+GET /api/properties → 401
+GET /api/onboarding → 401
+
+This means the session cookie is NOT being saved or returned.
+
+Current Environment:
+
+Server:
+
+Node.js Express running on port 5000
+PM2 process name: oss
+
+Nginx:
+
+/api requests proxy to:
+
+http://127.0.0.1:5000
+
+Session store:
+
+connect-pg-simple (PostgreSQL)
+
+Current sessionConfig:
+
+const sessionConfig: session.SessionOptions = {
+  store: sessionStore,
+  secret: sessionSecret || "oss-hotel-dev-secret-key",
+  resave: false,
+  saveUninitialized: true,
+  rolling: false,
+  cookie: {
+    secure: false,
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  },
+};
+
+Express config:
+
+app.set("trust proxy", 1);
+
+app.use(session(sessionConfig));
+
+Demo login route:
+
+req.session.regenerate()
+req.session.userId = user.id
+req.session.save()
+
+Response:
+
+res.json(userWithoutPassword)
+
+Problem:
+
+Set-Cookie header is NOT sent.
+
+Curl test:
+
+curl -i -X POST http://127.0.0.1:5000/api/auth/demo-login \
+-H "Content-Type: application/json" \
+-d '{"role":"owner"}'
+
+No Set-Cookie header.
+
+Requirements:
+
+Fix session authentication properly.
+
+IMPORTANT:
+
+We DO NOT want manual cookies.
+
+We want proper express-session cookie handling.
+
+Tasks:
+
+1) Fix express-session configuration if needed
+
+2) Fix demo-login route so session cookie is correctly created
+
+3) Ensure Set-Cookie header is returned
+
+4) Ensure browser sessions persist
+
+5) Ensure:
+
+GET /api/properties works after login
+
+6) Do NOT use manual res.cookie hacks unless absolutely necessary.
+
+7) Production must work behind Nginx proxy.
+
+8) Do NOT break existing authentication logic.
+
+
+Goal:
+
+After POST /api/auth/demo-login
+
+Browser must receive:
+
+Set-Cookie: connect.sid=...
+
+And subsequent requests must be authorized.
+
+
+Please modify only:
+
+server/routes/auth.routes.ts
+and sessionConfig if required.
+
+
+Return the final corrected code.

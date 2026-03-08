@@ -1,0 +1,129 @@
+TASK: Implement ROOM STATUS ENGINE (MEWS-style) using existing units table
+
+IMPORTANT:
+Do NOT break booking creation, payments, precheck, or overbooking.
+Make minimal safe changes.
+
+-------------------------------------
+CURRENT STATE
+- No rooms table.
+- units table is official room registry (unitNumber, unitType, propertyId, status, tenantId...).
+- bookings.roomNumber is free text and not linked to units.
+- bookings has optional unitId column but currently unused.
+
+GOAL
+1) Make units.status the source of truth for room status.
+2) Soft-link bookings to units using (tenantId + propertyId + roomNumber == unitNumber).
+3) Keep backward compatibility if no matching unit is found.
+4) Provide Reception "Room Status" view and allow housekeeping updates.
+
+-------------------------------------
+STEP 1 — Define Standard Room Status Values (units.status)
+Use these statuses in units.status:
+- ready
+- dirty
+- cleaning
+- occupied
+- out_of_order
+
+If units.status currently uses other values, map them or extend allowed values (do not delete old values; keep backward compatible).
+
+-------------------------------------
+STEP 2 — Auto-update Room Status Based on Booking Status
+Create a storage helper function:
+
+storage.updateUnitStatusFromBooking(bookingId)
+
+Logic:
+1) Load booking by id.
+2) Determine unit match:
+   - If booking.unitId exists -> use it
+   - Else try find unit by:
+       tenantId = booking.tenantId
+       propertyId = booking.propertyId (if present)
+       unitNumber = trim(booking.roomNumber)
+     If propertyId is null, match by tenantId + unitNumber only.
+3) If no unit found -> do nothing (backward compatible).
+4) If found, update units.status based on booking.status:
+   - checked_in  -> occupied
+   - checked_out -> dirty
+   - cancelled/no_show -> ready (only if unit not occupied by another active booking; see safety below)
+   - confirmed/booked/precheck_submitted/arrival_info_submitted -> no automatic change (leave as-is)
+
+SAFETY:
+Before setting ready/dirty, ensure there is no other ACTIVE booking overlapping today for that same unit:
+Active statuses: booked, confirmed, precheck_submitted, arrival_info_submitted, checked_in
+If another active booking exists, do not set ready.
+
+-------------------------------------
+STEP 3 — Populate bookings.unitId (Soft Link)
+When creating a booking (POST /api/staff/create-guest):
+- Normalize roomNumber = trim(roomNumber)
+- Attempt to find matching unit (tenantId + propertyId + unitNumber)
+- If found, set booking.unitId = unit.id
+- Keep booking.roomNumber as is (trimmed) for display
+- If not found, keep unitId null (backward compatible)
+
+Do NOT enforce hard validation yet (no blocking). Just link if possible.
+
+-------------------------------------
+STEP 4 — Trigger Status Updates at Key Points
+Call updateUnitStatusFromBooking(bookingId) after status changes:
+- After reception manually sets checked_in
+- After reception sets checked_out
+- After cancellation/no_show actions if exist
+Find existing endpoints that PATCH booking status and add the call after updateBooking().
+
+Also: When Auto Check-in Engine sets status -> confirmed, do NOT update unit status automatically (confirmed does not mean occupied).
+
+-------------------------------------
+STEP 5 — Add Room Status APIs
+1) GET /api/units/status?propertyId=...
+Return list of units with:
+unitNumber, unitType, status, floor, capacity
+
+2) PATCH /api/units/:id/status
+Body: { status }
+Allowed: ready/dirty/cleaning/occupied/out_of_order
+Auth: staff/admin only
+Tenant-scoped.
+
+-------------------------------------
+STEP 6 — Frontend Room Status View (Reception)
+Add a new left menu item:
+"Room Status"
+
+Page shows:
+- Filter by property
+- Table:
+  UnitNumber | Type | Status | Actions
+
+Actions:
+- Mark Cleaning
+- Mark Ready
+- Mark Out of order
+
+Also show computed occupancy hint:
+If there is an active booking today for that unit, show "Booked/Active" badge.
+
+-------------------------------------
+DELIVERABLES
+- units.status becomes room status engine
+- bookings.unitId gets filled when possible
+- auto updates on checked_in/checked_out
+- manual room status dashboard for reception
+- full backward compatibility if unit match not found
+
+DO NOT:
+- Add a new rooms table
+- Enforce strict validation that would block bookings
+(we can add strict validation later as an optional setting)
+
+-------------------------------------
+TEST PLAN
+1) Create units: 101, 102 in a property.
+2) Create booking for roomNumber "101" -> booking.unitId should be set.
+3) Set booking to checked_in -> unit 101 status becomes occupied.
+4) Set booking to checked_out -> unit 101 status becomes dirty.
+5) Manually set unit 101 -> cleaning -> ready.
+6) Booking with roomNumber that doesn't exist in units -> should still work, unitId remains null.

@@ -1,0 +1,114 @@
+We need to fully refactor and stabilize the SaaS plan system.
+
+Current issue:
+Features are inconsistently read from PLAN_FEATURE_MATRIX and subscription table.
+This causes random feature breakage (staff, performance, property limits, etc.)
+
+GOAL:
+Create a single source of truth for plan features.
+
+-------------------------------------------------
+1️⃣ SUBSCRIPTION = SINGLE SOURCE OF TRUTH
+-------------------------------------------------
+
+Subscription table must store ALL plan limits and features:
+
+- planType
+- maxProperties
+- maxStaff
+- multiProperty
+- performanceEnabled
+- staffPerformanceEnabled
+- advancedAnalytics
+- prioritySupport
+- customIntegrations
+- smartRoomsEnabled
+
+Remove any direct feature reads from PLAN_FEATURE_MATRIX in middleware.
+
+-------------------------------------------------
+2️⃣ PLAN MATRIX = TEMPLATE ONLY
+-------------------------------------------------
+
+PLAN_FEATURE_MATRIX should only act as a template.
+
+When:
+- User registers
+- User upgrades plan
+- Trial starts
+
+Then:
+Copy ALL plan features from PLAN_FEATURE_MATRIX[planType]
+into subscription record.
+
+After that:
+System must ONLY read from subscription.
+
+-------------------------------------------------
+3️⃣ REMOVE FALLBACKS
+-------------------------------------------------
+
+Remove:
+- fallback to "starter"
+- hardcoded maxProperties = 1
+- feature defaults inside middleware
+
+If subscription does not exist:
+Block actions and return proper error.
+
+-------------------------------------------------
+4️⃣ DEFINE FINAL PLAN STRUCTURE
+-------------------------------------------------
+
+Starter:
+- maxProperties: 1
+- maxStaff: 5
+- multiProperty: false
+- performanceEnabled: false
+- staffPerformanceEnabled: false
+- advancedAnalytics: false
+- prioritySupport: false
+- customIntegrations: false
+
+Growth:
+- maxProperties: 3
+- maxStaff: 20
+- multiProperty: true
+- performanceEnabled: true
+- staffPerformanceEnabled: true
+- advancedAnalytics: true
+- prioritySupport: false
+- customIntegrations: false
+
+Pro:
+- maxProperties: unlimited
+- maxStaff: unlimited
+- multiProperty: true
+- performanceEnabled: true
+- staffPerformanceEnabled: true
+- advancedAnalytics: true
+- prioritySupport: true
+- customIntegrations: true
+
+-------------------------------------------------
+5️⃣ MIDDLEWARE RULE
+-------------------------------------------------
+
+All feature checks must read ONLY from:
+
+req.subscription
+
+NOT from plan matrix.
+
+-------------------------------------------------
+6️⃣ DEBUG LOG
+-------------------------------------------------
+
+On login:
+console.log("Active Plan:", subscription.planType);
+console.log("Plan Features:", subscription);
+
+-------------------------------------------------
+END GOAL:
+Plan behavior must be deterministic.
+No feature should randomly break when another is fixed.

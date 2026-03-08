@@ -1,0 +1,185 @@
+Please expand the "Register Your Hotel" onboarding form and convert it into a professional multi-step hospitality registration system.
+
+Add the following new sections and fields:
+
+⭐ Step 1 — Hotel Basic Information
+
+Add these fields:
+
+Hotel Name (Required)
+
+Country (Dropdown, Required)
+
+City (Required)
+
+Hotel Address (Required)
+
+Postal Code
+
+Hotel Phone (Required)
+
+Hotel Email (Required)
+
+Website URL
+
+⭐ Step 2 — Hotel Classification
+
+Add classification fields:
+
+Star Rating (Dropdown)
+
+1 Star
+
+2 Star
+
+3 Star
+
+4 Star
+
+5 Star
+
+Boutique Hotel
+
+Resort
+
+Apartment Hotel
+
+⭐ Step 3 — Property Details
+
+Add property details:
+
+Total Number of Rooms (Required)
+
+Number of Floors
+
+Building Type (Dropdown)
+
+Hotel Building
+
+Resort Complex
+
+Boutique Hotel
+
+Apartment Hotel
+
+Villa Complex
+
+Capsule Hotel
+
+Tiny House / A-Frame Resort
+
+⭐ Step 4 — Guest Profile
+
+Add guest targeting fields:
+
+Primary Guest Type (Dropdown)
+
+Business
+
+Tourism
+
+Family
+
+Luxury
+
+Wellness
+
+Ski / Mountain Tourism
+
+Beach Resort
+
+⭐ Step 5 — Smart Infrastructure Status
+
+Add smart system readiness section:
+
+Toggle: Does the hotel already use smart devices? (Yes / No)
+
+If YES, show checkbox options:
+
+Smart Door Locks
+
+Smart HVAC System
+
+Smart Lighting
+
+PMS System
+
+BMS System
+
+IoT Sensors
+
+⭐ Step 6 — PMS Integration
+
+Add PMS selection:
+
+PMS Software Used (Dropdown)
+
+Opera
+
+Cloudbeds
+
+Hotelogix
+
+None
+
+Other (Textbox)
+
+⭐ Step 7 — Billing & Capacity Planning
+
+Add commercial planning fields:
+
+Expected Monthly Smart Room Count (Number input)
+
+Preferred Billing Currency (Dropdown)
+
+Billing Contact Email
+
+⭐ Step 8 — Staff Account Setup
+
+Keep existing staff account section but improve it:
+
+Full Name (Required)
+
+Email (Required)
+
+Password (Required)
+
+Role Selection:
+
+Admin
+
+Reception
+
+Manager
+
+Technician
+
+⭐ UX Requirements
+
+Please convert the entire onboarding form into a:
+
+Multi-step wizard layout
+
+Add progress bar indicator
+
+Ensure mobile responsive design
+
+Maintain O.S.S dark UI design theme
+
+Use validation for required fields
+
+Use dropdowns and toggles for better UX
+
+⭐ Extra UX Suggestion (Important)
+
+Add summary screen before final submission showing:
+
+Hotel Name
+
+Room Count
+
+Smart Infrastructure Status
+
+PMS Integration
+
+Subscription estimation preview

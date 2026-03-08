@@ -1,0 +1,122 @@
+We need a FULL SYSTEM AUDIT and PRODUCTION STABILITY CHECK for the O.S.S Smart Hotel System.
+
+The application has multiple modules working partially, but integration issues exist.
+
+Your task is to automatically test, verify, and fix system-wide functional issues.
+
+----------------------------------------
+OBJECTIVE
+----------------------------------------
+
+Perform a full end-to-end QA audit across ALL system modules.
+
+Detect:
+- Broken flows
+- Authentication issues
+- Permission mismatches
+- UI action failures
+- Backend integration failures
+- Session and cookie problems
+- Role mapping inconsistencies
+
+Then FIX them.
+
+----------------------------------------
+CRITICAL FLOWS TO TEST
+----------------------------------------
+
+1. AUTHENTICATION
+- Owner registration
+- Owner login
+- Staff login
+- Guest login
+- Password reset flow
+- Invitation acceptance login
+- Session persistence
+- Logout reliability
+
+2. STAFF MANAGEMENT
+- Staff creation
+- Staff invitation acceptance
+- Staff login using generated credentials
+- Role mapping validation
+- Staff edit / manage UI
+- Staff removal
+
+3. PROPERTY MANAGEMENT
+- Create property
+- Edit property
+- Multi-property support
+- Owner linking validation
+
+4. BOOKING & GUEST FLOWS
+- Guest creation
+- Booking creation
+- Check-in logic
+- Guest smart room access activation
+
+5. EMAIL INFRASTRUCTURE
+- Invitation email sending
+- Password reset email
+- Booking confirmation email
+- Token validation
+
+6. SESSION & SECURITY
+- Session regeneration
+- Cookie persistence
+- Role enforcement
+- OwnerId and propertyId linkage
+
+7. FRONTEND ACTIONS
+- All buttons clickable
+- Modals open correctly
+- Navigation routes exist
+- No dead UI components
+
+----------------------------------------
+TECHNICAL REQUIREMENTS
+----------------------------------------
+
+Add automated flow tests where missing.
+
+Add logging for failed flows.
+
+Ensure:
+
+- owner_admin has full control
+- staff roles map correctly
+- invitations produce working accounts
+- new staff can successfully sign in
+
+----------------------------------------
+FIX REQUIREMENTS
+----------------------------------------
+
+Automatically fix:
+
+- Role mismatches
+- Session bugs
+- Missing route handlers
+- Broken click handlers
+- Credential generation issues
+- Authentication failures
+
+----------------------------------------
+TEST METHOD
+----------------------------------------
+
+Simulate real user journeys:
+
+Owner → Creates Property → Adds Staff → Staff Accepts → Staff Logs In → Staff Uses Dashboard
+
+----------------------------------------
+DELIVERABLE
+----------------------------------------
+
+Provide:
+
+1. Full list of detected issues
+2. Root cause explanations
+3. Code fixes applied
+4. List of tested flows
+5. Confirmation system is production stable

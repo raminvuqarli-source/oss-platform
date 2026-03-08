@@ -1,0 +1,171 @@
+Improve OSS Terms of Service to enterprise level.
+
+Add 4 new legal sections and translate them to ALL languages.
+
+Languages:
+
+EN
+AZ
+TR
+RU
+FA
+DE
+FR
+ES
+NL
+AR
+
+Use existing localization system:
+
+client/src/locales/
+
+Add translations inside:
+
+terms section.
+
+
+---------------------------------
+
+NEW SECTION 1
+
+Key:
+
+terms.dataResponsibilityTitle
+
+English:
+
+Data Responsibility
+
+Key:
+
+terms.dataResponsibilityText
+
+English:
+
+Client is responsible for the accuracy and legality of all data entered into OSS.
+
+Orange Studio MMC is not responsible for incorrect or illegal data entered by the Client.
+
+
+
+---------------------------------
+
+NEW SECTION 2
+
+Key:
+
+terms.accountTerminationTitle
+
+English:
+
+Account Termination
+
+Key:
+
+terms.accountTerminationText
+
+English:
+
+Orange Studio MMC reserves the right to suspend or terminate accounts in case of:
+
+- Abuse
+- Fraud
+- Illegal activity
+- Violation of terms
+
+Service may be terminated without prior notice.
+
+
+
+---------------------------------
+
+NEW SECTION 3
+
+Key:
+
+terms.priceChangesTitle
+
+English:
+
+Price Changes
+
+Key:
+
+terms.priceChangesText
+
+English:
+
+Orange Studio MMC reserves the right to modify subscription prices.
+
+Clients will be notified before price changes take effect.
+
+
+
+---------------------------------
+
+NEW SECTION 4
+
+Key:
+
+terms.forceMajeureTitle
+
+English:
+
+Force Majeure
+
+Key:
+
+terms.forceMajeureText
+
+English:
+
+Orange Studio MMC shall not be liable for service interruptions caused by:
+
+- Natural disasters
+- War
+- Government actions
+- Internet infrastructure failures
+- Power outages
+
+
+
+---------------------------------
+
+REQUIREMENTS
+
+1)
+
+Add translations to ALL locale files.
+
+client/src/locales/
+
+
+2)
+
+Add sections to:
+
+terms-of-service.tsx
+
+after:
+
+Section 13 Official Language
+
+
+3)
+
+Use useTranslation() system.
+
+
+4)
+
+Keep formatting consistent.
+
+
+5)
+
+English remains default fallback.
+
+
+6)
+
+Do not break existing Terms system.

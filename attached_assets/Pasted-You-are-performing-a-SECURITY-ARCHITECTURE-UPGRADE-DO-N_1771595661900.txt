@@ -1,0 +1,124 @@
+You are performing a SECURITY ARCHITECTURE UPGRADE.
+
+DO NOT refactor business logic.
+ONLY migrate authentication from localStorage JWT to secure HttpOnly cookie-based auth.
+
+PROBLEM:
+- JWT is stored in localStorage (client/src/lib/queryClient.ts)
+- WebSocket token is passed via URL query (?token=...)
+- This is vulnerable to XSS and token leakage
+
+GOAL:
+- Remove JWT from localStorage completely
+- Use HttpOnly secure cookies only
+- Remove token from URL query usage
+- Maintain compatibility with existing routes
+
+-----------------------------------------
+STEP 1 — REMOVE LOCALSTORAGE TOKEN
+-----------------------------------------
+
+Search for:
+localStorage.setItem(TOKEN_KEY, token)
+localStorage.getItem(TOKEN_KEY)
+
+REMOVE all usage.
+
+Frontend must no longer read/write tokens manually.
+
+-----------------------------------------
+STEP 2 — USE COOKIE-BASED AUTH ONLY
+-----------------------------------------
+
+Backend:
+Ensure login route sets cookie:
+
+res.cookie("auth_token", token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000
+})
+
+Frontend:
+All fetch/axios requests must include:
+
+credentials: "include"
+
+Remove Authorization: Bearer headers entirely.
+
+-----------------------------------------
+STEP 3 — UPDATE AUTH MIDDLEWARE
+-----------------------------------------
+
+Modify auth middleware:
+
+Instead of:
+req.headers.authorization
+
+Use:
+req.cookies.auth_token
+
+Verify JWT from cookie only.
+
+If missing → 401.
+
+-----------------------------------------
+STEP 4 — FIX WEBSOCKET AUTH
+-----------------------------------------
+
+Currently:
+const token = url.searchParams.get("token");
+
+REMOVE query token logic.
+
+Instead:
+Use cookie-based authentication during WebSocket handshake.
+
+In ws server:
+
+const cookies = parse(req.headers.cookie);
+const token = cookies.auth_token;
+
+If invalid → reject connection.
+
+-----------------------------------------
+STEP 5 — REMOVE TOKEN FROM FRONTEND STATE
+-----------------------------------------
+
+Ensure:
+- No global token state
+- No React context storing JWT
+- No token in URL
+- No token in query params
+
+-----------------------------------------
+STEP 6 — SECURITY HARDENING
+-----------------------------------------
+
+Add:
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"]
+    }
+  }
+}));
+
+Add CORS config:
+
+app.use(cors({
+  origin: process.env.FRONTEND_URL,
+  credentials: true
+}));
+
+-----------------------------------------
+FINAL REQUIREMENTS:
+- No localStorage token usage
+- No Authorization header usage
+- Only HttpOnly cookie auth
+- WebSocket uses cookie auth
+- System compiles
+- All routes work
+- Generate list of modified files

@@ -1,0 +1,188 @@
+TASK: Implement Auto Check-in Engine
+
+IMPORTANT:
+Safe implementation.
+
+Do NOT break:
+
+- Payment system
+- Online Check-in
+- Booking creation
+- Manual reception workflow
+
+-------------------------------------
+
+GOAL
+
+Implement automatic confirmation when:
+
+paymentStatus = paid
+AND
+status = precheck_submitted
+
+Then:
+
+status -> confirmed
+
+-------------------------------------
+
+STEP 1 — Auto Check-in Function
+
+File:
+
+server/storage.ts
+
+Add function:
+
+async autoCheckinIfReady(bookingId: string)
+
+Logic:
+
+1) Find booking by id
+
+2) If booking not found → return
+
+3) Check conditions:
+
+If:
+
+booking.paymentStatus === "paid"
+AND
+booking.status === "precheck_submitted"
+
+Then:
+
+Update booking:
+
+status = "confirmed"
+
+Use existing function:
+
+updateBooking()
+
+Add log:
+
+console.log(
+"AUTO CHECKIN CONFIRMED",
+bookingId
+)
+
+Else:
+
+Do nothing
+
+-------------------------------------
+
+STEP 2 — Trigger After Payment
+
+File:
+
+server/routes/epoint.routes.ts
+
+Inside webhook:
+
+After booking payment success:
+
+Existing code:
+
+paymentStatus = "paid"
+
+Add after:
+
+await storage.autoCheckinIfReady(booking.referenceId)
+
+-------------------------------------
+
+STEP 3 — Trigger After Precheck Submit
+
+File:
+
+server/routes/bookings.routes.ts
+
+Endpoint:
+
+POST /api/bookings/:id/precheck
+
+After booking updated:
+
+status = "precheck_submitted"
+
+Add:
+
+await storage.autoCheckinIfReady(bookingId)
+
+-------------------------------------
+
+STEP 4 — Safety Rules
+
+Auto check-in must NOT run if:
+
+status is:
+
+cancelled
+checked_out
+no_show
+
+Only allow:
+
+precheck_submitted -> confirmed
+
+-------------------------------------
+
+STEP 5 — Logging
+
+Add logs:
+
+console.log(
+"AUTO CHECKIN SKIPPED",
+bookingId
+)
+
+When conditions not met.
+
+-------------------------------------
+
+EXPECTED RESULT
+
+Case 1:
+
+Precheck first:
+
+status = precheck_submitted
+
+Payment later:
+
+paymentStatus = paid
+
+Result:
+
+status -> confirmed automatically
+
+-------------------------------------
+
+Case 2:
+
+Payment first:
+
+paymentStatus = paid
+
+Precheck later:
+
+status = precheck_submitted
+
+Result:
+
+status -> confirmed automatically
+
+-------------------------------------
+
+IMPORTANT
+
+Do NOT change:
+
+createBooking()
+Overbooking
+Payment webhook logic
+Guest dashboard
+
+Only add auto engine.

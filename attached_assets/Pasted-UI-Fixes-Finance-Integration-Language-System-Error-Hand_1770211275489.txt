@@ -1,0 +1,219 @@
+UI Fixes + Finance Integration + Language System + Error Handling Improvements (O.S.S Application)
+
+Please implement the following corrections, removals, and system improvements in the O.S.S Hotel Management Application.
+
+1️⃣ Phone Number Display Bug
+
+Currently Azerbaijan phone numbers display incorrectly.
+
+Example problem:
+When entering:
++994 51 888 00 89
+
+The system shows:
++4 (51) 888 00 89 ❌
+
+Required Fix:
+
+• Correct phone number formatting
+• Ensure full international phone number is displayed correctly
+• Use E.164 international phone number standard
+• Prevent country code duplication or truncation
+• Ensure correct display during input and after saving
+• Validate formatting for all countries
+
+2️⃣ Remove "Add Guest" From Admin Panel
+
+Admin users must NOT have permission to create guests.
+
+Required Action:
+
+• Completely remove "Add Guest" button from Admin dashboard
+• Remove related Admin routes and modals
+• Block Admin from accessing guest creation APIs
+• Guest creation must only be available for Reception role
+
+3️⃣ Remove Social Login Options
+
+The system currently shows:
+
+• Sign in with Facebook
+• Sign in with Gmail
+
+Required Action:
+
+• Completely remove Facebook login
+• Completely remove Gmail login
+• Remove unused authentication logic
+• Keep only Email + Password login system
+
+4️⃣ Reception Add Guest – Payment & Finance Integration
+
+Reception must be able to record guest room payment during guest creation.
+
+Add Payment Fields To Add Guest Form:
+
+• Room Payment Amount
+• Payment Status:
+
+Paid
+
+Pending
+
+Unpaid
+
+• Payment Method:
+
+Cash
+
+Card
+
+Online
+
+Other
+
+Finance Automation Requirements:
+
+When Reception creates guest and enters payment data:
+
+System must automatically:
+
+• Create financial transaction record
+• Assign transaction to guest and room
+• Update Admin revenue dashboard
+• Update booking revenue analytics
+• Save transaction to financial logs
+
+Transaction Data Must Include:
+
+• Guest Name
+• Room Number
+• Payment Amount
+• Payment Method
+• Payment Status
+• Check-in and Check-out dates
+• Reception staff user ID
+• Timestamp
+
+Data Flow:
+
+Reception Add Guest → Booking Created → Payment Entered → Finance Transaction Created → Admin Dashboard Updated
+
+5️⃣ Multi-Language System Fix (Critical Issue)
+
+Currently, when changing language, only the first page changes language.
+Other parts of the application remain in English.
+
+Required Fix:
+
+The entire application must support dynamic language switching.
+
+Language selection must update ALL system sections including:
+
+• Login / Registration pages
+• Guest dashboard
+• Reception dashboard
+• Admin dashboard
+• Service request pages
+• Pre-check-in forms
+• Notifications
+• Error messages
+• Buttons and UI labels
+• Modals and popup windows
+
+Language System Requirements:
+
+• Selected language must be saved in user profile
+• Language must persist after refresh and re-login
+• All components must use translation keys
+• Ensure translation JSON files are fully connected
+• No UI text should remain hard-coded
+
+Arabic Language Special Requirement:
+
+• Enable full RTL (Right-To-Left) layout
+• Mirror UI alignment
+• Support RTL typography and spacing
+
+6️⃣ Role Permission & Security
+
+Reception:
+• Can create guests
+• Can enter payment data
+• Can edit payment before confirmation
+
+Admin:
+• Can view financial analytics only
+• Cannot create or edit guest payments
+
+7️⃣ UI & UX Requirements
+
+• Maintain current dark theme design
+• Keep interface clean and user-friendly
+• Payment section must be integrated naturally into Add Guest modal
+• Ensure mobile responsiveness
+
+8️⃣ Database & Backend Requirements
+
+Create or update models/tables for:
+
+• Booking payments
+• Financial transactions
+• Payment status tracking
+• Revenue analytics
+• Audit logs
+
+9️⃣ Full System Testing Requirement
+
+After implementing all updates, perform full system testing including:
+
+• Phone number input validation
+• Add Guest payment workflow
+• Automatic finance dashboard update
+• Language switching across all pages
+• Role permission restrictions
+• Social login removal
+• UI stability and performance
+• Mobile responsiveness
+• API and database error handling
+
+🔟 Final Requirement
+
+Ensure the application is fully stable, bug-free, and production-ready.
+Fix any additional errors discovered during testing.
+
+1️⃣1️⃣ Error Message System Improvement (Very Important)
+
+Currently, when an error occurs, a small red error notification appears in the bottom-right corner without clear explanation.
+
+Required Fix:
+
+• Remove generic red error popup notifications
+• Replace them with user-friendly and informative error messages
+• Show clear explanation of what went wrong
+• Indicate which field or action caused the error
+• Provide guidance on how the user can fix the problem
+
+Error Display Requirements:
+
+• Errors must appear close to the related input field or action
+• Use readable and descriptive language
+• Avoid technical or developer error messages
+• Provide validation hints when possible
+
+Example:
+
+❌ "Error occurred"
+✔ "Phone number format is incorrect. Please enter a valid international number."
+
+Developer Requirement:
+
+• Implement centralized error handling system
+• Capture frontend validation errors
+• Capture backend API errors
+• Log errors for debugging
+• Prevent silent or unclear failures
+
+UX Requirement:
+
+Error messages must improve user experience and reduce confusion, especially for hotel staff using the system.

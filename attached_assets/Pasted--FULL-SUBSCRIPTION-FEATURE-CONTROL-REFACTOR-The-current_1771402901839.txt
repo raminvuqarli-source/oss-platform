@@ -1,0 +1,229 @@
+🚨 FULL SUBSCRIPTION & FEATURE CONTROL REFACTOR
+
+The current system does NOT properly enforce subscription-based feature restrictions.
+
+Issues:
+
+Feature differences exist visually in pricing page, but not system-level enforced.
+
+Guest creation is currently possible for all plans.
+
+Smart features are not properly restricted per plan.
+
+Access control logic is inconsistent.
+
+This is not acceptable for a SaaS architecture.
+
+We need a complete subscription-based access control refactor.
+
+🎯 Objective
+
+Implement a professional SaaS-grade:
+
+Plan-based access control
+
+Role + Plan combined permission logic
+
+Backend-level enforcement (mandatory)
+
+Clean frontend conditional rendering
+
+Centralized feature matrix configuration
+
+Clean and maintainable architecture
+
+1️⃣ Create Centralized Plan Feature Matrix
+
+Create a new config file (e.g., planFeatures.ts)
+
+Structure example:
+
+Core Starter:
+
+guest_management: true
+
+staff_management: false
+
+smart_controls: false
+
+advanced_analytics: false
+
+multi_property: false
+
+custom_integrations: false
+
+priority_support: false
+
+Core Growth:
+
+guest_management: true
+
+staff_management: true
+
+smart_controls: limited
+
+advanced_analytics: true
+
+multi_property: true
+
+custom_integrations: false
+
+priority_support: false
+
+Core Pro:
+
+all features: true
+
+This configuration must be centralized.
+No hardcoded feature checks inside components.
+
+2️⃣ Backend Enforcement (CRITICAL)
+
+Create middleware:
+
+checkPlanAccess(featureKey)
+
+Example usage:
+
+checkPlanAccess("guest_management")
+
+checkPlanAccess("staff_management")
+
+checkPlanAccess("smart_controls")
+
+Middleware must:
+
+Read hotel.subscription.plan
+
+Compare against planFeatures config
+
+If allowed → proceed
+
+If not allowed → return 403 with structured response:
+
+{
+error: "PLAN_LIMIT",
+message: "This feature is not included in your subscription plan."
+}
+
+Frontend hiding alone is NOT enough.
+API-level protection is mandatory.
+
+3️⃣ Guest Creation Logic (Correct UX Required)
+
+If plan includes guest_management:
+
+“Add Guest” button is ACTIVE
+
+Guest creation works normally
+
+If plan does NOT include guest_management:
+
+Button must be DISABLED
+
+Visually dimmed
+
+Tooltip: “This feature is not included in your plan.”
+
+API must not be called from UI
+
+No raw error should appear in normal UI flow
+
+4️⃣ Staff Management Restriction
+
+If staff_management = false:
+
+Hide Staff menu
+
+Disable staff creation
+
+Protect staff API endpoints
+
+5️⃣ Smart Feature Restriction
+
+If smart_controls = false:
+
+Do not render smart UI components
+
+Block smart API endpoints
+
+Disable smart buttons
+
+If smart_controls = limited:
+
+Apply logical limits (e.g., limited rooms, limited actions)
+
+6️⃣ Multi-Property Restriction
+
+If multi_property = false:
+
+Limit to 1 property only
+
+Block adding second property
+
+Show Upgrade modal
+
+Protect API endpoint
+
+7️⃣ Advanced Analytics Restriction
+
+If advanced_analytics = false:
+
+Hide advanced analytics UI
+
+Block analytics API routes
+
+8️⃣ Role + Plan Combined Access
+
+Access must depend on BOTH:
+
+User role (owner, staff, guest)
+
+Subscription plan
+
+Examples:
+
+Owner + Starter → cannot create staff
+Staff + Growth → can create guests
+Guest + Starter → no smart panel
+Guest + Pro → smart panel active
+
+9️⃣ Upgrade Modal System
+
+When a restricted feature is clicked:
+
+Do NOT show error page
+
+Show Upgrade modal instead
+
+Message:
+
+“This feature is not included in your current subscription plan. Please upgrade to access it.”
+
+🔟 Refactor Requirements
+
+Remove hardcoded permission logic
+
+Replace with centralized feature-based system
+
+Clean duplicated logic
+
+Ensure multi-tenant isolation
+
+Manually test all plans
+
+Generate full backup link after completion
+
+FINAL EXPECTED RESULT
+
+Each plan strictly limited to its defined features
+
+No improper feature leakage
+
+No UI crashes
+
+Secure backend enforcement
+
+Clean SaaS-grade architecture
+
+This is a critical architectural upgrade required for OSS to function as a real SaaS platform.

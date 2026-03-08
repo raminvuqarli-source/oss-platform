@@ -1,0 +1,134 @@
+🔐 CRITICAL: Strengthen Multi-Tenant Security (Do NOT disable anything)
+
+There is a serious issue:
+In DEMO mode and possibly other areas, users can see data entered by previous users.
+
+Do NOT disable demo.
+Do NOT remove any features.
+Do NOT change UI.
+
+Only strengthen security and enforce strict tenant isolation.
+
+🎯 Goal
+
+Ensure full tenant-level data isolation across the entire platform.
+No user should ever see another tenant’s data.
+
+1️⃣ Standardize Tenant Architecture
+
+Use a single canonical tenant key (e.g., tenantId) across the entire system.
+
+All tenant-related tables must include tenantId (NOT NULL).
+
+No database operation should execute without tenant context.
+
+2️⃣ Enforce Tenant Filtering in Backend (Mandatory)
+
+For ALL database operations:
+
+SELECT queries MUST include tenantId filter.
+
+INSERT must automatically assign tenantId.
+
+UPDATE and DELETE must include tenantId in WHERE clause.
+
+If tenantId is missing → reject the request.
+
+Remove any fallback logic that returns unfiltered data.
+
+3️⃣ Central Tenant Middleware
+
+Implement a global middleware:
+
+Extract tenantId from authenticated user/session.
+
+Attach it to req.tenantId.
+
+If tenantId mismatch or missing → deny request.
+
+System must follow “deny by default” principle.
+
+4️⃣ Secure DEMO Mode (Keep It Active)
+
+Demo must remain active but fully isolated.
+
+DEMO must never access real tenant data.
+
+Each demo session should use its own isolated tenant.
+OR
+
+Demo data must be strictly scoped and never shared between visitors.
+
+Under no condition should one demo user see another demo user’s data.
+
+5️⃣ Full Platform Audit
+
+Audit ALL modules and enforce tenant filtering:
+
+Tasks
+
+Smart Assistant
+
+Guests
+
+Rooms
+
+Devices
+
+Payments
+
+Staff
+
+Reports
+
+Notifications
+
+File uploads
+
+Search endpoints
+
+Search entire codebase for any query without tenant filter and fix it.
+
+6️⃣ Database-Level Reinforcement
+
+Add NOT NULL constraint for tenantId.
+
+Add indexes on tenantId.
+
+Add foreign keys referencing tenant table.
+
+If using PostgreSQL, enable Row Level Security (RLS).
+
+No query should ever return cross-tenant data.
+
+7️⃣ Verification & Testing
+
+Add tests:
+
+Tenant A creates data.
+
+Tenant B must NEVER see or modify it.
+
+Demo users must not see each other’s data.
+
+Log tenantId on every request.
+
+Important
+
+Do NOT disable demo.
+
+Do NOT remove functionality.
+
+Do NOT change UI.
+
+Only enforce strict, secure tenant isolation everywhere.
+
+After implementation, provide a security audit report listing:
+
+Root cause
+
+Files changed
+
+Endpoints fixed
+
+How demo isolation now works

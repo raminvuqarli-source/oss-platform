@@ -1,0 +1,114 @@
+We are upgrading OSS unit management system.
+
+IMPORTANT:
+Do NOT create duplicate models or duplicate UI components.
+Refactor existing unit system instead of rebuilding from scratch.
+
+-----------------------------------------------------
+
+1. PRESERVE EXISTING STRUCTURE
+
+Keep:
+- owners table
+- properties table
+- units table
+- device linking
+- booking relationships
+- multi-tenant security
+- existing APIs
+
+-----------------------------------------------------
+
+2. DATABASE REFACTOR
+
+Modify existing "units" table:
+
+ADD new column:
+unit_category
+
+Default value for all existing units:
+accommodation
+
+DO NOT create new units table.
+
+-----------------------------------------------------
+
+3. UNIT TYPE HANDLING
+
+Extend existing unit_type field.
+
+Do NOT create a new type model.
+Use existing type field and extend allowed values.
+
+-----------------------------------------------------
+
+4. UI REFACTOR
+
+Modify existing Units page.
+
+Replace flat list layout with grouped layout.
+
+Remove:
+Old flat unit list display
+
+Add:
+Grouped category display
+
+-----------------------------------------------------
+
+5. UNIT CREATION FORM
+
+Modify existing "Add Unit" modal.
+
+Add:
+Step 1 Category selection
+Step 2 Type selection
+
+Do NOT create separate creation forms.
+
+-----------------------------------------------------
+
+6. BACKWARD COMPATIBILITY
+
+Ensure all existing unit data remains functional.
+
+If unit_category missing:
+auto assign accommodation
+
+-----------------------------------------------------
+
+7. ANALYTICS REFACTOR
+
+Extend analytics queries to group results by category.
+
+Do NOT rebuild analytics engine.
+
+-----------------------------------------------------
+
+8. PERMISSION REFACTOR
+
+Extend existing permission checks to support category filtering.
+
+Do NOT replace permission system.
+
+-----------------------------------------------------
+
+9. CLEANUP RULES
+
+Remove:
+Any duplicate UI component created during refactor
+Any unused unit list component
+
+-----------------------------------------------------
+
+10. UI STYLE RULE
+
+Maintain Airbnb-style simplicity.
+Avoid adding advanced complexity.
+
+-----------------------------------------------------
+
+Before implementing:
+Analyze existing models and UI.
+Then refactor safely.
+

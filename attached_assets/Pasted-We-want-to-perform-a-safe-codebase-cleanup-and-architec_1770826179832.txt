@@ -1,0 +1,124 @@
+We want to perform a safe codebase cleanup and architecture stabilization for OSS.
+
+IMPORTANT:
+- Do NOT change business logic.
+- Do NOT modify database schema.
+- Do NOT break multi-tenant logic.
+- Do NOT remove working features.
+- This is structural cleanup and organization only.
+
+-----------------------------------------------------
+
+1. CODE ORGANIZATION
+
+Refactor project structure into clear modules:
+
+/components
+/pages
+/services
+/hooks
+/utils
+/types
+/layouts
+/routes
+
+Ensure consistent naming and folder separation.
+
+-----------------------------------------------------
+
+2. REMOVE DUPLICATE COMPONENTS
+
+Scan for:
+- Duplicate dashboards
+- Old UI panels
+- Unused views
+- Obsolete routing components
+
+Safely remove only unused code.
+
+-----------------------------------------------------
+
+3. ROUTING CLEANUP
+
+Centralize routing logic.
+
+Ensure:
+- All navigation routes are mapped in one router config
+- Sidebar menu uses router links only
+- No broken navigation states
+
+-----------------------------------------------------
+
+4. ROLE-BASED VIEW STRUCTURE
+
+Separate views into:
+
+OwnerViews
+StaffViews
+ManagerViews
+
+Avoid mixing logic across roles.
+
+-----------------------------------------------------
+
+5. UI COMPONENT REUSABILITY
+
+Extract reusable components:
+
+- PropertyCard
+- TaskCard
+- UnitCard
+- StatusBadge
+- PriorityIndicator
+
+Avoid duplicate UI code.
+
+-----------------------------------------------------
+
+6. STATE MANAGEMENT CLEANUP
+
+Ensure:
+- View state is centralized
+- Remove unused state variables
+- Standardize data fetching
+
+-----------------------------------------------------
+
+7. FILE NAMING CONSISTENCY
+
+Apply consistent naming convention:
+
+PascalCase → Components
+camelCase → Functions
+kebab-case → routes
+
+-----------------------------------------------------
+
+8. COMMENTS AND DOCUMENTATION
+
+Add lightweight comments explaining:
+
+- Role logic
+- Routing flow
+- Task automation triggers
+- Multi-tenant protections
+
+-----------------------------------------------------
+
+9. ERROR HANDLING STANDARDIZATION
+
+Create unified error handling utilities.
+
+-----------------------------------------------------
+
+10. PERFORMANCE OPTIMIZATION
+
+Remove unnecessary re-renders.
+Lazy load heavy components if possible.
+
+-----------------------------------------------------
+
+Goal:
+Make codebase clean, scalable, and safe for future UX refactors.
+
+Do NOT change user-facing functionality.

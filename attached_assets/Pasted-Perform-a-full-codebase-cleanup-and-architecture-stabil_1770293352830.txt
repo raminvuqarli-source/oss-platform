@@ -1,0 +1,69 @@
+Perform a full codebase cleanup and architecture stabilization for production.
+
+Goals:
+- Improve maintainability
+- Remove duplicated logic
+- Prevent future bugs when adding features
+- Enforce scalable SaaS architecture
+
+Please do the following:
+
+1. Centralize Business Logic
+- Move validation, formatting, and utility logic into shared services.
+- Remove duplicated logic across pages and components.
+
+2. Enforce Modular Architecture
+- Separate layers clearly:
+  • UI Components
+  • Business Logic / Services
+  • API / Data Layer
+  • Utilities / Helpers
+
+3. Standardize Folder Structure
+Organize code into clear domains such as:
+- auth
+- dashboard
+- finance
+- guests
+- hotels
+- admin
+- oss-admin
+- shared components
+
+4. Centralize State Management
+- Ensure authentication, user roles, and global settings are managed from one source of truth.
+- Avoid local state duplication.
+
+5. Centralize Error Handling
+- All API errors must go through a global error handler.
+- Remove inline try/catch duplication.
+
+6. Centralize Role-Based Access Control (RBAC)
+- Permissions must be managed from one file/service.
+- Avoid hardcoded role checks in components.
+
+7. Improve Internationalization (i18n)
+- Remove all hardcoded UI text.
+- Ensure all UI strings use translation keys.
+
+8. Improve Responsive Layout System
+- Use shared layout components for dialogs, modals, and dashboards.
+- Prevent future mobile layout conflicts.
+
+9. Remove Dead Code
+- Remove unused components, functions, and imports.
+
+10. Add Developer Documentation
+- Document architecture
+- Document folder responsibilities
+- Document how to add new features safely
+
+11. Enforce DRY and SOLID Principles
+- Avoid copy-paste logic
+- Ensure reusable components and services
+
+12. Run Full Regression Testing
+- Verify login, dashboards, finance, guest management, and OSS admin all work after refactor.
+
+Expected Result:
+The application should have clean, scalable, production-ready architecture that supports future feature expansion without breaking existing functionality.

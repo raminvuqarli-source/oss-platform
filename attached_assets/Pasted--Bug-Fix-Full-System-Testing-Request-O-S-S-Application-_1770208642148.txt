@@ -1,0 +1,68 @@
+✅ Bug Fix + Full System Testing Request (O.S.S Application)
+
+We have several functional issues in the application that must be fixed and fully tested.
+
+1️⃣ Language Switching Problem
+
+Multi-language support has been added, but when a user selects a different language, the interface does not change.
+
+Required Fix:
+
+• Language selection must immediately update all UI text
+• Selected language must be saved in user profile
+• Language must remain selected after page refresh and re-login
+• Translation files must be correctly connected to all UI components
+• Arabic language must properly activate RTL layout
+• Make sure no parts of the UI remain untranslated
+
+2️⃣ "Register Your Hotel" Page Loading Issue
+
+When clicking the "Register Your Hotel" button, the page becomes dark and does not load.
+
+Required Fix:
+
+• Identify and fix the loading or routing error
+• Ensure the page loads correctly without freezing
+• Check backend API connections
+• Verify database calls
+• Fix any UI blocking overlay or loading state bugs
+• Ensure form fields render correctly
+
+3️⃣ Full System End-To-End Testing (Very Important)
+
+After fixing the above issues, perform a complete system test from 0 to 100.
+
+Testing Scope:
+
+• User registration flow
+• Login / logout process
+• Multi-language switching
+• Pre-check-in workflow
+• Guest dashboard functions
+• Reception panel functionality
+• Admin dashboard analytics
+• Financial transaction creation
+• Manual reception price entry
+• Notifications and alerts
+• Phone number validation (international support)
+• Service request workflows
+• Database data saving and retrieval
+• Mobile responsiveness
+• Error handling and loading states
+
+4️⃣ Stability & Performance Review
+
+• Check for UI freezing or slow loading
+• Fix broken navigation routes
+• Ensure real-time updates work correctly
+• Remove console errors
+• Verify API error handling
+• Ensure database operations are reliable
+
+5️⃣ Final Requirement
+
+After testing, fix ALL detected issues and ensure the application is fully stable, functional, and production-ready.
+
+The goal is to remove any bugs, UI inconsistencies, or system failures.
+
+If additional missing components, database models, or API endpoints are required, create and implement them properly.

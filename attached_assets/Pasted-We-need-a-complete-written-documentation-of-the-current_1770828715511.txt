@@ -1,0 +1,169 @@
+We need a complete written documentation of the current OSS application.
+
+IMPORTANT:
+Do NOT modify code.
+Do NOT refactor anything.
+Do NOT run migrations.
+Only analyze and describe the system.
+
+GOAL:
+Generate a full functional and technical documentation of the app in plain structured text.
+
+----------------------------------------------------
+
+Please describe:
+
+1. SYSTEM OVERVIEW
+- What OSS does
+- Core purpose of the platform
+- Target users
+- SaaS model explanation
+
+----------------------------------------------------
+
+2. USER ROLES
+
+Describe all roles and permissions:
+
+Owner
+Property Manager
+Staff Roles
+Guest user flow (if exists)
+
+Explain what each role can and cannot do.
+
+----------------------------------------------------
+
+3. PROPERTY STRUCTURE
+
+Explain full hierarchy:
+
+Owner
+Property
+Unit / Space / Category
+Facilities
+Devices
+Guests
+
+----------------------------------------------------
+
+4. STAFF MANAGEMENT FLOW
+
+Explain:
+
+- Invitation system
+- Manual staff creation
+- Role permissions
+- Login flow
+- Access limitations
+
+----------------------------------------------------
+
+5. GUEST MANAGEMENT
+
+Explain:
+
+- How guests are created
+- Booking handling
+- Check-in / check-out logic
+- Guest data storage
+
+----------------------------------------------------
+
+6. TASK & OPERATIONS MODULE
+
+Explain:
+
+- Task creation
+- Task assignment
+- Automation logic
+- Status flows
+
+----------------------------------------------------
+
+7. CALENDAR SYSTEM
+
+Explain:
+
+- Availability logic
+- Booking integration
+- Staff interaction
+
+----------------------------------------------------
+
+8. IoT / DEVICE MODULE
+
+Explain:
+
+- Device registration
+- Telemetry handling
+- Real-time communication
+- Device permission control
+
+----------------------------------------------------
+
+9. BILLING & SUBSCRIPTION SYSTEM
+
+Explain:
+
+- Plan types
+- Usage metering
+- Upgrade/downgrade rules
+- Payment integration logic
+
+----------------------------------------------------
+
+10. MULTI-TENANT SECURITY
+
+Explain:
+
+- How data isolation works
+- Property-level permissions
+- Role-based access control
+
+----------------------------------------------------
+
+11. FRONTEND ARCHITECTURE
+
+Explain:
+
+- Main UI sections
+- Navigation structure
+- Dashboard logic
+- Component structure
+
+----------------------------------------------------
+
+12. BACKEND ARCHITECTURE
+
+Explain:
+
+- Main API layers
+- Database entities overview
+- Service separation
+
+----------------------------------------------------
+
+13. AUTHENTICATION FLOW
+
+Explain:
+
+- Login system
+- Invitation tokens
+- Staff authentication
+- Session handling
+
+----------------------------------------------------
+
+14. CURRENT LIMITATIONS OR KNOWN GAPS
+
+List any unfinished or experimental modules.
+
+----------------------------------------------------
+
+FORMAT REQUIREMENTS:
+
+- Structured headings
+- Clean professional documentation style
+- Plain text (no code dump)
+- Easy to read for investors and developers

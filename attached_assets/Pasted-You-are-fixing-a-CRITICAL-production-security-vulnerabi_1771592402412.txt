@@ -1,0 +1,109 @@
+You are fixing a CRITICAL production security vulnerability.
+
+DO NOT refactor unrelated logic.
+ONLY fix plaintext password storage + exposure issues.
+
+PROBLEM:
+- Guest plaintext passwords are stored in credential_logs (server/routes/staff.routes.ts line ~268)
+- They are later extracted and returned via API (/api/users/guests/:guestId/details)
+- Booking confirmation emails include plaintext password
+- Auth service allows plaintext fallback comparison
+
+GOAL:
+Completely eliminate plaintext password storage, logging, retrieval, and email exposure.
+System must use bcrypt hashes ONLY.
+No fallback to plaintext allowed.
+
+-----------------------------------------
+STEP 1 — REMOVE PLAINTEXT STORAGE
+-----------------------------------------
+
+In:
+server/routes/staff.routes.ts
+
+REMOVE any code that stores:
+notes: `Guest account created with username ${username}, password: ${password}`
+
+Replace with:
+notes: `Guest account created with username ${username}`
+
+Ensure password is NEVER logged anywhere.
+
+-----------------------------------------
+STEP 2 — REMOVE PLAINTEXT RETRIEVAL
+-----------------------------------------
+
+In:
+api/users/guests/:guestId/details
+
+REMOVE:
+- Any regex extracting password from credentialLogs
+- Any "password" field returned in API response
+
+If frontend expects password field,
+replace with:
+password: undefined
+
+-----------------------------------------
+STEP 3 — FIX AUTH SERVICE
+-----------------------------------------
+
+In:
+server/services/auth.service.ts
+
+REMOVE this insecure fallback:
+
+if (!hash.startsWith("$2")) {
+  return password === hash;
+}
+
+REPLACE verification logic with STRICT bcrypt comparison only:
+
+return await bcrypt.compare(password, hash);
+
+If stored hash is invalid format,
+throw error and force reset.
+
+-----------------------------------------
+STEP 4 — REMOVE PASSWORD FROM EMAIL
+-----------------------------------------
+
+In:
+server/email.ts
+
+REMOVE:
+Password: <strong>${data.password}</strong>
+
+Replace guest creation flow with:
+- Generate random password
+- Hash it
+- Send guest a secure password reset link instead
+
+Implement:
+createPasswordResetToken(userId)
+Store hashed reset token with expiry (15 min)
+Send link:
+${FRONTEND_URL}/reset-password?token=...
+
+-----------------------------------------
+STEP 5 — ADD SAFETY CHECK
+-----------------------------------------
+
+Search entire project for:
+password:
+credential_logs
+notes:
+
+Ensure no plaintext password storage remains.
+
+-----------------------------------------
+FINAL REQUIREMENTS:
+- No plaintext password anywhere in DB
+- No password returned in any API
+- No password in email
+- No plaintext fallback login
+- Only bcrypt comparison allowed
+- System compiles without breaking guest creation flow
+
+After changes:
+Generate a short report listing files modified.

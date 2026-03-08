@@ -1,0 +1,254 @@
+PROJECT: OSS SaaS Billing – EPOINT ONLY (Production Ready)
+
+IMPORTANT:
+REMOVE ALL PAYRIFF CODE COMPLETELY.
+
+Delete:
+
+- Payriff routes
+- Payriff services
+- Payriff env variables
+- Payriff database fields
+- Payriff webhook
+- Payriff secrets
+
+Only EPOINT must remain.
+
+--------------------------------
+
+STACK:
+
+Backend:
+Express.js + TypeScript
+
+Frontend:
+React
+
+Database:
+PostgreSQL
+
+Auth:
+Session Cookie
+
+Payment:
+EPOINT ONLY
+
+Currency:
+AZN
+
+Domain:
+https://ossaiproapp.com
+
+--------------------------------
+
+ENV VARIABLES
+
+Add:
+
+EPOINT_PUBLIC_KEY=
+EPOINT_PRIVATE_KEY=
+EPOINT_MERCHANT_ID=
+
+BASE_URL=https://ossaiproapp.com
+
+REMOVE:
+
+PAYRIFF_MERCHANT_ID
+PAYRIFF_SECRET_KEY
+PAYRIFF_API_URL
+
+--------------------------------
+
+PLANS
+
+CORE_STARTER = 134.30
+
+CORE_GROWTH = 219.30
+
+CORE_PRO = 338.30
+
+APARTMENT_LITE = 85.00
+
+SMART_LITE = 49.30
+
+SMART_PRO = 100.30
+
+SMART_AI = 168.30
+
+
+--------------------------------
+
+PAYMENT FLOW
+
+Dashboard → Settings → Billing
+
+User clicks Pay
+
+POST:
+
+/api/epoint/create-order
+
+Body:
+
+{
+planCode:"CORE_STARTER"
+}
+
+Server returns:
+
+{
+paymentUrl,
+orderId
+}
+
+Frontend redirects user to paymentUrl
+
+
+--------------------------------
+
+SUCCESS REDIRECT
+
+/settings?payment=success&orderId=XXXX
+
+
+DECLINED REDIRECT
+
+/settings?payment=declined&orderId=XXXX
+
+
+--------------------------------
+
+WEBHOOK
+
+POST
+
+/api/epoint/webhook
+
+Epoint sends payment result.
+
+Must:
+
+Validate signature
+
+Find orderId
+
+If success:
+
+payment_transactions.status = paid
+
+subscriptions.planCode update
+
+subscriptions.active = true
+
+subscriptions.startDate = now
+
+subscriptions.endDate = now + 30 days
+
+
+If failed:
+
+payment_transactions.status = failed
+
+
+Return:
+
+HTTP 200
+
+
+--------------------------------
+
+DATABASE
+
+payment_transactions:
+
+id
+hotelId
+orderId
+planCode
+amount
+currency
+status
+
+pending
+paid
+failed
+
+createdAt
+paidAt
+
+epointResponse
+
+
+subscriptions:
+
+planType
+planCode
+startDate
+endDate
+active
+
+
+--------------------------------
+
+SECURITY
+
+Implement:
+
+Signature verification
+
+Reject invalid signature
+
+Reject duplicate payments
+
+Reject unknown orders
+
+
+--------------------------------
+
+UI
+
+Settings → Billing
+
+Show:
+
+Current Plan
+
+Expire Date
+
+Buttons:
+
+Starter
+Growth
+Pro
+Apartment Lite
+
+
+--------------------------------
+
+SUCCESS DISPLAY
+
+If:
+
+payment=success
+
+Show:
+
+Payment Successful
+
+
+If:
+
+payment=declined
+
+Show:
+
+Payment Failed
+
+
+--------------------------------
+
+FINAL STEP
+
+After implementation log:
+
+"EPOINT ACTIVE"

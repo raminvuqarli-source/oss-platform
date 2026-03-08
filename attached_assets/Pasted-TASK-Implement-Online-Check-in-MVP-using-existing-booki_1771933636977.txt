@@ -1,0 +1,108 @@
+TASK: Implement Online Check-in (MVP) using existing bookings columns
+
+CONTEXT:
+- Bookings table already has:
+  numberOfGuests, nationality, passportNumber, dateOfBirth, guestAddress,
+  arrivalTime, preCheckNotes, specialRequests
+- Existing "Prepare My Stay" flow exists:
+  POST /api/bookings/:id/arrival-info
+  changes status to arrival_info_submitted
+- Guest ownership check exists:
+  booking.guestId === req.session.userId
+- No file upload system and no signature component yet.
+
+GOAL:
+Add an "Online Check-in" form to Guest Dashboard that captures:
+- Personal details (passportNumber, nationality, dateOfBirth, guestAddress, numberOfGuests)
+- Optional specialRequests
+- Digital signature (canvas)
+- Optional ID image (base64) for MVP (no server file upload)
+Then saves into bookings table and sets status to precheck_submitted.
+
+Also add Reception review UX:
+- Reception can see bookings with status precheck_submitted and view submitted fields + signature image.
+
+REQUIREMENTS:
+
+A) BACKEND
+1) Add booking columns for MVP assets:
+   - idDocumentBase64 (text nullable)   // OPTIONAL MVP
+   - guestSignatureBase64 (text nullable) // REQUIRED MVP
+If adding new columns is too heavy now, store them in:
+   - specialRequests or preCheckNotes as JSON string (last resort)
+Preferred: add two columns to bookings table in schema + migration.
+
+2) New endpoint:
+   POST /api/bookings/:id/precheck
+Body:
+{
+  passportNumber,
+  nationality,
+  dateOfBirth,
+  guestAddress,
+  numberOfGuests,
+  specialRequests,
+  guestSignatureBase64,
+  idDocumentBase64 (optional)
+}
+
+Validation:
+- Ensure booking exists
+- Ensure booking.guestId === req.session.userId
+- Require guestSignatureBase64 (must be non-empty)
+- Require passportNumber and nationality and dateOfBirth (minimum)
+- Update bookings row with provided fields
+- Set status = "precheck_submitted"
+
+Return updated booking.
+
+3) Reception endpoint:
+   GET /api/bookings/precheck/submitted
+- Auth: staff/reception/admin only
+- Return list of bookings where status == "precheck_submitted" (tenant scoped)
+Include key fields + signature/id base64.
+
+B) FRONTEND
+1) Guest Dashboard:
+File: client/src/pages/guest-dashboard.tsx
+- Add a new dialog/card: "Online Check-in"
+- Show it if booking exists and booking.status is not checked_out/cancelled.
+- Form fields bound to booking columns.
+- Add Signature Canvas component:
+  - simple HTML canvas where user draws
+  - export to base64 PNG (toDataURL)
+  - clear button
+- Optional ID image upload (MVP):
+  - input type=file accept=image/*
+  - use FileReader.readAsDataURL to store base64 in state
+
+- Submit button calls:
+  apiRequest("POST", `/api/bookings/${bookingId}/precheck`, payload)
+
+- On success:
+  show toast "Online check-in göndərildi"
+  refresh booking details
+  show badge "Pre-check submitted"
+
+2) Reception Dashboard:
+- Add a tab or section "Pre-check"
+- Use apiRequest GET /api/bookings/precheck/submitted
+- List submitted items
+- Clicking item opens modal showing:
+  passportNumber, nationality, dateOfBirth, guestAddress, numberOfGuests
+  signature image preview
+  id image preview if present
+
+C) STATUS / I18N
+- Use existing status value "precheck_submitted" (already used in codebase)
+- Add i18n labels only if needed, otherwise hardcode AZ labels for MVP.
+
+D) SAFETY
+- Do not store huge images if possible; warn user if file > 2MB.
+- Keep base64 only as MVP; note in code comment: replace with real upload later.
+
+DELIVERABLES:
+- New backend endpoint /api/bookings/:id/precheck
+- New staff endpoint to list submitted prechecks
+- Guest Dashboard UI with form + signature canvas + optional ID base64
+- Reception UI to review submitted prechecks

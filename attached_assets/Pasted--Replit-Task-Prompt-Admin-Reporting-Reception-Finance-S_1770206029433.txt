@@ -1,0 +1,184 @@
+✅ Replit Task Prompt – Admin Reporting + Reception Finance System (O.S.S)
+
+Create a complete Financial Management and Reporting System for the O.S.S Hotel Management Application with role-based access.
+
+The system must separate responsibilities:
+
+• Reception Role → Data Entry & Transaction Management
+• Admin Role → Financial Reporting & Analytics Only
+
+1️⃣ Role-Based Financial Permissions
+Reception Permissions
+
+Reception staff must be able to:
+
+• Create financial transactions
+• Enter booking prices manually
+• Add service charges
+• Edit or update transaction details
+• Assign transactions to guest or room
+• Add service descriptions
+• Select service categories
+• Submit and save transactions
+
+Reception cannot access financial analytics or reports.
+
+Admin Permissions
+
+Admin users must:
+
+• View full financial reports
+• Monitor revenue analytics
+• View occupancy financial performance
+• Monitor service income
+• Track no-show revenue losses
+• View transaction history and logs
+
+Admin must NOT manually edit transaction prices.
+
+(Admin only observes and analyzes.)
+
+2️⃣ Reception Finance System Design
+
+Create a Reception Finance Panel where reception staff can enter financial data.
+
+Reception must be able to create transactions for:
+
+• Room booking payments
+• Guest service requests
+• Additional hotel services
+• Late check-out fees
+• Damage or extra charges
+• Manual custom services
+
+Each transaction must include:
+
+• Guest Name
+• Room Number
+• Service Category
+• Service Description
+• Price Amount
+• Payment Status (Paid / Unpaid / Pending)
+• Payment Method (Cash / Card / Online / Other)
+• Date and Time
+• Reception Staff User ID
+• Optional Notes
+
+Reception Interface Features
+
+• Add new transaction
+• Edit existing transaction
+• Cancel or void transaction (with reason)
+• Search transactions by guest / room / date
+• View transaction history for each guest
+
+3️⃣ Admin Financial Reporting Dashboard
+
+Create an analytics dashboard visible ONLY to Admin.
+
+KPI Cards Required
+Revenue Metrics
+
+• Daily Revenue
+• Weekly Revenue
+• Monthly Revenue
+• Service Revenue
+• Booking Revenue
+
+Each KPI must show:
+
+Total amount
+
+Percentage trend compared to previous period
+
+Occupancy Financial Analytics
+
+• Occupancy Rate
+• Total rooms vs booked rooms
+• Revenue per room (RevPAR style metric)
+
+No-Show Financial Monitoring
+
+• Number of no-show guests
+• Estimated revenue loss
+• Historical no-show trend
+
+Service Profit Analytics
+
+• Most profitable services
+• Most ordered services
+• Service revenue distribution
+
+4️⃣ Transaction Flow Logic
+
+All reception transactions must automatically update:
+
+• Admin revenue dashboard
+• Financial analytics
+• Occupancy analytics
+• Revenue history logs
+
+Manual entries must behave exactly like automated transactions.
+
+5️⃣ Audit & Security System (Very Important)
+
+Create full audit tracking for financial transparency.
+
+The system must log:
+
+• Who created the transaction
+• Who edited the transaction
+• When the transaction was changed
+• What values were changed
+
+Admin must be able to view audit logs.
+
+Reception cannot delete audit records.
+
+6️⃣ Database Structure Requirements
+
+Create tables or models for:
+
+• Financial transactions
+• Service revenue tracking
+• Booking revenue tracking
+• Manual reception entries
+• Audit logs
+• No-show financial tracking
+• Occupancy analytics
+
+7️⃣ UI / UX Requirements
+
+• Maintain existing dark theme dashboard
+• Use modern card-based layout
+• Make panels mobile responsive
+• Keep reception interface simple and fast
+• Provide filters and search tools for financial data
+
+8️⃣ Future AI Analytics Preparation
+
+Structure data to allow future AI insights like:
+
+• Revenue prediction
+• Guest spending behavior
+• Profitability recommendations
+• No-show risk detection
+
+9️⃣ Optional Visual Charts
+
+If possible, include charts for:
+
+• Weekly revenue trends
+• Service income distribution
+• Occupancy performance trends
+
+🔟 Performance Requirements
+
+• Dashboard must load quickly
+• Financial data must update near real-time
+• Support large transaction volumes
+
+Final System Behavior Summary
+
+Reception → Enters and manages financial transactions
+Admin → Views financial performance and analytics only

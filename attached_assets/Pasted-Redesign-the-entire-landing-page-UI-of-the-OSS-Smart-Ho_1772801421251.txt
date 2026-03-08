@@ -1,0 +1,78 @@
+Redesign the entire landing page UI of the OSS Smart Hospitality Platform to look like a modern 2025 SaaS product (similar quality to Linear, Vercel, Stripe, or Notion).
+
+Goals:
+- Make the landing page feel premium, modern, and product-focused.
+- Keep the existing content structure but improve layout, spacing, and visuals.
+- Add subtle animations and interactive elements.
+- Maintain the dark theme with orange accent color.
+
+Required Improvements:
+
+1. HERO SECTION
+- Add a large product dashboard preview image under the headline.
+- Use a two-layer layout:
+  headline + CTA on top
+  large dashboard UI preview below
+- Add glow gradient background behind the dashboard image.
+- Improve typography hierarchy and spacing.
+
+2. SCROLL ANIMATIONS
+- Add smooth scroll animations using Framer Motion or AOS.
+- Elements should fade-in and slide-up when entering viewport.
+- Add hover effects to feature cards.
+
+3. FEATURE SECTION
+- Redesign feature cards to look more premium.
+- Increase card spacing and add soft shadows or glow.
+- Add subtle hover animation (lift effect).
+- Improve icon styling and alignment.
+
+4. PRODUCT PREVIEW SECTIONS
+Add new sections that visually show the product:
+
+- "All Operations in One Dashboard"
+- "Smart Room Control Interface"
+- "Guest Communication System"
+- "Analytics and Reports"
+
+Each section should contain:
+- large UI screenshot
+- text explanation
+- alternating layout (image left / text right)
+
+5. TRUST SECTION
+Improve the "Trusted by hotels" area:
+- Add statistics like:
+  - 50+ hotels
+  - 12 countries
+  - 99.9% uptime
+- Style this section with stronger visual hierarchy.
+
+6. PRICING SECTION
+Keep the current pricing but:
+- Make the Growth plan visually dominant.
+- Add glow border around the recommended plan.
+- Improve spacing and card contrast.
+
+7. BACKGROUND DESIGN
+Add subtle background elements:
+- gradient blur
+- radial gradients
+- light glow effects
+- avoid flat dark sections.
+
+8. CTA SECTION
+Redesign the final CTA:
+"Ready to Transform Your Property?"
+Add stronger visual contrast and a gradient background.
+
+9. GENERAL DESIGN IMPROVEMENTS
+- Improve padding and section spacing.
+- Use consistent max-width layout.
+- Improve typography scale.
+- Ensure responsive design.
+
+Do NOT change the functionality or routes.
+Focus only on UI/UX and visual improvements.
+
+Return the updated React components and styling changes.

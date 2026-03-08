@@ -1,0 +1,223 @@
+✅ FULL ARCHITECTURE REFACTOR & GLOBAL STABILITY TASK (O.S.S Application)
+
+Perform a complete architecture audit, refactor, and stabilization of the O.S.S Smart Hotel Management Application.
+
+The goal is to convert the project from page-level fixes into a scalable, modular, production-ready SaaS architecture.
+
+🔴 CURRENT PROBLEM STATEMENT
+
+The application currently suffers from:
+
+• Duplicate logic across multiple components
+• Page-level bug fixes instead of system-level fixes
+• Inconsistent error handling
+• Partial multi-language implementation
+• Fragmented authentication logic
+• Hardcoded UI text
+• Non-reusable validation rules
+
+This creates instability, maintenance difficulty, and inconsistent user experience.
+
+✅ PRIMARY OBJECTIVE
+
+Refactor the entire project architecture to enforce:
+
+• DRY principle (Do Not Repeat Yourself)
+• Centralized shared services
+• Global error handling
+• Unified authentication logic
+• Fully global multi-language system
+• Reusable validation utilities
+• Scalable modular code structure
+
+1️⃣ GLOBAL ARCHITECTURE AUDIT
+
+Scan entire codebase and identify:
+
+• Duplicate authentication logic
+• Duplicate validation logic
+• Hardcoded UI text
+• Local error handling blocks
+• Component-specific API calls
+• Inconsistent state management
+
+Create shared reusable modules instead.
+
+2️⃣ GLOBAL AUTHENTICATION SERVICE
+
+Create centralized authentication architecture.
+
+Requirements:
+
+• Single auth service for:
+
+Admin login
+
+Reception login
+
+Guest login
+
+• Standardized error responses
+• Shared login validation
+• Unified session handling
+• Token storage & refresh logic
+• Role-based permission management
+
+All authentication must use the same service layer.
+
+3️⃣ CENTRALIZED ERROR HANDLING SYSTEM
+
+Create global error handling architecture.
+
+Requirements:
+
+• Convert backend errors into user-friendly messages
+• Remove raw API error messages from UI
+• Standardize error UI across entire application
+• Display field-specific validation errors
+• Log errors for debugging
+• Support multi-language error translation
+
+Remove duplicate error handling from components.
+
+4️⃣ GLOBAL VALIDATION SERVICE
+
+Create shared validation utilities for:
+
+• Phone number validation (E.164)
+• Email validation
+• Password rules
+• Required field validation
+• Form validation helpers
+
+All forms must use shared validation service.
+
+5️⃣ FULL GLOBAL MULTI-LANGUAGE SYSTEM (i18n)
+
+Refactor localization into fully global architecture.
+
+Requirements:
+
+• Localization provider must wrap entire application
+• Remove all hardcoded UI text
+• All UI strings must use translation keys
+• Language selection must update entire app instantly
+• Language must persist across sessions
+• Support RTL layout for Arabic
+• Support dynamic translation loading
+
+Audit entire UI to ensure full translation coverage.
+
+6️⃣ SHARED API CLIENT & DATA SERVICE LAYER
+
+Create centralized API service:
+
+• Standard request handling
+• Standard error handling
+• Token injection
+• Response normalization
+• Retry logic if needed
+
+All components must use shared API client.
+
+7️⃣ ROLE-BASED ACCESS CONTROL REFACTOR
+
+Implement centralized RBAC system.
+
+Reception:
+• Guest creation
+• Payment entry
+
+Admin:
+• Financial analytics only
+• No direct transaction editing
+
+Guest:
+• Self-service features
+
+Remove role checks from UI and centralize them.
+
+8️⃣ FINANCIAL SYSTEM STRUCTURE REVIEW
+
+Standardize transaction flow:
+
+Reception → Booking → Payment → Finance Transaction → Analytics Dashboard
+
+Ensure:
+
+• Manual and automated transactions use same logic
+• Audit logs track all financial changes
+• Revenue analytics auto-update
+
+9️⃣ UI CONSISTENCY & COMPONENT STANDARDIZATION
+
+Create reusable UI components for:
+
+• Forms
+• Modals
+• Error messages
+• Input fields
+• Notification messages
+• Dashboard KPI cards
+
+Replace duplicated UI logic with shared components.
+
+🔟 APPLICATION STATE MANAGEMENT REVIEW
+
+Refactor global state handling for:
+
+• User session
+• Selected language
+• Permissions
+• Notifications
+• Dashboard data caching
+
+Use centralized state management architecture.
+
+1️⃣1️⃣ SYSTEM-WIDE REGRESSION TESTING
+
+After refactor, perform full end-to-end testing:
+
+• Authentication flows
+• Language switching
+• Booking workflows
+• Financial transactions
+• Dashboard analytics
+• Error handling
+• Mobile responsiveness
+• API failure handling
+
+1️⃣2️⃣ CODEBASE CLEANUP
+
+Remove:
+
+• Dead code
+• Duplicate services
+• Unused imports
+• Hardcoded UI strings
+• Page-specific validation logic
+
+1️⃣3️⃣ PERFORMANCE & SCALABILITY REVIEW
+
+Ensure architecture supports:
+
+• Multi-hotel SaaS scaling
+• Multi-language expansion
+• Large booking volumes
+• Real-time dashboard updates
+
+🔴 FINAL REQUIREMENT
+
+Do NOT apply fixes page-by-page.
+
+Instead:
+
+✔ Identify root causes
+✔ Refactor shared architecture
+✔ Ensure fixes apply globally
+✔ Improve maintainability
+✔ Improve scalability
+
+EXPECTED RESULT
+
+A modular, scalable, stable, and production-ready O.S.S application architecture.

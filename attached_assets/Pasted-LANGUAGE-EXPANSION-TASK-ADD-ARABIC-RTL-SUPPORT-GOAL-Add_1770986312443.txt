@@ -1,0 +1,101 @@
+LANGUAGE EXPANSION TASK — ADD ARABIC (RTL SUPPORT)
+
+GOAL:
+Add full Arabic language support across the entire O.S.S platform.
+
+-----------------------------------------
+STEP 1 — ADD NEW LANGUAGE
+-----------------------------------------
+
+✔ Create new translation file:
+/locales/ar.json
+
+Meaning:
+ar = Arabic
+
+-----------------------------------------
+STEP 2 — RTL SUPPORT
+-----------------------------------------
+
+Arabic is Right-To-Left.
+
+Implement:
+
+✔ Auto switch layout direction when Arabic selected
+✔ Apply:
+document.dir = "rtl"
+
+✔ Fix:
+- Sidebar alignment
+- Navigation order
+- Form field alignment
+- Icons positioning
+- Tables & dashboard cards
+- Modal windows
+
+-----------------------------------------
+STEP 3 — TRANSLATION COVERAGE
+-----------------------------------------
+
+✔ Translate ALL keys from en.json into ar.json
+✔ Do NOT auto shorten text
+✔ Use professional hospitality wording
+
+-----------------------------------------
+STEP 4 — FONT COMPATIBILITY
+-----------------------------------------
+
+Add Arabic-friendly font:
+
+Suggested:
+✔ Cairo
+✔ Noto Sans Arabic
+
+Auto load font only when Arabic selected.
+
+-----------------------------------------
+STEP 5 — UI TESTING
+-----------------------------------------
+
+Test every major page:
+
+✔ Landing
+✔ Auth pages
+✔ Dashboard
+✔ Guests
+✔ Calendar
+✔ Messages
+✔ Finance
+✔ Settings
+✔ Booking flow
+✔ Staff panel
+✔ Guest panel
+
+-----------------------------------------
+STEP 6 — LANGUAGE SWITCHER UPDATE
+-----------------------------------------
+
+Add Arabic option:
+🇸🇦 العربية
+
+Ensure switching language:
+✔ Updates instantly
+✔ Saves user preference
+✔ Persists after refresh
+
+-----------------------------------------
+STEP 7 — VALIDATION SCRIPT
+-----------------------------------------
+
+Update i18n-check to include Arabic.
+
+-----------------------------------------
+FINAL REPORT
+-----------------------------------------
+
+Return:
+✔ ar.json created
+✔ RTL fully working
+✔ Pages tested list
+✔ Any layout fixes applied
+✔ Font integration confirmed

@@ -1,0 +1,200 @@
+MASTER ARCHITECTURE COMMUNICATION & NAVIGATION FIX
+(O.S.S Role Based Refactor)
+
+IMPORTANT RULES
+• Do NOT delete existing APIs
+• Do NOT break working features
+• Maintain backward compatibility
+• Only refactor communication logic, permissions, and navigation behavior
+• Keep multi-tenant isolation
+
+====================================================
+SECTION 1 — COMMUNICATION ARCHITECTURE FIX
+====================================================
+
+NEW COMMUNICATION HIERARCHY
+
+OWNER
+• Can chat ONLY with Staff / Managers / Reception
+• Cannot directly chat with Guests
+• Can view guest activity but NOT open guest chat thread
+
+STAFF / RECEPTION
+• Primary communication bridge
+• Can chat with Guests
+• Can chat with Owner
+• Can escalate guest issues to Owner via internal thread
+
+GUEST
+• Can chat ONLY with Staff / Reception
+• Cannot chat Owner directly
+
+OSS SUPER ADMIN
+• Read-only system monitoring chat
+• No direct property guest chat
+
+----------------------------------------------------
+
+IMPLEMENTATION RULES
+
+1. Split messaging system into TWO layers:
+
+INTERNAL CHAT
+Owner ↔ Staff ↔ Managers
+
+GUEST SERVICE CHAT
+Guest ↔ Reception / Staff
+
+2. Owner dashboard:
+• Remove guest chat threads
+• Replace with:
+  → Staff communication panel
+  → Escalated service issue view
+  → Staff performance messaging
+
+3. Staff dashboard:
+• Keep full guest messaging system
+• Add escalation button:
+  "Escalate to Owner"
+
+====================================================
+SECTION 2 — NAVIGATION FIX
+====================================================
+
+Fix broken navigation for Reception/Admin roles.
+
+Separate menu logic per role:
+
+OWNER MENU
+Core
+• Dashboard
+• Properties
+• Guests Overview
+• Staff Management
+
+Operations
+• Service Escalations
+• Reports & Analytics
+• Finance & Subscriptions
+
+Communication
+• Staff Chat
+• Notifications
+
+System
+• Integrations
+• Settings
+
+--------------------------------------------
+
+STAFF / RECEPTION MENU
+Core
+• Dashboard
+• Reservations / Calendar
+• Guests
+
+Operations
+• Service Requests
+• Tasks
+• Room Preparation
+
+Communication
+• Guest Messages
+• Notifications
+
+--------------------------------------------
+
+GUEST MENU
+• My Booking
+• Services
+• Messages (Staff only)
+• Smart Room Controls
+• Billing
+
+--------------------------------------------
+
+OSS SUPER ADMIN MENU
+• Platform Dashboard
+• Tenants
+• Billing Monitoring
+• Logs
+• System Notifications
+
+====================================================
+SECTION 3 — ROUTING REFACTOR
+====================================================
+
+Separate routes:
+
+/messages/internal
+/messaging/staff
+/messaging/guest
+
+Remove duplicate navigation routing:
+Calendar, Tasks, Messages must open different modules.
+
+====================================================
+SECTION 4 — PERMISSION MATRIX UPDATE
+====================================================
+
+Owner:
+✔ Staff messaging
+✔ Escalation viewing
+✖ Guest direct messaging
+
+Staff:
+✔ Guest messaging
+✔ Owner messaging
+✔ Escalation creation
+
+Guest:
+✔ Staff messaging only
+
+====================================================
+SECTION 5 — DATABASE & THREAD MODEL
+====================================================
+
+Add message thread types:
+
+thread_type:
+• internal
+• guest_service
+• escalation
+
+Ensure tenant isolation maintained.
+
+====================================================
+SECTION 6 — UI REQUIREMENTS
+====================================================
+
+Owner UI:
+• Staff communication center
+• Escalation panel
+
+Staff UI:
+• Guest chat panel
+• Escalation button
+• Owner chat tab
+
+Guest UI:
+• Simplified service chat
+
+====================================================
+SECTION 7 — FIX KNOWN ISSUES FROM AUDIT
+====================================================
+
+Resolve:
+• Broken Calendar / Tasks / Messages navigation
+• Duplicate finance panels
+• Public backup route exposure
+• Large file modularization
+• i18n hardcoded strings removal
+
+====================================================
+OUTPUT REQUIRED
+
+• Updated sidebar architecture
+• Updated messaging permission logic
+• Clean routing map
+• Updated role visibility controls
+• No regression in Stripe / IoT / Notifications

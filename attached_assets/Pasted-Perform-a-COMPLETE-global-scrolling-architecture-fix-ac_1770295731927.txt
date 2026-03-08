@@ -1,0 +1,131 @@
+Perform a COMPLETE global scrolling architecture fix across the entire application.
+
+This is NOT a simple CSS fix.
+This must refactor root layout, modal behavior, and Radix/Shadcn dialog handling.
+
+--------------------------------
+ROOT LAYOUT FIX
+--------------------------------
+
+1. Find ALL root wrappers such as:
+
+App.tsx
+MainLayout
+LandingPage container
+Root layout components
+
+2. REMOVE these classes everywhere:
+
+h-screen
+max-h-screen
+overflow-hidden
+fixed height wrappers
+
+3. Replace with:
+
+min-h-screen
+overflow-y-auto
+overflow-x-hidden
+flex flex-col
+
+--------------------------------
+GLOBAL HTML/BODY FIX
+--------------------------------
+
+Search global CSS and REMOVE:
+
+html, body {
+  overflow: hidden;
+}
+
+Replace with:
+
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+--------------------------------
+RADIX / SHADCN DIALOG FIX
+--------------------------------
+
+Refactor ALL Dialog components including:
+
+Get Quote modal
+Guest modals
+Admin dialogs
+Add Guest modal
+Finance modal
+Booking modal
+
+Apply this structure:
+
+DialogContent must use:
+
+flex flex-col
+max-h-[90dvh]
+w-full
+overflow-hidden
+
+DialogBody must use:
+
+flex-1
+overflow-y-auto
+overflow-x-hidden
+min-h-0
+
+DialogHeader and DialogFooter must use:
+
+shrink-0
+
+--------------------------------
+SCROLL LOCK FIX
+--------------------------------
+
+REMOVE any manual scroll lock logic like:
+
+document.body.style.overflow = "hidden"
+
+Radix already manages scroll lock internally.
+
+--------------------------------
+MOBILE SAFE AREA FIX
+--------------------------------
+
+DialogFooter must include:
+
+pb-[max(1rem,env(safe-area-inset-bottom))]
+
+--------------------------------
+LANDING PAGE HERO FIX
+--------------------------------
+
+Landing page hero sections must NOT use fixed viewport heights.
+
+Replace:
+
+h-screen
+
+With:
+
+min-h-screen
+
+--------------------------------
+VERIFICATION REQUIRED
+--------------------------------
+
+Confirm scrolling works correctly in:
+
+Landing page mobile view
+Get Quote modal
+Guest Details modal
+Admin dashboard dialogs
+Mobile Chrome browser
+Android WebView
+
+--------------------------------
+IMPORTANT
+--------------------------------
+
+Do NOT apply partial fixes.
+Perform a consistent layout architecture refactor.

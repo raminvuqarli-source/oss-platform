@@ -1,0 +1,254 @@
+You are the Lead Architect of the O.S.S Smart Hospitality Platform.
+Perform a FULL SYSTEM REFACTOR without breaking existing working features.
+
+==============================
+CRITICAL FIX GROUP 1 — Finance Data Flow
+==============================
+
+Fix full finance pipeline:
+
+When guest / booking / service request has a price → it MUST automatically appear in:
+
+• Owner Finance dashboard
+• Staff Finance view
+• Performance analytics
+• Revenue KPIs
+• Reports
+• Subscription revenue if linked
+
+Implement:
+
+Unified Revenue Engine
+All pricing stored in single financial ledger
+Booking, Service Request, Add-ons → push to ledger
+
+Finance Must Show:
+• Daily revenue
+• Monthly revenue
+• RevPAR
+• Occupancy revenue
+• Service revenue
+• Property-based financial split
+
+
+==============================
+CRITICAL FIX GROUP 2 — Navigation & Routing
+==============================
+
+Fix Broken Navigation Mapping
+Ensure each menu item opens UNIQUE view.
+
+Reception / Staff Menu Must Be:
+
+Dashboard
+Calendar → reservation calendar ONLY
+Guests → guest management ONLY
+Service Requests → service tickets
+Tasks → internal staff tasks
+Room Preparation → housekeeping workflow
+Finance → limited finance overview
+Guest Messages → guest chat center
+Notifications
+Settings
+
+Fix Bug:
+Service Request and Tasks must NOT open same page.
+
+Staff Section Purpose:
+• Staff list
+• Role assignment
+• Work shift tracking
+• Task load monitoring
+• Availability management
+
+
+==============================
+CRITICAL FIX GROUP 3 — Owner Role Logic
+==============================
+
+Remove Owner → Guest Chat
+
+Owner must ONLY chat with Staff.
+
+Messaging Structure:
+Guest → Staff
+Staff → Owner escalation
+Owner → Staff internal chat
+
+Backend must enforce restriction.
+
+Owner Dashboard Navigation Fix:
+Ensure these open DIFFERENT pages:
+
+• Properties
+• Guests
+• Staff
+
+Add Property Delete Feature:
+• Archive property
+• Soft delete property
+• Prevent deletion if active bookings exist
+
+
+==============================
+CRITICAL FIX GROUP 4 — Notifications System Upgrade
+==============================
+
+Upgrade notifications into Interactive Notification Center
+
+Allow:
+• Open related item
+• Accept / Reject service request
+• Assign task
+• Reply to message
+• Mark as resolved
+
+
+==============================
+CRITICAL FIX GROUP 5 — Translation Issues
+==============================
+
+Fix untranslated sidebar labels
+Remove hardcoded text
+Ensure all labels exist in i18n files
+Add automated translation validation script
+
+
+==============================
+CRITICAL FIX GROUP 6 — Guest Smart Room UX
+==============================
+
+Lights Control:
+• Show brightness percentage
+• Show color indicator
+
+Curtains Control:
+• Add open percentage slider
+• Show visual curtain state
+
+AI Wake Up Feature:
+• Add time selector
+• Add alarm routine automation
+
+REMOVE:
+• Smart Food module
+• Smart Bathroom module
+
+
+==============================
+CRITICAL FIX GROUP 7 — Room Preparation Orders
+==============================
+
+Fix “Manage Order” button
+Make it interactive
+Open order control modal
+Allow status change
+Allow staff assignment
+
+
+==============================
+CRITICAL FIX GROUP 8 — Escalations System
+==============================
+
+Escalations Must Allow:
+• Staff escalate issue to owner
+• Owner assign resolution
+• Owner reply with internal notes
+• Escalation status tracking
+
+
+==============================
+CRITICAL FIX GROUP 9 — Performance Dashboard
+==============================
+
+Performance must pull data from:
+• Financial ledger
+• Occupancy data
+• Service revenue
+
+
+==============================
+CRITICAL FIX GROUP 10 — Concierge Module
+==============================
+
+Rename Concierge → Guest Experience Services
+
+Include:
+• Taxi
+• Restaurant reservation
+• Tour booking
+• Special requests
+
+
+==============================
+CRITICAL FIX GROUP 11 — Arabic Language
+==============================
+
+Add full RTL support:
+• Layout mirroring
+• Text alignment switching
+• Icon flipping
+• Font compatibility
+
+
+==============================
+CRITICAL FIX GROUP 12 — UI Interaction Fix
+==============================
+
+All buttons must be functional
+Remove static labels pretending to be buttons
+
+
+==============================
+CRITICAL FIX GROUP 13 — Routing Architecture
+==============================
+
+Convert duplicated dashboard sections into:
+view-based routing
+Avoid duplicated page rendering
+
+
+==============================
+CRITICAL FIX GROUP 14 — Data Integrity
+==============================
+
+Ensure:
+All modules use shared tenant isolation
+All finance connects to unified ledger
+
+
+==============================
+FINAL REQUIREMENTS
+==============================
+
+After implementation:
+
+1. Generate full system validation report
+2. Provide bug checklist
+3. Confirm role permission matrix
+4. Confirm translation coverage
+5. Confirm finance data integrity
+6. Confirm navigation uniqueness
+
+
+==============================
+DO NOT
+==============================
+
+Do NOT break:
+Stripe integration
+IoT device connection
+Multi-tenant architecture
+Authentication system
+
+
+==============================
+OUTPUT REQUIRED
+==============================
+
+Return structured technical report:
+
+• Fixed modules
+• Updated architecture summary
+• Remaining risks
+• Test coverage status

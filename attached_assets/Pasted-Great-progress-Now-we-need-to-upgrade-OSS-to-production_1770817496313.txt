@@ -1,0 +1,128 @@
+Great progress. Now we need to upgrade OSS to production-ready SaaS platform.
+
+Please implement the following advanced SaaS features:
+
+--------------------------------------------------
+
+1. BILLING & PAYMENT SYSTEM
+
+Integrate Stripe or LemonSqueezy billing.
+
+Each owner must be able to:
+
+- Subscribe to plan
+- Upgrade or downgrade plan
+- View invoices
+- View billing history
+- Auto renewal
+
+Subscription must enforce usage limits.
+
+--------------------------------------------------
+
+2. FEATURE FLAG ENGINE
+
+Create dynamic feature control per owner plan.
+
+Example:
+
+smart_room
+ai_concierge
+analytics
+iot_devices
+white_label
+multi_property
+
+All features must be checked server-side before usage.
+
+--------------------------------------------------
+
+3. USAGE METERING SYSTEM
+
+Track:
+
+number_of_properties
+number_of_units
+number_of_devices
+number_of_users
+
+Block or warn when limits are reached.
+
+--------------------------------------------------
+
+4. WHITE LABEL SUPPORT
+
+Enterprise owners must be able to:
+
+- Upload logo
+- Choose brand colors
+- Custom domain support
+- Hide OSS branding
+
+--------------------------------------------------
+
+5. DEVICE REGISTRY & IOT LAYER
+
+Create centralized device registry.
+
+Each device must include:
+
+device_id
+unit_id
+property_id
+owner_id
+device_type
+status
+last_online
+ip_address
+firmware_version
+
+--------------------------------------------------
+
+6. REAL TIME DEVICE COMMUNICATION
+
+Prepare WebSocket or MQTT support for smart device communication.
+
+--------------------------------------------------
+
+7. OWNER ONBOARDING FLOW
+
+Create onboarding wizard:
+
+Step 1: Owner account
+Step 2: Property creation
+Step 3: Unit setup
+Step 4: Subscription selection
+Step 5: Device setup (optional)
+
+--------------------------------------------------
+
+8. ANALYTICS EXPANSION
+
+Add:
+
+Revenue analytics
+Occupancy forecasting
+Device health analytics
+Guest behavior analytics
+
+--------------------------------------------------
+
+9. AUDIT LOG SYSTEM
+
+Track all actions:
+
+user login
+device changes
+subscription changes
+booking changes
+
+--------------------------------------------------
+
+10. SCALABILITY PREPARATION
+
+Prepare architecture for future microservices separation.
+
+--------------------------------------------------
+
+Ensure clean scalable SaaS code structure.

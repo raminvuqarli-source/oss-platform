@@ -1,0 +1,149 @@
+ARCHITECTURE CHECK — Housekeeping Level Upgrade
+
+Do NOT modify code.
+Only analyze and answer precisely.
+
+We are preparing to upgrade Auto Housekeeping Engine to MEWS-level architecture.
+
+I need exact answers:
+
+--------------------------------------------------
+
+1) HOUSEKEEPING TASK TABLE
+
+What table stores housekeeping tasks?
+
+File location:
+shared/schema.ts
+
+List ALL columns and types.
+
+Important:
+Does the table include:
+
+- bookingId ?
+- unitId ?
+- roomNumber ?
+- propertyId ?
+- tenantId ?
+
+Show full schema.
+
+
+--------------------------------------------------
+
+2) TASK CREATION FUNCTION
+
+Where is the housekeeping task created?
+
+Example:
+
+createHousekeepingTask()
+insert(tasks)
+insert(housekeepingTasks)
+
+Show:
+
+File name
+Function name
+Code snippet.
+
+
+--------------------------------------------------
+
+3) DUPLICATE PREVENTION LOGIC
+
+Where is duplicate prevention implemented?
+
+Example logic:
+
+Same room
+Same booking
+Same property
+Same tenant
+
+Show exact code.
+
+
+--------------------------------------------------
+
+4) UNIT LOOKUP
+
+When a cleaning task is created:
+
+How does the system find the unit?
+
+Options:
+
+A)
+Uses unitId directly
+
+B)
+Searches units table by unitNumber
+
+C)
+Uses only roomNumber text
+
+Show code.
+
+
+--------------------------------------------------
+
+5) TASK COMPLETION FLOW
+
+When task status becomes "completed":
+
+What exactly happens?
+
+Show code.
+
+Does system:
+
+- Update unit status to ready?
+- Update booking?
+- Trigger notifications?
+
+
+--------------------------------------------------
+
+6) EXISTING TASK STATUS VALUES
+
+List ALL allowed task status values.
+
+Example:
+
+pending
+assigned
+in_progress
+completed
+cancelled
+
+Show validation code.
+
+
+--------------------------------------------------
+
+7) STAFF ASSIGNMENT LOGIC
+
+How is staff selected?
+
+Is it:
+
+A)
+Random
+
+B)
+First available
+
+C)
+All staff notified
+
+D)
+Round-robin
+
+Show exact function.
+
+
+--------------------------------------------------
+
+END

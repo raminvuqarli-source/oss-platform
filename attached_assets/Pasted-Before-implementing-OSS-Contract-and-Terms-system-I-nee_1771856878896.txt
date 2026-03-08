@@ -1,0 +1,299 @@
+Before implementing OSS Contract and Terms system I need full technical analysis of this project.
+
+Please answer clearly and in detail.
+
+---------------------
+
+1) PROJECT FRAMEWORK
+
+What is the exact architecture?
+
+Is this project:
+
+- Next.js ?
+- React + Vite ?
+- Express + React ?
+- Node.js backend ?
+- Fullstack framework ?
+
+Explain clearly.
+
+Also show project folder structure.
+
+
+---------------------
+
+2) PRICING SYSTEM FILES
+
+Where are these pages implemented?
+
+Main Platform Plans:
+
+Starter
+Growth
+Pro
+
+Smart Room Plans:
+
+Smart Lite
+Smart Pro
+Smart AI
+
+Which files control these pricing cards?
+
+
+---------------------
+
+3) PLAN SELECTION LOGIC
+
+When user clicks:
+
+"İndi abunə ol"
+or
+
+"Plan Seçin"
+
+Which file handles this?
+
+Where is selected plan saved?
+
+
+---------------------
+
+4) PLAN DATABASE STORAGE
+
+Where is selected plan stored?
+
+Which table?
+
+Example:
+
+users
+hotels
+subscriptions
+plans
+
+
+Show schema.
+
+
+---------------------
+
+5) MULTIPLE PLAN SUPPORT
+
+We have two plan groups:
+
+GROUP 1:
+
+Starter / Growth / Pro
+
+GROUP 2:
+
+Smart Lite / Smart Pro / Smart AI
+
+Can database store BOTH?
+
+Example:
+
+MainPlan = Growth
+SmartPlan = Smart Pro
+
+Where should we store this?
+
+
+---------------------
+
+6) TRIAL SYSTEM
+
+There is:
+
+14 gün pulsuz sınaq
+
+Where is trial logic?
+
+Which file handles trial activation?
+
+
+---------------------
+
+7) USER IDENTIFICATION
+
+When user activates plan:
+
+How do we know:
+
+Hotel name?
+
+User ID?
+
+Owner ID?
+
+Which database fields?
+
+
+---------------------
+
+8) OWNER DASHBOARD
+
+Where is Owner Dashboard located?
+
+Which file?
+
+We need to show:
+
+Agreement Status
+
+
+---------------------
+
+9) BACKEND LOCATION
+
+Where is backend?
+
+server/
+api/
+routes/
+
+Which files process API requests?
+
+
+---------------------
+
+10) DATABASE SYSTEM
+
+Which database is used?
+
+PostgreSQL ?
+MongoDB ?
+SQLite ?
+
+Which ORM?
+
+Prisma?
+Drizzle?
+Mongoose?
+
+
+Show schema file location.
+
+
+---------------------
+
+11) USER IP DETECTION
+
+Can backend detect user IP?
+
+Which file handles requests?
+
+
+---------------------
+
+12) AUTHENTICATION
+
+Which system used?
+
+JWT?
+Session?
+Firebase?
+
+
+Where stored?
+
+
+---------------------
+
+13) PDF GENERATION
+
+Can this project generate PDF?
+
+Is there already library like:
+
+pdfkit
+puppeteer
+jspdf
+
+installed?
+
+
+---------------------
+
+14) BEST PLACE FOR CONTRACT SYSTEM
+
+Where is the best place to add:
+
+Terms of Service system?
+
+Explain.
+
+
+---------------------
+
+15) ACTIVATION FLOW
+
+Explain exact flow:
+
+User selects plan →
+
+Trial starts →
+
+Plan activates →
+
+Which files involved?
+
+
+---------------------
+
+16) HOTEL NAME SOURCE
+
+Contract must include:
+
+Hotel Name
+
+Where stored?
+
+
+---------------------
+
+17) PLAN PRICE SOURCE
+
+Contract must include:
+
+Price
+
+Where price defined?
+
+Static file?
+Database?
+
+
+---------------------
+
+18) BILLING TYPE
+
+System shows:
+
+Billed Monthly
+
+Where stored?
+
+
+---------------------
+
+19) CONTRACT STORAGE
+
+Where should we store contract acceptance?
+
+Best table?
+
+
+---------------------
+
+20) SAFEST IMPLEMENTATION PLAN
+
+Explain safest way to implement:
+
+Terms checkbox
+Contract storage
+Plan-based contract
+
+Without breaking existing system.

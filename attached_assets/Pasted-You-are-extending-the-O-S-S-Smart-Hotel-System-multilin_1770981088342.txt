@@ -1,0 +1,122 @@
+You are extending the O.S.S Smart Hotel System multilingual architecture by ADDING NEW LANGUAGES in a clean, scalable, and fully synchronized way.
+
+GOAL:
+Add professional support for the following new languages:
+
+✔ French (fr)
+✔ Dutch (nl)
+✔ German (de)
+✔ Spanish (es)
+
+Also prepare the system so future languages can be added easily.
+
+--------------------------------------------------
+STEP 1 — CREATE NEW LANGUAGE FILES
+--------------------------------------------------
+
+Inside /locales/ create:
+
+fr.json
+nl.json
+de.json
+es.json
+
+Use en.json as the MASTER reference.
+Copy all keys exactly from en.json.
+
+DO NOT change key structure.
+
+--------------------------------------------------
+STEP 2 — TRANSLATE CONTENT
+--------------------------------------------------
+
+Translate all UI text professionally and naturally for hospitality SaaS usage.
+
+Languages:
+- French (France standard)
+- Dutch (Netherlands standard)
+- German (Germany standard)
+- Spanish (Spain neutral professional tone)
+
+Avoid literal translations.
+Use hotel / SaaS industry terminology.
+
+--------------------------------------------------
+STEP 3 — UPDATE LANGUAGE CONFIGURATION
+--------------------------------------------------
+
+Add new languages to:
+
+✔ Language selector dropdown
+✔ Supported languages configuration
+✔ Language detection logic
+
+Language codes:
+fr → French
+nl → Dutch
+de → German
+es → Spanish
+
+--------------------------------------------------
+STEP 4 — ENSURE FALLBACK SAFETY
+--------------------------------------------------
+
+If any translation key is missing:
+Automatically fallback to English.
+
+Never allow:
+- Broken UI text
+- Mixed language sentences
+- Empty labels
+
+--------------------------------------------------
+STEP 5 — RTL & UI CHECK
+--------------------------------------------------
+
+Confirm:
+✔ Layout stability across all languages
+✔ Button and modal spacing
+✔ Table and dashboard readability
+
+(No RTL needed except existing Persian support)
+
+--------------------------------------------------
+STEP 6 — RUN TRANSLATION VALIDATOR
+--------------------------------------------------
+
+Use i18n validation script to:
+
+✔ Verify all language files contain identical keys
+✔ Detect missing translations
+✔ Generate synchronization report
+
+--------------------------------------------------
+STEP 7 — PERFORMANCE OPTIMIZATION
+--------------------------------------------------
+
+✔ Lazy load new language files
+✔ Cache selected language
+✔ Prevent UI reload flicker
+
+--------------------------------------------------
+STEP 8 — OPTIONAL FUTURE LANGUAGE PREP
+--------------------------------------------------
+
+Prepare system placeholders for possible future markets:
+
+Italian (it)
+Portuguese (pt)
+
+(No translation required yet, only architecture readiness)
+
+--------------------------------------------------
+FINAL OUTPUT REPORT
+--------------------------------------------------
+
+After completion generate report including:
+
+✔ Languages successfully added
+✔ Total translation keys synchronized
+✔ Missing translation fixes
+✔ UI verification results
+✔ Performance impact analysis

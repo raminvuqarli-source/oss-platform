@@ -1,0 +1,128 @@
+✅ GLOBAL ERROR HANDLING & SYSTEM-WIDE BUG FIX REQUIREMENT (O.S.S Application)
+
+There is a recurring issue in the application where bugs and fixes are applied only locally to specific pages, while the same problem still exists in other parts of the system.
+
+This approach must be replaced with a global architecture fix.
+
+🔴 Current Problem
+
+Example:
+
+Error messages, authentication issues, validation problems, and UI bugs are fixed only in one component or page.
+
+However:
+
+• The same bug appears in other forms
+• Other dashboards still show old behavior
+• Error handling is inconsistent
+• Some pages use improved logic while others still use outdated logic
+
+This creates unstable and unprofessional user experience.
+
+✅ Required System-Level Solution
+
+Implement centralized and reusable logic across the entire application.
+
+Fixes must NEVER be applied only to individual pages or components.
+
+All fixes must be global, reusable, and consistent across the full system.
+
+1️⃣ Centralized Error Handling System
+
+Create a global error handling architecture.
+
+Requirements:
+
+• Remove raw backend error messages from UI
+• Convert technical errors into user-friendly messages
+• Apply same error formatting across entire application
+• Prevent duplicate error logic inside different components
+• Display errors near relevant input fields
+• Log errors for debugging
+
+2️⃣ Authentication Error Standardization
+
+Example problem:
+
+Currently system shows raw error:
+
+401: {"message":"Invalid credentials"}
+
+This must be replaced with user-friendly UI message like:
+
+"Username or password is incorrect. Please try again."
+
+This behavior must be applied globally to:
+
+• Login pages
+• Admin login
+• Reception login
+• Guest login
+• API authentication errors
+
+3️⃣ Validation Logic Centralization
+
+Create shared validation utilities for:
+
+• Phone number validation
+• Email validation
+• Password rules
+• Required field checks
+
+All forms must use same validation rules.
+
+No page should implement separate validation logic.
+
+4️⃣ Translation System Enforcement
+
+Error messages must support multilingual system.
+
+All error messages must use translation keys.
+
+No hardcoded English error text allowed.
+
+5️⃣ Global UI Consistency Audit
+
+Developer must scan the entire codebase and verify:
+
+• All components use shared UI utilities
+• All forms use shared validation
+• All error messages use centralized error handler
+• All authentication flows use shared login logic
+
+6️⃣ Refactoring Requirement
+
+If duplicate logic is found across multiple components:
+
+Refactor into shared services, hooks, or utility modules.
+
+7️⃣ Full Application Regression Testing
+
+After implementing global fixes:
+
+Test the entire system including:
+
+• Login flows
+• Registration flows
+• Guest creation
+• Financial transactions
+• Language switching
+• Dashboard loading
+• Notifications
+• API failure handling
+• Mobile responsiveness
+
+8️⃣ Stability & Maintainability Goal
+
+The system must follow:
+
+• DRY principle (Do Not Repeat Yourself)
+• Modular architecture
+• Reusable services
+• Consistent UI behavior
+
+🔴 FINAL REQUIREMENT
+
+Developer must NOT fix bugs page-by-page.
+
+Developer must identify root cause and apply solution across the entire application.

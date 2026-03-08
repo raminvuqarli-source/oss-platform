@@ -1,0 +1,105 @@
+We are adding a new subscription plan inside O.S.S Smart Hotel System.
+
+GOAL:
+Create a new plan called "APARTMENT_LITE" inside the existing multi-tenant SaaS architecture.
+
+PRICING:
+$50 / month (excl. VAT)
+Hardware not included.
+Show note: "Hardware and installation are quoted separately under contract."
+Show note: "All prices exclude VAT."
+
+------------------------------------------------
+PLAN TYPE:
+
+Add new plan enum:
+
+PLAN_TYPES:
+- HOTEL_CORE
+- HOTEL_SMART
+- APARTMENT_LITE
+
+------------------------------------------------
+FUNCTIONAL REQUIREMENTS:
+
+1) Dashboard (Minimal Version)
+
+If planType === APARTMENT_LITE:
+
+Show only:
+
+• Units (properties)
+• Guest Management (simple)
+• Lock Control
+• Temperature Control
+• Chat
+• Activity Logs (basic)
+
+Hide completely:
+
+• Booking system
+• Finance dashboard
+• Staff management
+• Analytics
+• Reports
+• Multi-property advanced tools
+
+------------------------------------------------
+2) Owner Features:
+
+Owner can:
+• Add units
+• Add guest manually
+• Set check-in / check-out time
+• Remotely LOCK / UNLOCK
+• Set default temperature
+• Chat with guest
+• See lock activity logs
+
+------------------------------------------------
+3) Guest Panel (Minimal Access)
+
+Guest login should allow only:
+
+• LOCK / UNLOCK button
+• Temperature adjustment
+• Chat with property owner
+
+Nothing else visible.
+
+------------------------------------------------
+4) Conditional Rendering Logic
+
+Use clean conditional rendering:
+
+if(planType === 'APARTMENT_LITE') {
+   renderApartmentLiteDashboard()
+}
+
+Ensure other modules are completely hidden from this plan.
+
+------------------------------------------------
+5) Database Changes
+
+Add:
+
+planType field to tenant model
+
+Ensure proper tenant isolation.
+
+------------------------------------------------
+6) UI Requirements
+
+• Keep premium dark theme
+• Minimal clean layout
+• Mobile responsive
+• Very simple guest interface
+• No unused code
+
+------------------------------------------------
+
+Return:
+• Updated subscription logic
+• Updated React components
+• Clean and organized structure
+• Ready to deploy

@@ -1,0 +1,137 @@
+Replit Task Prompt – International Phone Support + Multi Language System (O.S.S)
+
+Improve the O.S.S Hotel Application to support international phone numbers and multi-language user interface.
+
+1️⃣ International Phone Number Support
+
+Currently the application accepts only Azerbaijan phone numbers starting with +994.
+
+The system must be upgraded to support phone numbers from all countries.
+
+Requirements:
+
+• Allow users to register using international phone numbers
+• Replace fixed +994 validation with global phone number validation
+• Add country selector dropdown with flag icons
+• Automatically apply country calling code when selected
+
+Phone Number Validation Rules:
+
+• Must accept international format
+• Use E.164 international phone format standard
+• Prevent invalid phone number input
+• Support formatting and auto spacing if possible
+
+Suggested Technical Implementation:
+
+• Use international phone input library
+Example options:
+
+react-phone-input-2
+
+intl-tel-input
+
+libphonenumber validation logic
+
+UI Requirements:
+
+• Add country flag selector
+• Automatically insert country code
+• Mobile friendly phone input field
+
+2️⃣ Multi Language System (Localization)
+
+Add multilingual support for the entire O.S.S application interface.
+
+Languages To Add:
+
+• Arabic
+• Turkish
+• German
+• Spanish
+• Dutch
+• English (default)
+• Azerbaijani (existing)
+
+Language System Requirements:
+
+• User must be able to select preferred language
+• Save selected language in user profile
+• Automatically load saved language on login
+• Allow language switching from settings panel
+
+Special Language Handling:
+
+Arabic language must support:
+
+• Right-To-Left (RTL) layout
+• Mirrored UI alignment
+• RTL text formatting
+
+3️⃣ Translation Scope
+
+The following parts must support language translation:
+
+• Login / Registration pages
+• Guest dashboard
+• Reception dashboard
+• Admin dashboard
+• Service request menus
+• Pre-check-in forms
+• Notifications
+• Error messages
+• Buttons and system labels
+
+4️⃣ Technical Localization Structure
+
+Implement translation system using:
+
+• i18n or similar localization framework
+• JSON translation files for each language
+• Central translation management structure
+
+Example:
+
+en.json
+az.json
+ar.json
+tr.json
+de.json
+es.json
+nl.json
+
+5️⃣ Dynamic Content Translation Preparation
+
+System must allow future translation of:
+
+• Service names
+• Hotel custom content
+• Guest notifications
+
+6️⃣ Language Auto Detection (Optional but Recommended)
+
+If possible:
+
+• Detect device language automatically
+• Suggest matching system language
+• Allow manual override by user
+
+7️⃣ Performance Requirements
+
+• Language switching must be instant
+• Do not reload entire application
+• Maintain system speed and responsiveness
+
+8️⃣ Database Requirements
+
+Add language preference field to:
+
+• User profile
+• Guest profile
+• Staff profile
+
+Final System Behavior Summary
+
+Users from any country must be able to register using their phone number.
+Users must be able to use the application in their preferred language.
+Arabic users must experience fully RTL supported interface.

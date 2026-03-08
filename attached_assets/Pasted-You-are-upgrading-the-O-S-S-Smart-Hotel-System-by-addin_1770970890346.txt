@@ -1,0 +1,179 @@
+You are upgrading the O.S.S Smart Hotel System by adding a COMPLETE FINANCIAL MANAGEMENT & DATA FLOW MODULE.
+
+GOAL:
+Create a Finance Center where financial data is automatically generated when possible and manually entered only when necessary. The system must clearly define who enters which data.
+
+--------------------------------------------------
+
+⚠️ DATA FLOW RULE (VERY IMPORTANT)
+
+Financial data must come from THREE SOURCES:
+
+1. AUTOMATIC SYSTEM GENERATED DATA
+2. OWNER CONFIGURED DATA
+3. STAFF MANUAL INPUT DATA
+
+--------------------------------------------------
+
+1️⃣ AUTOMATIC DATA SOURCES (NO MANUAL ENTRY)
+
+System must automatically create revenue records when:
+
+✔ Booking is created or completed
+✔ Guest check-out occurs
+✔ Payment gateway confirms payment
+✔ OTA integrations (Booking, Airbnb, etc.) send payment data
+
+AUTO CREATE revenue entry with:
+- bookingId
+- room/spaceId
+- payment method
+- amount
+- source = "AUTO_BOOKING"
+
+System must also:
+✔ Update cash or bank balance automatically
+✔ Connect revenue to Performance dashboard
+
+--------------------------------------------------
+
+2️⃣ OWNER CONFIGURED DATA (SET ONCE OR PERIODIC)
+
+Owner defines financial templates and staff salary rules.
+
+WHEN OWNER CREATES OR EDITS STAFF:
+
+Add payroll configuration:
+- Base salary
+- Bonus rules
+- Deduction rules
+- Payment frequency (weekly/monthly)
+
+System automatically generates payroll expense records based on schedule.
+
+Owner can also configure recurring expenses:
+
+✔ Utilities (electricity, gas, water, internet)
+✔ Rent
+✔ Maintenance contracts
+✔ Subscriptions
+
+Recurring expenses auto generate monthly expense entries.
+
+--------------------------------------------------
+
+3️⃣ STAFF MANUAL ENTRY DATA
+
+Reception / Manager can manually enter:
+
+✔ Cash payments received outside booking system
+✔ Extra maintenance expenses
+✔ Emergency purchases
+✔ External service costs
+
+Staff must select category and property when adding expenses.
+
+--------------------------------------------------
+
+4️⃣ DATABASE STRUCTURE
+
+Create collections/tables:
+
+revenues
+expenses
+payroll
+cash_accounts
+recurring_expenses
+financial_templates
+
+Each record must include:
+- propertyId
+- userId who created it
+- sourceType (AUTO / OWNER_CONFIG / STAFF_INPUT)
+
+--------------------------------------------------
+
+5️⃣ BACKEND LOGIC
+
+Create services:
+
+Finance Aggregator Service:
+→ Calculates real-time totals
+→ Updates balances
+→ Generates reports
+
+Recurring Expense Scheduler:
+→ Runs daily cron job
+→ Generates scheduled expenses
+
+Payroll Generator:
+→ Runs based on payroll frequency
+
+--------------------------------------------------
+
+6️⃣ FINANCE CENTER DASHBOARD (OWNER)
+
+Show:
+
+TOP SUMMARY:
+✔ Total Revenue
+✔ Total Expenses
+✔ Payroll Cost
+✔ Net Profit
+✔ Cashbox Balance
+✔ Bank Balance
+
+ANALYTICS:
+✔ Income vs Expense Chart
+✔ Monthly Profit Graph
+✔ Revenue per Room
+✔ Expense Category Breakdown
+
+TABLES:
+✔ Recent Revenues
+✔ Recent Expenses
+✔ Payroll Status
+✔ Recurring Expense Tracking
+
+--------------------------------------------------
+
+7️⃣ ROLE PERMISSIONS
+
+Owner:
+Full financial control and configuration
+
+Manager:
+View reports + add manual expenses
+
+Reception:
+Add manual payments and expenses only
+
+Cleaner/Staff:
+No financial access
+
+--------------------------------------------------
+
+8️⃣ SMART FINANCIAL INSIGHTS
+
+System should auto generate messages such as:
+- Utility costs increased X%
+- Payroll exceeds safe revenue ratio
+- Highest performing room/property
+- Profit trend analysis
+
+--------------------------------------------------
+
+9️⃣ UI REQUIREMENTS
+
+✔ Follow existing OSS dark theme
+✔ Use modern financial dashboard cards
+✔ Use charts and filters
+✔ Mobile responsive
+✔ Support multi-property filtering
+
+--------------------------------------------------
+
+IMPORTANT:
+Keep system modular and scalable.
+Do not break existing booking logic.
+Integrate Finance Center with Performance dashboard.

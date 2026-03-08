@@ -1,0 +1,90 @@
+Improve the OSS landing page to reach a high-end SaaS marketing level similar to Stripe, Linear, and Vercel.
+
+Do not change the existing color theme, animations, or layout structure unless necessary. Focus on improving conversion and product presentation.
+
+Add the following sections if they do not already exist, and improve them if they do:
+
+1. HOW IT WORKS SECTION
+Create a simple 3-step explanation of the platform.
+
+Example structure:
+Step 1 — Connect Your Property
+Add your hotel, rooms, and basic settings.
+
+Step 2 — Manage Operations
+Handle bookings, staff, guest requests, and finances from one dashboard.
+
+Step 3 — Automate & Scale
+Use smart automation, analytics, and IoT integrations to run your property efficiently.
+
+Use icons and a clean horizontal layout.
+
+2. PRODUCT PREVIEW / REAL UI SECTION
+Show realistic screenshots or UI mockups of:
+- Dashboard
+- Bookings
+- Smart Room Control
+- Analytics
+
+Each block should have:
+Left side → UI preview
+Right side → short explanation
+
+Alternate layout left/right for each section.
+
+3. TRUST / SOCIAL PROOF SECTION
+Add credibility elements.
+
+Example:
+- 50+ Hotels
+- 12 Countries
+- 99.9% uptime
+- 24/7 support
+
+Display them as animated statistic cards.
+
+Also add space for future customer logos.
+
+4. WHY OSS SECTION
+Add a section explaining why the platform is different.
+
+Example points:
+- All-in-one hospitality operating system
+- Built-in smart room integration
+- Real-time analytics and automation
+- Multi-property management
+
+Use 4 feature cards with icons.
+
+5. CTA SECTION IMPROVEMENT
+Improve the main call-to-action block near the bottom.
+
+Headline example:
+"Start Running Your Hotel Smarter Today"
+
+Buttons:
+Start Free Trial
+See Live Demo
+
+Add small text:
+"No credit card required • 14-day free trial"
+
+6. VISUAL POLISH
+Improve small UI details:
+- spacing between sections
+- card shadows
+- hover interactions
+- consistent icon style
+- subtle gradient or glow effects
+
+Do NOT break existing functionality or routing.
+
+7. RESPONSIVE DESIGN
+Ensure all sections look good on:
+- desktop
+- tablet
+- mobile
+
+Use modern SaaS spacing and layout patterns.
+
+The goal is to make the landing page look like a premium SaaS product website.

@@ -1,0 +1,379 @@
+TASK: Implement AUTO HOUSEKEEPING ENGINE (MEWS-level)
+
+IMPORTANT:
+Do NOT break existing systems.
+Do NOT modify booking creation logic.
+Do NOT modify subscription payments.
+Extend architecture safely.
+
+Existing systems already working:
+
+- bookings table
+- units table
+- Room Status Engine
+- updateUnitStatusFromBooking()
+- notifications system
+- users table with roles
+- tenant isolation
+- property isolation
+
+We are adding AUTOMATIC HOUSEKEEPING ENGINE.
+
+
+========================================
+PART 1 — CREATE HOUSEKEEPING TASK TABLE
+========================================
+
+Create new table:
+
+housekeepingTasks
+
+Columns:
+
+id → varchar UUID primary key default gen_random_uuid()
+
+tenantId → varchar NOT NULL
+propertyId → varchar NOT NULL
+
+unitId → varchar NOT NULL
+roomNumber → text NOT NULL
+
+taskType → text NOT NULL
+Allowed values:
+
+cleaning
+inspection
+maintenance
+
+cleaningType → text nullable
+
+Allowed values:
+
+checkout_cleaning
+stayover_cleaning
+deep_cleaning
+
+status → text NOT NULL default 'pending'
+
+Allowed values:
+
+pending
+assigned
+in_progress
+completed
+cancelled
+
+priority → text default 'normal'
+
+Allowed values:
+
+low
+normal
+high
+urgent
+
+assignedTo → varchar nullable (users.id)
+
+triggerSource → text NOT NULL
+
+Allowed values:
+
+auto_checkout
+manual
+admin
+system
+
+notes → text nullable
+
+dueDate → timestamp nullable
+
+createdAt → timestamp default now()
+
+completedAt → timestamp nullable
+
+
+
+========================================
+PART 2 — STORAGE METHODS
+========================================
+
+Add to storage.ts:
+
+createHousekeepingTask(task)
+
+getTasksByProperty(propertyId)
+
+getTasksByStaff(userId)
+
+updateHousekeepingTask(id, updates)
+
+getOpenTasksForUnit(unitId)
+
+
+
+
+
+========================================
+PART 3 — AUTO TASK CREATION ENGINE
+========================================
+
+Modify:
+
+updateUnitStatusFromBooking()
+
+File:
+
+server/storage.ts
+
+
+When booking status becomes:
+
+checked_out
+
+System must:
+
+1) Find unit by:
+
+tenantId
+propertyId
+unitNumber = roomNumber.trim()
+
+2) If unit found:
+
+Set unit.status = dirty
+
+3) Check if open task exists:
+
+status != completed AND status != cancelled
+
+If exists:
+
+DO NOTHING
+
+If not:
+
+Create housekeeping task:
+
+taskType = cleaning
+
+cleaningType = checkout_cleaning
+
+priority = normal
+
+triggerSource = auto_checkout
+
+tenantId
+propertyId
+unitId
+roomNumber
+
+
+
+========================================
+PART 4 — AUTO ASSIGNMENT
+========================================
+
+After task creation:
+
+Find staff users:
+
+users.role = staff
+users.propertyId = propertyId
+
+Pick random staff.
+
+Set:
+
+assignedTo = staff.id
+
+If no staff exists:
+
+leave assignedTo null
+
+
+
+
+
+========================================
+PART 5 — NOTIFICATIONS
+========================================
+
+After task creation:
+
+Create notification for assigned staff:
+
+Title:
+
+New Cleaning Task
+
+Message:
+
+Room {roomNumber} requires cleaning
+
+actionUrl:
+
+/housekeeping
+
+
+
+
+
+========================================
+PART 6 — UNIT STATUS FLOW
+========================================
+
+Keep existing behavior:
+
+checked_in
+→ occupied
+
+checked_out
+→ dirty
+
+cancelled
+→ ready
+
+no_show
+→ ready
+
+
+But ADD:
+
+When housekeeping task becomes:
+
+completed
+
+System must:
+
+Set unit.status = ready
+
+
+
+
+
+========================================
+PART 7 — API ENDPOINTS
+========================================
+
+Create endpoints:
+
+
+GET /api/housekeeping/tasks
+
+Return tasks for property.
+
+
+GET /api/housekeeping/my-tasks
+
+Return tasks assigned to logged-in user.
+
+
+PATCH /api/housekeeping/tasks/:id
+
+Allow update:
+
+status
+assignedTo
+notes
+
+
+
+========================================
+PART 8 — SECURITY
+========================================
+
+All queries MUST filter:
+
+tenantId
+
+Staff can see:
+
+only their property tasks
+
+Owner/Admin can see:
+
+all property tasks
+
+oss_super_admin can see all
+
+
+
+
+
+========================================
+PART 9 — UNIT LINKING FIX
+========================================
+
+When booking created:
+
+Attempt to find unit:
+
+tenantId
+propertyId
+unitNumber = roomNumber.trim()
+
+If found:
+
+save booking.unitId
+
+If not:
+
+allow booking
+
+
+
+
+
+========================================
+PART 10 — VALIDATION
+========================================
+
+Reject invalid values:
+
+taskType
+cleaningType
+status
+priority
+
+Reject invalid assignedTo if user not staff
+
+
+
+
+
+========================================
+PART 11 — DO NOT MODIFY
+========================================
+
+DO NOT modify:
+
+payments
+epoint
+overbooking
+guest dashboard
+online checkin
+
+Only extend system.
+
+
+
+
+
+========================================
+PART 12 — SUCCESS CRITERIA
+========================================
+
+After checkout:
+
+Room becomes dirty
+
+Task auto-created
+
+Task assigned
+
+Notification created
+
+
+After task completed:
+
+Room becomes ready

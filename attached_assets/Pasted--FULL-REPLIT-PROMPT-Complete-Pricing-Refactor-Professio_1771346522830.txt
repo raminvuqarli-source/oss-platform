@@ -1,0 +1,201 @@
+🔥 FULL REPLIT PROMPT – Complete Pricing Refactor (Professional SaaS Comparison)
+
+Refactor the entire Pricing page into a clean, professional SaaS comparison structure.
+
+We are converting OSS into a true self-service SaaS model.
+
+1️⃣ Remove Confusing Flow
+
+Remove any mixed or old logic like:
+
+“Get Quote” for standard plans
+
+“Starter-dəki hər şey +” text
+
+Mixed language UI blocks
+
+Standard plans (Starter, Growth, Pro) must use:
+
+Primary button: Start Free Trial
+
+Secondary button: Subscribe Now
+
+Show: “14-day free trial included”
+
+Only show “Request Enterprise Quote” if:
+
+Hotel rooms > 100
+OR
+
+Custom integrations are selected
+
+Remove quote form from standard flow.
+
+2️⃣ Create Professional SaaS Feature Matrix (Core Plans)
+
+All plans must display the SAME feature list.
+
+Use:
+✔ Green check for included features
+✖ Muted gray for not included features
+Optional tooltip: “Available in Growth” or “Available in Pro”
+
+Unified Core Feature List
+
+PMS System
+
+Booking & Reservation
+
+Guest Management
+
+Staff Management
+
+Basic Reports
+
+Multi-property Support
+
+Advanced Analytics
+
+Priority Support
+
+Custom Integrations
+
+Plan Logic
+Core Starter ($79)
+
+✔ PMS System
+✔ Booking & Reservation
+✔ Guest Management
+✔ Staff Management
+✔ Basic Reports
+✖ Multi-property Support
+✖ Advanced Analytics
+✖ Priority Support
+✖ Custom Integrations
+
+Core Growth ($129)
+
+✔ Everything in Starter
+✔ Multi-property Support
+✔ Advanced Analytics
+✖ Priority Support
+✖ Custom Integrations
+
+Keep “Most Popular” badge here.
+
+Core Pro ($199)
+
+✔ Everything
+
+3️⃣ Smart Room Add-On – Same Matrix Logic
+
+Apply identical comparison structure to:
+
+Smart Lite ($29 / room)
+Smart Pro ($59 / room)
+Smart AI ($99 / room)
+
+Unified Smart Feature List
+
+Light Control
+
+AC Control
+
+Smart Lock Integration
+
+Pre-Check-In Automation
+
+Energy Monitoring
+
+Smart Scenes
+
+Guest Mobile Control
+
+Automation Rules
+
+AI Energy Optimization
+
+Behavioral Analytics
+
+Auto Temperature Adaptation
+
+Advanced IoT Integration
+
+Show all features in all plans using ✔ / ✖ logic.
+
+Do NOT hide features silently.
+
+4️⃣ Feature Gating Logic (Important)
+
+Backend must enforce plan-based feature access.
+
+If feature not included:
+
+Hide it completely from dashboard
+
+Do not render disabled premium blocks for basic users
+
+This must apply to:
+
+Guest panel
+
+Smart Room panel
+
+Analytics
+
+Multi-property
+
+Keep multi-tenant structure intact.
+
+5️⃣ Add Monthly / Yearly Toggle
+
+Add billing toggle:
+
+Monthly
+Yearly (15% discount)
+
+Ensure:
+
+Stripe price IDs support billingPeriod
+
+Trial days (14 days default) remain functional
+
+No existing Stripe plan IDs break
+
+6️⃣ UI Improvements
+
+Align all feature rows perfectly
+
+Add subtle divider lines
+
+Keep Growth highlighted
+
+Maintain orange branding
+
+Keep fully responsive mobile layout
+
+No mixed languages in UI
+
+7️⃣ Clean Code
+
+Remove old quote logic
+
+Remove duplicated feature arrays
+
+Ensure TypeScript compiles cleanly
+
+Keep Stripe integration working
+
+Keep auth system untouched
+
+After finishing:
+
+Provide a summary of:
+
+Structural changes
+
+Feature gating implementation
+
+Stripe adjustments
+
+Removed legacy logic

@@ -1,0 +1,95 @@
+BUG FIX TASK — Messages Module Not Responding
+
+ISSUE:
+In O.S.S dashboard, Messages section displays messages but user cannot:
+✔ Approve requests
+✔ Reject requests
+✔ Reply to messages
+✔ Trigger any action buttons
+
+Buttons visually appear but have NO event response.
+
+-----------------------------------------
+STEP 1 — CHECK FRONTEND EVENTS
+-----------------------------------------
+
+Verify:
+
+✔ onClick handlers exist for:
+- approveRequest()
+- rejectRequest()
+- replyMessage()
+- openMessageThread()
+
+✔ Confirm buttons are NOT:
+- disabled
+- missing event binding
+- blocked by overlay or modal layer
+
+✔ Inspect console for JS errors
+
+-----------------------------------------
+STEP 2 — CHECK API CONNECTION
+-----------------------------------------
+
+Confirm frontend correctly calls backend routes:
+
+POST /api/messages/approve
+POST /api/messages/reject
+POST /api/messages/reply
+GET /api/messages/thread
+
+Validate:
+✔ Authorization headers
+✔ Request payload
+✔ Response handling
+✔ Error handling UI feedback
+
+-----------------------------------------
+STEP 3 — CHECK ROLE PERMISSIONS
+-----------------------------------------
+
+Ensure Staff/Admin roles have permissions to:
+✔ Respond to guest requests
+✔ Approve service requests
+✔ Send chat messages
+
+-----------------------------------------
+STEP 4 — WEBSOCKET / REALTIME CHECK
+-----------------------------------------
+
+If messaging uses WebSocket:
+
+✔ Confirm socket connection active
+✔ Confirm message event listeners attached
+✔ Confirm UI state updates after actions
+
+-----------------------------------------
+STEP 5 — FIX UI STATE MANAGEMENT
+-----------------------------------------
+
+Ensure after action:
+✔ Message status updates instantly
+✔ Activity feed refreshes
+✔ Notifications trigger correctly
+
+-----------------------------------------
+STEP 6 — ADD FAILSAFE UX
+-----------------------------------------
+
+If API fails:
+✔ Show error toast
+✔ Prevent silent failure
+✔ Retry option
+
+-----------------------------------------
+FINAL REPORT
+-----------------------------------------
+
+Return:
+
+✔ Root cause
+✔ Fixed files list
+✔ Tested message actions
+✔ Confirmation approve/reply now works
+✔ Any permission issues found

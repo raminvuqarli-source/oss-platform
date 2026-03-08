@@ -1,0 +1,254 @@
+TASK: Implement Booking Payment System Using Existing Epoint Integration
+
+IMPORTANT:
+SAFE IMPLEMENTATION.
+
+Do NOT break:
+
+- Subscription payments
+- Existing Epoint webhook
+- Plans system
+- Auth system
+- Overbooking logic
+
+Reuse existing Epoint integration.
+
+-------------------------------------
+
+PROJECT CONTEXT
+
+OSS PMS system
+
+Backend:
+Express + Drizzle + PostgreSQL
+
+Existing Epoint integration:
+
+File:
+server/routes/epoint.routes.ts
+
+Endpoint:
+
+POST /api/epoint/create-order
+
+Webhook:
+
+POST /api/epoint/webhook
+
+Table:
+
+payment_orders
+
+Subscriptions already use this system.
+
+We must extend it for booking payments.
+
+-------------------------------------
+
+GOAL
+
+Allow reception or guest to pay for a booking.
+
+Payment flow:
+
+Booking created →
+Payment Order created →
+Redirect to Epoint →
+Webhook success →
+Booking marked PAID
+
+-------------------------------------
+
+STEP 1 — Add paymentStatus Column
+
+Modify bookings table.
+
+File:
+
+shared/schema.ts
+
+Add column:
+
+paymentStatus text DEFAULT 'unpaid'
+
+Allowed values:
+
+unpaid
+paid
+failed
+
+Default:
+
+unpaid
+
+-------------------------------------
+
+STEP 2 — Create Booking Payment Order Endpoint
+
+Create new endpoint:
+
+POST /api/epoint/create-booking-order
+
+File:
+
+server/routes/epoint.routes.ts
+
+Input:
+
+{
+ bookingId: string
+ amount: number
+}
+
+Logic:
+
+1) Find booking by bookingId.
+
+2) Validate booking exists.
+
+3) Create payment order:
+
+Use payment_orders table.
+
+Fields:
+
+orderType = "booking"
+referenceId = bookingId
+amount = amount
+currency = "AZN"
+status = "pending"
+
+4) Use same Epoint request structure as subscription.
+
+Example:
+
+description:
+
+"O.S.S Booking Payment Room {roomNumber}"
+
+success_redirect_url:
+
+${baseUrl}/dashboard?payment=success&bookingId={bookingId}
+
+error_redirect_url:
+
+${baseUrl}/dashboard?payment=declined&bookingId={bookingId}
+
+callback_url:
+
+${baseUrl}/api/epoint/webhook
+
+order_id:
+
+payment_orders.id
+
+-------------------------------------
+
+STEP 3 — Modify Webhook Logic
+
+File:
+
+server/routes/epoint.routes.ts
+
+Endpoint:
+
+POST /api/epoint/webhook
+
+Add logic:
+
+When payment order found:
+
+If orderType == "booking":
+
+If status == "success":
+
+Update booking:
+
+paymentStatus = "paid"
+
+Example:
+
+update bookings
+set paymentStatus = 'paid'
+where id = referenceId
+
+If status != success:
+
+paymentStatus = "failed"
+
+-------------------------------------
+
+STEP 4 — Do NOT Modify Subscription Logic
+
+Existing:
+
+processEpointPayment()
+
+must remain unchanged.
+
+Add booking logic BEFORE subscription logic.
+
+-------------------------------------
+
+STEP 5 — Logging
+
+Add logs:
+
+console.log(
+"BOOKING PAYMENT SUCCESS",
+bookingId
+);
+
+console.log(
+"BOOKING PAYMENT FAILED",
+bookingId
+);
+
+-------------------------------------
+
+STEP 6 — Safety
+
+Reject payment if booking not found.
+
+Reject if booking already paid.
+
+Return error:
+
+"BOOKING_ALREADY_PAID"
+
+-------------------------------------
+
+EXPECTED RESULT
+
+Flow:
+
+Reception creates booking.
+
+Booking:
+
+paymentStatus = unpaid
+
+-------------------------------------
+
+Reception clicks Pay.
+
+System creates Epoint order.
+
+Guest pays.
+
+Webhook:
+
+paymentStatus = paid
+
+-------------------------------------
+
+IMPORTANT
+
+Do NOT modify:
+
+Overbooking protection
+createBooking()
+Subscription plans
+Auth routes
+
+Reuse payment_orders table.

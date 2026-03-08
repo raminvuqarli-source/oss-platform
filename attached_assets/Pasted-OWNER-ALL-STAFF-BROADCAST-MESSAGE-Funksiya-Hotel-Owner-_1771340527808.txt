@@ -1,0 +1,156 @@
+OWNER → ALL STAFF BROADCAST MESSAGE
+Funksiya:
+
+Hotel Owner bütün staff-a eyni anda mesaj göndərə bilsin.
+
+Mesaj həm dashboard notification kimi, həm də Staff panelində “Inbox” bölməsində görünsün.
+
+Mesaj database-də saxlanılsın.
+
+Mesaj statusu:
+
+Sent
+
+Delivered
+
+Read
+
+Texniki tələblər:
+
+Yeni model yarat: StaffMessage
+
+id
+
+hotelId
+
+senderRole (owner)
+
+messageText
+
+createdAt
+
+Hər staff üçün ayrıca MessageStatus saxlanılsın:
+
+staffId
+
+messageId
+
+isRead
+
+readAt
+
+Owner Dashboard:
+
+“Send Message to All Staff” bölməsi əlavə et
+
+Göndərilən mesajların statistikası görünsün:
+
+Neçə nəfər oxuyub
+
+Neçə nəfər oxumayıb
+
+2️⃣ AUTOMATIC STAFF RATING SYSTEM
+
+Sistem avtomatik olaraq hər işçiyə rating hesablasın.
+
+Rating meyarları:
+
+Mesajlara cavab sürəti
+
+Tapşırıqları vaxtında tamamlama
+
+Service request performansı
+
+Login aktivliyi
+
+Rating Logic:
+
+Hər staff üçün performanceScore hesabla:
+
+Message response time → 25%
+
+Task completion on time → 35%
+
+Service quality → 25%
+
+Activity consistency → 15%
+
+Final score 0–100 arası olsun.
+
+Vizual Göstərim:
+
+Owner Dashboard-da yeni bölmə:
+
+⭐ Staff Performance Panel
+
+Hər işçi üçün göstər:
+
+Ad
+
+Rol
+
+Current Rating (məs: 87/100)
+
+Status:
+
+🔥 Excellent (85+)
+
+✅ Good (70–85)
+
+⚠ Needs Improvement (50–70)
+
+❌ Low Performance (<50)
+
+3️⃣ MANUAL OWNER FEEDBACK
+
+Owner aşağıdakıları edə bilsin:
+
+⭐ “Satisfied” (ulduz icon)
+
+⚠ “Warning” (töhmət icon)
+
+Manual qiymətləndirmə performanceScore-a təsir etsin:
+
+Ulduz → +5 bal
+
+Töhmət → -7 bal
+
+Feedback history saxlanılsın:
+
+ownerId
+
+staffId
+
+type (star / warning)
+
+reason (optional text)
+
+createdAt
+
+4️⃣ UI TƏLƏBLƏRİ
+
+Owner panelində ayrıca “Staff Performance” menyusu
+
+Staff öz ratingini görə bilsin (amma başqalarınınkını yox)
+
+Sistem multi-tenant strukturuna uyğun işləsin
+
+Kod təmizlənsin, duplicate logic silinsin
+
+Mövcud dil sistemi ilə inteqrasiya edilsin (i18n pozulmasın)
+
+5️⃣ BONUS
+
+Əgər mümkündürsə:
+
+Aylıq performans qrafiki əlavə et
+
+Export CSV funksiyası əlavə et
+
+Kod yazarkən:
+
+Mövcud auth sistemi pozulmasın
+
+Role-based access control saxlanılsın
+
+Gələcəkdə AI analytics əlavə etmək üçün struktur scalable olsun

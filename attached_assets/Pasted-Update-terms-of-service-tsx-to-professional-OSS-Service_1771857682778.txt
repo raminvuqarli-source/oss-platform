@@ -1,0 +1,167 @@
+Update terms-of-service.tsx to professional OSS Service Agreement.
+
+Replace all text with the following structured content.
+
+Title:
+
+OSS SERVICE AGREEMENT
+
+Company:
+
+Orange Studio MMC
+Baku Azerbaijan
+
+--------------------
+
+1. Service Description
+
+OSS is a cloud-based smart hotel automation system providing:
+
+- Property management tools
+- Guest control interface
+- Smart room automation
+- IoT device management
+- Analytics and reporting
+
+Service is provided via cloud servers and requires internet access.
+
+--------------------
+
+2. Subscription Plans
+
+Client subscribes to a selected OSS plan:
+
+Main Platform Plans:
+
+Starter
+Growth
+Pro
+Apartment Lite
+
+Optional Smart Room Plans:
+
+Smart Lite
+Smart Pro
+Smart AI
+
+Selected plans and pricing are defined inside the OSS platform.
+
+--------------------
+
+3. Free Trial
+
+OSS includes a 14-day free trial.
+
+After the trial period ends,
+paid subscription is required.
+
+OSS may automatically restrict features
+after trial expiration.
+
+--------------------
+
+4. Payments
+
+Subscription fees must be paid
+according to the billing cycle.
+
+Billing period is monthly.
+
+Prices are shown inside the OSS platform.
+
+--------------------
+
+5. Late Payment and Suspension
+
+If payment is overdue for more than
+10 calendar days,
+
+OSS services may be automatically suspended.
+
+Service will be restored after payment.
+
+Orange Studio MMC is not responsible
+for losses caused by suspension
+due to unpaid invoices.
+
+--------------------
+
+6. Hardware Responsibility
+
+Client is responsible for:
+
+- Internet connection
+- Electrical systems
+- Hardware devices
+- Local installations
+
+Orange Studio MMC is not responsible
+for hardware failures or installation errors.
+
+--------------------
+
+7. Service Availability
+
+Orange Studio MMC will make reasonable
+efforts to keep the service online.
+
+Temporary downtime may occur due to:
+
+- Maintenance
+- Updates
+- Network failures
+- Third-party services
+
+--------------------
+
+8. Limitation of Liability
+
+Orange Studio MMC shall not be liable for:
+
+- Financial losses
+- Business interruptions
+- Data loss
+- Hardware failures
+- Internet failures
+
+Total liability is limited
+to the amount paid by the client
+for the last 30 days.
+
+--------------------
+
+9. Automatic Operation
+
+OSS is an automated system.
+
+Certain actions may occur automatically:
+
+- Trial expiration
+- Service suspension
+- Feature limitations
+
+Client agrees to automatic system operation.
+
+--------------------
+
+10. Electronic Agreement
+
+This agreement is accepted electronically.
+
+Acceptance includes:
+
+Checkbox confirmation
+Timestamp
+IP address recording
+
+This constitutes a legally binding agreement.
+
+--------------------
+
+11. Governing Law
+
+Jurisdiction:
+
+Baku Azerbaijan
+
+International SaaS agreement applies.

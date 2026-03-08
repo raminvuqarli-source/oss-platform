@@ -1,0 +1,113 @@
+✅ CRITICAL FIX – Global Language Switching Not Working
+
+The language selector dropdown is working visually, but the language change applies only to the first page.
+
+Other parts of the application remain in English. This means the localization system is not connected globally.
+
+This must be fixed so language switching works across the entire application.
+
+🔴 Current Problem
+
+When a user selects a new language:
+
+• Only the landing page updates
+• Dashboards, modals, forms, and internal pages remain in English
+• Translation system is not applied globally
+• Some UI text is still hardcoded
+
+✅ Required Technical Fix
+
+Implement a global localization state management system.
+
+Language selection must:
+
+• Update entire application instantly
+• Persist after refresh
+• Persist after login
+• Affect ALL UI components
+
+✅ Mandatory Implementation Steps
+1️⃣ Global Language State
+
+Language must be stored in:
+
+• Global context or state manager
+(React Context / Zustand / Redux / similar)
+
+Language must NOT be stored only inside dropdown component.
+
+2️⃣ Translation Hook Usage
+
+All UI text must use translation functions such as:
+
+t("key_name")
+
+Hardcoded English text must be removed from:
+
+• Forms
+• Buttons
+• Modals
+• Dashboards
+• Labels
+• Notifications
+• Error messages
+
+3️⃣ Application Root Integration
+
+Localization provider must wrap the entire application at root level.
+
+Example:
+
+<App> <I18nProvider> Entire Application </I18nProvider> </App>
+4️⃣ Language Persistence
+
+Selected language must be saved in:
+
+• LocalStorage OR
+• User profile database
+
+Language must auto-load when user logs in.
+
+5️⃣ Component Translation Audit
+
+Perform full audit and ensure:
+
+ALL components use translation keys.
+
+No UI text should remain static.
+
+6️⃣ Arabic RTL Support
+
+When Arabic is selected:
+
+• Enable RTL layout globally
+• Mirror navigation and UI alignment
+• Apply RTL CSS rules
+
+7️⃣ Performance Requirement
+
+Language switching must update UI without full page reload.
+
+✅ Full Testing Requirement
+
+Test language switching across:
+
+• Landing page
+• Register hotel page
+• Login / register forms
+• Guest dashboard
+• Reception dashboard
+• Admin dashboard
+• Service request modals
+• Notifications
+• Error messages
+
+🔴 IMPORTANT FINAL REQUIREMENT
+
+Developer must scan the entire codebase and remove any hardcoded English UI text.
+
+All user-visible text must be controlled by translation system.
+
+BONUS DEBUG TASK
+
+If necessary, refactor translation architecture to make localization fully global and scalable.

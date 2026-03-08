@@ -1,0 +1,88 @@
+You are fixing a CRITICAL multi-tenant isolation weakness.
+
+DO NOT refactor unrelated logic.
+ONLY enforce mandatory tenant isolation in storage and routes.
+
+PROBLEM:
+- tenantId is optional in 30+ storage functions.
+- If tenantId is null/undefined, queries return cross-tenant data.
+- Some routes forget to pass tenantId.
+- resolveTenant middleware sets req.tenantId but enforcement is inconsistent.
+
+GOAL:
+Make tenant isolation mandatory everywhere except for oss_super_admin.
+
+-----------------------------------------
+STEP 1 — ENFORCE TENANT IN STORAGE LAYER
+-----------------------------------------
+
+In server/storage.ts:
+
+For ALL functions that access tenant-scoped tables:
+
+- Remove tenantId?: string | null
+- Replace with tenantId: string (required)
+
+If tenantId missing:
+→ throw new Error("TenantId required")
+
+-----------------------------------------
+STEP 2 — FORCE TENANT FILTER
+-----------------------------------------
+
+Change pattern from:
+
+if (tenantId) {
+   conditions.push(eq(users.tenantId, tenantId))
+}
+
+To:
+
+conditions.push(eq(users.tenantId, tenantId))
+
+(no optional logic)
+
+-----------------------------------------
+STEP 3 — OSS SUPER ADMIN EXCEPTION
+-----------------------------------------
+
+If role === "oss_super_admin":
+→ allow cross-tenant access explicitly
+→ but only inside admin routes
+
+Implement:
+
+if (user.role !== "oss_super_admin" && !tenantId) {
+   throw new Error("Unauthorized tenant access");
+}
+
+-----------------------------------------
+STEP 4 — REQUIRE TENANT MIDDLEWARE
+-----------------------------------------
+
+Ensure ALL protected routes use:
+
+resolveTenant
+requireAuth
+
+If any route missing them:
+→ add middleware
+
+-----------------------------------------
+STEP 5 — SAFETY VALIDATION
+-----------------------------------------
+
+Search entire project for:
+tenantId?:
+tenantId || null
+if (tenantId)
+
+Remove optional patterns.
+
+-----------------------------------------
+FINAL REQUIREMENTS:
+- No storage function works without tenantId
+- No optional tenant filtering
+- Only oss_super_admin can bypass tenant filter
+- System compiles
+- Generate list of modified files
