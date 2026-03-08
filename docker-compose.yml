@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    container_name: oss_app
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: production
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15
+    container_name: oss_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: oss
+      POSTGRES_PASSWORD: osspassword
+      POSTGRES_DB: ossdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
