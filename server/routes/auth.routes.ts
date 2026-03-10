@@ -329,10 +329,6 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
   };
 
   app.post("/api/auth/demo-login", authRateLimiter, async (req, res) => {
-    if (process.env.NODE_ENV === "production") {
-      return res.status(403).json({ error: "Demo login disabled in production" });
-    }
-
     try {
       const { role } = req.body;
       const username = DEMO_ROLE_MAP[role];
