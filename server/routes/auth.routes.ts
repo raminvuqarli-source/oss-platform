@@ -329,7 +329,8 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
   };
 
   app.post("/api/auth/demo-login", authRateLimiter, async (req, res) => {
-    if (process.env.NODE_ENV === "production") {
+    const runtimeEnv = process.env["NODE_ENV"];
+    if (runtimeEnv === "production") {
       return res.status(403).json({ error: "Demo login disabled in production" });
     }
 
