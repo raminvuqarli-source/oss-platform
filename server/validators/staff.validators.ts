@@ -50,6 +50,5 @@ export const resetPasswordSchema = z.object({
 
 export const inviteStaffSchema = z.object({
   email: z.string().email("Valid email is required"),
-  fullName: z.string().min(1, "Full name is required"),
-  role: z.string().min(1, "Role is required"),
+  staffRole: z.string().min(1, "Staff role is required"),
 });
