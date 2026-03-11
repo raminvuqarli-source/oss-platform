@@ -5,92 +5,99 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1772443702456,
-      "tag": "0000_add_unique_external_bookings",
+      "when": 1772443600000,
+      "tag": "0000_initial_schema",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1772443835335,
-      "tag": "0001_add_missing_indexes",
+      "when": 1772443702456,
+      "tag": "0001_add_unique_external_bookings",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "7",
-      "when": 1772447166837,
-      "tag": "0002_add_foreign_key_constraints",
+      "when": 1772443835335,
+      "tag": "0002_add_missing_indexes",
       "breakpoints": true
     },
     {
       "idx": 3,
       "version": "7",
-      "when": 1772455000000,
-      "tag": "0003_add_room_nights",
+      "when": 1772447166837,
+      "tag": "0003_add_foreign_key_constraints",
       "breakpoints": true
     },
     {
       "idx": 4,
       "version": "7",
-      "when": 1772627000000,
-      "tag": "0004_add_rate_plans",
+      "when": 1772455000000,
+      "tag": "0004_add_room_nights",
       "breakpoints": true
     },
     {
       "idx": 5,
       "version": "7",
-      "when": 1772628000000,
-      "tag": "0005_add_ota_integrations",
+      "when": 1772627000000,
+      "tag": "0005_add_rate_plans",
       "breakpoints": true
     },
     {
       "idx": 6,
       "version": "7",
-      "when": 1772632000000,
-      "tag": "0006_add_ota_conflicts",
+      "when": 1772628000000,
+      "tag": "0006_add_ota_integrations",
       "breakpoints": true
     },
     {
       "idx": 7,
       "version": "7",
-      "when": 1772730000000,
-      "tag": "0007_add_pricing_rules",
+      "when": 1772632000000,
+      "tag": "0007_add_ota_conflicts",
       "breakpoints": true
     },
     {
       "idx": 8,
       "version": "7",
-      "when": 1772810000000,
-      "tag": "0008_subscription_lifecycle",
+      "when": 1772730000000,
+      "tag": "0008_add_pricing_rules",
       "breakpoints": true
     },
     {
       "idx": 9,
       "version": "7",
-      "when": 1772900000000,
-      "tag": "0009_add_invoice_pdf",
+      "when": 1772810000000,
+      "tag": "0009_subscription_lifecycle",
       "breakpoints": true
     },
     {
       "idx": 10,
       "version": "7",
-      "when": 1772986000000,
-      "tag": "0010_add_refund_requests",
+      "when": 1772900000000,
+      "tag": "0010_add_invoice_pdf",
       "breakpoints": true
     },
     {
       "idx": 11,
       "version": "7",
-      "when": 1773072000000,
-      "tag": "0011_add_api_usage_logs",
+      "when": 1772986000000,
+      "tag": "0011_add_refund_requests",
       "breakpoints": true
     },
     {
       "idx": 12,
       "version": "7",
+      "when": 1773072000000,
+      "tag": "0012_add_api_usage_logs",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
       "when": 1773158000000,
-      "tag": "0012_add_audit_log_indexes",
+      "tag": "0013_add_audit_log_indexes",
       "breakpoints": true
     }
   ]
