@@ -1,0 +1,181 @@
+We need to export this project for a clean production deployment on a VPS server using:
+
+Docker
+Node.js
+PostgreSQL
+Nginx reverse proxy
+
+The current export is incomplete and fails during deployment due to missing database schema and Replit-specific dependencies.
+
+Please prepare a **FULL PRODUCTION EXPORT** of this project with the following requirements.
+
+---
+
+1. PROJECT STRUCTURE
+
+---
+
+The exported ZIP must contain:
+
+server/
+client/
+shared/
+migrations/
+
+package.json
+package-lock.json
+Dockerfile
+docker-compose.yml
+vite.config.ts
+drizzle.config.ts
+tsconfig.json
+.env.example
+
+Do NOT include:
+
+node_modules/
+dist/
+
+Docker will build these automatically.
+
+---
+
+2. DATABASE SCHEMA (CRITICAL)
+
+---
+
+The current migrations assume tables already exist.
+
+Provide ONE of the following:
+
+Option A (preferred)
+
+Create a file:
+
+schema.sql
+
+This file must create all base tables including:
+
+users
+hotels
+rooms
+guests
+bookings
+external_bookings
+subscriptions
+invoices
+financial_transactions
+audit_logs
+api_usage_logs
+
+Option B
+
+Ensure the Drizzle ORM setup works so this command generates the full schema:
+
+npx drizzle-kit push
+
+The project must include a valid:
+
+shared/schema.ts
+
+---
+
+3. DRIZZLE ORM FIX
+
+---
+
+Ensure the following works inside the project:
+
+npx drizzle-kit generate
+npx drizzle-kit push
+
+Add drizzle-kit to devDependencies if missing.
+
+---
+
+4. REMOVE REPLIT-SPECIFIC DEPENDENCIES
+
+---
+
+Remove any Replit-only plugins such as:
+
+@replit/vite-plugin-runtime-error-modal
+
+Update vite.config.ts to a minimal production-safe version:
+
+import { defineConfig } from "vite"
+import react from "@vitejs/plugin-react"
+import path from "path"
+
+export default defineConfig({
+plugins: [react()],
+resolve: {
+alias: {
+"@": path.resolve(__dirname, "client/src")
+}
+},
+build: {
+outDir: "dist/public",
+emptyOutDir: true
+}
+})
+
+---
+
+5. DOCKER BUILD MUST WORK
+
+---
+
+The project must successfully run with:
+
+docker compose up --build
+
+During build Docker should:
+
+1. run npm ci
+2. run npm run build
+3. start the server
+
+node dist/index.cjs
+
+---
+
+6. ENVIRONMENT VARIABLES
+
+---
+
+Provide an .env.example file including:
+
+DATABASE_URL=
+SESSION_SECRET=
+RESEND_API_KEY=
+EMAIL_FROM=
+BASE_URL=
+APP_BASE_URL=
+ONE_SIGNAL_REST_API_KEY=
+VITE_ONESIGNAL_APP_ID=
+EPOINT_MERCHANT_ID=
+EPOINT_PRIVATE_KEY=
+EPOINT_PUBLIC_KEY=
+
+---
+
+7. EXPECTED RESULT
+
+---
+
+After deployment the following must work:
+
+curl http://localhost:5000
+
+The server should start without:
+
+database migration errors
+missing schema errors
+missing dependency errors
+
+---
+
+## GOAL
+
+Produce a **clean production-ready ZIP export** that can be deployed on a fresh Ubuntu server using Docker and PostgreSQL with no manual fixes required.
