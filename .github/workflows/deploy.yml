@@ -9,14 +9,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: SSH Deploy
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: 89.167.118.166
-        username: root
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        script: |
-          cd /opt/oss-platform
-          git pull
-          docker compose down
-          docker compose up -d --build
+      - name: SSH Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 89.167.118.166
+          username: root
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /opt/oss-platform
+            git pull
+            docker stop oss_app || true
+            docker rm oss_app || true
+            docker compose down
+            docker compose up -d --build
