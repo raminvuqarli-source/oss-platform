@@ -28,6 +28,7 @@ import { registerSubscriptionRoutes } from "./subscription.routes";
 import { registerInvoiceRoutes } from "./invoice.routes";
 import { registerAdminFinanceRoutes } from "./admin-finance.routes";
 import { registerRefundRoutes } from "./refund.routes";
+import { registerAiChatRoutes } from "./ai-chat.routes";
 import { initWebSocket } from "../websocket/index";
 import path from "path";
 
@@ -74,6 +75,7 @@ export async function registerRoutes(
   registerInvoiceRoutes(app);
   registerAdminFinanceRoutes(app);
   registerRefundRoutes(app);
+  registerAiChatRoutes(app);
   initWebSocket(httpServer, app);
 
   return httpServer;

@@ -1839,3 +1839,23 @@ export const insertApiUsageLogSchema = createInsertSchema(apiUsageLogs).omit({
 });
 export type InsertApiUsageLog = z.infer<typeof insertApiUsageLogSchema>;
 export type ApiUsageLog = typeof apiUsageLogs.$inferSelect;
+
+// ===================== AI CHAT LEADS =====================
+export const leads = pgTable("leads", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  propertyName: text("property_name").notNull(),
+  country: text("country").notNull(),
+  propertyType: text("property_type").notNull(),
+  email: text("email").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_leads_email").on(table.email),
+  index("idx_leads_created_at").on(table.createdAt),
+]);
+
+export const insertLeadSchema = createInsertSchema(leads).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertLead = z.infer<typeof insertLeadSchema>;
+export type Lead = typeof leads.$inferSelect;

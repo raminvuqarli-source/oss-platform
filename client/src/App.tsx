@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Lock as LockIcon } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import Welcome from "@/pages/welcome";
+import { AIChatWidget } from "@/components/ai-chat-widget";
 import '@/lib/i18n';
 
 const Login = lazy(() => import("@/pages/login"));
@@ -217,6 +218,7 @@ function App() {
             <TooltipProvider>
               <Toaster />
               <Router />
+              <AIChatWidget />
             </TooltipProvider>
           </AuthProvider>
         </ThemeProvider>

@@ -23,6 +23,9 @@ export const env = {
   get EPOINT_MERCHANT_ID(): string | undefined {
     return process.env.EPOINT_MERCHANT_ID;
   },
+  get OPENAI_API_KEY(): string | undefined {
+    return process.env.OPENAI_API_KEY;
+  },
   get BASE_URL(): string {
     if (process.env.APP_BASE_URL) return process.env.APP_BASE_URL;
     if (process.env.BASE_URL) return process.env.BASE_URL;

@@ -63,6 +63,13 @@ Preferred communication style: Simple, everyday language.
 - **Refund Management System**: Tracks refund workflow (pending → approved → processed, or rejected) and updates invoice/transaction statuses.
 - **Admin Finance Center**: Provides platform-wide financial metrics and data.
 
+### AI Chat Widget
+- **Floating Chat Bubble**: Fixed bottom-right widget visible on all pages (Intercom/Drift style).
+- **AI-Powered Responses**: Integrates with OpenAI GPT-4o-mini via `OPENAI_API_KEY` env var (gracefully falls back to offline message if not set).
+- **Demo Lead Capture**: Detects demo/trial intent keywords, shows inline lead form (property name, country, type, email). Leads saved to `leads` PostgreSQL table.
+- **Public Endpoints**: `POST /api/ai-chat` and `POST /api/ai-chat/lead` are whitelisted as public (no auth required).
+- **Files**: `client/src/components/ai-chat-widget.tsx`, `server/routes/ai-chat.routes.ts`.
+
 ### Automated Systems
 - **Automated Database Backup**: Daily `pg_dump` backups, retaining the last 7, with monitoring for failures.
 - **Production Monitoring & Error Tracking**: Centralized alert tracking with admin email notifications for critical system events.
