@@ -1905,8 +1905,11 @@
       "corporate": "Корпоративный",
       "other": "Прочее"
     },
+    "payNow": "Оплатить",
     "paymentStatuses": {
       "paid": "Оплачено",
+      "unpaid": "Не оплачено",
+      "failed": "Не удалось",
       "pending": "Ожидание",
       "partial": "Частично"
     },

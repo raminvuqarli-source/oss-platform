@@ -1905,8 +1905,11 @@
       "corporate": "Firmenbuchung",
       "other": "Sonstiges"
     },
+    "payNow": "Jetzt bezahlen",
     "paymentStatuses": {
       "paid": "Bezahlt",
+      "unpaid": "Nicht bezahlt",
+      "failed": "Fehlgeschlagen",
       "pending": "Ausstehend",
       "partial": "Teilweise bezahlt"
     },

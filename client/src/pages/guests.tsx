@@ -875,7 +875,7 @@ function GuestProfile({ guestId, onBack }: { guestId: string; onBack: () => void
                   </div>
                 )}
                 <div className="flex justify-between items-center flex-wrap gap-1">
-                  <span className="text-muted-foreground">Ödəniş Statusu</span>
+                  <span className="text-muted-foreground">{t('guests.paymentStatus')}</span>
                   <Badge
                     variant={
                       (booking as any).paymentStatus === "paid" ? "default" :
@@ -883,8 +883,8 @@ function GuestProfile({ guestId, onBack }: { guestId: string; onBack: () => void
                     }
                     data-testid="badge-payment-status"
                   >
-                    {(booking as any).paymentStatus === "paid" ? "Ödənilib" :
-                     (booking as any).paymentStatus === "failed" ? "Uğursuz" : "Ödənilməyib"}
+                    {(booking as any).paymentStatus === "paid" ? t('guests.paymentStatuses.paid') :
+                     (booking as any).paymentStatus === "failed" ? t('guests.paymentStatuses.failed') : t('guests.paymentStatuses.unpaid')}
                   </Badge>
                 </div>
                 {(booking as any).paymentStatus !== "paid" && (
@@ -896,7 +896,7 @@ function GuestProfile({ guestId, onBack }: { guestId: string; onBack: () => void
                     data-testid="button-pay-now"
                   >
                     <CreditCard className="h-4 w-4 mr-1" />
-                    {paymentMutation.isPending ? "Yüklənir..." : "Ödəniş et (Pay Now)"}
+                    {paymentMutation.isPending ? t('common.loading') : t('guests.payNow')}
                   </Button>
                 )}
               </div>

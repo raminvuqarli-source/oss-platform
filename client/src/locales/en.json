@@ -2045,8 +2045,11 @@
       "corporate": "Corporate",
       "other": "Other"
     },
+    "payNow": "Pay Now",
     "paymentStatuses": {
       "paid": "Paid",
+      "unpaid": "Unpaid",
+      "failed": "Failed",
       "pending": "Pending",
       "partial": "Partial"
     },

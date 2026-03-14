@@ -1905,8 +1905,11 @@
       "corporate": "Kurumsal",
       "other": "Diğer"
     },
+    "payNow": "Şimdi Öde",
     "paymentStatuses": {
       "paid": "Ödendi",
+      "unpaid": "Ödenmedi",
+      "failed": "Başarısız",
       "pending": "Beklemede",
       "partial": "Kısmi"
     },

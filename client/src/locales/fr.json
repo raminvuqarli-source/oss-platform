@@ -1905,8 +1905,11 @@
       "corporate": "Entreprise",
       "other": "Autre"
     },
+    "payNow": "Payer maintenant",
     "paymentStatuses": {
       "paid": "Payé",
+      "unpaid": "Non payé",
+      "failed": "Échoué",
       "pending": "En attente",
       "partial": "Partiel"
     },

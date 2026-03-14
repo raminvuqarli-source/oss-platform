@@ -1905,8 +1905,11 @@
       "corporate": "شرکتی",
       "other": "سایر"
     },
+    "payNow": "پرداخت کن",
     "paymentStatuses": {
       "paid": "پرداخت شده",
+      "unpaid": "پرداخت نشده",
+      "failed": "ناموفق",
       "pending": "در انتظار",
       "partial": "پرداخت ناقص"
     },

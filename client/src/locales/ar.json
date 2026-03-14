@@ -1905,8 +1905,11 @@
       "corporate": "شركات",
       "other": "أخرى"
     },
+    "payNow": "ادفع الآن",
     "paymentStatuses": {
       "paid": "مدفوع",
+      "unpaid": "غير مدفوع",
+      "failed": "فشل",
       "pending": "قيد الانتظار",
       "partial": "مدفوع جزئيًا"
     },

@@ -1905,8 +1905,11 @@
       "corporate": "Zakelijk",
       "other": "Overig"
     },
+    "payNow": "Nu betalen",
     "paymentStatuses": {
       "paid": "Betaald",
+      "unpaid": "Niet betaald",
+      "failed": "Mislukt",
       "pending": "In Afwachting",
       "partial": "Gedeeltelijk"
     },
