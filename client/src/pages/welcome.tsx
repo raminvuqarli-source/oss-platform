@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { SEO } from "@/components/seo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -128,6 +129,26 @@ export default function Welcome() {
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [showIOSSteps, setShowIOSSteps] = useState(false);
+  const [installStatus, setInstallStatus] = useState<"idle" | "accepted" | "unavailable">("idle");
+  const [showIOSModal, setShowIOSModal] = useState(false);
+
+  const triggerInstall = async () => {
+    const prompt = (window as any).__pwaInstallPrompt;
+    if (!prompt) {
+      setInstallStatus("unavailable");
+      return;
+    }
+    try {
+      await prompt.prompt();
+      const { outcome } = await prompt.userChoice;
+      (window as any).__pwaInstallPrompt = null;
+      if (outcome === "accepted") {
+        setInstallStatus("accepted");
+      }
+    } catch {
+      setInstallStatus("unavailable");
+    }
+  };
   const pwa = usePWAInstall();
 
   useEffect(() => {
@@ -1327,17 +1348,17 @@ export default function Welcome() {
                           <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">2.</span>Click install icon in address bar</li>
                           <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">3.</span>Click "Install"</li>
                         </ol>
-                        {pwa.isInstalled ? (
-                          <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                            <CheckCircle className="h-3.5 w-3.5" /> App installed!
+                        {installStatus === "accepted" ? (
+                          <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium" data-testid="text-install-success-windows">
+                            <CheckCircle className="h-3.5 w-3.5" /> OSS installed successfully
+                          </div>
+                        ) : installStatus === "unavailable" ? (
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="text-install-unsupported-windows">
+                            <X className="h-3.5 w-3.5" /> Installation not supported on this device
                           </div>
                         ) : (
-                          <Button size="sm" className="w-full rounded-lg" data-testid="button-install-windows"
-                            onClick={async () => {
-                              const result = await pwa.install();
-                              if (result === "unavailable") toast({ title: "Use Chrome or Edge", description: "Click the install icon (⊕) in the address bar to install." });
-                            }}>
-                            <Download className="h-3.5 w-3.5 mr-1.5" /> Install for Windows
+                          <Button size="sm" className="w-full rounded-lg" data-testid="button-install-windows" onClick={triggerInstall}>
+                            <Download className="h-3.5 w-3.5 mr-1.5" /> Install Now
                           </Button>
                         )}
                       </CardContent>
@@ -1370,17 +1391,17 @@ export default function Welcome() {
                           <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">2.</span>Click install icon in address bar</li>
                           <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">3.</span>Click "Install"</li>
                         </ol>
-                        {pwa.isInstalled ? (
-                          <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                            <CheckCircle className="h-3.5 w-3.5" /> App installed!
+                        {installStatus === "accepted" ? (
+                          <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium" data-testid="text-install-success-mac">
+                            <CheckCircle className="h-3.5 w-3.5" /> OSS installed successfully
+                          </div>
+                        ) : installStatus === "unavailable" ? (
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="text-install-unsupported-mac">
+                            <X className="h-3.5 w-3.5" /> Installation not supported on this device
                           </div>
                         ) : (
-                          <Button size="sm" className="w-full rounded-lg" data-testid="button-install-mac"
-                            onClick={async () => {
-                              const result = await pwa.install();
-                              if (result === "unavailable") toast({ title: "Use Chrome or Safari", description: "Click the install icon (⊕) in the address bar to install." });
-                            }}>
-                            <Download className="h-3.5 w-3.5 mr-1.5" /> Install for Mac
+                          <Button size="sm" className="w-full rounded-lg" data-testid="button-install-mac" onClick={triggerInstall}>
+                            <Download className="h-3.5 w-3.5 mr-1.5" /> Install Now
                           </Button>
                         )}
                       </CardContent>
@@ -1413,17 +1434,17 @@ export default function Welcome() {
                           <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">2.</span>Tap the ⋮ menu</li>
                           <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">3.</span>Tap "Add to Home Screen"</li>
                         </ol>
-                        {pwa.isInstalled ? (
-                          <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                            <CheckCircle className="h-3.5 w-3.5" /> App installed!
+                        {installStatus === "accepted" ? (
+                          <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium" data-testid="text-install-success-android">
+                            <CheckCircle className="h-3.5 w-3.5" /> OSS installed successfully
+                          </div>
+                        ) : installStatus === "unavailable" ? (
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="text-install-unsupported-android">
+                            <X className="h-3.5 w-3.5" /> Installation not supported on this device
                           </div>
                         ) : (
-                          <Button size="sm" className="w-full rounded-lg" data-testid="button-install-android"
-                            onClick={async () => {
-                              const result = await pwa.install();
-                              if (result === "unavailable") toast({ title: "Use Chrome", description: "Tap ⋮ menu → 'Add to Home Screen' in Chrome to install." });
-                            }}>
-                            <Download className="h-3.5 w-3.5 mr-1.5" /> Install for Android
+                          <Button size="sm" className="w-full rounded-lg" data-testid="button-install-android" onClick={triggerInstall}>
+                            <Download className="h-3.5 w-3.5 mr-1.5" /> Install Now
                           </Button>
                         )}
                       </CardContent>
@@ -1463,10 +1484,10 @@ export default function Welcome() {
                           size="sm"
                           className="w-full rounded-lg"
                           data-testid="button-install-ios"
-                          onClick={() => setShowIOSSteps(s => !s)}
+                          onClick={() => setShowIOSModal(true)}
                         >
                           <Download className="h-3.5 w-3.5 mr-1.5" />
-                          {showIOSSteps ? "Hide Guide" : "Install for iOS"}
+                          Install Now
                         </Button>
                       </CardContent>
                     </Card>
@@ -1474,26 +1495,26 @@ export default function Welcome() {
                 })()}
               </div>
 
-              {/* iOS Expanded Instructions */}
-              {showIOSSteps && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="rounded-2xl border border-border/50 bg-muted/30 p-6 max-w-2xl mx-auto"
-                  data-testid="ios-instructions-expanded"
-                >
-                  <div className="flex items-center gap-2 mb-4">
-                    <SiApple className="text-slate-600 dark:text-slate-300 text-lg" />
-                    <h3 className="font-semibold">iPhone / iPad Install Guide</h3>
-                  </div>
-                  <div className="space-y-3">
+              {/* iOS Install Modal */}
+              <Dialog open={showIOSModal} onOpenChange={setShowIOSModal}>
+                <DialogContent className="max-w-md" data-testid="modal-ios-install">
+                  <DialogHeader>
+                    <div className="flex items-center gap-2.5 mb-1">
+                      <SiApple className="text-slate-600 dark:text-slate-300 text-xl" />
+                      <DialogTitle>Install OSS on iPhone / iPad</DialogTitle>
+                    </div>
+                    <DialogDescription>
+                      Safari required — Chrome on iOS doesn't support PWA install.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-3 mt-2">
                     {[
                       { step: "1", icon: <Globe className="h-4 w-4 text-blue-500" />, title: "Open Safari", desc: "Must use Safari — Chrome on iOS doesn't support PWA install." },
                       { step: "2", icon: <Share className="h-4 w-4 text-blue-500" />, title: "Tap the Share icon", desc: "The square with an arrow pointing up at the bottom of the screen." },
                       { step: "3", icon: <Plus className="h-4 w-4 text-green-500" />, title: "Add to Home Screen", desc: "Scroll down in the share sheet and tap 'Add to Home Screen'." },
                       { step: "4", icon: <CheckCircle className="h-4 w-4 text-green-500" />, title: "Tap Add", desc: "OSS will appear on your home screen as an app icon." },
                     ].map(item => (
-                      <div key={item.step} className="flex items-start gap-3 p-3 rounded-xl bg-background/60 border border-border/30">
+                      <div key={item.step} className="flex items-start gap-3 p-3 rounded-xl bg-muted/50 border border-border/30">
                         <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-xs font-bold text-primary mt-0.5">{item.step}</div>
                         <div className="flex items-start gap-2.5 flex-1">
                           <div className="mt-0.5 flex-shrink-0">{item.icon}</div>
@@ -1505,8 +1526,8 @@ export default function Welcome() {
                       </div>
                     ))}
                   </div>
-                </motion.div>
-              )}
+                </DialogContent>
+              </Dialog>
 
               <p className="text-center text-xs text-muted-foreground/50 mt-8">
                 Works offline · No app store required · Always up to date
