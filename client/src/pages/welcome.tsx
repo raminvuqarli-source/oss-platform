@@ -129,13 +129,15 @@ export default function Welcome() {
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [showIOSSteps, setShowIOSSteps] = useState(false);
-  const [installStatus, setInstallStatus] = useState<"idle" | "accepted" | "needs_browser">("idle");
+  const [installStatus, setInstallStatus] = useState<"idle" | "accepted" | "needs_browser" | "use_menu">("idle");
   const [showIOSModal, setShowIOSModal] = useState(false);
+
+  const isInIframe = window.self !== window.top;
 
   const triggerInstall = async () => {
     const prompt = (window as any).__pwaInstallPrompt;
     if (!prompt) {
-      setInstallStatus("needs_browser");
+      setInstallStatus(isInIframe ? "needs_browser" : "use_menu");
       return;
     }
     try {
@@ -146,7 +148,7 @@ export default function Welcome() {
         setInstallStatus("accepted");
       }
     } catch {
-      setInstallStatus("needs_browser");
+      setInstallStatus(isInIframe ? "needs_browser" : "use_menu");
     }
   };
 
@@ -1363,8 +1365,19 @@ export default function Welcome() {
                       <div className="space-y-2">
                         <p className="text-xs text-muted-foreground">Open OSS directly in Chrome or Edge — not inside an embedded frame.</p>
                         <Button variant="outline" className="w-full rounded-lg" data-testid="button-open-browser-windows" onClick={openInBrowser}>
-                          <ExternalLink className="h-4 w-4 mr-2" /> Open in Chrome
+                          <ExternalLink className="h-4 w-4 mr-2" /> Open in New Tab
                         </Button>
+                      </div>
+                    ) : installStatus === "use_menu" ? (
+                      <div className="space-y-2">
+                        <div className="flex items-start gap-2 p-2.5 rounded-lg bg-muted/60 border border-border/30">
+                          <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-primary mt-0.5">1</div>
+                          <p className="text-xs text-muted-foreground">Look for <span className="font-medium text-foreground">⊕</span> icon in the address bar</p>
+                        </div>
+                        <div className="flex items-start gap-2 p-2.5 rounded-lg bg-muted/60 border border-border/30">
+                          <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-primary mt-0.5">2</div>
+                          <p className="text-xs text-muted-foreground">Or Chrome menu <span className="font-medium text-foreground">⋮</span> → <span className="font-medium text-foreground">Install OSS</span></p>
+                        </div>
                       </div>
                     ) : (
                       <Button className="w-full rounded-lg" data-testid="button-install-windows" onClick={triggerInstall}>
@@ -1402,8 +1415,19 @@ export default function Welcome() {
                       <div className="space-y-2">
                         <p className="text-xs text-muted-foreground">Open OSS directly in Chrome or Safari — not inside an embedded frame.</p>
                         <Button variant="outline" className="w-full rounded-lg" data-testid="button-open-browser-mac" onClick={openInBrowser}>
-                          <ExternalLink className="h-4 w-4 mr-2" /> Open in Chrome
+                          <ExternalLink className="h-4 w-4 mr-2" /> Open in New Tab
                         </Button>
+                      </div>
+                    ) : installStatus === "use_menu" ? (
+                      <div className="space-y-2">
+                        <div className="flex items-start gap-2 p-2.5 rounded-lg bg-muted/60 border border-border/30">
+                          <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-primary mt-0.5">1</div>
+                          <p className="text-xs text-muted-foreground">Look for <span className="font-medium text-foreground">⊕</span> icon in the address bar</p>
+                        </div>
+                        <div className="flex items-start gap-2 p-2.5 rounded-lg bg-muted/60 border border-border/30">
+                          <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-primary mt-0.5">2</div>
+                          <p className="text-xs text-muted-foreground">Or Chrome menu <span className="font-medium text-foreground">⋮</span> → <span className="font-medium text-foreground">Install OSS</span></p>
+                        </div>
                       </div>
                     ) : (
                       <Button className="w-full rounded-lg" data-testid="button-install-mac" onClick={triggerInstall}>
@@ -1441,8 +1465,19 @@ export default function Welcome() {
                       <div className="space-y-2">
                         <p className="text-xs text-muted-foreground">Open OSS directly in Chrome — not inside an embedded frame.</p>
                         <Button variant="outline" className="w-full rounded-lg" data-testid="button-open-browser-android" onClick={openInBrowser}>
-                          <ExternalLink className="h-4 w-4 mr-2" /> Open in Chrome
+                          <ExternalLink className="h-4 w-4 mr-2" /> Open in New Tab
                         </Button>
+                      </div>
+                    ) : installStatus === "use_menu" ? (
+                      <div className="space-y-2">
+                        <div className="flex items-start gap-2 p-2.5 rounded-lg bg-muted/60 border border-border/30">
+                          <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-primary mt-0.5">1</div>
+                          <p className="text-xs text-muted-foreground">Look for <span className="font-medium text-foreground">⊕</span> icon in the address bar</p>
+                        </div>
+                        <div className="flex items-start gap-2 p-2.5 rounded-lg bg-muted/60 border border-border/30">
+                          <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-primary mt-0.5">2</div>
+                          <p className="text-xs text-muted-foreground">Or Chrome menu <span className="font-medium text-foreground">⋮</span> → <span className="font-medium text-foreground">Install OSS</span></p>
+                        </div>
                       </div>
                     ) : (
                       <Button className="w-full rounded-lg" data-testid="button-install-android" onClick={triggerInstall}>
