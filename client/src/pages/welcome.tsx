@@ -455,39 +455,6 @@ export default function Welcome() {
           </section>
         </AnimatedSection>
 
-        {/* HIGHLIGHTS SECTION */}
-        <AnimatedSection>
-          <section className="py-20 px-6" data-testid="section-highlights">
-            <div className="max-w-6xl mx-auto">
-              <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {[
-                  { icon: Building2, titleKey: 'landing.highlights.multiProperty', descKey: 'landing.highlights.multiPropertyDesc', tid: 'multi-property' },
-                  { icon: Smartphone, titleKey: 'landing.highlights.smartRooms', descKey: 'landing.highlights.smartRoomsDesc', tid: 'smart-rooms' },
-                  { icon: BarChart3, titleKey: 'landing.highlights.realTimeAnalytics', descKey: 'landing.highlights.realTimeAnalyticsDesc', tid: 'real-time-analytics' },
-                  { icon: Users, titleKey: 'landing.highlights.teamManagement', descKey: 'landing.highlights.teamManagementDesc', tid: 'team-management' },
-                  { icon: Wifi, titleKey: 'landing.highlights.iotIntegration', descKey: 'landing.highlights.iotIntegrationDesc', tid: 'iot-integration' },
-                  { icon: Clock, titleKey: 'landing.highlights.automation', descKey: 'landing.highlights.automationDesc', tid: 'automation' },
-                ].map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <motion.div key={item.tid} variants={fadeUp}>
-                      <Card className="group border-border/40 bg-card/50 hover:bg-card hover:border-primary/20 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1" data-testid={`card-highlight-${item.tid}`}>
-                        <CardContent className="p-6 space-y-3">
-                          <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
-                            <Icon className="h-5 w-5 text-primary" />
-                          </div>
-                          <h3 className="font-heading font-semibold text-base">{t(item.titleKey)}</h3>
-                          <p className="text-sm text-muted-foreground leading-relaxed">{t(item.descKey)}</p>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  );
-                })}
-              </motion.div>
-            </div>
-          </section>
-        </AnimatedSection>
-
         {/* FEATURES SECTION */}
         <AnimatedSection>
           <section id="features" className="py-24 px-6 relative" data-testid="section-features">
