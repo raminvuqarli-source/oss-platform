@@ -240,14 +240,15 @@ export default function Welcome() {
             {t('landing.tryLiveDemo')}
           </Button>
         </nav>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <LanguageSwitcher />
           <ThemeToggle />
-          <Button variant="ghost" size="sm" onClick={() => setLocation("/login")} className="hidden sm:inline-flex" data-testid="button-header-login">
+          <Button variant="ghost" size="sm" onClick={() => setLocation("/login")} data-testid="button-header-login">
             {t('auth.signIn')}
           </Button>
-          <Button size="sm" onClick={() => navigateToRegister()} className="hidden sm:inline-flex" data-testid="button-header-trial">
-            {t('pricing.startFreeTrial')}
+          <Button size="sm" onClick={() => navigateToRegister()} data-testid="button-header-trial">
+            <span className="hidden sm:inline">{t('pricing.startFreeTrial')}</span>
+            <span className="sm:hidden">Trial</span>
             <ArrowRight className="ml-1 h-3.5 w-3.5" />
           </Button>
         </div>
