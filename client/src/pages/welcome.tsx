@@ -154,6 +154,11 @@ export default function Welcome() {
     const url = window.location.href.split("?")[0];
     window.open(url, "_blank", "noopener");
   };
+
+  const isIOSSafari = (() => {
+    const ua = navigator.userAgent;
+    return /iPhone|iPad|iPod/.test(ua) && !/CriOS|FxiOS|OPiOS|mercury/.test(ua);
+  })();
   const pwa = usePWAInstall();
 
   useEffect(() => {
@@ -1463,12 +1468,37 @@ export default function Welcome() {
                       </div>
                       <div>
                         <p className="font-semibold text-sm">iPhone / iPad</p>
-                        <p className="text-xs text-muted-foreground">Safari browser</p>
+                        <p className="text-xs text-muted-foreground">{isIOSSafari ? "You're in Safari ✓" : "Safari browser"}</p>
                       </div>
                     </div>
-                    <Button className="w-full rounded-lg" data-testid="button-install-ios" onClick={() => setShowIOSModal(true)}>
-                      <Download className="h-4 w-4 mr-2" /> Install Now
-                    </Button>
+                    {isIOSSafari ? (
+                      <div className="space-y-2.5">
+                        <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-muted/60 border border-border/30">
+                          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-[11px] font-bold text-primary">1</div>
+                          <div className="flex items-center gap-1.5 text-sm">
+                            <span>Tap</span>
+                            <Share className="h-4 w-4 text-blue-500" />
+                            <span className="font-medium">Share</span>
+                            <span className="text-muted-foreground text-xs">(bottom bar)</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-muted/60 border border-border/30">
+                          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-[11px] font-bold text-primary">2</div>
+                          <div className="flex items-center gap-1.5 text-sm">
+                            <Plus className="h-4 w-4 text-green-500" />
+                            <span>Tap <span className="font-medium">"Add to Home Screen"</span></span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                          <CheckCircle className="h-4 w-4 text-emerald-500 flex-shrink-0" />
+                          <span className="text-xs text-emerald-600 dark:text-emerald-400">OSS will appear on your home screen</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <Button className="w-full rounded-lg" data-testid="button-install-ios" onClick={() => setShowIOSModal(true)}>
+                        <Download className="h-4 w-4 mr-2" /> Install Now
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
 
