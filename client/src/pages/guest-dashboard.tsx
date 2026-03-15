@@ -288,21 +288,21 @@ export default function GuestDashboard() {
 
   const smartPlan = (planData?.smartPlanType || "none") as SmartPlanType;
   const isGuest = user?.role === "guest";
-  const smartGated = isGuest && !isDemoMode;
-  const smartControlsEnabled = !smartGated && smartPlan !== "none";
+  const hotelHasSmart = smartPlan !== "none";
+  const smartControlsEnabled = hotelHasSmart;
 
-  const canLight = !smartGated && hasSmartFeature(smartPlan, "light_control");
-  const canAC = !smartGated && hasSmartFeature(smartPlan, "ac_control");
-  const canLock = !smartGated && hasSmartFeature(smartPlan, "smart_lock");
-  const canPreCheckin = !smartGated && hasSmartFeature(smartPlan, "pre_checkin");
-  const canCurtains = !smartGated && hasSmartFeature(smartPlan, "curtains");
-  const canJacuzzi = !smartGated && hasSmartFeature(smartPlan, "jacuzzi");
-  const canWelcome = !smartGated && hasSmartFeature(smartPlan, "welcome_mode");
-  const canMoodLighting = !smartGated && hasSmartFeature(smartPlan, "mood_lighting");
-  const canImmersiveAudio = !smartGated && hasSmartFeature(smartPlan, "immersive_audio");
-  const canSmartMirror = !smartGated && hasSmartFeature(smartPlan, "smart_mirror");
-  const canAiWakeup = !smartGated && hasSmartFeature(smartPlan, "ai_wakeup");
-  const canGuestAi = !smartGated && hasSmartFeature(smartPlan, "guest_ai");
+  const canLight = hasSmartFeature(smartPlan, "light_control");
+  const canAC = hasSmartFeature(smartPlan, "ac_control");
+  const canLock = hasSmartFeature(smartPlan, "smart_lock");
+  const canPreCheckin = hasSmartFeature(smartPlan, "pre_checkin");
+  const canCurtains = hasSmartFeature(smartPlan, "curtains");
+  const canJacuzzi = hasSmartFeature(smartPlan, "jacuzzi");
+  const canWelcome = hasSmartFeature(smartPlan, "welcome_mode");
+  const canMoodLighting = hasSmartFeature(smartPlan, "mood_lighting");
+  const canImmersiveAudio = hasSmartFeature(smartPlan, "immersive_audio");
+  const canSmartMirror = hasSmartFeature(smartPlan, "smart_mirror");
+  const canAiWakeup = hasSmartFeature(smartPlan, "ai_wakeup");
+  const canGuestAi = hasSmartFeature(smartPlan, "guest_ai");
 
   const { data: booking, isLoading: bookingLoading } = useQuery<Booking>({
     queryKey: ["/api/bookings/current"],
@@ -410,7 +410,7 @@ export default function GuestDashboard() {
 
   const updateSettingsMutation = useMutation({
     mutationFn: async (settings: Partial<RoomSettings>) => {
-      if (smartGated) return;
+      if (!hotelHasSmart) return;
       const response = await apiRequest("PATCH", `/api/room-settings/${booking?.id}`, settings);
       return response.json();
     },
@@ -446,7 +446,7 @@ export default function GuestDashboard() {
 
   const doorControlMutation = useMutation({
     mutationFn: async (action: "open" | "close") => {
-      if (smartGated) return;
+      if (!hotelHasSmart) return;
       const response = await apiRequest("POST", `/api/door/${booking?.id}/control`, { action });
       return response.json();
     },
@@ -633,7 +633,7 @@ export default function GuestDashboard() {
   };
 
   const handleSettingChange = (key: string, value: any) => {
-    if (smartGated) return;
+    if (!hotelHasSmart) return;
     updateSettingsMutation.mutate({ [key]: value });
   };
 
@@ -820,17 +820,17 @@ export default function GuestDashboard() {
         </div>
         
         {!smartControlsEnabled && (
-          <Card className="mb-4">
+          <Card className="mb-4 border-muted-foreground/20">
             <CardContent className="p-4 flex items-center gap-3">
               <div className="p-2 rounded-md bg-muted">
                 <Lock className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium">{t('plan.smartControlsLocked', 'Smart Controls Not Available')}</p>
-                <p className="text-xs text-muted-foreground">
-                  {isGuest
-                    ? t('plan.smartControlsLockedGuest', 'Smart room controls are not enabled for your room. Contact reception for assistance.')
-                    : t('plan.smartControlsLockedDesc', 'Smart room controls are not included in your current plan. Contact your hotel for more information.')}
+                <p className="text-sm font-medium text-muted-foreground">
+                  {t('plan.smartControlsNotAvailable', 'Bu xidmət bu oteldə mövcud deyil')}
+                </p>
+                <p className="text-xs text-muted-foreground/70">
+                  {t('plan.smartControlsNotAvailableDesc', 'Bu otel smart idarəetmə paketini aktivləşdirməyib.')}
                 </p>
               </div>
             </CardContent>
