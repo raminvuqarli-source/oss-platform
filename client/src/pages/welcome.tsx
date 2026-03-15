@@ -1323,176 +1323,147 @@ export default function Welcome() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+
                 {/* Windows */}
-                {(() => {
-                  const isCurrentDevice = pwa.deviceType === "windows";
-                  return (
-                    <Card className={`relative overflow-hidden transition-all duration-200 ${isCurrentDevice ? "border-primary/60 shadow-md shadow-primary/10" : "border-border/40 hover:border-border/70"}`} data-testid="card-platform-windows">
-                      {isCurrentDevice && (
-                        <div className="absolute top-2 right-2">
-                          <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">Your device</Badge>
-                        </div>
-                      )}
-                      <CardContent className="p-5 space-y-4">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
-                            <Monitor className="text-blue-500 h-5 w-5" />
-                          </div>
-                          <div>
-                            <p className="font-semibold text-sm">Windows</p>
-                            <p className="text-xs text-muted-foreground">Chrome / Edge</p>
-                          </div>
-                        </div>
-                        <ol className="space-y-1.5 text-xs text-muted-foreground">
-                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">1.</span>Open in Chrome or Edge</li>
-                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">2.</span>Click install icon in address bar</li>
-                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">3.</span>Click "Install"</li>
-                        </ol>
-                        {installStatus === "accepted" ? (
-                          <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium" data-testid="text-install-success-windows">
-                            <CheckCircle className="h-3.5 w-3.5" /> OSS installed successfully
-                          </div>
-                        ) : installStatus === "unavailable" ? (
-                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="text-install-unsupported-windows">
-                            <X className="h-3.5 w-3.5" /> Installation not supported on this device
-                          </div>
-                        ) : (
-                          <Button size="sm" className="w-full rounded-lg" data-testid="button-install-windows" onClick={triggerInstall}>
-                            <Download className="h-3.5 w-3.5 mr-1.5" /> Install Now
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
-                  );
-                })()}
+                <Card
+                  className={`relative overflow-hidden transition-all duration-200 ${pwa.deviceType === "windows" ? "border-primary/60 shadow-md shadow-primary/10" : "border-border/40 hover:border-border/70"}`}
+                  data-testid="card-platform-windows"
+                >
+                  {pwa.deviceType === "windows" && (
+                    <div className="absolute top-2 right-2">
+                      <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">Your device</Badge>
+                    </div>
+                  )}
+                  <CardContent className="p-5 space-y-4">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                        <Monitor className="text-blue-500 h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm">Windows</p>
+                        <p className="text-xs text-muted-foreground">Chrome / Edge</p>
+                      </div>
+                    </div>
+                    {installStatus === "accepted" ? (
+                      <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm font-medium" data-testid="text-install-success-windows">
+                        <CheckCircle className="h-4 w-4 flex-shrink-0" />
+                        OSS installed successfully
+                      </div>
+                    ) : installStatus === "unavailable" ? (
+                      <div className="flex items-center gap-2 p-3 rounded-lg bg-muted text-muted-foreground text-sm" data-testid="text-install-unsupported-windows">
+                        <X className="h-4 w-4 flex-shrink-0" />
+                        Installation not supported on this device
+                      </div>
+                    ) : (
+                      <Button className="w-full rounded-lg" data-testid="button-install-windows" onClick={triggerInstall}>
+                        <Download className="h-4 w-4 mr-2" /> Install Now
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
 
                 {/* Mac */}
-                {(() => {
-                  const isCurrentDevice = pwa.deviceType === "mac";
-                  return (
-                    <Card className={`relative overflow-hidden transition-all duration-200 ${isCurrentDevice ? "border-primary/60 shadow-md shadow-primary/10" : "border-border/40 hover:border-border/70"}`} data-testid="card-platform-mac">
-                      {isCurrentDevice && (
-                        <div className="absolute top-2 right-2">
-                          <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">Your device</Badge>
-                        </div>
-                      )}
-                      <CardContent className="p-5 space-y-4">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-10 h-10 rounded-xl bg-slate-500/10 flex items-center justify-center">
-                            <SiApple className="text-slate-600 dark:text-slate-300 text-xl" />
-                          </div>
-                          <div>
-                            <p className="font-semibold text-sm">Mac</p>
-                            <p className="text-xs text-muted-foreground">Chrome / Safari</p>
-                          </div>
-                        </div>
-                        <ol className="space-y-1.5 text-xs text-muted-foreground">
-                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">1.</span>Open in Chrome or Safari</li>
-                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">2.</span>Click install icon in address bar</li>
-                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">3.</span>Click "Install"</li>
-                        </ol>
-                        {installStatus === "accepted" ? (
-                          <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium" data-testid="text-install-success-mac">
-                            <CheckCircle className="h-3.5 w-3.5" /> OSS installed successfully
-                          </div>
-                        ) : installStatus === "unavailable" ? (
-                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="text-install-unsupported-mac">
-                            <X className="h-3.5 w-3.5" /> Installation not supported on this device
-                          </div>
-                        ) : (
-                          <Button size="sm" className="w-full rounded-lg" data-testid="button-install-mac" onClick={triggerInstall}>
-                            <Download className="h-3.5 w-3.5 mr-1.5" /> Install Now
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
-                  );
-                })()}
+                <Card
+                  className={`relative overflow-hidden transition-all duration-200 ${pwa.deviceType === "mac" ? "border-primary/60 shadow-md shadow-primary/10" : "border-border/40 hover:border-border/70"}`}
+                  data-testid="card-platform-mac"
+                >
+                  {pwa.deviceType === "mac" && (
+                    <div className="absolute top-2 right-2">
+                      <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">Your device</Badge>
+                    </div>
+                  )}
+                  <CardContent className="p-5 space-y-4">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-xl bg-slate-500/10 flex items-center justify-center">
+                        <SiApple className="text-slate-600 dark:text-slate-300 text-xl" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm">Mac</p>
+                        <p className="text-xs text-muted-foreground">Chrome / Safari</p>
+                      </div>
+                    </div>
+                    {installStatus === "accepted" ? (
+                      <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm font-medium" data-testid="text-install-success-mac">
+                        <CheckCircle className="h-4 w-4 flex-shrink-0" />
+                        OSS installed successfully
+                      </div>
+                    ) : installStatus === "unavailable" ? (
+                      <div className="flex items-center gap-2 p-3 rounded-lg bg-muted text-muted-foreground text-sm" data-testid="text-install-unsupported-mac">
+                        <X className="h-4 w-4 flex-shrink-0" />
+                        Installation not supported on this device
+                      </div>
+                    ) : (
+                      <Button className="w-full rounded-lg" data-testid="button-install-mac" onClick={triggerInstall}>
+                        <Download className="h-4 w-4 mr-2" /> Install Now
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
 
                 {/* Android */}
-                {(() => {
-                  const isCurrentDevice = pwa.deviceType === "android";
-                  return (
-                    <Card className={`relative overflow-hidden transition-all duration-200 ${isCurrentDevice ? "border-primary/60 shadow-md shadow-primary/10" : "border-border/40 hover:border-border/70"}`} data-testid="card-platform-android">
-                      {isCurrentDevice && (
-                        <div className="absolute top-2 right-2">
-                          <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">Your device</Badge>
-                        </div>
-                      )}
-                      <CardContent className="p-5 space-y-4">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
-                            <SiAndroid className="text-green-500 text-xl" />
-                          </div>
-                          <div>
-                            <p className="font-semibold text-sm">Android</p>
-                            <p className="text-xs text-muted-foreground">Chrome browser</p>
-                          </div>
-                        </div>
-                        <ol className="space-y-1.5 text-xs text-muted-foreground">
-                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">1.</span>Open in Chrome browser</li>
-                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">2.</span>Tap the ⋮ menu</li>
-                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">3.</span>Tap "Add to Home Screen"</li>
-                        </ol>
-                        {installStatus === "accepted" ? (
-                          <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium" data-testid="text-install-success-android">
-                            <CheckCircle className="h-3.5 w-3.5" /> OSS installed successfully
-                          </div>
-                        ) : installStatus === "unavailable" ? (
-                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="text-install-unsupported-android">
-                            <X className="h-3.5 w-3.5" /> Installation not supported on this device
-                          </div>
-                        ) : (
-                          <Button size="sm" className="w-full rounded-lg" data-testid="button-install-android" onClick={triggerInstall}>
-                            <Download className="h-3.5 w-3.5 mr-1.5" /> Install Now
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
-                  );
-                })()}
+                <Card
+                  className={`relative overflow-hidden transition-all duration-200 ${pwa.deviceType === "android" ? "border-primary/60 shadow-md shadow-primary/10" : "border-border/40 hover:border-border/70"}`}
+                  data-testid="card-platform-android"
+                >
+                  {pwa.deviceType === "android" && (
+                    <div className="absolute top-2 right-2">
+                      <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">Your device</Badge>
+                    </div>
+                  )}
+                  <CardContent className="p-5 space-y-4">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+                        <SiAndroid className="text-green-500 text-xl" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm">Android</p>
+                        <p className="text-xs text-muted-foreground">Chrome browser</p>
+                      </div>
+                    </div>
+                    {installStatus === "accepted" ? (
+                      <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm font-medium" data-testid="text-install-success-android">
+                        <CheckCircle className="h-4 w-4 flex-shrink-0" />
+                        OSS installed successfully
+                      </div>
+                    ) : installStatus === "unavailable" ? (
+                      <div className="flex items-center gap-2 p-3 rounded-lg bg-muted text-muted-foreground text-sm" data-testid="text-install-unsupported-android">
+                        <X className="h-4 w-4 flex-shrink-0" />
+                        Installation not supported on this device
+                      </div>
+                    ) : (
+                      <Button className="w-full rounded-lg" data-testid="button-install-android" onClick={triggerInstall}>
+                        <Download className="h-4 w-4 mr-2" /> Install Now
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
 
-                {/* iOS */}
-                {(() => {
-                  const isCurrentDevice = pwa.deviceType === "ios";
-                  return (
-                    <Card
-                      className={`relative overflow-hidden transition-all duration-200 ${isCurrentDevice ? "border-primary/60 shadow-md shadow-primary/10" : "border-border/40 hover:border-border/70"}`}
-                      data-testid="card-platform-ios"
-                    >
-                      {isCurrentDevice && (
-                        <div className="absolute top-2 right-2">
-                          <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">Your device</Badge>
-                        </div>
-                      )}
-                      <CardContent className="p-5 space-y-4">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-10 h-10 rounded-xl bg-slate-500/10 flex items-center justify-center">
-                            <SiApple className="text-slate-600 dark:text-slate-300 text-xl" />
-                          </div>
-                          <div>
-                            <p className="font-semibold text-sm">iPhone / iPad</p>
-                            <p className="text-xs text-muted-foreground">Safari browser</p>
-                          </div>
-                        </div>
-                        <ol className="space-y-1.5 text-xs text-muted-foreground">
-                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">1.</span>Open in Safari</li>
-                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">2.</span>Tap <Share className="inline h-3 w-3 mx-0.5" /> Share button</li>
-                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">3.</span>Tap "Add to Home Screen"</li>
-                        </ol>
-                        <Button
-                          size="sm"
-                          className="w-full rounded-lg"
-                          data-testid="button-install-ios"
-                          onClick={() => setShowIOSModal(true)}
-                        >
-                          <Download className="h-3.5 w-3.5 mr-1.5" />
-                          Install Now
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  );
-                })()}
+                {/* iPhone / iPad */}
+                <Card
+                  className={`relative overflow-hidden transition-all duration-200 ${pwa.deviceType === "ios" ? "border-primary/60 shadow-md shadow-primary/10" : "border-border/40 hover:border-border/70"}`}
+                  data-testid="card-platform-ios"
+                >
+                  {pwa.deviceType === "ios" && (
+                    <div className="absolute top-2 right-2">
+                      <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">Your device</Badge>
+                    </div>
+                  )}
+                  <CardContent className="p-5 space-y-4">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-xl bg-slate-500/10 flex items-center justify-center">
+                        <SiApple className="text-slate-600 dark:text-slate-300 text-xl" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm">iPhone / iPad</p>
+                        <p className="text-xs text-muted-foreground">Safari browser</p>
+                      </div>
+                    </div>
+                    <Button className="w-full rounded-lg" data-testid="button-install-ios" onClick={() => setShowIOSModal(true)}>
+                      <Download className="h-4 w-4 mr-2" /> Install Now
+                    </Button>
+                  </CardContent>
+                </Card>
+
               </div>
 
               {/* iOS Install Modal */}
