@@ -18,9 +18,11 @@ import {
   BarChart3, Users, Wifi, Smartphone, Clock, HeadphonesIcon,
   Cpu, Calculator, Play, Loader2, Crown, UserCog, ConciergeBell, User,
   SunMedium, Gauge, BrainCircuit, ArrowRight, Zap, Activity, LayoutDashboard,
-  BedDouble, MessageCircle, TrendingUp, ChevronRight,
+  BedDouble, MessageCircle, TrendingUp, ChevronRight, Download, Monitor, Share, MoreHorizontal,
 } from "lucide-react";
 import { X } from "lucide-react";
+import { SiApple, SiAndroid } from "react-icons/si";
+import { usePWAInstall } from "@/hooks/use-pwa-install";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { PlanCode } from "@shared/schema";
@@ -125,6 +127,8 @@ export default function Welcome() {
   const [smartEnabled, setSmartEnabled] = useState(false);
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [showIOSSteps, setShowIOSSteps] = useState(false);
+  const pwa = usePWAInstall();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -1279,6 +1283,227 @@ export default function Welcome() {
             </div>
           </AnimatedSection>
         </section>
+
+        {/* DOWNLOAD / INSTALL APP SECTION */}
+        <AnimatedSection>
+          <section id="download" className="py-20 px-6 border-t border-border/20" data-testid="section-download-app">
+            <div className="max-w-5xl mx-auto">
+              <div className="text-center mb-12 space-y-3">
+                <Badge variant="secondary" className="px-3 py-1 text-xs font-medium gap-1.5">
+                  <Download className="h-3 w-3" />
+                  Progressive Web App
+                </Badge>
+                <h2 className="font-heading text-3xl md:text-4xl font-bold tracking-tight">
+                  Install OSS on Your Device
+                </h2>
+                <p className="text-muted-foreground max-w-xl mx-auto">
+                  No app store needed. Install directly from your browser — works on all platforms, offline-ready.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                {/* Windows */}
+                {(() => {
+                  const isCurrentDevice = pwa.deviceType === "windows";
+                  return (
+                    <Card className={`relative overflow-hidden transition-all duration-200 ${isCurrentDevice ? "border-primary/60 shadow-md shadow-primary/10" : "border-border/40 hover:border-border/70"}`} data-testid="card-platform-windows">
+                      {isCurrentDevice && (
+                        <div className="absolute top-2 right-2">
+                          <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">Your device</Badge>
+                        </div>
+                      )}
+                      <CardContent className="p-5 space-y-4">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                            <Monitor className="text-blue-500 h-5 w-5" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-sm">Windows</p>
+                            <p className="text-xs text-muted-foreground">Chrome / Edge</p>
+                          </div>
+                        </div>
+                        <ol className="space-y-1.5 text-xs text-muted-foreground">
+                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">1.</span>Open in Chrome or Edge</li>
+                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">2.</span>Click install icon in address bar</li>
+                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">3.</span>Click "Install"</li>
+                        </ol>
+                        {pwa.isInstalled ? (
+                          <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                            <CheckCircle className="h-3.5 w-3.5" /> App installed!
+                          </div>
+                        ) : pwa.canInstall ? (
+                          <Button size="sm" className="w-full rounded-lg" onClick={async () => { await pwa.install(); }} data-testid="button-install-windows">
+                            <Download className="h-3.5 w-3.5 mr-1.5" /> Install Now
+                          </Button>
+                        ) : (
+                          <p className="text-xs text-muted-foreground/60 italic">Open in Chrome or Edge to install</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })()}
+
+                {/* Mac */}
+                {(() => {
+                  const isCurrentDevice = pwa.deviceType === "mac";
+                  return (
+                    <Card className={`relative overflow-hidden transition-all duration-200 ${isCurrentDevice ? "border-primary/60 shadow-md shadow-primary/10" : "border-border/40 hover:border-border/70"}`} data-testid="card-platform-mac">
+                      {isCurrentDevice && (
+                        <div className="absolute top-2 right-2">
+                          <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">Your device</Badge>
+                        </div>
+                      )}
+                      <CardContent className="p-5 space-y-4">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-10 h-10 rounded-xl bg-slate-500/10 flex items-center justify-center">
+                            <SiApple className="text-slate-600 dark:text-slate-300 text-xl" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-sm">Mac</p>
+                            <p className="text-xs text-muted-foreground">Chrome / Safari</p>
+                          </div>
+                        </div>
+                        <ol className="space-y-1.5 text-xs text-muted-foreground">
+                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">1.</span>Open in Chrome or Safari</li>
+                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">2.</span>Click install icon in address bar</li>
+                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">3.</span>Click "Install"</li>
+                        </ol>
+                        {pwa.isInstalled ? (
+                          <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                            <CheckCircle className="h-3.5 w-3.5" /> App installed!
+                          </div>
+                        ) : pwa.canInstall ? (
+                          <Button size="sm" className="w-full rounded-lg" onClick={async () => { await pwa.install(); }} data-testid="button-install-mac">
+                            <Download className="h-3.5 w-3.5 mr-1.5" /> Install Now
+                          </Button>
+                        ) : (
+                          <p className="text-xs text-muted-foreground/60 italic">Open in Chrome or Safari to install</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })()}
+
+                {/* Android */}
+                {(() => {
+                  const isCurrentDevice = pwa.deviceType === "android";
+                  return (
+                    <Card className={`relative overflow-hidden transition-all duration-200 ${isCurrentDevice ? "border-primary/60 shadow-md shadow-primary/10" : "border-border/40 hover:border-border/70"}`} data-testid="card-platform-android">
+                      {isCurrentDevice && (
+                        <div className="absolute top-2 right-2">
+                          <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">Your device</Badge>
+                        </div>
+                      )}
+                      <CardContent className="p-5 space-y-4">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+                            <SiAndroid className="text-green-500 text-xl" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-sm">Android</p>
+                            <p className="text-xs text-muted-foreground">Chrome browser</p>
+                          </div>
+                        </div>
+                        <ol className="space-y-1.5 text-xs text-muted-foreground">
+                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">1.</span>Open in Chrome browser</li>
+                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">2.</span>Tap the ⋮ menu</li>
+                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">3.</span>Tap "Add to Home Screen"</li>
+                        </ol>
+                        {pwa.isInstalled ? (
+                          <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                            <CheckCircle className="h-3.5 w-3.5" /> App installed!
+                          </div>
+                        ) : pwa.canInstall ? (
+                          <Button size="sm" className="w-full rounded-lg" onClick={async () => { await pwa.install(); }} data-testid="button-install-android">
+                            <Download className="h-3.5 w-3.5 mr-1.5" /> Install Now
+                          </Button>
+                        ) : (
+                          <p className="text-xs text-muted-foreground/60 italic">Open in Chrome to install</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })()}
+
+                {/* iOS */}
+                {(() => {
+                  const isCurrentDevice = pwa.deviceType === "ios";
+                  return (
+                    <Card
+                      className={`relative overflow-hidden transition-all duration-200 cursor-pointer ${isCurrentDevice ? "border-primary/60 shadow-md shadow-primary/10" : "border-border/40 hover:border-border/70"}`}
+                      onClick={() => setShowIOSSteps(s => !s)}
+                      data-testid="card-platform-ios"
+                    >
+                      {isCurrentDevice && (
+                        <div className="absolute top-2 right-2">
+                          <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">Your device</Badge>
+                        </div>
+                      )}
+                      <CardContent className="p-5 space-y-4">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-10 h-10 rounded-xl bg-slate-500/10 flex items-center justify-center">
+                            <SiApple className="text-slate-600 dark:text-slate-300 text-xl" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-sm">iPhone / iPad</p>
+                            <p className="text-xs text-muted-foreground">Safari browser</p>
+                          </div>
+                        </div>
+                        <ol className="space-y-1.5 text-xs text-muted-foreground">
+                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">1.</span>Open in Safari</li>
+                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">2.</span>Tap <Share className="inline h-3 w-3 mx-0.5" /> Share button</li>
+                          <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">3.</span>Tap "Add to Home Screen"</li>
+                        </ol>
+                        <Button size="sm" variant="outline" className="w-full rounded-lg" data-testid="button-ios-instructions">
+                          <Share className="h-3.5 w-3.5 mr-1.5" />
+                          {showIOSSteps ? "Hide Steps" : "See Full Guide"}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })()}
+              </div>
+
+              {/* iOS Expanded Instructions */}
+              {showIOSSteps && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="rounded-2xl border border-border/50 bg-muted/30 p-6 max-w-2xl mx-auto"
+                  data-testid="ios-instructions-expanded"
+                >
+                  <div className="flex items-center gap-2 mb-4">
+                    <SiApple className="text-slate-600 dark:text-slate-300 text-lg" />
+                    <h3 className="font-semibold">iPhone / iPad Install Guide</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {[
+                      { step: "1", icon: <Globe className="h-4 w-4 text-blue-500" />, title: "Open Safari", desc: "Must use Safari — Chrome on iOS doesn't support PWA install." },
+                      { step: "2", icon: <Share className="h-4 w-4 text-blue-500" />, title: "Tap the Share icon", desc: "The square with an arrow pointing up at the bottom of the screen." },
+                      { step: "3", icon: <Plus className="h-4 w-4 text-green-500" />, title: "Add to Home Screen", desc: "Scroll down in the share sheet and tap 'Add to Home Screen'." },
+                      { step: "4", icon: <CheckCircle className="h-4 w-4 text-green-500" />, title: "Tap Add", desc: "OSS will appear on your home screen as an app icon." },
+                    ].map(item => (
+                      <div key={item.step} className="flex items-start gap-3 p-3 rounded-xl bg-background/60 border border-border/30">
+                        <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-xs font-bold text-primary mt-0.5">{item.step}</div>
+                        <div className="flex items-start gap-2.5 flex-1">
+                          <div className="mt-0.5 flex-shrink-0">{item.icon}</div>
+                          <div>
+                            <p className="text-sm font-medium">{item.title}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              <p className="text-center text-xs text-muted-foreground/50 mt-8">
+                Works offline · No app store required · Always up to date
+              </p>
+            </div>
+          </section>
+        </AnimatedSection>
       </main>
 
       <footer className="relative border-t border-border/30 py-12 px-6">
