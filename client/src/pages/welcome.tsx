@@ -19,7 +19,7 @@ import {
   BarChart3, Users, Wifi, Smartphone, Clock, HeadphonesIcon,
   Cpu, Calculator, Play, Loader2, Crown, UserCog, ConciergeBell, User,
   SunMedium, Gauge, BrainCircuit, ArrowRight, Zap, Activity, LayoutDashboard,
-  BedDouble, MessageCircle, TrendingUp, ChevronRight, Download, Monitor, Share, MoreHorizontal,
+  BedDouble, MessageCircle, TrendingUp, ChevronRight, Download, Monitor, Share, MoreHorizontal, ExternalLink,
 } from "lucide-react";
 import { X } from "lucide-react";
 import { SiApple, SiAndroid } from "react-icons/si";
@@ -129,13 +129,13 @@ export default function Welcome() {
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [showIOSSteps, setShowIOSSteps] = useState(false);
-  const [installStatus, setInstallStatus] = useState<"idle" | "accepted" | "unavailable">("idle");
+  const [installStatus, setInstallStatus] = useState<"idle" | "accepted" | "needs_browser">("idle");
   const [showIOSModal, setShowIOSModal] = useState(false);
 
   const triggerInstall = async () => {
     const prompt = (window as any).__pwaInstallPrompt;
     if (!prompt) {
-      setInstallStatus("unavailable");
+      setInstallStatus("needs_browser");
       return;
     }
     try {
@@ -146,8 +146,13 @@ export default function Welcome() {
         setInstallStatus("accepted");
       }
     } catch {
-      setInstallStatus("unavailable");
+      setInstallStatus("needs_browser");
     }
+  };
+
+  const openInBrowser = () => {
+    const url = window.location.href.split("?")[0];
+    window.open(url, "_blank", "noopener");
   };
   const pwa = usePWAInstall();
 
@@ -1346,13 +1351,14 @@ export default function Welcome() {
                     </div>
                     {installStatus === "accepted" ? (
                       <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm font-medium" data-testid="text-install-success-windows">
-                        <CheckCircle className="h-4 w-4 flex-shrink-0" />
-                        OSS installed successfully
+                        <CheckCircle className="h-4 w-4 flex-shrink-0" /> OSS installed successfully
                       </div>
-                    ) : installStatus === "unavailable" ? (
-                      <div className="flex items-center gap-2 p-3 rounded-lg bg-muted text-muted-foreground text-sm" data-testid="text-install-unsupported-windows">
-                        <X className="h-4 w-4 flex-shrink-0" />
-                        Installation not supported on this device
+                    ) : installStatus === "needs_browser" ? (
+                      <div className="space-y-2">
+                        <p className="text-xs text-muted-foreground">Open OSS directly in Chrome or Edge — not inside an embedded frame.</p>
+                        <Button variant="outline" className="w-full rounded-lg" data-testid="button-open-browser-windows" onClick={openInBrowser}>
+                          <ExternalLink className="h-4 w-4 mr-2" /> Open in Chrome
+                        </Button>
                       </div>
                     ) : (
                       <Button className="w-full rounded-lg" data-testid="button-install-windows" onClick={triggerInstall}>
@@ -1384,13 +1390,14 @@ export default function Welcome() {
                     </div>
                     {installStatus === "accepted" ? (
                       <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm font-medium" data-testid="text-install-success-mac">
-                        <CheckCircle className="h-4 w-4 flex-shrink-0" />
-                        OSS installed successfully
+                        <CheckCircle className="h-4 w-4 flex-shrink-0" /> OSS installed successfully
                       </div>
-                    ) : installStatus === "unavailable" ? (
-                      <div className="flex items-center gap-2 p-3 rounded-lg bg-muted text-muted-foreground text-sm" data-testid="text-install-unsupported-mac">
-                        <X className="h-4 w-4 flex-shrink-0" />
-                        Installation not supported on this device
+                    ) : installStatus === "needs_browser" ? (
+                      <div className="space-y-2">
+                        <p className="text-xs text-muted-foreground">Open OSS directly in Chrome or Safari — not inside an embedded frame.</p>
+                        <Button variant="outline" className="w-full rounded-lg" data-testid="button-open-browser-mac" onClick={openInBrowser}>
+                          <ExternalLink className="h-4 w-4 mr-2" /> Open in Chrome
+                        </Button>
                       </div>
                     ) : (
                       <Button className="w-full rounded-lg" data-testid="button-install-mac" onClick={triggerInstall}>
@@ -1422,13 +1429,14 @@ export default function Welcome() {
                     </div>
                     {installStatus === "accepted" ? (
                       <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm font-medium" data-testid="text-install-success-android">
-                        <CheckCircle className="h-4 w-4 flex-shrink-0" />
-                        OSS installed successfully
+                        <CheckCircle className="h-4 w-4 flex-shrink-0" /> OSS installed successfully
                       </div>
-                    ) : installStatus === "unavailable" ? (
-                      <div className="flex items-center gap-2 p-3 rounded-lg bg-muted text-muted-foreground text-sm" data-testid="text-install-unsupported-android">
-                        <X className="h-4 w-4 flex-shrink-0" />
-                        Installation not supported on this device
+                    ) : installStatus === "needs_browser" ? (
+                      <div className="space-y-2">
+                        <p className="text-xs text-muted-foreground">Open OSS directly in Chrome — not inside an embedded frame.</p>
+                        <Button variant="outline" className="w-full rounded-lg" data-testid="button-open-browser-android" onClick={openInBrowser}>
+                          <ExternalLink className="h-4 w-4 mr-2" /> Open in Chrome
+                        </Button>
                       </div>
                     ) : (
                       <Button className="w-full rounded-lg" data-testid="button-install-android" onClick={triggerInstall}>
