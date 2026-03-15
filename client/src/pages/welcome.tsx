@@ -1331,12 +1331,14 @@ export default function Welcome() {
                           <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                             <CheckCircle className="h-3.5 w-3.5" /> App installed!
                           </div>
-                        ) : pwa.canInstall ? (
-                          <Button size="sm" className="w-full rounded-lg" onClick={async () => { await pwa.install(); }} data-testid="button-install-windows">
-                            <Download className="h-3.5 w-3.5 mr-1.5" /> Install Now
-                          </Button>
                         ) : (
-                          <p className="text-xs text-muted-foreground/60 italic">Open in Chrome or Edge to install</p>
+                          <Button size="sm" className="w-full rounded-lg" data-testid="button-install-windows"
+                            onClick={async () => {
+                              const result = await pwa.install();
+                              if (result === "unavailable") toast({ title: "Use Chrome or Edge", description: "Click the install icon (⊕) in the address bar to install." });
+                            }}>
+                            <Download className="h-3.5 w-3.5 mr-1.5" /> Install for Windows
+                          </Button>
                         )}
                       </CardContent>
                     </Card>
@@ -1372,12 +1374,14 @@ export default function Welcome() {
                           <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                             <CheckCircle className="h-3.5 w-3.5" /> App installed!
                           </div>
-                        ) : pwa.canInstall ? (
-                          <Button size="sm" className="w-full rounded-lg" onClick={async () => { await pwa.install(); }} data-testid="button-install-mac">
-                            <Download className="h-3.5 w-3.5 mr-1.5" /> Install Now
-                          </Button>
                         ) : (
-                          <p className="text-xs text-muted-foreground/60 italic">Open in Chrome or Safari to install</p>
+                          <Button size="sm" className="w-full rounded-lg" data-testid="button-install-mac"
+                            onClick={async () => {
+                              const result = await pwa.install();
+                              if (result === "unavailable") toast({ title: "Use Chrome or Safari", description: "Click the install icon (⊕) in the address bar to install." });
+                            }}>
+                            <Download className="h-3.5 w-3.5 mr-1.5" /> Install for Mac
+                          </Button>
                         )}
                       </CardContent>
                     </Card>
@@ -1413,12 +1417,14 @@ export default function Welcome() {
                           <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                             <CheckCircle className="h-3.5 w-3.5" /> App installed!
                           </div>
-                        ) : pwa.canInstall ? (
-                          <Button size="sm" className="w-full rounded-lg" onClick={async () => { await pwa.install(); }} data-testid="button-install-android">
-                            <Download className="h-3.5 w-3.5 mr-1.5" /> Install Now
-                          </Button>
                         ) : (
-                          <p className="text-xs text-muted-foreground/60 italic">Open in Chrome to install</p>
+                          <Button size="sm" className="w-full rounded-lg" data-testid="button-install-android"
+                            onClick={async () => {
+                              const result = await pwa.install();
+                              if (result === "unavailable") toast({ title: "Use Chrome", description: "Tap ⋮ menu → 'Add to Home Screen' in Chrome to install." });
+                            }}>
+                            <Download className="h-3.5 w-3.5 mr-1.5" /> Install for Android
+                          </Button>
                         )}
                       </CardContent>
                     </Card>
@@ -1430,8 +1436,7 @@ export default function Welcome() {
                   const isCurrentDevice = pwa.deviceType === "ios";
                   return (
                     <Card
-                      className={`relative overflow-hidden transition-all duration-200 cursor-pointer ${isCurrentDevice ? "border-primary/60 shadow-md shadow-primary/10" : "border-border/40 hover:border-border/70"}`}
-                      onClick={() => setShowIOSSteps(s => !s)}
+                      className={`relative overflow-hidden transition-all duration-200 ${isCurrentDevice ? "border-primary/60 shadow-md shadow-primary/10" : "border-border/40 hover:border-border/70"}`}
                       data-testid="card-platform-ios"
                     >
                       {isCurrentDevice && (
@@ -1454,9 +1459,14 @@ export default function Welcome() {
                           <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">2.</span>Tap <Share className="inline h-3 w-3 mx-0.5" /> Share button</li>
                           <li className="flex items-start gap-2"><span className="text-primary font-bold mt-0.5">3.</span>Tap "Add to Home Screen"</li>
                         </ol>
-                        <Button size="sm" variant="outline" className="w-full rounded-lg" data-testid="button-ios-instructions">
-                          <Share className="h-3.5 w-3.5 mr-1.5" />
-                          {showIOSSteps ? "Hide Steps" : "See Full Guide"}
+                        <Button
+                          size="sm"
+                          className="w-full rounded-lg"
+                          data-testid="button-install-ios"
+                          onClick={() => setShowIOSSteps(s => !s)}
+                        >
+                          <Download className="h-3.5 w-3.5 mr-1.5" />
+                          {showIOSSteps ? "Hide Guide" : "Install for iOS"}
                         </Button>
                       </CardContent>
                     </Card>
