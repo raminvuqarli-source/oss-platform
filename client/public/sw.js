@@ -1,5 +1,5 @@
-const CACHE_NAME = "oss-pwa-v1";
-const PRECACHE_URLS = ["/", "/manifest.json", "/favicon.png"];
+const CACHE_NAME = "oss-pwa-v2";
+const PRECACHE_URLS = ["/", "/manifest.json", "/favicon.png", "/icon-192.png", "/icon-512.png"];
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
@@ -58,8 +58,8 @@ self.addEventListener("message", (event) => {
     event.waitUntil(
       self.registration.showNotification(title, {
         body: body,
-        icon: "/favicon.png",
-        badge: "/favicon.png",
+        icon: "/icon-192.png",
+        badge: "/icon-192.png",
         tag: "oss-msg-" + Date.now(),
         renotify: true,
         vibrate: [200, 100, 200],
