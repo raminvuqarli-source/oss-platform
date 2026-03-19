@@ -86,6 +86,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     onSuccess: (data: User) => {
       setAuthUser(data);
       queryClient.setQueryData(["/api/auth/me"], data);
+      if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+        (window as any).gtag("event", "user_login", { method: "email" });
+      }
       (async () => {
         await loginOneSignal(data.id);
         await setOneSignalTags({ role: data.role, hotelId: data.hotelId || "" });
