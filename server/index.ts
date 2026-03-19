@@ -217,20 +217,14 @@ async function gracefulShutdown(signal: string): Promise<void> {
   await registerBackupWorker(boss);
   startupLog.info("Job queue and workers initialized");
 
-  const port = parseInt(process.env.PORT || "5000", 10);
-  httpServer.listen(
-    {
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    },
-    () => {
-      startupLog.info({ port }, "Server listening");
-      startupLog.info("========================================");
-      startupLog.info("Server ready and accepting connections");
-      startupLog.info("========================================");
-    },
-  );
+  const PORT = 5000;
+  httpServer.listen(PORT, "0.0.0.0", () => {
+    console.log("Server running on port " + PORT);
+    startupLog.info({ port: PORT }, "Server listening");
+    startupLog.info("========================================");
+    startupLog.info("Server ready and accepting connections");
+    startupLog.info("========================================");
+  });
 
   process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
   process.on("SIGINT", () => gracefulShutdown("SIGINT"));
