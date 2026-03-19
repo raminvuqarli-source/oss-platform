@@ -75,6 +75,7 @@ import { useAuth } from "@/lib/auth-context";
 import type { User, ServiceRequest, Booking, Notification, DoorActionLog, ChatMessage, RoomPreparationOrder } from "@shared/schema";
 import { FinancePanel } from "@/components/finance-panel";
 import { StaffMyPerformance } from "@/components/staff-my-performance";
+import { HousekeepingView } from "@/components/housekeeping-view";
 import { StatCard } from "@/components/stat-card";
 import { DollarSign, TrendingDown, Percent, Building, Plus } from "lucide-react";
 
@@ -906,6 +907,8 @@ export default function AdminDashboard() {
         <StaffMyPerformance />
       ) : currentView === "room-status" ? (
         <AdminRoomStatusPanel />
+      ) : currentView === "housekeeping" ? (
+        <HousekeepingView />
       ) : (
       <Tabs key={defaultTab} defaultValue={defaultTab} className="w-full min-w-0 overflow-hidden">
         <TabsList className="flex w-full gap-1 overflow-x-auto scrollbar-hide h-auto flex-nowrap justify-start p-1">

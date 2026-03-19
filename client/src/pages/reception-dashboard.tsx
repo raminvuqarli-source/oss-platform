@@ -76,6 +76,7 @@ import {
 import type { ServiceRequest, User, Booking, ChatMessage, RoomPreparationOrder } from "@shared/schema";
 import { FinancePanel } from "@/components/finance-panel";
 import { StaffMyPerformance } from "@/components/staff-my-performance";
+import { HousekeepingView } from "@/components/housekeeping-view";
 
 const serviceIcons: Record<string, React.ElementType> = {
   coffee: Coffee,
@@ -806,6 +807,9 @@ function RoomStatusPanel() {
   );
 }
 
+function _HousekeepingViewUnused_DELETED() {
+  const { t } = useTranslation();
+  const { toast } = useToast();
 export default function ReceptionDashboard() {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -1678,6 +1682,8 @@ export default function ReceptionDashboard() {
         <ReceptionCalendarView />
       ) : currentView === "my-performance" ? (
         <StaffMyPerformance />
+      ) : currentView === "housekeeping" ? (
+        <HousekeepingView />
       ) : (
       <Tabs key={defaultTab} defaultValue={defaultTab} className="w-full min-w-0">
           <TabsList className="flex gap-1 h-auto flex-wrap justify-start p-1">

@@ -63,6 +63,7 @@ import {
   Activity,
   Home,
   Star,
+  SprayCan,
 } from "lucide-react";
 import type { Notification } from "@shared/schema";
 import { getRoleDisplayName } from "@/lib/permissions";
@@ -219,6 +220,7 @@ function DashboardSidebar() {
             items: [
               { title: t("nav.serviceRequests", "Service Requests"), icon: Wrench, url: "/dashboard?view=requests", testId: "nav-requests" },
               { title: t("nav.tasks", "Tasks"), icon: ClipboardList, url: "/dashboard?view=tasks", testId: "nav-tasks" },
+              { title: t("nav.housekeeping", "Housekeeping"), icon: SprayCan, url: "/dashboard?view=housekeeping", testId: "nav-housekeeping" },
               { title: t("nav.roomPrep", "Room Prep"), icon: DoorOpen, url: "/dashboard?view=room-prep", testId: "nav-room-prep" },
               { title: t("nav.roomStatus", "Room Status"), icon: BedDouble, url: "/dashboard?view=room-status", testId: "nav-room-status" },
               { title: t("staffPerformance.myRating", "My Rating"), icon: Star, url: "/dashboard?view=my-performance", testId: "nav-my-performance" },
@@ -256,6 +258,7 @@ function DashboardSidebar() {
             items: [
               { title: t("nav.serviceRequests", "Service Requests"), icon: Wrench, url: "/dashboard?view=requests", testId: "nav-requests" },
               { title: t("nav.tasks", "Tasks"), icon: ClipboardList, url: "/dashboard?view=tasks", testId: "nav-tasks" },
+              { title: t("nav.housekeeping", "Housekeeping"), icon: SprayCan, url: "/dashboard?view=housekeeping", testId: "nav-housekeeping" },
               { title: t("nav.roomPrep", "Room Prep"), icon: DoorOpen, url: "/dashboard?view=room-prep", testId: "nav-room-prep" },
               { title: t("nav.roomStatus", "Room Status"), icon: BedDouble, url: "/dashboard?view=room-status", testId: "nav-room-status" },
               { title: t("nav.finance", "Finance"), icon: Wallet, url: "/dashboard?view=finance", testId: "nav-finance" },
