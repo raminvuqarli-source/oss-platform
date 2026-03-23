@@ -261,8 +261,7 @@ export default function Welcome() {
         {/* HERO SECTION */}
         <section className="relative overflow-hidden pt-16 pb-24 px-6" data-testid="section-hero">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-[-30%] left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-primary/8 blur-[120px]" />
-            <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-primary/5 blur-[100px]" />
+            <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-[100px]" />
           </div>
 
           <div className="relative max-w-5xl mx-auto">
@@ -277,22 +276,22 @@ export default function Welcome() {
                 {t('landing.trustedBadge')}
               </Badge>
 
-              <h1 className="font-heading text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.05]">
+              <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.08]" style={{ letterSpacing: "-0.02em" }}>
                 {t('welcome.title')}
               </h1>
 
-              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                {t('welcome.subtitle')} {t('landing.heroExtended')}
+              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
+                {t('welcome.subtitle')}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-                <Button size="lg" onClick={() => navigateToRegister()} className="rounded-xl shadow-lg shadow-primary/20" data-testid="button-start-trial">
-                  {t('pricing.startFreeTrial')}
+                <Button size="lg" onClick={() => navigateToRegister()} className="rounded-xl shadow-md shadow-primary/15" data-testid="button-start-trial">
+                  Start Managing Your Hotel Today
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
                 <Button size="lg" variant="outline" onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })} className="rounded-xl" data-testid="button-hero-demo">
                   <Play className="mr-2 h-4 w-4" />
-                  {t('landing.tryLiveDemo')}
+                  See Live Hotel Dashboard
                 </Button>
               </div>
 
@@ -308,8 +307,7 @@ export default function Welcome() {
               transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
               className="mt-16 relative"
             >
-              <div className="absolute inset-0 -m-4 rounded-3xl bg-gradient-to-b from-primary/10 via-primary/5 to-transparent blur-2xl pointer-events-none" />
-              <div className="relative rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm shadow-2xl overflow-hidden">
+              <div className="relative rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm shadow-xl overflow-hidden">
                 <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50 bg-muted/30">
                   <div className="flex gap-1.5">
                     <div className="w-3 h-3 rounded-full bg-red-400/60" />
