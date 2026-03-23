@@ -1,0 +1,150 @@
+You are a Senior Hotel Systems Architect + Backend Engineer.
+
+The core folio system is already working in production-like conditions.
+
+Your task is to IMPLEMENT PHASE 2 features to make the system fully hotel-ready.
+
+DO NOT explain only — WRITE FULL WORKING CODE.
+
+----------------------------------------
+
+PHASE 1 — NIGHT AUDIT ENGINE (CRITICAL)
+
+Build a real hotel-style Night Audit system.
+
+1. Create automated daily process:
+- Runs once per day (cron)
+- Time configurable (e.g. 02:00 AM)
+
+2. For each active (checked_in) booking:
+- Find open folio
+- Calculate nights stayed (based on check-in date)
+- Add ONE room charge per night (NOT one total)
+
+3. Prevent duplicates:
+- Use idempotency key:
+  "room-night-{bookingId}-{date}"
+
+4. Update:
+- folio balance
+- daily_financial_summaries
+
+5. Create API:
+POST /api/night-audit/run
+→ manually trigger audit
+
+----------------------------------------
+
+PHASE 2 — ROOM NIGHT LOGIC FIX
+
+Fix current behavior:
+❌ single charge for entire stay
+✅ one charge per night
+
+Each charge must include:
+- serviceDate (date of night)
+- description: "Room night - YYYY-MM-DD"
+
+----------------------------------------
+
+PHASE 3 — INVOICE PDF GENERATION
+
+Build PDF invoice system.
+
+Requirements:
+- Generate PDF from folio data
+- Include:
+  - hotel name
+  - guest name
+  - room number
+  - check-in / check-out
+  - all charges (table)
+  - tax breakdown
+  - total amount
+  - payments
+  - balance
+
+Use:
+- pdfkit OR react-pdf
+
+Create API:
+GET /api/folios/:id/invoice/pdf
+
+Return:
+- downloadable PDF
+
+----------------------------------------
+
+PHASE 4 — CANCELLATION / NO-SHOW POLICY ENGINE
+
+Automate deposit handling.
+
+1. Add policy config:
+- free cancellation window (e.g. 24h)
+- no-show penalty (% or fixed)
+
+2. On:
+- booking cancelled
+- booking marked as no_show
+
+System must:
+- detect deposit
+- apply penalty:
+  → create folio_adjustment (revenue)
+- refund remaining:
+  → create negative payment
+
+3. Ensure:
+- all actions logged
+- accounting-ready
+
+----------------------------------------
+
+PHASE 5 — ADJUSTMENT APPROVAL FLOW
+
+1. Add approval system:
+- adjustment_status: pending | approved | rejected
+
+2. Roles:
+- reception → can create adjustment
+- manager → must approve
+
+3. No adjustment affects balance until approved
+
+----------------------------------------
+
+PHASE 6 — CONCURRENCY & DATA SAFETY
+
+Fix race conditions:
+
+1. Use DB transactions for:
+- adding charges
+- adding payments
+- recalculating balance
+
+2. Lock folio row during updates
+
+3. Ensure:
+balance = charges - payments ALWAYS correct
+
+----------------------------------------
+
+PHASE 7 — FINAL OUTPUT
+
+Return:
+
+SECTION A — New features implemented
+SECTION B — Full backend code
+SECTION C — SQL changes
+SECTION D — Cron setup instructions
+SECTION E — Example test scenarios
+
+----------------------------------------
+
+IMPORTANT:
+
+- Think like real hotel operations
+- No fake logic
+- No manual steps
+- Everything must be automated and safe
+- Code must be production-ready

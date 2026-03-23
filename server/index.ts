@@ -215,6 +215,8 @@ async function gracefulShutdown(signal: string): Promise<void> {
   await registerSubscriptionRenewalWorker(boss);
   const { registerBackupWorker } = await import("./workers/backupWorker");
   await registerBackupWorker(boss);
+  const { registerNightAuditWorker } = await import("./workers/nightAuditWorker");
+  await registerNightAuditWorker(boss);
   startupLog.info("Job queue and workers initialized");
 
   const PORT = 5000;

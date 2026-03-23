@@ -2013,17 +2013,45 @@ export const folioAdjustments = pgTable("folio_adjustments", {
   description: text("description").notNull(),
   amount: integer("amount").notNull(),
   currency: text("currency").default("USD"),
+  approvalStatus: text("approval_status").notNull().default("approved"),
   approvedBy: varchar("approved_by"),
+  approvedAt: timestamp("approved_at"),
+  rejectedBy: varchar("rejected_by"),
+  rejectedAt: timestamp("rejected_at"),
+  rejectionReason: text("rejection_reason"),
   createdBy: varchar("created_by"),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   index("idx_folio_adjustments_folio_id").on(table.folioId),
   index("idx_folio_adjustments_hotel_id").on(table.hotelId),
   index("idx_folio_adjustments_tenant_id").on(table.tenantId),
+  index("idx_folio_adjustments_approval").on(table.approvalStatus),
 ]);
 export const insertFolioAdjustmentSchema = createInsertSchema(folioAdjustments).omit({ id: true, createdAt: true });
 export type InsertFolioAdjustment = z.infer<typeof insertFolioAdjustmentSchema>;
 export type FolioAdjustment = typeof folioAdjustments.$inferSelect;
+
+// ===================== HOTEL FINANCE — CANCELLATION POLICIES =====================
+export const cancellationPolicies = pgTable("cancellation_policies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  hotelId: varchar("hotel_id").notNull(),
+  tenantId: varchar("tenant_id"),
+  name: text("name").notNull(),
+  freeCancellationHours: integer("free_cancellation_hours").default(24),
+  noShowPenaltyType: text("no_show_penalty_type").default("percent"),
+  noShowPenaltyValue: integer("no_show_penalty_value").default(10000),
+  lateCancellationPenaltyType: text("late_cancellation_penalty_type").default("percent"),
+  lateCancellationPenaltyValue: integer("late_cancellation_penalty_value").default(10000),
+  isDefault: boolean("is_default").default(false),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_cancel_policy_hotel_id").on(table.hotelId),
+  index("idx_cancel_policy_tenant_id").on(table.tenantId),
+]);
+export const insertCancellationPolicySchema = createInsertSchema(cancellationPolicies).omit({ id: true, createdAt: true });
+export type InsertCancellationPolicy = z.infer<typeof insertCancellationPolicySchema>;
+export type CancellationPolicy = typeof cancellationPolicies.$inferSelect;
 
 // ===================== HOTEL FINANCE — CHART OF ACCOUNTS =====================
 export const chartOfAccounts = pgTable("chart_of_accounts", {

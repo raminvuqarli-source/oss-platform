@@ -218,8 +218,8 @@ export function registerFolioRoutes(app: Express): void {
     }
   });
 
-  // ── Add adjustment ────────────────────────────────────────
-  app.post("/api/folios/:id/adjustments", requireRole("admin", "owner_admin", "property_manager"), async (req, res) => {
+  // ── Add adjustment (reception → pending, manager → approved) ─
+  app.post("/api/folios/:id/adjustments", requireRole("admin", "owner_admin", "property_manager", "reception"), async (req, res) => {
     try {
       const folio = await storage.getGuestFolio(req.params.id);
       if (!folio) return res.status(404).json({ message: "Folio not found" });
@@ -228,6 +228,9 @@ export function registerFolioRoutes(app: Express): void {
       if (!adjustmentType || !description || amount === undefined) {
         return res.status(400).json({ message: "adjustmentType, description and amount are required" });
       }
+      const user = await storage.getUser(req.session.userId!);
+      const isManager = ["admin", "owner_admin", "property_manager"].includes(user?.role ?? "");
+      const approvalStatus = isManager ? "approved" : "pending";
       const adj = await storage.createFolioAdjustment({
         folioId: folio.id,
         bookingId: folio.bookingId,
@@ -237,13 +240,55 @@ export function registerFolioRoutes(app: Express): void {
         description,
         amount,
         currency: folio.currency ?? "USD",
+        approvalStatus,
+        approvedBy: isManager ? req.session.userId : undefined,
+        approvedAt: isManager ? new Date() : undefined,
         createdBy: req.session.userId,
       });
-      await storage.recalculateFolioBalance(folio.id);
+      if (isManager) await storage.recalculateFolioBalance(folio.id);
       res.status(201).json(adj);
     } catch (e) {
       logger.error({ err: e }, "Error adding folio adjustment");
       res.status(500).json({ message: "Failed to add adjustment" });
+    }
+  });
+
+  // ── Approve adjustment ────────────────────────────────────
+  app.post("/api/folios/:id/adjustments/:adjId/approve", requireRole("admin", "owner_admin", "property_manager"), async (req, res) => {
+    try {
+      const folio = await storage.getGuestFolio(req.params.id);
+      if (!folio) return res.status(404).json({ message: "Folio not found" });
+      if (folio.status === "finalized") return res.status(400).json({ message: "Cannot approve on finalized folio" });
+      const adj = await storage.updateFolioAdjustment(req.params.adjId, {
+        approvalStatus: "approved",
+        approvedBy: req.session.userId,
+        approvedAt: new Date(),
+      });
+      if (!adj) return res.status(404).json({ message: "Adjustment not found" });
+      await storage.recalculateFolioBalance(folio.id);
+      res.json(adj);
+    } catch (e) {
+      logger.error({ err: e }, "Error approving adjustment");
+      res.status(500).json({ message: "Failed to approve adjustment" });
+    }
+  });
+
+  // ── Reject adjustment ─────────────────────────────────────
+  app.post("/api/folios/:id/adjustments/:adjId/reject", requireRole("admin", "owner_admin", "property_manager"), async (req, res) => {
+    try {
+      const { reason } = req.body;
+      if (!reason) return res.status(400).json({ message: "Rejection reason required" });
+      const adj = await storage.updateFolioAdjustment(req.params.adjId, {
+        approvalStatus: "rejected",
+        rejectedBy: req.session.userId,
+        rejectedAt: new Date(),
+        rejectionReason: reason,
+      });
+      if (!adj) return res.status(404).json({ message: "Adjustment not found" });
+      res.json(adj);
+    } catch (e) {
+      logger.error({ err: e }, "Error rejecting adjustment");
+      res.status(500).json({ message: "Failed to reject adjustment" });
     }
   });
 
@@ -631,6 +676,104 @@ export function registerFolioRoutes(app: Express): void {
       res.status(500).json({ message: "Failed to fetch daily summaries" });
     }
   });
+
+  // ═══════════ INVOICE PDF DOWNLOAD ═══════════════════════════
+
+  app.get("/api/folios/:id/invoice/pdf", requireAuth, async (req, res) => {
+    try {
+      const folio = await storage.getGuestFolio(req.params.id);
+      if (!folio) return res.status(404).json({ message: "Folio not found" });
+      const { generateFolioInvoicePdf } = await import("../services/folioPdfService");
+      const pdfBuffer = await generateFolioInvoicePdf(req.params.id);
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="invoice-${folio.folioNumber ?? folio.id}.pdf"`);
+      res.end(pdfBuffer);
+    } catch (e) {
+      logger.error({ err: e }, "Error generating invoice PDF");
+      res.status(500).json({ message: "Failed to generate PDF" });
+    }
+  });
+
+  // ═══════════ NIGHT AUDIT MANUAL TRIGGER ═════════════════════
+
+  app.post("/api/night-audit/run", requireRole("admin", "owner_admin"), async (req, res) => {
+    try {
+      const ctx = await getHotelContext(req.session.userId!);
+      if (!ctx?.hotelId) return res.status(400).json({ message: "No hotel assigned" });
+      const { auditDate } = req.body;
+      const { runNightAuditForHotel } = await import("../services/nightAuditEngine");
+      const parsedDate = auditDate ? new Date(auditDate) : undefined;
+      const result = await runNightAuditForHotel(ctx.hotelId, req.tenantId!, parsedDate);
+      res.json({ message: "Night audit completed", ...result });
+    } catch (e) {
+      logger.error({ err: e }, "Error running manual night audit");
+      res.status(500).json({ message: "Failed to run night audit" });
+    }
+  });
+
+  // ═══════════ CANCELLATION POLICIES CRUD ═════════════════════
+
+  app.get("/api/cancellation-policies", requireRole("admin", "owner_admin", "property_manager"), async (req, res) => {
+    try {
+      const ctx = await getHotelContext(req.session.userId!);
+      if (!ctx?.hotelId) return res.status(400).json({ message: "No hotel assigned" });
+      const policies = await storage.getCancellationPoliciesByHotel(ctx.hotelId);
+      res.json(policies);
+    } catch (e) {
+      res.status(500).json({ message: "Failed to fetch cancellation policies" });
+    }
+  });
+
+  app.post("/api/cancellation-policies", requireRole("admin", "owner_admin", "property_manager"), async (req, res) => {
+    try {
+      const ctx = await getHotelContext(req.session.userId!);
+      if (!ctx?.hotelId) return res.status(400).json({ message: "No hotel assigned" });
+      const {
+        name,
+        freeCancellationHours = 24,
+        noShowPenaltyType = "percent",
+        noShowPenaltyValue = 10000,
+        lateCancellationPenaltyType = "percent",
+        lateCancellationPenaltyValue = 10000,
+        isDefault = false,
+      } = req.body;
+      if (!name) return res.status(400).json({ message: "name is required" });
+      const policy = await storage.createCancellationPolicy({
+        hotelId: ctx.hotelId,
+        tenantId: req.tenantId ?? undefined,
+        name,
+        freeCancellationHours,
+        noShowPenaltyType,
+        noShowPenaltyValue,
+        lateCancellationPenaltyType,
+        lateCancellationPenaltyValue,
+        isDefault,
+      });
+      res.status(201).json(policy);
+    } catch (e) {
+      logger.error({ err: e }, "Error creating cancellation policy");
+      res.status(500).json({ message: "Failed to create policy" });
+    }
+  });
+
+  app.patch("/api/cancellation-policies/:id", requireRole("admin", "owner_admin", "property_manager"), async (req, res) => {
+    try {
+      const updated = await storage.updateCancellationPolicy(req.params.id, req.body);
+      if (!updated) return res.status(404).json({ message: "Policy not found" });
+      res.json(updated);
+    } catch (e) {
+      res.status(500).json({ message: "Failed to update policy" });
+    }
+  });
+
+  app.delete("/api/cancellation-policies/:id", requireRole("admin", "owner_admin"), async (req, res) => {
+    try {
+      await storage.deleteCancellationPolicy(req.params.id);
+      res.json({ message: "Policy deleted" });
+    } catch (e) {
+      res.status(500).json({ message: "Failed to delete policy" });
+    }
+  });
 }
 
 // ── Exported service: auto-open folio on check-in ────────────
@@ -650,32 +793,8 @@ export async function autoOpenFolio(bookingId: string, hotelId: string, guestId:
       status: "open",
       currency: booking.currency ?? "USD",
     });
-    if (booking.nightlyRate && booking.checkInDate && booking.checkOutDate) {
-      const nights = Math.ceil((new Date(booking.checkOutDate).getTime() - new Date(booking.checkInDate).getTime()) / 86400000);
-      if (nights > 0) {
-        const unitPrice = booking.nightlyRate;
-        await storage.createFolioCharge({
-          folioId: folio.id,
-          bookingId,
-          hotelId,
-          tenantId: tenantId ?? undefined,
-          chargeType: "room_night",
-          description: `Room charge — ${nights} night${nights > 1 ? "s" : ""} @ ${booking.roomNumber}`,
-          quantity: nights,
-          unitPrice,
-          amountNet: nights * unitPrice,
-          taxRate: 0,
-          taxAmount: 0,
-          amountGross: nights * unitPrice,
-          isInclusive: false,
-          currency: booking.currency ?? "USD",
-          serviceDate: new Date(booking.checkInDate),
-          idempotencyKey: `room-charge-${bookingId}`,
-          status: "posted",
-        });
-        await storage.recalculateFolioBalance(folio.id);
-      }
-    }
+    // Note: Room night charges are posted by the Night Audit Engine (per-night, with idempotency).
+    // The folio opens empty — charges accumulate nightly via night audit or manually via reception.
     logger.info({ bookingId, folioId: folio.id }, "Guest folio auto-opened on check-in");
   } catch (e) {
     logger.error({ err: e, bookingId }, "Failed to auto-open guest folio");

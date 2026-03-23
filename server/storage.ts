@@ -205,6 +205,9 @@ import {
   dailyFinancialSummaries,
   type DailyFinancialSummary,
   type InsertDailyFinancialSummary,
+  cancellationPolicies,
+  type CancellationPolicy,
+  type InsertCancellationPolicy,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -2799,16 +2802,18 @@ export class DatabaseStorage implements IStorage {
     return f;
   }
   async recalculateFolioBalance(folioId: string): Promise<GuestFolio | undefined> {
-    const charges = await db.select().from(folioCharges).where(and(eq(folioCharges.folioId, folioId), eq(folioCharges.status, "posted")));
-    const payments = await db.select().from(folioPayments).where(and(eq(folioPayments.folioId, folioId), eq(folioPayments.status, "completed")));
-    const adjustments = await db.select().from(folioAdjustments).where(eq(folioAdjustments.folioId, folioId));
-    const totalCharges = charges.reduce((s, c) => s + (c.amountGross || 0), 0);
-    const totalPayments = payments.reduce((s, p) => s + (p.amount || 0), 0);
-    const totalAdjustments = adjustments.reduce((s, a) => s + (a.amount || 0), 0);
-    const taxTotal = charges.reduce((s, c) => s + (c.taxAmount || 0), 0);
-    const balance = totalCharges - totalPayments + totalAdjustments;
-    const [f] = await db.update(guestFolios).set({ totalCharges, totalPayments, totalAdjustments, taxTotal, balance }).where(eq(guestFolios.id, folioId)).returning();
-    return f;
+    return db.transaction(async (tx) => {
+      const charges = await tx.select().from(folioCharges).where(and(eq(folioCharges.folioId, folioId), eq(folioCharges.status, "posted")));
+      const payments = await tx.select().from(folioPayments).where(and(eq(folioPayments.folioId, folioId), eq(folioPayments.status, "completed")));
+      const adjustments = await tx.select().from(folioAdjustments).where(and(eq(folioAdjustments.folioId, folioId), eq(folioAdjustments.approvalStatus, "approved")));
+      const totalCharges = charges.reduce((s, c) => s + (c.amountGross || 0), 0);
+      const totalPayments = payments.reduce((s, p) => s + (p.amount || 0), 0);
+      const totalAdjustments = adjustments.reduce((s, a) => s + (a.amount || 0), 0);
+      const taxTotal = charges.reduce((s, c) => s + (c.taxAmount || 0), 0);
+      const balance = totalCharges - totalPayments + totalAdjustments;
+      const [f] = await tx.update(guestFolios).set({ totalCharges, totalPayments, totalAdjustments, taxTotal, balance }).where(eq(guestFolios.id, folioId)).returning();
+      return f;
+    });
   }
 
   // ===================== FOLIO CHARGES =====================
@@ -2844,6 +2849,39 @@ export class DatabaseStorage implements IStorage {
   async createFolioAdjustment(adj: InsertFolioAdjustment): Promise<FolioAdjustment> {
     const [a] = await db.insert(folioAdjustments).values(adj).returning();
     return a;
+  }
+  async updateFolioAdjustment(id: string, updates: Partial<FolioAdjustment>): Promise<FolioAdjustment | undefined> {
+    const [a] = await db.update(folioAdjustments).set(updates).where(eq(folioAdjustments.id, id)).returning();
+    return a;
+  }
+
+  // ===================== CANCELLATION POLICIES =====================
+  async getCancellationPoliciesByHotel(hotelId: string): Promise<CancellationPolicy[]> {
+    return db.select().from(cancellationPolicies).where(and(eq(cancellationPolicies.hotelId, hotelId), eq(cancellationPolicies.isActive, true)));
+  }
+  async getDefaultCancellationPolicy(hotelId: string): Promise<CancellationPolicy | undefined> {
+    const [p] = await db.select().from(cancellationPolicies).where(and(eq(cancellationPolicies.hotelId, hotelId), eq(cancellationPolicies.isDefault, true), eq(cancellationPolicies.isActive, true)));
+    return p;
+  }
+  async createCancellationPolicy(policy: InsertCancellationPolicy): Promise<CancellationPolicy> {
+    const [p] = await db.insert(cancellationPolicies).values(policy).returning();
+    return p;
+  }
+  async updateCancellationPolicy(id: string, updates: Partial<CancellationPolicy>): Promise<CancellationPolicy | undefined> {
+    const [p] = await db.update(cancellationPolicies).set(updates).where(eq(cancellationPolicies.id, id)).returning();
+    return p;
+  }
+  async deleteCancellationPolicy(id: string): Promise<void> {
+    await db.delete(cancellationPolicies).where(eq(cancellationPolicies.id, id));
+  }
+
+  // ===================== NIGHT AUDIT — ACTIVE BOOKINGS QUERY =====================
+  async getCheckedInBookingsByHotel(hotelId: string, tenantId: string): Promise<Booking[]> {
+    const result = await db.select()
+      .from(bookings)
+      .innerJoin(users, eq(bookings.guestId, users.id))
+      .where(and(eq(users.hotelId, hotelId), eq(bookings.tenantId, tenantId), eq(bookings.status, "checked_in")));
+    return result.map(r => r.bookings);
   }
 
   // ===================== CHART OF ACCOUNTS =====================

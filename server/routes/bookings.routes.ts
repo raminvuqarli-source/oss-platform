@@ -9,6 +9,7 @@ import { enqueueOtaSync } from "../workers/otaSyncWorker";
 import { validateBody } from "../middleware/validateBody";
 import { updateBookingSchema, arrivalInfoSchema, precheckSchema, roomSettingsSchema, doorControlSchema, unitStatusSchema } from "../validators/booking.validators";
 import { autoOpenFolio, autoCloseFolio } from "./folio.routes";
+import { applyCancellationPolicy } from "../services/cancellationPolicyEngine";
 
 export function registerBookingRoutes(app: Express): void {
   // Bookings Routes - filtered by hotel
@@ -56,6 +57,26 @@ export function registerBookingRoutes(app: Express): void {
       if (["cancelled", "no_show"].includes(req.body.status)) {
         await storage.deleteRoomNightsByBooking(id);
         logger.info({ bookingId: id, newStatus: req.body.status }, "Room nights released on cancellation");
+        if (updatedBooking) {
+          (async () => {
+            try {
+              let hotelId: string | undefined;
+              if (updatedBooking.propertyId) {
+                const hotel = await storage.getHotelByPropertyId(updatedBooking.propertyId);
+                hotelId = hotel?.id;
+              }
+              if (!hotelId && updatedBooking.ownerId) {
+                const owner = await storage.getOwner(updatedBooking.ownerId);
+                if (owner?.hotelId) hotelId = owner.hotelId;
+              }
+              if (hotelId) {
+                await applyCancellationPolicy(updatedBooking, req.body.status as "cancelled" | "no_show", hotelId);
+              }
+            } catch (err) {
+              logger.error({ err, bookingId: id }, "applyCancellationPolicy failed");
+            }
+          })();
+        }
       }
       if (req.body.status === "checked_in" && updatedBooking) {
         (async () => {
