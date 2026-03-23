@@ -281,10 +281,10 @@ export default function Welcome() {
                 style={{ letterSpacing: "-0.01em" }}
               >
                 <span className="font-bold block">
-                  Run Your Hotel Like a 5-Star Operation
+                  {t('landing.heroTitle1')}
                 </span>
                 <span className="font-semibold block text-primary">
-                  — Automatically
+                  {t('landing.heroTitle2')}
                 </span>
               </h1>
 
@@ -294,12 +294,12 @@ export default function Welcome() {
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
                 <Button size="lg" onClick={() => navigateToRegister()} className="rounded-xl shadow-md shadow-primary/15" data-testid="button-start-trial">
-                  Start Managing Your Hotel Today
+                  {t('landing.ctaManage')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
                 <Button size="lg" variant="outline" onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })} className="rounded-xl" data-testid="button-hero-demo">
                   <Play className="mr-2 h-4 w-4" />
-                  See Live Hotel Dashboard
+                  {t('landing.ctaLiveDemo')}
                 </Button>
               </div>
 
@@ -329,13 +329,13 @@ export default function Welcome() {
                 <div className="p-6 md:p-8 space-y-6">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {[
-                      { label: "Occupancy", value: "87%", change: "+5%", color: "text-emerald-500" },
-                      { label: "Revenue", value: "$12,450", change: "+12%", color: "text-blue-500" },
-                      { label: "Bookings", value: "24", change: "+3", color: "text-violet-500" },
-                      { label: "Guest Rating", value: "4.8", change: "+0.2", color: "text-amber-500" },
+                      { labelKey: "landing.mockOccupancy", value: "87%", change: "+5%", color: "text-emerald-500" },
+                      { labelKey: "landing.mockRevenue", value: "$12,450", change: "+12%", color: "text-blue-500" },
+                      { labelKey: "landing.mockBookings", value: "24", change: "+3", color: "text-violet-500" },
+                      { labelKey: "landing.mockGuestRating", value: "4.8", change: "+0.2", color: "text-amber-500" },
                     ].map((stat) => (
-                      <div key={stat.label} className="p-4 rounded-xl bg-muted/40 border border-border/30 space-y-1">
-                        <p className="text-xs text-muted-foreground">{stat.label}</p>
+                      <div key={stat.labelKey} className="p-4 rounded-xl bg-muted/40 border border-border/30 space-y-1">
+                        <p className="text-xs text-muted-foreground">{t(stat.labelKey)}</p>
                         <p className="text-2xl font-bold">{stat.value}</p>
                         <p className={`text-xs font-medium ${stat.color}`}>{stat.change}</p>
                       </div>
@@ -350,8 +350,8 @@ export default function Welcome() {
                       </div>
                     </div>
                     <div className="h-32 rounded-xl bg-muted/40 border border-border/30 p-4 space-y-2">
-                      <p className="text-xs font-medium text-muted-foreground">Recent Activity</p>
-                      {["Check-in: Room 301", "New booking #1024", "Service request #45"].map((item) => (
+                      <p className="text-xs font-medium text-muted-foreground">{t('landing.mockRecentActivity')}</p>
+                      {[t('landing.mockCheckin'), t('landing.mockNewBooking'), t('landing.mockServiceRequest')].map((item) => (
                         <div key={item} className="flex items-center gap-2 text-xs">
                           <div className="w-1.5 h-1.5 rounded-full bg-primary/60" />
                           <span className="text-muted-foreground">{item}</span>
@@ -498,18 +498,18 @@ export default function Welcome() {
                 mockContent: (
                   <div className="p-5 space-y-3">
                     {[
-                      { label: "Lighting", value: "75%", icon: Lightbulb, color: "bg-amber-500" },
-                      { label: "Temperature", value: "22°C", icon: Activity, color: "bg-blue-500" },
-                      { label: "Curtains", value: "Open", icon: Shield, color: "bg-emerald-500" },
+                      { labelKey: "landing.mockLighting", value: "75%", icon: Lightbulb, color: "bg-amber-500" },
+                      { labelKey: "landing.mockTemperature", value: "22°C", icon: Activity, color: "bg-blue-500" },
+                      { labelKey: "landing.mockCurtains", valueKey: "landing.mockCurtainsOpen", icon: Shield, color: "bg-emerald-500" },
                     ].map((ctrl) => (
-                      <div key={ctrl.label} className="flex items-center gap-3 p-3 rounded-lg bg-muted/40 border border-border/30">
+                      <div key={ctrl.labelKey} className="flex items-center gap-3 p-3 rounded-lg bg-muted/40 border border-border/30">
                         <div className={`w-8 h-8 rounded-lg ${ctrl.color}/10 flex items-center justify-center`}>
                           <ctrl.icon className={`h-4 w-4 ${ctrl.color === "bg-amber-500" ? "text-amber-500" : ctrl.color === "bg-blue-500" ? "text-blue-500" : "text-emerald-500"}`} />
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-medium">{ctrl.label}</p>
+                          <p className="text-sm font-medium">{t(ctrl.labelKey)}</p>
                         </div>
-                        <span className="text-sm text-muted-foreground font-medium">{ctrl.value}</span>
+                        <span className="text-sm text-muted-foreground font-medium">{ctrl.valueKey ? t(ctrl.valueKey) : ctrl.value}</span>
                       </div>
                     ))}
                   </div>
@@ -525,9 +525,9 @@ export default function Welcome() {
                 mockContent: (
                   <div className="p-5 space-y-3">
                     {[
-                      { name: "Guest - Room 301", msg: "Extra towels please", time: "2m ago", urgent: false },
-                      { name: "VIP - Suite 501", msg: "Late checkout request", time: "5m ago", urgent: true },
-                      { name: "Guest - Room 205", msg: "Room service order", time: "12m ago", urgent: false },
+                      { name: "Guest - Room 301", msgKey: "landing.mockMsgTowels", timeKey: "landing.mock2mAgo", urgent: false },
+                      { name: "VIP - Suite 501", msgKey: "landing.mockMsgCheckout", timeKey: "landing.mock5mAgo", urgent: true },
+                      { name: "Guest - Room 205", msgKey: "landing.mockMsgRoomService", timeKey: "landing.mock12mAgo", urgent: false },
                     ].map((m) => (
                       <div key={m.name} className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/30">
                         <div className="w-8 h-8 rounded-full bg-violet-500/10 flex items-center justify-center flex-shrink-0">
@@ -538,9 +538,9 @@ export default function Welcome() {
                             <p className="text-sm font-medium truncate">{m.name}</p>
                             {m.urgent && <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />}
                           </div>
-                          <p className="text-xs text-muted-foreground truncate">{m.msg}</p>
+                          <p className="text-xs text-muted-foreground truncate">{t(m.msgKey)}</p>
                         </div>
-                        <span className="text-[10px] text-muted-foreground flex-shrink-0">{m.time}</span>
+                        <span className="text-[10px] text-muted-foreground flex-shrink-0">{t(m.timeKey)}</span>
                       </div>
                     ))}
                   </div>
@@ -1202,13 +1202,13 @@ export default function Welcome() {
               <div className="text-center mb-12 space-y-3">
                 <Badge variant="secondary" className="px-3 py-1 text-xs font-medium gap-1.5">
                   <Download className="h-3 w-3" />
-                  Progressive Web App
+                  {t('landing.pwaProgressiveWebApp')}
                 </Badge>
                 <h2 className="font-heading text-3xl md:text-4xl font-bold tracking-tight">
-                  Install OSS on Your Device
+                  {t('landing.pwaTitle')}
                 </h2>
                 <p className="text-muted-foreground max-w-xl mx-auto">
-                  No app store needed. Install directly from your browser — works on all platforms, offline-ready.
+                  {t('landing.pwaSubtitle')}
                 </p>
               </div>
 
@@ -1221,7 +1221,7 @@ export default function Welcome() {
                 >
                   {pwa.deviceType === "windows" && (
                     <div className="absolute top-2 right-2">
-                      <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">Your device</Badge>
+                      <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">{t('landing.pwaYourDevice')}</Badge>
                     </div>
                   )}
                   <CardContent className="p-5 space-y-4">
@@ -1258,7 +1258,7 @@ export default function Welcome() {
                       </div>
                     ) : (
                       <Button className="w-full rounded-lg" data-testid="button-install-windows" onClick={triggerInstall}>
-                        <Download className="h-4 w-4 mr-2" /> Install Now
+                        <Download className="h-4 w-4 mr-2" /> {t('landing.pwaInstallNow')}
                       </Button>
                     )}
                   </CardContent>
@@ -1271,7 +1271,7 @@ export default function Welcome() {
                 >
                   {pwa.deviceType === "mac" && (
                     <div className="absolute top-2 right-2">
-                      <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">Your device</Badge>
+                      <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">{t('landing.pwaYourDevice')}</Badge>
                     </div>
                   )}
                   <CardContent className="p-5 space-y-4">
@@ -1308,7 +1308,7 @@ export default function Welcome() {
                       </div>
                     ) : (
                       <Button className="w-full rounded-lg" data-testid="button-install-mac" onClick={triggerInstall}>
-                        <Download className="h-4 w-4 mr-2" /> Install Now
+                        <Download className="h-4 w-4 mr-2" /> {t('landing.pwaInstallNow')}
                       </Button>
                     )}
                   </CardContent>
@@ -1321,7 +1321,7 @@ export default function Welcome() {
                 >
                   {pwa.deviceType === "android" && (
                     <div className="absolute top-2 right-2">
-                      <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">Your device</Badge>
+                      <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">{t('landing.pwaYourDevice')}</Badge>
                     </div>
                   )}
                   <CardContent className="p-5 space-y-4">
@@ -1358,7 +1358,7 @@ export default function Welcome() {
                       </div>
                     ) : (
                       <Button className="w-full rounded-lg" data-testid="button-install-android" onClick={triggerInstall}>
-                        <Download className="h-4 w-4 mr-2" /> Install Now
+                        <Download className="h-4 w-4 mr-2" /> {t('landing.pwaInstallNow')}
                       </Button>
                     )}
                   </CardContent>
@@ -1371,7 +1371,7 @@ export default function Welcome() {
                 >
                   {pwa.deviceType === "ios" && (
                     <div className="absolute top-2 right-2">
-                      <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">Your device</Badge>
+                      <Badge className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border-primary/20">{t('landing.pwaYourDevice')}</Badge>
                     </div>
                   )}
                   <CardContent className="p-5 space-y-4">
@@ -1409,7 +1409,7 @@ export default function Welcome() {
                       </div>
                     ) : (
                       <Button className="w-full rounded-lg" data-testid="button-install-ios" onClick={() => setShowIOSModal(true)}>
-                        <Download className="h-4 w-4 mr-2" /> Install Now
+                        <Download className="h-4 w-4 mr-2" /> {t('landing.pwaInstallNow')}
                       </Button>
                     )}
                   </CardContent>
@@ -1452,7 +1452,7 @@ export default function Welcome() {
               </Dialog>
 
               <p className="text-center text-xs text-muted-foreground/50 mt-8">
-                Works offline · No app store required · Always up to date
+                {t('landing.pwaWorksOffline')}
               </p>
             </div>
           </section>
