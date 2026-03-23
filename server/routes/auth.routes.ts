@@ -79,6 +79,7 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
 
   app.use(helmet({
     contentSecurityPolicy: false,
+    frameguard: isProduction ? { action: "sameorigin" } : false,
   }));
 
   const allowedOrigins = [
