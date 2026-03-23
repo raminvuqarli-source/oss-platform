@@ -283,7 +283,7 @@ export default function Welcome() {
                 <span className="font-bold block">
                   Run Your Hotel Like a 5-Star Operation
                 </span>
-                <span className="font-medium block" style={{ opacity: 0.72 }}>
+                <span className="font-semibold block text-primary">
                   — Automatically
                 </span>
               </h1>
