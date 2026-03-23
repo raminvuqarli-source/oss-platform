@@ -77,6 +77,36 @@ export function registerFolioRoutes(app: Express): void {
     }
   });
 
+  // ── Manually open folio for no-show / cancellation billing ──
+  app.post("/api/folios/booking/:bookingId/open", requireRole("admin", "owner_admin", "property_manager", "reception"), async (req, res) => {
+    try {
+      const existing = await storage.getGuestFolioByBooking(req.params.bookingId);
+      if (existing) return res.json(existing);
+      const booking = await storage.getBooking(req.params.bookingId);
+      if (!booking) return res.status(404).json({ message: "Booking not found" });
+      const ctx = await getHotelContext(req.session.userId!);
+      if (!ctx?.hotelId) return res.status(400).json({ message: "No hotel assigned" });
+      const folioNumber = `F-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.floor(Math.random() * 9000 + 1000)}`;
+      const folio = await storage.createGuestFolio({
+        bookingId: booking.id,
+        guestId: booking.guestId,
+        hotelId: ctx.hotelId,
+        propertyId: booking.propertyId ?? undefined,
+        tenantId: req.tenantId ?? undefined,
+        folioNumber,
+        currency: booking.currency ?? "USD",
+        status: "open",
+        openedAt: new Date(),
+        notes: req.body.notes ?? `Manually opened for ${booking.status} booking`,
+      });
+      logger.info({ bookingId: booking.id, folioId: folio.id, status: booking.status }, "Folio manually opened");
+      res.status(201).json(folio);
+    } catch (e) {
+      logger.error({ err: e }, "Error opening manual folio");
+      res.status(500).json({ message: "Failed to open folio" });
+    }
+  });
+
   // ── Add charge to folio ───────────────────────────────────
   app.post("/api/folios/:id/charges", requireRole("admin", "owner_admin", "property_manager", "reception"), async (req, res) => {
     try {
@@ -257,16 +287,22 @@ export function registerFolioRoutes(app: Express): void {
       const guest = booking ? await storage.getUser(booking.guestId) : null;
       const postedCharges = charges.filter(c => c.status === "posted");
       const subtotal = postedCharges.reduce((s, c) => s + c.amountNet, 0);
-      const totalTax = postedCharges.reduce((s, c) => s + c.taxAmount, 0);
+      const totalTax = postedCharges.reduce((s, c) => s + (c.taxAmount ?? 0), 0);
       const totalGross = postedCharges.reduce((s, c) => s + c.amountGross, 0);
       const totalPaid = payments.filter(p => p.status === "completed").reduce((s, p) => s + p.amount, 0);
       const totalAdj = adjustments.reduce((s, a) => s + a.amount, 0);
       const amountDue = totalGross + totalAdj - totalPaid;
+      const guestName = guest
+        ? (guest.fullName || `${(guest as any).firstName ?? ""} ${(guest as any).lastName ?? ""}`.trim() || guest.username || "Guest")
+        : "Guest";
       res.json({
         invoiceNumber: folio.folioNumber,
         folioId: folio.id,
         bookingId: folio.bookingId,
-        guestName: guest ? `${guest.firstName ?? ""} ${guest.lastName ?? ""}`.trim() : "Guest",
+        roomNumber: booking?.roomNumber,
+        checkInDate: booking?.checkInDate,
+        checkOutDate: booking?.checkOutDate,
+        guestName,
         currency: folio.currency,
         openedAt: folio.openedAt,
         closedAt: folio.closedAt,
@@ -277,9 +313,11 @@ export function registerFolioRoutes(app: Express): void {
           quantity: c.quantity,
           unitPrice: c.unitPrice / 100,
           amountNet: c.amountNet / 100,
-          taxRate: c.taxRate,
-          taxAmount: c.taxAmount / 100,
+          taxRateBasisPoints: c.taxRate,
+          taxRatePercent: (c.taxRate ?? 0) / 100,
+          taxAmount: (c.taxAmount ?? 0) / 100,
           amountGross: c.amountGross / 100,
+          isInclusive: c.isInclusive,
           serviceDate: c.serviceDate,
         })),
         payments: payments.map(p => ({
@@ -648,8 +686,8 @@ export async function autoOpenFolio(bookingId: string, hotelId: string, guestId:
 export async function autoCloseFolio(bookingId: string): Promise<void> {
   try {
     const folio = await storage.getGuestFolioByBooking(bookingId);
-    if (!folio || folio.status !== "open") return;
-    await storage.updateGuestFolio(folio.id, { closedAt: new Date() });
+    if (!folio || folio.status === "finalized") return;
+    await storage.updateGuestFolio(folio.id, { status: "closed", closedAt: new Date() });
     await storage.recalculateFolioBalance(folio.id);
     logger.info({ bookingId, folioId: folio.id }, "Guest folio auto-closed on check-out");
   } catch (e) {

@@ -1,0 +1,112 @@
+You are a HOTEL OWNER + CFO + RECEPTIONIST + AUDITOR.
+
+Your job is to TEST my OSS (Smart Hospitality Platform) like a REAL 5-STAR HOTEL using it in daily operations.
+
+DO NOT just review code.
+SIMULATE REAL USAGE step-by-step.
+
+----------------------------------------
+
+PHASE 1 — ACT LIKE A HOTEL OWNER
+
+- You own a 30-room hotel
+- You care about:
+  - revenue accuracy
+  - no money loss
+  - easy operations
+  - clear reports
+
+----------------------------------------
+
+PHASE 2 — SIMULATE REAL OPERATIONS
+
+Test the system with REAL scenarios:
+
+1. Create booking
+2. Take deposit (partial payment)
+3. Check-in guest → folio must open automatically
+4. Add charges:
+   - room night
+   - spa
+   - restaurant
+   - minibar
+5. Split payment:
+   - part cash
+   - part card
+6. Check-out guest → folio must close
+7. Generate invoice
+
+Then test edge cases:
+
+- Guest cancels → deposit handling
+- Guest no-show → penalty
+- Wrong charge added → void/reversal
+- Duplicate charge attempt
+- Partial payment (remaining balance)
+
+----------------------------------------
+
+PHASE 3 — THINK LIKE CFO
+
+Check:
+
+- Is revenue correct?
+- Any mismatch between:
+  folio_charges vs payments vs balance
+- VAT calculation correct?
+- Can I trust reports?
+
+----------------------------------------
+
+PHASE 4 — THINK LIKE RECEPTIONIST
+
+Check:
+
+- Is it easy to use?
+- Too many steps?
+- Confusing flows?
+- Missing buttons or actions?
+
+----------------------------------------
+
+PHASE 5 — THINK LIKE AUDITOR
+
+Check:
+
+- Can data be manipulated?
+- Can someone cheat the system?
+- Are logs complete?
+- Are transactions traceable?
+
+----------------------------------------
+
+PHASE 6 — BREAK THE SYSTEM
+
+Try to break it:
+
+- Send duplicate requests
+- Modify closed folio
+- Add payment after closing
+- Delete linked data
+- Invalid inputs
+
+----------------------------------------
+
+PHASE 7 — OUTPUT
+
+SECTION A — What works well
+SECTION B — Critical problems (must fix now)
+SECTION C — Business logic errors
+SECTION D — Financial risks (money loss, fraud)
+SECTION E — UX problems (real user pain)
+SECTION F — Missing features
+SECTION G — FIXES with code
+
+----------------------------------------
+
+IMPORTANT:
+
+- Think like a real hotel using this tomorrow
+- Be strict and critical
+- Focus on real-world problems, not theory
+- If something is confusing, it is a bug
