@@ -276,11 +276,19 @@ export default function Welcome() {
                 {t('landing.trustedBadge')}
               </Badge>
 
-              <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.08]" style={{ letterSpacing: "-0.02em" }}>
-                {t('welcome.title')}
+              <h1
+                className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.15]"
+                style={{ letterSpacing: "-0.01em" }}
+              >
+                <span className="font-bold block">
+                  Run Your Hotel Like a 5-Star Operation
+                </span>
+                <span className="font-medium block" style={{ opacity: 0.72 }}>
+                  — Automatically
+                </span>
               </h1>
 
-              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
+              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-normal">
                 {t('welcome.subtitle')}
               </p>
 
