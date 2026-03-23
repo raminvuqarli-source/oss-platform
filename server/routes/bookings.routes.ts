@@ -8,6 +8,7 @@ import { getJobQueue } from "../services/jobQueue";
 import { enqueueOtaSync } from "../workers/otaSyncWorker";
 import { validateBody } from "../middleware/validateBody";
 import { updateBookingSchema, arrivalInfoSchema, precheckSchema, roomSettingsSchema, doorControlSchema, unitStatusSchema } from "../validators/booking.validators";
+import { autoOpenFolio, autoCloseFolio } from "./folio.routes";
 
 export function registerBookingRoutes(app: Express): void {
   // Bookings Routes - filtered by hotel
@@ -55,6 +56,31 @@ export function registerBookingRoutes(app: Express): void {
       if (["cancelled", "no_show"].includes(req.body.status)) {
         await storage.deleteRoomNightsByBooking(id);
         logger.info({ bookingId: id, newStatus: req.body.status }, "Room nights released on cancellation");
+      }
+      if (req.body.status === "checked_in" && updatedBooking) {
+        (async () => {
+          try {
+            let hotelId: string | undefined;
+            if (updatedBooking.propertyId) {
+              const hotel = await storage.getHotelByPropertyId(updatedBooking.propertyId);
+              hotelId = hotel?.id;
+            }
+            if (!hotelId && updatedBooking.ownerId) {
+              const owner = await storage.getOwner(updatedBooking.ownerId);
+              if (owner?.hotelId) hotelId = owner.hotelId;
+            }
+            if (hotelId) {
+              await autoOpenFolio(id, hotelId, updatedBooking.guestId, req.tenantId || null, updatedBooking.propertyId || null);
+            }
+          } catch (err) {
+            logger.error({ err, bookingId: id }, "autoOpenFolio failed");
+          }
+        })();
+      }
+      if (req.body.status === "checked_out") {
+        autoCloseFolio(id).catch(err =>
+          logger.error({ err, bookingId: id }, "autoCloseFolio failed")
+        );
       }
       if (updatedBooking?.propertyId) {
         try {

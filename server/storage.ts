@@ -169,6 +169,42 @@ import {
   type PricingRule,
   type InsertPricingRule,
   apiUsageLogs,
+  departments,
+  type Department,
+  type InsertDepartment,
+  costCenters,
+  type CostCenter,
+  type InsertCostCenter,
+  taxConfigurations,
+  type TaxConfiguration,
+  type InsertTaxConfiguration,
+  guestFolios,
+  type GuestFolio,
+  type InsertGuestFolio,
+  folioCharges,
+  type FolioCharge,
+  type InsertFolioCharge,
+  folioPayments,
+  type FolioPayment,
+  type InsertFolioPayment,
+  folioAdjustments,
+  type FolioAdjustment,
+  type InsertFolioAdjustment,
+  chartOfAccounts,
+  type ChartOfAccount,
+  type InsertChartOfAccount,
+  journalEntries,
+  type JournalEntry,
+  type InsertJournalEntry,
+  journalEntryLines,
+  type JournalEntryLine,
+  type InsertJournalEntryLine,
+  nightAudits,
+  type NightAudit,
+  type InsertNightAudit,
+  dailyFinancialSummaries,
+  type DailyFinancialSummary,
+  type InsertDailyFinancialSummary,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -2698,6 +2734,190 @@ export class DatabaseStorage implements IStorage {
         gte(apiUsageLogs.createdAt, startOfMonth),
       ));
     return result[0]?.total ?? 0;
+  }
+
+  // ===================== DEPARTMENTS =====================
+  async getDepartmentsByHotel(hotelId: string, tenantId: string): Promise<Department[]> {
+    return db.select().from(departments).where(and(eq(departments.hotelId, hotelId), eq(departments.tenantId, tenantId))).orderBy(asc(departments.name));
+  }
+  async createDepartment(dept: InsertDepartment): Promise<Department> {
+    const [d] = await db.insert(departments).values(dept).returning();
+    return d;
+  }
+  async updateDepartment(id: string, updates: Partial<Department>): Promise<Department | undefined> {
+    const [d] = await db.update(departments).set(updates).where(eq(departments.id, id)).returning();
+    return d;
+  }
+  async deleteDepartment(id: string): Promise<void> {
+    await db.delete(departments).where(eq(departments.id, id));
+  }
+
+  // ===================== COST CENTERS =====================
+  async getCostCentersByHotel(hotelId: string, tenantId: string): Promise<CostCenter[]> {
+    return db.select().from(costCenters).where(and(eq(costCenters.hotelId, hotelId), eq(costCenters.tenantId, tenantId))).orderBy(asc(costCenters.name));
+  }
+  async createCostCenter(cc: InsertCostCenter): Promise<CostCenter> {
+    const [c] = await db.insert(costCenters).values(cc).returning();
+    return c;
+  }
+  async updateCostCenter(id: string, updates: Partial<CostCenter>): Promise<CostCenter | undefined> {
+    const [c] = await db.update(costCenters).set(updates).where(eq(costCenters.id, id)).returning();
+    return c;
+  }
+
+  // ===================== TAX CONFIGURATIONS =====================
+  async getTaxConfigsByHotel(hotelId: string, tenantId: string): Promise<TaxConfiguration[]> {
+    return db.select().from(taxConfigurations).where(and(eq(taxConfigurations.hotelId, hotelId), eq(taxConfigurations.tenantId, tenantId), eq(taxConfigurations.isActive, true)));
+  }
+  async createTaxConfig(config: InsertTaxConfiguration): Promise<TaxConfiguration> {
+    const [t] = await db.insert(taxConfigurations).values(config).returning();
+    return t;
+  }
+  async updateTaxConfig(id: string, updates: Partial<TaxConfiguration>): Promise<TaxConfiguration | undefined> {
+    const [t] = await db.update(taxConfigurations).set(updates).where(eq(taxConfigurations.id, id)).returning();
+    return t;
+  }
+
+  // ===================== GUEST FOLIOS =====================
+  async getGuestFolioByBooking(bookingId: string): Promise<GuestFolio | undefined> {
+    const [f] = await db.select().from(guestFolios).where(eq(guestFolios.bookingId, bookingId));
+    return f;
+  }
+  async getGuestFolio(id: string): Promise<GuestFolio | undefined> {
+    const [f] = await db.select().from(guestFolios).where(eq(guestFolios.id, id));
+    return f;
+  }
+  async getGuestFoliosByHotel(hotelId: string, tenantId: string): Promise<GuestFolio[]> {
+    return db.select().from(guestFolios).where(and(eq(guestFolios.hotelId, hotelId), eq(guestFolios.tenantId, tenantId))).orderBy(desc(guestFolios.openedAt));
+  }
+  async createGuestFolio(folio: InsertGuestFolio): Promise<GuestFolio> {
+    const [f] = await db.insert(guestFolios).values(folio).returning();
+    return f;
+  }
+  async updateGuestFolio(id: string, updates: Partial<GuestFolio>): Promise<GuestFolio | undefined> {
+    const [f] = await db.update(guestFolios).set(updates).where(eq(guestFolios.id, id)).returning();
+    return f;
+  }
+  async recalculateFolioBalance(folioId: string): Promise<GuestFolio | undefined> {
+    const charges = await db.select().from(folioCharges).where(and(eq(folioCharges.folioId, folioId), eq(folioCharges.status, "posted")));
+    const payments = await db.select().from(folioPayments).where(and(eq(folioPayments.folioId, folioId), eq(folioPayments.status, "completed")));
+    const adjustments = await db.select().from(folioAdjustments).where(eq(folioAdjustments.folioId, folioId));
+    const totalCharges = charges.reduce((s, c) => s + (c.amountGross || 0), 0);
+    const totalPayments = payments.reduce((s, p) => s + (p.amount || 0), 0);
+    const totalAdjustments = adjustments.reduce((s, a) => s + (a.amount || 0), 0);
+    const taxTotal = charges.reduce((s, c) => s + (c.taxAmount || 0), 0);
+    const balance = totalCharges - totalPayments + totalAdjustments;
+    const [f] = await db.update(guestFolios).set({ totalCharges, totalPayments, totalAdjustments, taxTotal, balance }).where(eq(guestFolios.id, folioId)).returning();
+    return f;
+  }
+
+  // ===================== FOLIO CHARGES =====================
+  async getFolioCharges(folioId: string): Promise<FolioCharge[]> {
+    return db.select().from(folioCharges).where(eq(folioCharges.folioId, folioId)).orderBy(desc(folioCharges.createdAt));
+  }
+  async createFolioCharge(charge: InsertFolioCharge): Promise<FolioCharge> {
+    const [c] = await db.insert(folioCharges).values(charge).returning();
+    return c;
+  }
+  async voidFolioCharge(id: string, voidedBy: string, reason: string): Promise<FolioCharge | undefined> {
+    const [c] = await db.update(folioCharges).set({ status: "voided", voidedAt: new Date(), voidedBy, voidReason: reason }).where(eq(folioCharges.id, id)).returning();
+    return c;
+  }
+
+  // ===================== FOLIO PAYMENTS =====================
+  async getFolioPayments(folioId: string): Promise<FolioPayment[]> {
+    return db.select().from(folioPayments).where(eq(folioPayments.folioId, folioId)).orderBy(desc(folioPayments.createdAt));
+  }
+  async createFolioPayment(payment: InsertFolioPayment): Promise<FolioPayment> {
+    const [p] = await db.insert(folioPayments).values(payment).returning();
+    return p;
+  }
+  async updateFolioPayment(id: string, updates: Partial<FolioPayment>): Promise<FolioPayment | undefined> {
+    const [p] = await db.update(folioPayments).set(updates).where(eq(folioPayments.id, id)).returning();
+    return p;
+  }
+
+  // ===================== FOLIO ADJUSTMENTS =====================
+  async getFolioAdjustments(folioId: string): Promise<FolioAdjustment[]> {
+    return db.select().from(folioAdjustments).where(eq(folioAdjustments.folioId, folioId)).orderBy(desc(folioAdjustments.createdAt));
+  }
+  async createFolioAdjustment(adj: InsertFolioAdjustment): Promise<FolioAdjustment> {
+    const [a] = await db.insert(folioAdjustments).values(adj).returning();
+    return a;
+  }
+
+  // ===================== CHART OF ACCOUNTS =====================
+  async getChartOfAccountsByHotel(hotelId: string, tenantId: string): Promise<ChartOfAccount[]> {
+    return db.select().from(chartOfAccounts).where(and(eq(chartOfAccounts.hotelId, hotelId), eq(chartOfAccounts.tenantId, tenantId))).orderBy(asc(chartOfAccounts.accountCode));
+  }
+  async getChartOfAccountByCode(hotelId: string, accountCode: string): Promise<ChartOfAccount | undefined> {
+    const [a] = await db.select().from(chartOfAccounts).where(and(eq(chartOfAccounts.hotelId, hotelId), eq(chartOfAccounts.accountCode, accountCode)));
+    return a;
+  }
+  async createChartOfAccount(account: InsertChartOfAccount): Promise<ChartOfAccount> {
+    const [a] = await db.insert(chartOfAccounts).values(account).returning();
+    return a;
+  }
+  async updateChartOfAccount(id: string, updates: Partial<ChartOfAccount>): Promise<ChartOfAccount | undefined> {
+    const [a] = await db.update(chartOfAccounts).set(updates).where(eq(chartOfAccounts.id, id)).returning();
+    return a;
+  }
+
+  // ===================== JOURNAL ENTRIES =====================
+  async getJournalEntriesByHotel(hotelId: string, tenantId: string, limit = 100): Promise<JournalEntry[]> {
+    return db.select().from(journalEntries).where(and(eq(journalEntries.hotelId, hotelId), eq(journalEntries.tenantId, tenantId))).orderBy(desc(journalEntries.entryDate)).limit(limit);
+  }
+  async getJournalEntriesBySource(sourceType: string, sourceId: string): Promise<JournalEntry[]> {
+    return db.select().from(journalEntries).where(and(eq(journalEntries.sourceType, sourceType), eq(journalEntries.sourceId, sourceId)));
+  }
+  async createJournalEntry(entry: InsertJournalEntry, lines: InsertJournalEntryLine[]): Promise<JournalEntry> {
+    const [je] = await db.insert(journalEntries).values(entry).returning();
+    if (lines.length > 0) {
+      await db.insert(journalEntryLines).values(lines.map(l => ({ ...l, journalEntryId: je.id })));
+    }
+    return je;
+  }
+  async getJournalEntryLines(journalEntryId: string): Promise<JournalEntryLine[]> {
+    return db.select().from(journalEntryLines).where(eq(journalEntryLines.journalEntryId, journalEntryId));
+  }
+
+  // ===================== NIGHT AUDITS =====================
+  async getNightAuditsByHotel(hotelId: string, tenantId: string, limit = 30): Promise<NightAudit[]> {
+    return db.select().from(nightAudits).where(and(eq(nightAudits.hotelId, hotelId), eq(nightAudits.tenantId, tenantId))).orderBy(desc(nightAudits.auditDate)).limit(limit);
+  }
+  async getNightAuditByDate(hotelId: string, date: Date): Promise<NightAudit | undefined> {
+    const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const endOfDay = new Date(startOfDay.getTime() + 86400000);
+    const [na] = await db.select().from(nightAudits).where(and(eq(nightAudits.hotelId, hotelId), gte(nightAudits.auditDate, startOfDay), lt(nightAudits.auditDate, endOfDay)));
+    return na;
+  }
+  async createNightAudit(audit: InsertNightAudit): Promise<NightAudit> {
+    const [na] = await db.insert(nightAudits).values(audit).returning();
+    return na;
+  }
+  async updateNightAudit(id: string, updates: Partial<NightAudit>): Promise<NightAudit | undefined> {
+    const [na] = await db.update(nightAudits).set(updates).where(eq(nightAudits.id, id)).returning();
+    return na;
+  }
+
+  // ===================== DAILY FINANCIAL SUMMARIES =====================
+  async getDailyFinancialSummaries(hotelId: string, tenantId: string, limit = 30): Promise<DailyFinancialSummary[]> {
+    return db.select().from(dailyFinancialSummaries).where(and(eq(dailyFinancialSummaries.hotelId, hotelId), eq(dailyFinancialSummaries.tenantId, tenantId))).orderBy(desc(dailyFinancialSummaries.summaryDate)).limit(limit);
+  }
+  async getDailyFinancialSummaryByDate(hotelId: string, date: Date): Promise<DailyFinancialSummary | undefined> {
+    const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const endOfDay = new Date(startOfDay.getTime() + 86400000);
+    const [s] = await db.select().from(dailyFinancialSummaries).where(and(eq(dailyFinancialSummaries.hotelId, hotelId), gte(dailyFinancialSummaries.summaryDate, startOfDay), lt(dailyFinancialSummaries.summaryDate, endOfDay)));
+    return s;
+  }
+  async upsertDailyFinancialSummary(data: InsertDailyFinancialSummary): Promise<DailyFinancialSummary> {
+    const existing = await this.getDailyFinancialSummaryByDate(data.hotelId, data.summaryDate as Date);
+    if (existing) {
+      const [s] = await db.update(dailyFinancialSummaries).set({ ...data, updatedAt: new Date() }).where(eq(dailyFinancialSummaries.id, existing.id)).returning();
+      return s;
+    }
+    const [s] = await db.insert(dailyFinancialSummaries).values(data).returning();
+    return s;
   }
 }
 

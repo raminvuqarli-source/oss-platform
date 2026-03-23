@@ -44,7 +44,7 @@ Preferred communication style: Simple, everyday language.
 ### Core Features
 - **Property & Staff Management**: Includes onboarding and per-property staff management.
 - **SaaS Features**: Feature flag engine, usage metering, audit logging, billing & subscription, device registry, and analytics.
-- **Financial Management**: Revenue, expenses, payroll, and recurring expenses with multi-tenant isolation, integrated with booking data.
+- **Financial Management (Hotel-Grade, Phase 1-4)**: Guest Folio System complete — `guest_folios`, `folio_charges`, `folio_payments`, `folio_adjustments`. Folio auto-opens on `checked_in`, auto-closes on `checked_out`. Idempotency-protected charges. Multi-method payment splits and deposits. Tax engine schema (`tax_configurations` — VAT, inclusive/exclusive per charge). Double-entry GL schema (`chart_of_accounts`, `journal_entries`, `journal_entry_lines`). Departments & cost centers (`departments`, `cost_centers`). Night audit (`night_audits`). Pre-aggregated KPI analytics (`daily_financial_summaries`). Legacy `financial_transactions`/`revenues` remain but are soft-deprecated — `guest_folios` is the canonical source of truth. `bookings` extended with `depositAmount`, `depositDueDate`, `depositPaidAt`, `paidAmount`, `remainingBalance`. APIs: `/api/folios/*`, `/api/departments`, `/api/tax-configs`, `/api/accounting/*`, `/api/night-audits`, `/api/finance/kpi`, `/api/finance/daily-summaries`.
 - **Communication Layer**: Two-layer internal (Owner↔Staff) and Guest Service (Guest↔Staff) communication with escalation.
 - **Notification Service**: Interactive notification center with action buttons.
 - **Escalation System**: Full escalation management with reply threading and status tracking.

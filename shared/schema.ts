@@ -410,6 +410,11 @@ export const bookings = pgTable("bookings", {
   unitId: varchar("unit_id"),
   ratePlanId: varchar("rate_plan_id"),
   tenantId: varchar("tenant_id"),
+  depositAmount: integer("deposit_amount"),
+  depositDueDate: timestamp("deposit_due_date"),
+  depositPaidAt: timestamp("deposit_paid_at"),
+  paidAmount: integer("paid_amount").default(0),
+  remainingBalance: integer("remaining_balance"),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   index("idx_bookings_tenant_id").on(table.tenantId),
@@ -1839,6 +1844,320 @@ export const insertApiUsageLogSchema = createInsertSchema(apiUsageLogs).omit({
 });
 export type InsertApiUsageLog = z.infer<typeof insertApiUsageLogSchema>;
 export type ApiUsageLog = typeof apiUsageLogs.$inferSelect;
+
+// ===================== HOTEL FINANCE — DEPARTMENTS =====================
+export const departments = pgTable("departments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  hotelId: varchar("hotel_id").notNull(),
+  tenantId: varchar("tenant_id"),
+  name: text("name").notNull(),
+  code: text("code").notNull(),
+  type: text("type").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_departments_hotel_id").on(table.hotelId),
+  index("idx_departments_tenant_id").on(table.tenantId),
+]);
+export const insertDepartmentSchema = createInsertSchema(departments).omit({ id: true, createdAt: true });
+export type InsertDepartment = z.infer<typeof insertDepartmentSchema>;
+export type Department = typeof departments.$inferSelect;
+
+// ===================== HOTEL FINANCE — COST CENTERS =====================
+export const costCenters = pgTable("cost_centers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  departmentId: varchar("department_id").notNull(),
+  hotelId: varchar("hotel_id").notNull(),
+  tenantId: varchar("tenant_id"),
+  name: text("name").notNull(),
+  code: text("code").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_cost_centers_hotel_id").on(table.hotelId),
+  index("idx_cost_centers_department_id").on(table.departmentId),
+]);
+export const insertCostCenterSchema = createInsertSchema(costCenters).omit({ id: true, createdAt: true });
+export type InsertCostCenter = z.infer<typeof insertCostCenterSchema>;
+export type CostCenter = typeof costCenters.$inferSelect;
+
+// ===================== HOTEL FINANCE — TAX CONFIGURATIONS =====================
+export const taxConfigurations = pgTable("tax_configurations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  hotelId: varchar("hotel_id").notNull(),
+  tenantId: varchar("tenant_id"),
+  name: text("name").notNull(),
+  code: text("code").notNull(),
+  rate: integer("rate").notNull(),
+  isInclusive: boolean("is_inclusive").default(false),
+  appliesTo: text("applies_to").array(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_tax_config_hotel_id").on(table.hotelId),
+  index("idx_tax_config_tenant_id").on(table.tenantId),
+]);
+export const insertTaxConfigurationSchema = createInsertSchema(taxConfigurations).omit({ id: true, createdAt: true });
+export type InsertTaxConfiguration = z.infer<typeof insertTaxConfigurationSchema>;
+export type TaxConfiguration = typeof taxConfigurations.$inferSelect;
+
+// ===================== HOTEL FINANCE — GUEST FOLIOS =====================
+export const guestFolios = pgTable("guest_folios", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  bookingId: varchar("booking_id").notNull().unique(),
+  guestId: varchar("guest_id").notNull(),
+  hotelId: varchar("hotel_id").notNull(),
+  propertyId: varchar("property_id"),
+  tenantId: varchar("tenant_id"),
+  folioNumber: text("folio_number").notNull(),
+  status: text("status").notNull().default("open"),
+  currency: text("currency").default("USD"),
+  totalCharges: integer("total_charges").default(0),
+  totalPayments: integer("total_payments").default(0),
+  totalAdjustments: integer("total_adjustments").default(0),
+  balance: integer("balance").default(0),
+  taxTotal: integer("tax_total").default(0),
+  openedAt: timestamp("opened_at").defaultNow(),
+  closedAt: timestamp("closed_at"),
+  finalizedAt: timestamp("finalized_at"),
+  finalizedBy: varchar("finalized_by"),
+  invoiceGeneratedAt: timestamp("invoice_generated_at"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_folios_booking_id").on(table.bookingId),
+  index("idx_folios_guest_id").on(table.guestId),
+  index("idx_folios_hotel_id").on(table.hotelId),
+  index("idx_folios_tenant_id").on(table.tenantId),
+  index("idx_folios_status").on(table.status),
+]);
+export const insertGuestFolioSchema = createInsertSchema(guestFolios).omit({ id: true, createdAt: true });
+export type InsertGuestFolio = z.infer<typeof insertGuestFolioSchema>;
+export type GuestFolio = typeof guestFolios.$inferSelect;
+
+// ===================== HOTEL FINANCE — FOLIO CHARGES =====================
+export const folioCharges = pgTable("folio_charges", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  folioId: varchar("folio_id").notNull(),
+  bookingId: varchar("booking_id").notNull(),
+  hotelId: varchar("hotel_id").notNull(),
+  tenantId: varchar("tenant_id"),
+  departmentId: varchar("department_id"),
+  costCenterId: varchar("cost_center_id"),
+  chargeType: text("charge_type").notNull(),
+  description: text("description").notNull(),
+  quantity: integer("quantity").default(1),
+  unitPrice: integer("unit_price").notNull(),
+  amountNet: integer("amount_net").notNull(),
+  taxRate: integer("tax_rate").default(0),
+  taxAmount: integer("tax_amount").default(0),
+  amountGross: integer("amount_gross").notNull(),
+  isInclusive: boolean("is_inclusive").default(false),
+  currency: text("currency").default("USD"),
+  serviceDate: timestamp("service_date"),
+  idempotencyKey: text("idempotency_key").unique(),
+  status: text("status").notNull().default("posted"),
+  voidedAt: timestamp("voided_at"),
+  voidedBy: varchar("voided_by"),
+  voidReason: text("void_reason"),
+  postedBy: varchar("posted_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_folio_charges_folio_id").on(table.folioId),
+  index("idx_folio_charges_booking_id").on(table.bookingId),
+  index("idx_folio_charges_hotel_id").on(table.hotelId),
+  index("idx_folio_charges_tenant_id").on(table.tenantId),
+  index("idx_folio_charges_status").on(table.status),
+  index("idx_folio_charges_service_date").on(table.serviceDate),
+]);
+export const insertFolioChargeSchema = createInsertSchema(folioCharges).omit({ id: true, createdAt: true });
+export type InsertFolioCharge = z.infer<typeof insertFolioChargeSchema>;
+export type FolioCharge = typeof folioCharges.$inferSelect;
+
+// ===================== HOTEL FINANCE — FOLIO PAYMENTS =====================
+export const folioPayments = pgTable("folio_payments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  folioId: varchar("folio_id").notNull(),
+  bookingId: varchar("booking_id").notNull(),
+  hotelId: varchar("hotel_id").notNull(),
+  tenantId: varchar("tenant_id"),
+  paymentType: text("payment_type").notNull().default("payment"),
+  paymentMethod: text("payment_method").notNull(),
+  amount: integer("amount").notNull(),
+  currency: text("currency").default("USD"),
+  referenceNumber: text("reference_number"),
+  isDeposit: boolean("is_deposit").default(false),
+  status: text("status").notNull().default("completed"),
+  receivedAt: timestamp("received_at").defaultNow(),
+  receivedBy: varchar("received_by"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_folio_payments_folio_id").on(table.folioId),
+  index("idx_folio_payments_booking_id").on(table.bookingId),
+  index("idx_folio_payments_hotel_id").on(table.hotelId),
+  index("idx_folio_payments_tenant_id").on(table.tenantId),
+]);
+export const insertFolioPaymentSchema = createInsertSchema(folioPayments).omit({ id: true, createdAt: true });
+export type InsertFolioPayment = z.infer<typeof insertFolioPaymentSchema>;
+export type FolioPayment = typeof folioPayments.$inferSelect;
+
+// ===================== HOTEL FINANCE — FOLIO ADJUSTMENTS =====================
+export const folioAdjustments = pgTable("folio_adjustments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  folioId: varchar("folio_id").notNull(),
+  bookingId: varchar("booking_id").notNull(),
+  hotelId: varchar("hotel_id").notNull(),
+  tenantId: varchar("tenant_id"),
+  adjustmentType: text("adjustment_type").notNull(),
+  description: text("description").notNull(),
+  amount: integer("amount").notNull(),
+  currency: text("currency").default("USD"),
+  approvedBy: varchar("approved_by"),
+  createdBy: varchar("created_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_folio_adjustments_folio_id").on(table.folioId),
+  index("idx_folio_adjustments_hotel_id").on(table.hotelId),
+  index("idx_folio_adjustments_tenant_id").on(table.tenantId),
+]);
+export const insertFolioAdjustmentSchema = createInsertSchema(folioAdjustments).omit({ id: true, createdAt: true });
+export type InsertFolioAdjustment = z.infer<typeof insertFolioAdjustmentSchema>;
+export type FolioAdjustment = typeof folioAdjustments.$inferSelect;
+
+// ===================== HOTEL FINANCE — CHART OF ACCOUNTS =====================
+export const chartOfAccounts = pgTable("chart_of_accounts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  hotelId: varchar("hotel_id").notNull(),
+  tenantId: varchar("tenant_id"),
+  accountCode: text("account_code").notNull(),
+  accountName: text("account_name").notNull(),
+  accountType: text("account_type").notNull(),
+  parentId: varchar("parent_id"),
+  isSystem: boolean("is_system").default(false),
+  isActive: boolean("is_active").default(true),
+  normalBalance: text("normal_balance").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_coa_hotel_id").on(table.hotelId),
+  index("idx_coa_tenant_id").on(table.tenantId),
+  index("idx_coa_account_code").on(table.accountCode),
+]);
+export const insertChartOfAccountSchema = createInsertSchema(chartOfAccounts).omit({ id: true, createdAt: true });
+export type InsertChartOfAccount = z.infer<typeof insertChartOfAccountSchema>;
+export type ChartOfAccount = typeof chartOfAccounts.$inferSelect;
+
+// ===================== HOTEL FINANCE — JOURNAL ENTRIES =====================
+export const journalEntries = pgTable("journal_entries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  hotelId: varchar("hotel_id").notNull(),
+  tenantId: varchar("tenant_id"),
+  entryNumber: text("entry_number").notNull(),
+  entryDate: timestamp("entry_date").notNull(),
+  description: text("description").notNull(),
+  sourceType: text("source_type").notNull(),
+  sourceId: varchar("source_id"),
+  status: text("status").notNull().default("posted"),
+  totalDebit: integer("total_debit").default(0),
+  totalCredit: integer("total_credit").default(0),
+  currency: text("currency").default("USD"),
+  createdBy: varchar("created_by"),
+  reversedBy: varchar("reversed_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_journal_entries_hotel_id").on(table.hotelId),
+  index("idx_journal_entries_tenant_id").on(table.tenantId),
+  index("idx_journal_entries_source").on(table.sourceType, table.sourceId),
+  index("idx_journal_entries_date").on(table.entryDate),
+]);
+export const insertJournalEntrySchema = createInsertSchema(journalEntries).omit({ id: true, createdAt: true });
+export type InsertJournalEntry = z.infer<typeof insertJournalEntrySchema>;
+export type JournalEntry = typeof journalEntries.$inferSelect;
+
+// ===================== HOTEL FINANCE — JOURNAL ENTRY LINES =====================
+export const journalEntryLines = pgTable("journal_entry_lines", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  journalEntryId: varchar("journal_entry_id").notNull(),
+  hotelId: varchar("hotel_id").notNull(),
+  tenantId: varchar("tenant_id"),
+  accountId: varchar("account_id").notNull(),
+  departmentId: varchar("department_id"),
+  description: text("description"),
+  debit: integer("debit").default(0),
+  credit: integer("credit").default(0),
+  currency: text("currency").default("USD"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_journal_lines_entry_id").on(table.journalEntryId),
+  index("idx_journal_lines_account_id").on(table.accountId),
+  index("idx_journal_lines_hotel_id").on(table.hotelId),
+]);
+export const insertJournalEntryLineSchema = createInsertSchema(journalEntryLines).omit({ id: true, createdAt: true });
+export type InsertJournalEntryLine = z.infer<typeof insertJournalEntryLineSchema>;
+export type JournalEntryLine = typeof journalEntryLines.$inferSelect;
+
+// ===================== HOTEL FINANCE — NIGHT AUDITS =====================
+export const nightAudits = pgTable("night_audits", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  hotelId: varchar("hotel_id").notNull(),
+  tenantId: varchar("tenant_id"),
+  auditDate: timestamp("audit_date").notNull(),
+  status: text("status").notNull().default("open"),
+  totalRevenue: integer("total_revenue").default(0),
+  totalPayments: integer("total_payments").default(0),
+  totalAdjustments: integer("total_adjustments").default(0),
+  roomNightsPosted: integer("room_nights_posted").default(0),
+  occupiedRooms: integer("occupied_rooms").default(0),
+  totalRooms: integer("total_rooms").default(0),
+  occupancyRate: integer("occupancy_rate").default(0),
+  notes: text("notes"),
+  closedAt: timestamp("closed_at"),
+  closedBy: varchar("closed_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_night_audits_hotel_id").on(table.hotelId),
+  index("idx_night_audits_date").on(table.auditDate),
+  index("idx_night_audits_tenant_id").on(table.tenantId),
+]);
+export const insertNightAuditSchema = createInsertSchema(nightAudits).omit({ id: true, createdAt: true });
+export type InsertNightAudit = z.infer<typeof insertNightAuditSchema>;
+export type NightAudit = typeof nightAudits.$inferSelect;
+
+// ===================== HOTEL FINANCE — DAILY FINANCIAL SUMMARIES =====================
+export const dailyFinancialSummaries = pgTable("daily_financial_summaries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  hotelId: varchar("hotel_id").notNull(),
+  tenantId: varchar("tenant_id"),
+  summaryDate: timestamp("summary_date").notNull(),
+  roomRevenue: integer("room_revenue").default(0),
+  fbRevenue: integer("fb_revenue").default(0),
+  spaRevenue: integer("spa_revenue").default(0),
+  otherRevenue: integer("other_revenue").default(0),
+  totalRevenue: integer("total_revenue").default(0),
+  totalTax: integer("total_tax").default(0),
+  totalExpenses: integer("total_expenses").default(0),
+  occupiedRooms: integer("occupied_rooms").default(0),
+  totalRooms: integer("total_rooms").default(0),
+  occupancyRate: integer("occupancy_rate").default(0),
+  adr: integer("adr").default(0),
+  revpar: integer("revpar").default(0),
+  totalPaymentsCash: integer("total_payments_cash").default(0),
+  totalPaymentsCard: integer("total_payments_card").default(0),
+  totalPaymentsBank: integer("total_payments_bank").default(0),
+  isLocked: boolean("is_locked").default(false),
+  lockedAt: timestamp("locked_at"),
+  lockedBy: varchar("locked_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_daily_summary_hotel_id").on(table.hotelId),
+  index("idx_daily_summary_date").on(table.summaryDate),
+  index("idx_daily_summary_tenant_id").on(table.tenantId),
+]);
+export const insertDailyFinancialSummarySchema = createInsertSchema(dailyFinancialSummaries).omit({ id: true, createdAt: true });
+export type InsertDailyFinancialSummary = z.infer<typeof insertDailyFinancialSummarySchema>;
+export type DailyFinancialSummary = typeof dailyFinancialSummaries.$inferSelect;
 
 // ===================== AI CHAT LEADS =====================
 export const leads = pgTable("leads", {

@@ -1,0 +1,385 @@
+You are a Senior Hotel CFO + Enterprise Software Architect.
+
+I have an existing OSS financial system for hotel operations. I do NOT want a generic answer. I want you to design and build the correct upgraded architecture based on the exact current limitations below.
+
+CURRENT SYSTEM FACTS
+
+1) Accounting
+- There is NO General Ledger
+- There is NO double-entry accounting
+- No debit, no credit, no journals, no chart_of_accounts
+- Current system is simple single-entry cash recording only
+
+2) Booking to Finance
+- Booking does NOT automatically create a financial transaction
+- Reception manually creates transactions through:
+  POST /api/finance/transactions
+- There is also a backfill endpoint for old bookings:
+  POST /api/finance/backfill
+- This creates revenue leakage risk if reception forgets
+
+3) Guest Folio
+- There is NO folio system
+- No open guest account
+- No running balance
+- No check-in to check-out consolidated guest bill
+- Every transaction is currently an independent row
+
+4) Departments / Cost Centers
+- There is NO department_id
+- There is NO cost_center
+- Revenue and expense only use category fields
+- Department-level P&L is impossible today
+
+5) Night Audit / Daily Closing
+- There is NO night audit
+- No shift close
+- No daily reconciliation
+- No end-of-day finance lock
+
+6) Analytics
+- Finance analytics are calculated in real time by loading all transactions into memory
+- Example:
+  load all financial transactions
+  filter in JavaScript
+  calculate RevPAR / ADR / Occupancy
+- This does not scale
+
+7) Tax / VAT
+- There is NO VAT logic
+- No tax_rate
+- No tax_amount
+- No tax-inclusive/exclusive support
+- No tax-compliant guest invoice
+
+8) Payment Logic
+- Split payment is NOT supported
+- Each financial_transaction has only one paymentMethod field
+- One stay cannot properly support part cash + part card + part bank transfer
+- Partial payment / deposit / remaining balance is NOT supported
+- Booking only has totalPrice and paymentStatus
+- No depositAmount, paidAmount, remainingBalance
+
+9) Booking Lifecycle
+Current statuses:
+- booked
+- confirmed
+- arrival_info_submitted
+- precheck_submitted
+- checked_in
+- checked_out
+- cancelled
+- no_show
+
+Important:
+- Revenue is NOT automatically recognized at any status today
+- Manual finance posting can happen at any time, which is wrong
+
+Required correct behavior:
+- Folio opens at checked_in
+- Folio closes at checked_out
+- Deposit may be taken at confirmed
+- Revenue should be recognized based on service delivery, and fully finalized at checked_out
+- Cancelled / no_show must follow deposit / refund policy rules
+
+10) Source of Truth
+Current conflict:
+- bookings.totalPrice
+- financial_transactions.amount
+- revenues.amount
+
+These can disagree and there is no reliable referential integrity.
+
+Required future source of truth hierarchy:
+1. guest_folios
+2. folio_charges
+3. payment_splits
+
+Rules:
+- bookings.totalPrice should become only the initial quoted amount
+- revenues should be auto-generated from folio finalization
+- financial_transactions is legacy and should be replaced or deprecated in favor of folio-based logic
+- conflict resolution priority:
+  folio_charge > financial_transaction > booking.totalPrice
+
+11) Existing tables
+- financial_transactions
+- financial_audit_logs
+- revenues
+- expenses
+- payroll_configs
+- payroll_entries
+- recurring_expenses
+- invoices (currently SaaS subscription invoices only, NOT guest invoices)
+- payment_orders
+- refund_requests
+- rate_plans
+- pricing_rules
+
+12) Existing finance APIs
+- GET  /api/finance/transactions
+- POST /api/finance/transactions
+- PATCH /api/finance/transactions/:id
+- POST /api/finance/transactions/:id/void
+- GET  /api/finance/analytics
+- GET  /api/finance/audit-logs
+
+YOUR TASK
+
+Design and build the upgraded financial architecture for a TRUE 5-STAR HOTEL system.
+
+PHASE 1 — CORE HOTEL FINANCE FOUNDATION
+
+1. Build Guest Folio System
+Create proper schema and logic for:
+- guest_folios
+- folio_charges
+- folio_payments
+- folio_adjustments
+- folio_status
+- running balance
+- open at checked_in
+- close at checked_out
+- final guest invoice generation
+
+2. Build Payment Splits and Deposits
+Create support for:
+- multiple payment methods per stay
+- split payment
+- deposit payment
+- partial payment
+- remaining balance
+- refund support
+
+Suggested tables/fields:
+- payment_splits
+- bookings.depositAmount
+- bookings.paidAmount
+- bookings.remainingBalance
+- bookings.depositDueDate
+
+3. Automate Booking and Stay Charges
+Implement automation for:
+- deposit capture on confirmed
+- folio open on checked_in
+- room charge posting during stay
+- minibar / spa / restaurant / service charges added to folio
+- folio close on checked_out
+- invoice generation on finalization
+
+Add idempotency protection so duplicate charges cannot be posted.
+
+PHASE 2 — TAX AND COMPLIANCE
+
+4. Add VAT / Tax Engine
+Create:
+- tax_configurations
+- tax_rules
+- tax breakdown per charge
+
+Each charge must support:
+- amount_net
+- tax_amount
+- amount_gross
+- tax_rate
+- tax_inclusive boolean
+
+Support:
+- tax inclusive pricing
+- tax exclusive pricing
+- guest invoice with tax details
+- business-compliant reporting
+
+PHASE 3 — ACCOUNTING CORE
+
+5. Build Double-Entry Accounting
+Design and implement:
+- chart_of_accounts
+- journal_entries
+- journal_entry_lines
+- general_ledger view or ledger query model
+
+Every financial event must generate accounting entries automatically.
+
+Examples:
+- guest deposit received
+- room revenue recognized
+- final payment received
+- refund issued
+- cancellation with penalty
+- no_show with retained deposit
+
+6. Define Core Account Structure
+Include at minimum:
+Assets:
+- Cash
+- Bank
+- Accounts Receivable
+- Deposits Held
+Liabilities:
+- Tax Payable
+- Deferred Revenue
+Equity:
+- Retained Earnings
+Revenue:
+- Room Revenue
+- F&B Revenue
+- Spa Revenue
+- Event Revenue
+- Laundry Revenue
+- Parking Revenue
+Expenses:
+- Utilities
+- Payroll
+- Maintenance
+- Supplies
+- Marketing
+- Taxes
+- Software
+- Equipment
+
+PHASE 4 — OPERATIONAL HOTEL FINANCE
+
+7. Add Departments and Cost Centers
+Create:
+- departments
+- cost_centers
+
+Minimum departments:
+- Rooms
+- F&B
+- Spa
+- Events
+- Housekeeping
+- Maintenance
+- Admin
+
+Every folio charge, revenue, and expense must link to department_id and optionally cost_center_id.
+
+Goal:
+- department-level P&L
+- hotel consolidated P&L
+
+8. Add Night Audit / Daily Closing
+Build:
+- night_audits
+- daily_financial_summaries
+- shift_cash_sessions
+
+Required behavior:
+- close business day
+- reconcile payments
+- validate folio balances
+- lock previous day after close
+- only reversal entries allowed after posting/close
+
+PHASE 5 — PERFORMANCE AND REPORTING
+
+9. Replace In-Memory Analytics
+Do NOT calculate analytics by loading all rows into JavaScript memory.
+
+Instead build:
+- daily_financial_summary
+- monthly_financial_summary
+- department_financial_summary
+- occupancy_summary if needed
+
+Use:
+- SQL aggregations
+- indexes
+- materialized views if needed
+- scalable query design
+
+10. KPI Layer
+Support at minimum:
+- RevPAR
+- ADR
+- Occupancy
+- TRevPAR
+- NRevPAR
+- GOP
+- GOP %
+- Payroll % of Revenue
+- Food Cost %
+- Department P&L
+- Budget vs Actual readiness
+
+PHASE 6 — CONTROL, AUDIT, SAFETY
+
+11. Anti-Fraud and Controls
+Implement:
+- no destructive edits after posting
+- void / reversal workflow instead of direct overwrite
+- role-based permissions
+- full audit logs
+- posted/locked status
+- who created / approved / voided / reversed entries
+
+12. Source of Truth Rules
+Future truth model must be:
+- guest_folios = main truth
+- folio_charges = item-level truth
+- payment_splits = payment truth
+
+Rules:
+- booking.totalPrice = quote only
+- finalized folio decides final amount owed
+- revenues are generated from folio finalization
+- legacy financial_transactions should be migrated or deprecated
+
+OUTPUT FORMAT
+
+SECTION A
+- Upgraded architecture overview in simple language
+
+SECTION B
+- New database schema
+- include table definitions and key fields
+- mark which old tables stay, change, or become legacy
+
+SECTION C
+- Data flow
+- confirmed → deposit
+- checked_in → folio open
+- stay charges → folio accumulation
+- checked_out → folio finalization
+- payment → accounting entries
+- refund / cancellation / no_show flows
+
+SECTION D
+- Accounting design
+- chart of accounts
+- journal entry logic
+- double-entry examples
+
+SECTION E
+- API design
+- routes
+- responsibilities
+- example payloads
+
+SECTION F
+- Migration plan from current system
+- how to move from financial_transactions to folio-based architecture safely
+
+SECTION G
+- Performance strategy
+- summaries
+- indexing
+- reporting design
+
+SECTION H
+- Priority implementation roadmap
+- what must be built first
+- what can be phase 2
+- what can be phase 3
+
+IMPORTANT RULES
+
+- Be practical and production-ready
+- Do NOT give generic theory
+- Do NOT recommend manual finance workflows
+- Design this like it will run a real 5-star hotel
+- Prefer scalable and auditable architecture
+- Use the exact constraints above
+- If replacing legacy structures, explain backward compatibility
