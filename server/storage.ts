@@ -906,8 +906,8 @@ export class DatabaseStorage implements IStorage {
         remainingBalance: row.remaining_balance ?? null,
         createdAt: row.created_at ?? null,
       } as Booking;
-    } catch (error) {
-      logger.error({ err: error }, "Error in getCurrentBookingForGuest");
+    } catch (error: any) {
+      logger.error({ err: error, errMessage: error?.message, errCode: error?.code, guestId }, "Error in getCurrentBookingForGuest");
       return undefined;
     }
   }

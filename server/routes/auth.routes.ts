@@ -130,7 +130,7 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
     cookie: {
       secure: isProduction,
       httpOnly: true,
-      sameSite: isProduction ? "none" : "lax",
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: "/",
     },
@@ -577,7 +577,13 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
           });
           logger.info({ username: user.username }, "Created fresh demo booking and room settings for guest");
         } catch (bookingErr: any) {
-          logger.error({ err: bookingErr }, "Failed to create demo guest booking — continuing with login anyway");
+          logger.error({
+            err: bookingErr,
+            errMessage: bookingErr?.message,
+            errCode: bookingErr?.code,
+            guestId: user.id,
+            username: user.username,
+          }, "Failed to create demo guest booking — continuing with login anyway");
         }
       }
 
@@ -614,7 +620,7 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
         path: "/",
         httpOnly: true,
         secure: isProduction,
-        sameSite: isProduction ? "none" : "lax",
+        sameSite: "lax",
       });
       if (userId) {
         storage.createAuditLog({
