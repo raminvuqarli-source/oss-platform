@@ -453,9 +453,25 @@ export function registerStaffRoutes(app: Express): void {
           username: user.username,
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ err: error }, "Error creating guest");
-      res.status(500).json({ message: "Failed to create guest account" });
+      const errMsg = error?.message || "";
+      if (errMsg.includes("OVERBOOKING_BLOCKED")) {
+        return res.status(409).json({ message: "Bu otaq seçilmiş tarixlər üçün artıq rezerv edilib." });
+      }
+      if (errMsg.includes("ROOM_NOT_AVAILABLE")) {
+        return res.status(409).json({ message: "Otaq bu tarixlər üçün mövcud deyil." });
+      }
+      if (error?.code === "23503") {
+        return res.status(400).json({ message: "Bağlantı xətası: əlaqəli cədvəldə uyğun qeyd tapılmadı." });
+      }
+      if (error?.code === "42703") {
+        return res.status(500).json({ message: `DB sütun xətası (VPS miqrasiya tələb olunur): ${errMsg}` });
+      }
+      if (error?.code === "42P01") {
+        return res.status(500).json({ message: `DB cədvəl tapılmadı (VPS miqrasiya tələb olunur): ${errMsg}` });
+      }
+      res.status(500).json({ message: errMsg || "Qonaq hesabı yaradıla bilmədi." });
     }
   });
 
