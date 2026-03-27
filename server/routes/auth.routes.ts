@@ -122,14 +122,17 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
   const sessionConfig: session.SessionOptions = {
     store: sessionStore,
     secret: sessionSecret || "oss-hotel-dev-secret-key",
+    name: "oss.sid",
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     rolling: false,
+    proxy: isProduction,
     cookie: {
       secure: isProduction,
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
     },
   };
 
@@ -600,11 +603,11 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
       if (err) {
         logger.error({ err }, "Session destroy error");
       }
-      res.clearCookie("connect.sid", {
+      res.clearCookie("oss.sid", {
         path: "/",
         httpOnly: true,
         secure: isProduction,
-        sameSite: "lax",
+        sameSite: isProduction ? "none" : "lax",
       });
       if (userId) {
         storage.createAuditLog({
