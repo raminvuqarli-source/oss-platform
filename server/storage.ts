@@ -854,26 +854,62 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCurrentBookingForGuest(guestId: string): Promise<Booking | undefined> {
-    const result = await db.select().from(bookings)
-      .where(
-        and(
-          eq(bookings.guestId, guestId),
-          or(
-            eq(bookings.status, "pending"),
-            eq(bookings.status, "confirmed"),
-            eq(bookings.status, "booked"),
-            eq(bookings.status, "precheck_submitted"),
-            eq(bookings.status, "arrival_info_submitted"),
-            eq(bookings.status, "checked_in"),
-            eq(bookings.status, "rejected"),
-            eq(bookings.status, "active")
-          )
-        )
-      )
-      .orderBy(desc(bookings.checkInDate))
-      .limit(1);
-
-    return result[0];
+    try {
+      const result = await db.execute(
+        sql`SELECT * FROM bookings
+            WHERE guest_id = ${guestId}
+              AND status IN ('pending','confirmed','booked','precheck_submitted','arrival_info_submitted','checked_in','rejected','active')
+            ORDER BY check_in_date DESC
+            LIMIT 1`
+      );
+      const rows = (result as any).rows ?? result;
+      if (!rows || rows.length === 0) return undefined;
+      const row = rows[0];
+      return {
+        id: row.id,
+        guestId: row.guest_id,
+        roomNumber: row.room_number,
+        roomType: row.room_type,
+        checkInDate: row.check_in_date,
+        checkOutDate: row.check_out_date,
+        status: row.status,
+        preCheckedIn: row.pre_checked_in ?? false,
+        specialRequests: row.special_requests ?? null,
+        bookingNumber: row.booking_number ?? null,
+        bookingSource: row.booking_source ?? null,
+        numberOfGuests: row.number_of_guests ?? null,
+        nationality: row.nationality ?? null,
+        passportNumber: row.passport_number ?? null,
+        specialNotes: row.special_notes ?? null,
+        ownerId: row.owner_id ?? null,
+        propertyId: row.property_id ?? null,
+        unitId: row.unit_id ?? null,
+        nightlyRate: row.nightly_rate ?? null,
+        totalPrice: row.total_price ?? null,
+        currency: row.currency ?? "USD",
+        discount: row.discount ?? null,
+        tenantId: row.tenant_id ?? null,
+        travelAgencyName: row.travel_agency_name ?? null,
+        dateOfBirth: row.date_of_birth ?? null,
+        guestAddress: row.guest_address ?? null,
+        arrivalTime: row.arrival_time ?? null,
+        preCheckNotes: row.pre_check_notes ?? null,
+        rejectionReason: row.rejection_reason ?? null,
+        paymentStatus: row.payment_status ?? null,
+        guestSignatureBase64: row.guest_signature_base64 ?? null,
+        idDocumentBase64: row.id_document_base64 ?? null,
+        ratePlanId: row.rate_plan_id ?? null,
+        depositAmount: row.deposit_amount ?? null,
+        depositDueDate: row.deposit_due_date ?? null,
+        depositPaidAt: row.deposit_paid_at ?? null,
+        paidAmount: row.paid_amount ?? 0,
+        remainingBalance: row.remaining_balance ?? null,
+        createdAt: row.created_at ?? null,
+      } as Booking;
+    } catch (error) {
+      logger.error({ err: error }, "Error in getCurrentBookingForGuest");
+      return undefined;
+    }
   }
 
   async createBooking(booking: InsertBooking): Promise<Booking> {
@@ -908,8 +944,52 @@ export class DatabaseStorage implements IStorage {
         }
       }
 
-      const result = await tx.insert(bookings).values(booking).returning();
-      const createdBooking = result[0];
+      const inserted = await tx.insert(bookings).values(booking).returning({ id: bookings.id });
+      const insertedId = inserted[0].id;
+
+      const rawResult = await tx.execute(sql`SELECT * FROM bookings WHERE id = ${insertedId} LIMIT 1`);
+      const rawRows = (rawResult as any).rows ?? rawResult;
+      const createdBooking: Booking = rawRows[0] ? {
+        id: rawRows[0].id,
+        guestId: rawRows[0].guest_id,
+        roomNumber: rawRows[0].room_number,
+        roomType: rawRows[0].room_type,
+        checkInDate: rawRows[0].check_in_date,
+        checkOutDate: rawRows[0].check_out_date,
+        status: rawRows[0].status,
+        preCheckedIn: rawRows[0].pre_checked_in ?? false,
+        specialRequests: rawRows[0].special_requests ?? null,
+        bookingNumber: rawRows[0].booking_number ?? null,
+        bookingSource: rawRows[0].booking_source ?? null,
+        numberOfGuests: rawRows[0].number_of_guests ?? null,
+        nationality: rawRows[0].nationality ?? null,
+        passportNumber: rawRows[0].passport_number ?? null,
+        specialNotes: rawRows[0].special_notes ?? null,
+        ownerId: rawRows[0].owner_id ?? null,
+        propertyId: rawRows[0].property_id ?? null,
+        unitId: rawRows[0].unit_id ?? null,
+        nightlyRate: rawRows[0].nightly_rate ?? null,
+        totalPrice: rawRows[0].total_price ?? null,
+        currency: rawRows[0].currency ?? "USD",
+        discount: rawRows[0].discount ?? null,
+        tenantId: rawRows[0].tenant_id ?? null,
+        travelAgencyName: rawRows[0].travel_agency_name ?? null,
+        dateOfBirth: rawRows[0].date_of_birth ?? null,
+        guestAddress: rawRows[0].guest_address ?? null,
+        arrivalTime: rawRows[0].arrival_time ?? null,
+        preCheckNotes: rawRows[0].pre_check_notes ?? null,
+        rejectionReason: rawRows[0].rejection_reason ?? null,
+        paymentStatus: rawRows[0].payment_status ?? null,
+        guestSignatureBase64: rawRows[0].guest_signature_base64 ?? null,
+        idDocumentBase64: rawRows[0].id_document_base64 ?? null,
+        ratePlanId: rawRows[0].rate_plan_id ?? null,
+        depositAmount: rawRows[0].deposit_amount ?? null,
+        depositDueDate: rawRows[0].deposit_due_date ?? null,
+        depositPaidAt: rawRows[0].deposit_paid_at ?? null,
+        paidAmount: rawRows[0].paid_amount ?? 0,
+        remainingBalance: rawRows[0].remaining_balance ?? null,
+        createdAt: rawRows[0].created_at ?? null,
+      } as Booking : { id: insertedId, ...booking } as unknown as Booking;
 
       if (createdBooking.unitId && createdBooking.checkInDate && createdBooking.checkOutDate) {
         const nightRows = this.generateNightDates(
