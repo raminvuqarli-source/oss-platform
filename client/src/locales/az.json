@@ -2182,6 +2182,7 @@
     "steps": {
       "property": "Mülk",
       "rooms": "Otaqlar",
+      "finance": "Maliyyə",
       "smart": "Ağıllı",
       "staff": "Heyət",
       "plan": "Plan",

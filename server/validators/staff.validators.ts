@@ -7,6 +7,9 @@ export const createStaffSchema = z.object({
   email: z.string().email().nullable().optional(),
   role: z.string().optional(),
   staffRole: z.string().optional(),
+  baseSalary: z.union([z.string(), z.number()]).nullable().optional(),
+  employeeTaxRate: z.union([z.string(), z.number()]).nullable().optional(),
+  additionalExpensesMonthly: z.union([z.string(), z.number()]).nullable().optional(),
 });
 
 export const createGuestSchema = z.object({

@@ -709,7 +709,7 @@ export function registerStaffRoutes(app: Express): void {
       const userRole = roleMapping[rawRole] || "staff";
 
       const matchingHotel = await storage.getHotelByPropertyId(propertyId);
-      
+
       const hashedNewStaffPw = await hashPassword(password);
       const newUser = await storage.createUser({
         username,
@@ -721,6 +721,29 @@ export function registerStaffRoutes(app: Express): void {
         ownerId: user.ownerId!,
         hotelId: matchingHotel?.id || null,
       });
+
+      const baseSalaryRaw = req.body.baseSalary;
+      const baseSalaryCents = baseSalaryRaw ? Math.round(parseFloat(String(baseSalaryRaw)) * 100) : 0;
+      if (baseSalaryCents > 0 && matchingHotel?.id) {
+        const empTaxRate = req.body.employeeTaxRate ? parseInt(String(req.body.employeeTaxRate), 10) : 0;
+        const addlExpenses = req.body.additionalExpensesMonthly ? Math.round(parseFloat(String(req.body.additionalExpensesMonthly)) * 100) : 0;
+        storage.createPayrollConfig({
+          staffId: newUser.id,
+          staffName: fullName,
+          staffRole: rawRole,
+          baseSalary: baseSalaryCents,
+          currency: "USD",
+          frequency: "monthly",
+          employeeTaxRate: empTaxRate,
+          additionalExpensesMonthly: addlExpenses,
+          hotelId: matchingHotel.id,
+          propertyId,
+          ownerId: user.ownerId!,
+          tenantId: req.tenantId || null,
+          isActive: true,
+          createdBy: user.id,
+        }).catch((err: any) => logger.error({ err }, "Failed to auto-create payroll config for new staff"));
+      }
 
       storage.createAuditLog({
         ownerId: user.ownerId || undefined,

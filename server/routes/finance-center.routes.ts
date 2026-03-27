@@ -346,16 +346,20 @@ export function registerFinanceCenterRoutes(app: Express): void {
   // --- Finance Center Summary/Analytics ---
   app.get("/api/finance-center/summary", requireRole("admin", "owner_admin", "property_manager"), async (req, res) => {
     try {
-      const { hotelId, ownerId, user } = await resolveFinanceHotelId(req.session.userId!);
+      const { hotelId, propertyId, ownerId, user } = await resolveFinanceHotelId(req.session.userId!);
       if (!hotelId && !ownerId) return res.status(400).json({ message: "No hotel assigned" });
 
       const isOwner = user?.role === "owner_admin" && ownerId;
-      const [revenues, expenses, payrollEntries, cashAccounts] = await Promise.all([
+      const [revenues, expenses, payrollEntriesList, cashAccountsList, payrollConfigsList] = await Promise.all([
         isOwner ? storage.getRevenuesByOwner(ownerId!, req.tenantId!) : storage.getRevenuesByHotel(hotelId!, req.tenantId!),
         isOwner ? storage.getExpensesByOwner(ownerId!, req.tenantId!) : storage.getExpensesByHotel(hotelId!, req.tenantId!),
         isOwner ? storage.getPayrollEntriesByOwner(ownerId!, req.tenantId!) : storage.getPayrollEntriesByHotel(hotelId!, req.tenantId!),
         isOwner ? storage.getCashAccountsByOwner(ownerId!, req.tenantId!) : storage.getCashAccountsByHotel(hotelId!, req.tenantId!),
+        isOwner && ownerId ? storage.getPayrollConfigsByOwner(ownerId!, req.tenantId!) : (hotelId ? storage.getPayrollConfigsByHotel(hotelId!, req.tenantId!) : Promise.resolve([])),
       ]);
+
+      const propId = propertyId || null;
+      const property = propId ? await storage.getProperty(propId) : null;
 
       const now = new Date();
       const thisMonth = now.getMonth() + 1;
@@ -369,19 +373,45 @@ export function registerFinanceCenterRoutes(app: Express): void {
         })
         .reduce((sum: number, r: any) => sum + (r.amount || 0), 0);
 
-      const totalExpenses = expenses.reduce((sum: number, e: any) => sum + (e.amount || 0), 0);
-      const monthlyExpenses = expenses
+      const manualMonthlyExpenses = expenses
         .filter((e: any) => {
           const d = new Date(e.createdAt);
           return d.getMonth() + 1 === thisMonth && d.getFullYear() === thisYear;
         })
         .reduce((sum: number, e: any) => sum + (e.amount || 0), 0);
+      const totalManualExpenses = expenses.reduce((sum: number, e: any) => sum + (e.amount || 0), 0);
 
-      const monthlyPayroll = payrollEntries
+      // Auto-calculated expenses from property financial settings
+      const utilityExpensePct = property?.utilityExpensePct || 0;
+      const cleaningExpenseMonthly = property?.cleaningExpenseMonthly || 0;
+      const countryTaxRate = property?.countryTaxRate || 0;
+      const autoUtilityExpense = utilityExpensePct > 0 ? Math.round(monthlyRevenue * utilityExpensePct / 100) : 0;
+      const autoCleaningExpense = cleaningExpenseMonthly;
+      const autoTaxExpense = countryTaxRate > 0 ? Math.round(monthlyRevenue * countryTaxRate / 100) : 0;
+      const autoMonthlyExpenses = autoUtilityExpense + autoCleaningExpense + autoTaxExpense;
+      const monthlyExpenses = manualMonthlyExpenses + autoMonthlyExpenses;
+      const totalExpenses = totalManualExpenses + autoMonthlyExpenses;
+
+      // Payroll: use manual entries if present, otherwise calculate from payroll_configs
+      const manualMonthlyPayroll = payrollEntriesList
         .filter((p: any) => p.periodMonth === thisMonth && p.periodYear === thisYear)
         .reduce((sum: number, p: any) => sum + (p.netAmount || 0), 0);
 
-      const totalCashBalance = cashAccounts.reduce((sum: number, a: any) => sum + (a.balance || 0), 0);
+      const hasPayrollEntries = payrollEntriesList.some((p: any) => p.periodMonth === thisMonth && p.periodYear === thisYear);
+      const autoPayroll = !hasPayrollEntries
+        ? payrollConfigsList
+            .filter((c: any) => c.isActive)
+            .reduce((sum: number, c: any) => {
+              const base = c.baseSalary || 0;
+              const taxCost = Math.round(base * (c.employeeTaxRate || 0) / 100);
+              const addlExpenses = c.additionalExpensesMonthly || 0;
+              return sum + base + taxCost + addlExpenses;
+            }, 0)
+        : 0;
+      const monthlyPayroll = manualMonthlyPayroll + autoPayroll;
+
+      const totalCashBalance = cashAccountsList.reduce((sum: number, a: any) => sum + (a.balance || 0), 0);
+      const totalPayroll = payrollEntriesList.reduce((sum: number, p: any) => sum + (p.netAmount || 0), 0) + autoPayroll;
 
       res.json({
         totalRevenue,
@@ -390,12 +420,21 @@ export function registerFinanceCenterRoutes(app: Express): void {
         monthlyExpenses,
         monthlyPayroll,
         totalCashBalance,
-        netProfit: totalRevenue - totalExpenses - payrollEntries.reduce((sum: number, p: any) => sum + (p.netAmount || 0), 0),
+        netProfit: totalRevenue - totalExpenses - totalPayroll,
         monthlyNetProfit: monthlyRevenue - monthlyExpenses - monthlyPayroll,
         revenueCount: revenues.length,
         expenseCount: expenses.length,
-        payrollCount: payrollEntries.length,
-        accountCount: cashAccounts.length,
+        payrollCount: payrollEntriesList.length + payrollConfigsList.filter((c: any) => c.isActive).length,
+        accountCount: cashAccountsList.length,
+        autoBreakdown: {
+          utilityExpense: autoUtilityExpense,
+          cleaningExpense: autoCleaningExpense,
+          taxExpense: autoTaxExpense,
+          autoPayroll,
+          utilityExpensePct,
+          cleaningExpenseMonthly,
+          countryTaxRate,
+        },
       });
     } catch (error) {
       logger.error({ err: error }, "Error fetching finance summary");

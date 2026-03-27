@@ -870,6 +870,9 @@ function AddStaffDialog({ propertyId, onSuccess }: { propertyId: string; onSucce
   const [password, setPassword] = useState("");
   const [created, setCreated] = useState(false);
   const [createdUsername, setCreatedUsername] = useState("");
+  const [baseSalary, setBaseSalary] = useState("");
+  const [employeeTaxRate, setEmployeeTaxRate] = useState("");
+  const [additionalExpensesMonthly, setAdditionalExpensesMonthly] = useState("");
 
   const inviteMutation = useMutation({
     mutationFn: async () => {
@@ -898,6 +901,9 @@ function AddStaffDialog({ propertyId, onSuccess }: { propertyId: string; onSucce
         username,
         password,
         staffRole,
+        baseSalary: baseSalary ? parseFloat(baseSalary) : undefined,
+        employeeTaxRate: employeeTaxRate ? parseFloat(employeeTaxRate) : undefined,
+        additionalExpensesMonthly: additionalExpensesMonthly ? parseFloat(additionalExpensesMonthly) : undefined,
       });
       return res.json();
     },
@@ -924,6 +930,9 @@ function AddStaffDialog({ propertyId, onSuccess }: { propertyId: string; onSucce
     setCreated(false);
     setCreatedUsername("");
     setMode("invite");
+    setBaseSalary("");
+    setEmployeeTaxRate("");
+    setAdditionalExpensesMonthly("");
   };
 
   const copyLink = () => {
@@ -1102,6 +1111,64 @@ function AddStaffDialog({ propertyId, onSuccess }: { propertyId: string; onSucce
                   />
                 </div>
                 {roleSelector}
+                <div className="border-t pt-4 space-y-3">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Əmək Haqqı (İsteğe bağlı)</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="staff-salary" className="text-xs">Aylıq maaş ($)</Label>
+                      <Input
+                        id="staff-salary"
+                        type="number"
+                        min={0}
+                        step={1}
+                        placeholder="Məs: 800"
+                        value={baseSalary}
+                        onChange={(e) => setBaseSalary(e.target.value)}
+                        data-testid="input-staff-salary"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="staff-tax-rate" className="text-xs">Vergi faizi (%)</Label>
+                      <Input
+                        id="staff-tax-rate"
+                        type="number"
+                        min={0}
+                        max={100}
+                        step={0.1}
+                        placeholder="Məs: 22"
+                        value={employeeTaxRate}
+                        onChange={(e) => setEmployeeTaxRate(e.target.value)}
+                        data-testid="input-staff-tax-rate"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="staff-addl-expenses" className="text-xs">Əlavə aylıq xərclər (qida, nəqliyyat) ($)</Label>
+                    <Input
+                      id="staff-addl-expenses"
+                      type="number"
+                      min={0}
+                      step={1}
+                      placeholder="Məs: 150"
+                      value={additionalExpensesMonthly}
+                      onChange={(e) => setAdditionalExpensesMonthly(e.target.value)}
+                      data-testid="input-staff-additional-expenses"
+                    />
+                  </div>
+                  {baseSalary && (
+                    <div className="p-2 rounded bg-muted/30 text-xs text-muted-foreground">
+                      <span className="font-medium">Aylıq ümumi xərc: </span>
+                      <span className="text-foreground font-semibold">
+                        ${(
+                          (parseFloat(baseSalary) || 0) +
+                          Math.round((parseFloat(baseSalary) || 0) * (parseFloat(employeeTaxRate) || 0) / 100) +
+                          (parseFloat(additionalExpensesMonthly) || 0)
+                        ).toFixed(0)}
+                      </span>
+                      <span className="ml-1">(maaş + vergi + əlavə)</span>
+                    </div>
+                  )}
+                </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={handleClose}>{t('common.cancel')}</Button>
                   <Button
@@ -3107,7 +3174,7 @@ function PerformanceView() {
           <CardHeader className="pb-3">
             <CardTitle className="text-base">{t('owner.financialOverview', 'Financial Overview (This Month)')}</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div>
                 <p className="text-xs text-muted-foreground">{t('owner.financeCenter.revenue')}</p>
@@ -3134,6 +3201,25 @@ function PerformanceView() {
                 </p>
               </div>
             </div>
+            {financeSummary.autoBreakdown && (financeSummary.autoBreakdown.utilityExpense > 0 || financeSummary.autoBreakdown.cleaningExpense > 0 || financeSummary.autoBreakdown.taxExpense > 0 || financeSummary.autoBreakdown.autoPayroll > 0) && (
+              <div className="border-t pt-3">
+                <p className="text-xs font-medium text-muted-foreground mb-2">Avtomatik hesablanmış xərclər:</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-muted-foreground">
+                  {financeSummary.autoBreakdown.utilityExpense > 0 && (
+                    <div><span>Kommunal ({financeSummary.autoBreakdown.utilityExpensePct}%): </span><span className="text-red-500 font-medium">{formatCurrencyValue(financeSummary.autoBreakdown.utilityExpense / 100)}</span></div>
+                  )}
+                  {financeSummary.autoBreakdown.taxExpense > 0 && (
+                    <div><span>Vergi ({financeSummary.autoBreakdown.countryTaxRate}%): </span><span className="text-red-500 font-medium">{formatCurrencyValue(financeSummary.autoBreakdown.taxExpense / 100)}</span></div>
+                  )}
+                  {financeSummary.autoBreakdown.cleaningExpense > 0 && (
+                    <div><span>Təmizlik: </span><span className="text-red-500 font-medium">{formatCurrencyValue(financeSummary.autoBreakdown.cleaningExpense / 100)}</span></div>
+                  )}
+                  {financeSummary.autoBreakdown.autoPayroll > 0 && (
+                    <div><span>Əmək haqqı: </span><span className="text-blue-500 font-medium">{formatCurrencyValue(financeSummary.autoBreakdown.autoPayroll / 100)}</span></div>
+                  )}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

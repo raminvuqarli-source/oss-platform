@@ -106,6 +106,13 @@
       "when": 1774483574000,
       "tag": "0014_phase5_missing_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1774900000000,
+      "tag": "0015_financial_settings",
+      "breakpoints": true
     }
   ]
 }

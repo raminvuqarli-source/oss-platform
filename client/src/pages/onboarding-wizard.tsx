@@ -19,14 +19,16 @@ import {
   Building2, BedDouble, Users, CheckCircle,
   ChevronRight, ChevronLeft, Plus, Trash2, Loader2,
   MapPin, Globe, Clock, Sparkles, UserPlus, Mail,
+  DollarSign, Percent, Zap, Brush,
 } from "lucide-react";
 import type { OnboardingProgress, Property } from "@shared/schema";
 
 const STEPS = [
   { id: 1, icon: Building2, labelKey: "onboarding.steps.property" },
   { id: 2, icon: BedDouble, labelKey: "onboarding.steps.rooms" },
-  { id: 3, icon: Users, labelKey: "onboarding.steps.staff" },
-  { id: 4, icon: CheckCircle, labelKey: "onboarding.steps.review" },
+  { id: 3, icon: DollarSign, labelKey: "onboarding.steps.finance" },
+  { id: 4, icon: Users, labelKey: "onboarding.steps.staff" },
+  { id: 5, icon: CheckCircle, labelKey: "onboarding.steps.review" },
 ];
 
 const PROPERTY_TYPES = ["hotel", "resort", "tiny_house", "apartment", "glamping"];
@@ -72,6 +74,11 @@ export default function OnboardingWizard() {
   const [pricingModel, setPricingModel] = useState("nightly");
 
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
+
+  const [countryTaxRate, setCountryTaxRate] = useState("");
+  const [utilityExpensePct, setUtilityExpensePct] = useState("");
+  const [cleaningExpenseMonthly, setCleaningExpenseMonthly] = useState("");
+  const [defaultEmployeeTaxRate, setDefaultEmployeeTaxRate] = useState("");
 
   const [createdPropertyId, setCreatedPropertyId] = useState<string | null>(null);
 
@@ -134,6 +141,8 @@ export default function OnboardingWizard() {
         return true;
       case 4:
         return true;
+      case 5:
+        return true;
       default:
         return false;
     }
@@ -175,6 +184,24 @@ export default function OnboardingWizard() {
         });
       } else if (currentStep === 3) {
         const propId = createdPropertyId || existingProperties?.[0]?.id;
+        if (propId) {
+          const taxRate = parseFloat(countryTaxRate) || 0;
+          const utilityPct = parseFloat(utilityExpensePct) || 0;
+          const cleaningMonthly = parseFloat(cleaningExpenseMonthly) || 0;
+          const empTaxRate = parseFloat(defaultEmployeeTaxRate) || 0;
+          await apiRequest("PATCH", `/api/properties/${propId}`, {
+            countryTaxRate: Math.round(taxRate),
+            utilityExpensePct: Math.round(utilityPct),
+            cleaningExpenseMonthly: Math.round(cleaningMonthly * 100),
+            defaultEmployeeTaxRate: Math.round(empTaxRate),
+          });
+        }
+        await updateProgressMutation.mutateAsync({
+          currentStep: 4,
+          completedSteps: [1, 2, 3],
+        });
+      } else if (currentStep === 4) {
+        const propId = createdPropertyId || existingProperties?.[0]?.id;
         const validStaff = staffMembers.filter((s) => s.email.trim().length > 0);
         if (propId && validStaff.length > 0) {
           await apiRequest("POST", "/api/onboarding/staff", {
@@ -183,14 +210,14 @@ export default function OnboardingWizard() {
           });
         }
         await updateProgressMutation.mutateAsync({
-          currentStep: 4,
+          currentStep: 5,
           staffCompleted: true,
           smartSystemCompleted: true,
           subscriptionCompleted: true,
-          completedSteps: [1, 2, 3, 4],
+          completedSteps: [1, 2, 3, 4, 5],
         });
       }
-      setCurrentStep((s) => Math.min(s + 1, 4));
+      setCurrentStep((s) => Math.min(s + 1, 5));
     } catch (error) {
       showErrorToast(toast, error);
     } finally {
@@ -217,6 +244,15 @@ export default function OnboardingWizard() {
 
   function handleBack() {
     setCurrentStep((s) => Math.max(s - 1, 1));
+  }
+
+  function formatCurrency(val: string) {
+    const n = parseFloat(val);
+    return isNaN(n) ? "—" : `$${n.toLocaleString()}`;
+  }
+  function formatPct(val: string) {
+    const n = parseFloat(val);
+    return isNaN(n) || n === 0 ? "—" : `${n}%`;
   }
 
   function addRoom() {
@@ -462,6 +498,126 @@ export default function OnboardingWizard() {
         )}
 
         {currentStep === 3 && (
+          <Card data-testid="step-finance">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Maliyyə Ayarları
+              </CardTitle>
+              <CardDescription>
+                Bu məlumatlar əsasında sistem aylıq xərclərinizi, vergilərinizi və əmək haqqını avtomatik hesablayacaq.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="countryTaxRate" className="flex items-center gap-1">
+                    <Percent className="h-3.5 w-3.5" />
+                    Ölkənin vergi faizi (%)
+                  </Label>
+                  <Input
+                    id="countryTaxRate"
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={0.1}
+                    value={countryTaxRate}
+                    onChange={(e) => setCountryTaxRate(e.target.value)}
+                    placeholder="Məs: 18"
+                    data-testid="input-country-tax-rate"
+                  />
+                  <p className="text-xs text-muted-foreground">ƏDV, satış vergisi və s. — gəlirin bu faizi vergi kimi hesablanacaq</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="utilityExpensePct" className="flex items-center gap-1">
+                    <Zap className="h-3.5 w-3.5" />
+                    Kommunal xərclər (gəlirin %-i)
+                  </Label>
+                  <Input
+                    id="utilityExpensePct"
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={0.1}
+                    value={utilityExpensePct}
+                    onChange={(e) => setUtilityExpensePct(e.target.value)}
+                    placeholder="Məs: 15"
+                    data-testid="input-utility-expense-pct"
+                  />
+                  <p className="text-xs text-muted-foreground">İşıq, su, qaz, internet — aylıq gəlirin bu faizi kommunal xərc kimi sayılacaq</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="cleaningExpenseMonthly" className="flex items-center gap-1">
+                    <Brush className="h-3.5 w-3.5" />
+                    Aylıq təmizlik xərcləri ($)
+                  </Label>
+                  <Input
+                    id="cleaningExpenseMonthly"
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={cleaningExpenseMonthly}
+                    onChange={(e) => setCleaningExpenseMonthly(e.target.value)}
+                    placeholder="Məs: 300"
+                    data-testid="input-cleaning-expense"
+                  />
+                  <p className="text-xs text-muted-foreground">Hər ay sabit təmizlik xərci (kimya, ləvazimat, xarici şirkət)</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="defaultEmployeeTaxRate" className="flex items-center gap-1">
+                    <Users className="h-3.5 w-3.5" />
+                    İşçi vergi faizi (%)
+                  </Label>
+                  <Input
+                    id="defaultEmployeeTaxRate"
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={0.1}
+                    value={defaultEmployeeTaxRate}
+                    onChange={(e) => setDefaultEmployeeTaxRate(e.target.value)}
+                    placeholder="Məs: 22"
+                    data-testid="input-employee-tax-rate"
+                  />
+                  <p className="text-xs text-muted-foreground">Sosial sığorta, gəlir vergisi — maaşa əlavə ödənilən vergi faizi</p>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-md bg-muted/30 text-sm space-y-1">
+                <p className="font-medium text-foreground mb-2">Nümunə hesablama (aylıq $10,000 gəlir əsasında):</p>
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Kommunal xərclər ({utilityExpensePct || 0}%)</span>
+                  <span className="text-red-500">${((parseFloat(utilityExpensePct) || 0) * 100).toFixed(0)}</span>
+                </div>
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Vergi ({countryTaxRate || 0}%)</span>
+                  <span className="text-red-500">${((parseFloat(countryTaxRate) || 0) * 100).toFixed(0)}</span>
+                </div>
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Təmizlik (sabit)</span>
+                  <span className="text-red-500">${parseFloat(cleaningExpenseMonthly) || 0}</span>
+                </div>
+                <div className="flex justify-between font-medium border-t pt-1 mt-1">
+                  <span>Ümumi avtomatik xərc</span>
+                  <span className="text-red-600">
+                    ${(
+                      (parseFloat(utilityExpensePct) || 0) * 100 +
+                      (parseFloat(countryTaxRate) || 0) * 100 +
+                      (parseFloat(cleaningExpenseMonthly) || 0)
+                    ).toFixed(0)}
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground italic">Bu sahələri boş buraxsanız sistem avtomatik hesablama etməyəcək. Sonradan ayarlardan dəyişə bilərsiniz.</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {currentStep === 4 && (
           <Card data-testid="step-staff">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -517,7 +673,7 @@ export default function OnboardingWizard() {
           </Card>
         )}
 
-        {currentStep === 4 && (
+        {currentStep === 5 && (
           <Card data-testid="step-review">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -556,6 +712,18 @@ export default function OnboardingWizard() {
                   </div>
                 </div>
 
+                {(countryTaxRate || utilityExpensePct || cleaningExpenseMonthly || defaultEmployeeTaxRate) && (
+                  <div className="p-4 rounded-md bg-muted/30 space-y-2">
+                    <h4 className="font-medium flex items-center gap-2"><DollarSign className="h-4 w-4" /> Maliyyə Ayarları</h4>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      {countryTaxRate && <><span className="text-muted-foreground">Ölkə vergisi:</span><span>{countryTaxRate}%</span></>}
+                      {utilityExpensePct && <><span className="text-muted-foreground">Kommunal:</span><span>{utilityExpensePct}% gəlirdən</span></>}
+                      {cleaningExpenseMonthly && <><span className="text-muted-foreground">Təmizlik:</span><span>${cleaningExpenseMonthly}/ay</span></>}
+                      {defaultEmployeeTaxRate && <><span className="text-muted-foreground">İşçi vergisi:</span><span>{defaultEmployeeTaxRate}%</span></>}
+                    </div>
+                  </div>
+                )}
+
                 <div className="p-4 rounded-md bg-muted/30 space-y-2">
                   <h4 className="font-medium flex items-center gap-2"><Users className="h-4 w-4" /> {t("onboarding.review.staff")}</h4>
                   {staffMembers.length > 0 ? (
@@ -584,7 +752,7 @@ export default function OnboardingWizard() {
             {t("onboarding.back")}
           </Button>
 
-          {currentStep < 4 ? (
+          {currentStep < 5 ? (
             <Button onClick={handleNext} disabled={!canProceed() || saving} data-testid="button-next">
               {saving && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
               {t("onboarding.next")}
