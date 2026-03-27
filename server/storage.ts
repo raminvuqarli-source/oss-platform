@@ -1033,11 +1033,54 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateBooking(id: string, booking: Partial<Booking>): Promise<Booking | undefined> {
-    const result = await db.update(bookings)
+    await db.update(bookings)
       .set(booking)
-      .where(eq(bookings.id, id))
-      .returning();
-    return result[0];
+      .where(eq(bookings.id, id));
+    const rawResult = await db.execute(sql`SELECT * FROM bookings WHERE id = ${id} LIMIT 1`);
+    const rows = (rawResult as any).rows ?? rawResult;
+    if (!rows || rows.length === 0) return undefined;
+    const row = rows[0];
+    return {
+      id: row.id,
+      guestId: row.guest_id,
+      roomNumber: row.room_number,
+      roomType: row.room_type,
+      checkInDate: row.check_in_date,
+      checkOutDate: row.check_out_date,
+      status: row.status,
+      preCheckedIn: row.pre_checked_in ?? false,
+      specialRequests: row.special_requests ?? null,
+      bookingNumber: row.booking_number ?? null,
+      bookingSource: row.booking_source ?? null,
+      numberOfGuests: row.number_of_guests ?? null,
+      nationality: row.nationality ?? null,
+      passportNumber: row.passport_number ?? null,
+      specialNotes: row.special_notes ?? null,
+      ownerId: row.owner_id ?? null,
+      propertyId: row.property_id ?? null,
+      unitId: row.unit_id ?? null,
+      nightlyRate: row.nightly_rate ?? null,
+      totalPrice: row.total_price ?? null,
+      currency: row.currency ?? "USD",
+      discount: row.discount ?? null,
+      tenantId: row.tenant_id ?? null,
+      travelAgencyName: row.travel_agency_name ?? null,
+      dateOfBirth: row.date_of_birth ?? null,
+      guestAddress: row.guest_address ?? null,
+      arrivalTime: row.arrival_time ?? null,
+      preCheckNotes: row.pre_check_notes ?? null,
+      rejectionReason: row.rejection_reason ?? null,
+      paymentStatus: row.payment_status ?? null,
+      guestSignatureBase64: row.guest_signature_base64 ?? null,
+      idDocumentBase64: row.id_document_base64 ?? null,
+      ratePlanId: row.rate_plan_id ?? null,
+      depositAmount: row.deposit_amount ?? null,
+      depositDueDate: row.deposit_due_date ?? null,
+      depositPaidAt: row.deposit_paid_at ?? null,
+      paidAmount: row.paid_amount ?? 0,
+      remainingBalance: row.remaining_balance ?? null,
+      createdAt: row.created_at ?? null,
+    } as Booking;
   }
 
   async findUnitForBooking(booking: { tenantId: string | null; propertyId: string | null; roomNumber: string; unitId: string | null }): Promise<Unit | undefined> {

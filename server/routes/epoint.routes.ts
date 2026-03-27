@@ -309,6 +309,7 @@ export function registerEpointRoutes(app: Express): void {
 
       const epointData = {
         public_key: publicKey,
+        merchant_id: merchantId,
         amount: amountAZN,
         currency: "AZN",
         language: "az",
@@ -361,6 +362,7 @@ export function registerEpointRoutes(app: Express): void {
     try {
       const privateKey = env.EPOINT_PRIVATE_KEY;
       const publicKey = env.EPOINT_PUBLIC_KEY;
+      const merchantId = env.EPOINT_MERCHANT_ID;
 
       if (!privateKey || !publicKey) {
         return res.status(503).json({ message: "Payment gateway not configured" });
@@ -403,6 +405,7 @@ export function registerEpointRoutes(app: Express): void {
 
       const epointData = {
         public_key: publicKey,
+        merchant_id: merchantId,
         amount: amountAZN,
         currency: "AZN",
         language: "az",
@@ -454,6 +457,7 @@ export function registerEpointRoutes(app: Express): void {
     try {
       const privateKey = env.EPOINT_PRIVATE_KEY;
       const publicKey = env.EPOINT_PUBLIC_KEY;
+      const merchantId = env.EPOINT_MERCHANT_ID;
 
       if (!privateKey || !publicKey) {
         logger.error({ hasPrivateKey: !!privateKey, hasPublicKey: !!publicKey }, "Missing Epoint environment variables for booking order");
@@ -500,6 +504,7 @@ export function registerEpointRoutes(app: Express): void {
 
       const epointData = {
         public_key: publicKey,
+        merchant_id: merchantId,
         amount: amountAZN,
         currency: "AZN",
         language: "az",
