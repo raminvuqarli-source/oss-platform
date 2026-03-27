@@ -17,7 +17,6 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/migrations ./migrations
-COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 
 RUN chown -R appuser:appgroup /app
 USER appuser
