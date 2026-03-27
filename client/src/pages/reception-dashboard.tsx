@@ -807,9 +807,6 @@ function RoomStatusPanel() {
   );
 }
 
-function _HousekeepingViewUnused_DELETED() {
-  const { t } = useTranslation();
-  const { toast } = useToast();
 export default function ReceptionDashboard() {
   const { t } = useTranslation();
   const { toast } = useToast();
