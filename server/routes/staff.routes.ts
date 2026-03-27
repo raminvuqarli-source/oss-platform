@@ -271,14 +271,18 @@ export function registerStaffRoutes(app: Express): void {
         tenantId: guestTenantId,
       });
 
-      await storage.createCredentialLog({
-        guestId: user.id,
-        action: "created",
-        performedBy: staffUser.id,
-        performedByName: staffUser.fullName,
-        notes: `Guest account created with username ${username}`,
-        tenantId: guestTenantId,
-      });
+      try {
+        await storage.createCredentialLog({
+          guestId: user.id,
+          action: "created",
+          performedBy: staffUser.id,
+          performedByName: staffUser.fullName,
+          notes: `Guest account created with username ${username}`,
+          tenantId: guestTenantId,
+        });
+      } catch (credErr) {
+        logger.warn({ err: credErr }, "createCredentialLog failed (table may not exist yet — run migration 0014)");
+      }
 
       const trimmedRoomNumber = roomNumber.trim();
       const matchedUnit = await storage.findUnitForBooking({
