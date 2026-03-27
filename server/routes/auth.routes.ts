@@ -533,28 +533,42 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
       }
 
       if (role === "guest" && user) {
-        const ownerUser = await storage.getUserByUsername("demo_owner");
-        const propertyId = user.propertyId || ownerUser?.propertyId || null;
-        const ownerId = user.ownerId || ownerUser?.ownerId || null;
-        const today = new Date();
-        const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
-        const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
-        await storage.createBooking({
-          guestId: user.id,
-          roomNumber: "202",
-          roomType: "deluxe",
-          checkInDate: yesterday,
-          checkOutDate: tomorrow,
-          status: "booked",
-          numberOfGuests: 2,
-          specialRequests: "Extra pillows, late checkout if possible",
-          nightlyRate: 25000,
-          totalPrice: 50000,
-          currency: "USD",
-          ownerId: ownerId,
-          propertyId: propertyId,
-        });
-        logger.info({ username: user.username }, "Created fresh demo booking for guest");
+        try {
+          const ownerUser = await storage.getUserByUsername("demo_owner");
+          const propertyId = user.propertyId || ownerUser?.propertyId || null;
+          const ownerId = user.ownerId || ownerUser?.ownerId || null;
+          const today = new Date();
+          const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+          const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+          const demoBooking = await storage.createBooking({
+            guestId: user.id,
+            roomNumber: "202",
+            roomType: "deluxe",
+            checkInDate: yesterday,
+            checkOutDate: tomorrow,
+            status: "checked_in",
+            numberOfGuests: 2,
+            specialRequests: "Extra pillows, late checkout if possible",
+            nightlyRate: 25000,
+            totalPrice: 50000,
+            currency: "USD",
+            ownerId: ownerId,
+            propertyId: propertyId,
+          });
+          await storage.createRoomSettings({
+            bookingId: demoBooking.id,
+            temperature: 22,
+            lightsOn: true,
+            lightsBrightness: 70,
+            curtainsOpen: true,
+            jacuzziOn: false,
+            jacuzziTemperature: 38,
+            welcomeMode: true,
+          });
+          logger.info({ username: user.username }, "Created fresh demo booking and room settings for guest");
+        } catch (bookingErr: any) {
+          logger.error({ err: bookingErr }, "Failed to create demo guest booking — continuing with login anyway");
+        }
       }
 
       const demoSessionTenantId = `demo_session_${crypto.randomUUID()}`;
