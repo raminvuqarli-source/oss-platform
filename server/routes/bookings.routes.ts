@@ -23,11 +23,16 @@ export function registerBookingRoutes(app: Express): void {
   });
 
   app.get("/api/bookings/current", requireAuth, async (req, res) => {
-    const booking = await storage.getCurrentBookingForGuest(req.session.userId!);
-    if (!booking) {
-      return res.status(404).json({ message: "No current booking found" });
+    try {
+      const booking = await storage.getCurrentBookingForGuest(req.session.userId!);
+      if (!booking) {
+        return res.status(404).json({ message: "No current booking found" });
+      }
+      res.json(booking);
+    } catch (error: any) {
+      logger.error({ err: error }, "Error fetching current booking");
+      res.status(500).json({ message: "Failed to fetch booking" });
     }
-    res.json(booking);
   });
 
   app.patch("/api/bookings/:id", requireAuth, validateBody(updateBookingSchema), async (req, res) => {
