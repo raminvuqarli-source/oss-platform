@@ -456,8 +456,19 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
       if (validIds.length > 0) {
         const client = await pool.connect();
         try {
-          await client.query("BEGIN");
           const ph = (offset = 0) => validIds.map((_, i) => `$${i + 1 + offset}`).join(", ");
+
+          // credential_logs may not exist on older VPS — delete separately before transaction
+          try {
+            await client.query(
+              `DELETE FROM credential_logs WHERE guest_id IN (${ph()})`,
+              validIds
+            );
+          } catch (credCleanErr) {
+            logger.warn({ err: credCleanErr }, "credential_logs demo cleanup skipped (table may not exist yet)");
+          }
+
+          await client.query("BEGIN");
 
           const demoBookingRows = await client.query(
             `SELECT id FROM bookings WHERE guest_id IN (${ph()})`,
@@ -482,10 +493,6 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
           );
           await client.query(
             `DELETE FROM door_action_logs WHERE guest_id IN (${ph()})`,
-            validIds
-          );
-          await client.query(
-            `DELETE FROM credential_logs WHERE guest_id IN (${ph()})`,
             validIds
           );
           await client.query(
