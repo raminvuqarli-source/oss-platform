@@ -3288,21 +3288,18 @@ function PerformanceView() {
                 </p>
               </div>
             </div>
-            {financeSummary.autoBreakdown && (financeSummary.autoBreakdown.utilityExpense > 0 || financeSummary.autoBreakdown.cleaningExpense > 0 || financeSummary.autoBreakdown.taxExpense > 0 || financeSummary.autoBreakdown.autoPayroll > 0) && (
+            {financeSummary.autoBreakdown && (financeSummary.autoBreakdown.utilityExpense > 0 || financeSummary.autoBreakdown.cleaningExpense > 0 || financeSummary.autoBreakdown.taxExpense > 0) && (
               <div className="border-t pt-3">
-                <p className="text-xs font-medium text-muted-foreground mb-2">Avtomatik hesablanmış xərclər:</p>
+                <p className="text-xs font-medium text-muted-foreground mb-2">{t('owner.financeCenter.autoExpensesBreakdown', 'Avtomatik hesablanmış xərclər:')}</p>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-muted-foreground">
                   {financeSummary.autoBreakdown.utilityExpense > 0 && (
-                    <div><span>Kommunal ({financeSummary.autoBreakdown.utilityExpensePct}%): </span><span className="text-red-500 font-medium">{formatCurrencyValue(financeSummary.autoBreakdown.utilityExpense / 100)}</span></div>
+                    <div><span>{t('owner.financeCenter.utility', 'Kommunal')} ({financeSummary.autoBreakdown.utilityExpensePct}%): </span><span className="text-red-500 font-medium">{formatCurrencyValue(financeSummary.autoBreakdown.utilityExpense / 100)}</span></div>
                   )}
                   {financeSummary.autoBreakdown.taxExpense > 0 && (
-                    <div><span>Vergi ({financeSummary.autoBreakdown.countryTaxRate}%): </span><span className="text-red-500 font-medium">{formatCurrencyValue(financeSummary.autoBreakdown.taxExpense / 100)}</span></div>
+                    <div><span>{t('owner.financeCenter.tax', 'Vergi')} ({financeSummary.autoBreakdown.countryTaxRate}%): </span><span className="text-red-500 font-medium">{formatCurrencyValue(financeSummary.autoBreakdown.taxExpense / 100)}</span></div>
                   )}
                   {financeSummary.autoBreakdown.cleaningExpense > 0 && (
-                    <div><span>Təmizlik: </span><span className="text-red-500 font-medium">{formatCurrencyValue(financeSummary.autoBreakdown.cleaningExpense / 100)}</span></div>
-                  )}
-                  {financeSummary.autoBreakdown.autoPayroll > 0 && (
-                    <div><span>Əmək haqqı: </span><span className="text-blue-500 font-medium">{formatCurrencyValue(financeSummary.autoBreakdown.autoPayroll / 100)}</span></div>
+                    <div><span>{t('owner.financeCenter.cleaning', 'Təmizlik')}: </span><span className="text-red-500 font-medium">{formatCurrencyValue(financeSummary.autoBreakdown.cleaningExpense / 100)}</span></div>
                   )}
                 </div>
               </div>
