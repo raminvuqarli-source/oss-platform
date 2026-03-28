@@ -502,10 +502,10 @@ export default function OnboardingWizard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5" />
-                Maliyyə Ayarları
+                {t("onboarding.finance.title")}
               </CardTitle>
               <CardDescription>
-                Bu məlumatlar əsasında sistem aylıq xərclərinizi, vergilərinizi və əmək haqqını avtomatik hesablayacaq.
+                {t("onboarding.finance.description")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
@@ -513,7 +513,7 @@ export default function OnboardingWizard() {
                 <div className="space-y-2">
                   <Label htmlFor="countryTaxRate" className="flex items-center gap-1">
                     <Percent className="h-3.5 w-3.5" />
-                    Ölkənin vergi faizi (%)
+                    {t("onboarding.finance.taxRate")}
                   </Label>
                   <Input
                     id="countryTaxRate"
@@ -523,16 +523,16 @@ export default function OnboardingWizard() {
                     step={0.1}
                     value={countryTaxRate}
                     onChange={(e) => setCountryTaxRate(e.target.value)}
-                    placeholder="Məs: 18"
+                    placeholder={t("onboarding.finance.taxRatePlaceholder")}
                     data-testid="input-country-tax-rate"
                   />
-                  <p className="text-xs text-muted-foreground">ƏDV, satış vergisi və s. — gəlirin bu faizi vergi kimi hesablanacaq</p>
+                  <p className="text-xs text-muted-foreground">{t("onboarding.finance.taxRateHint")}</p>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="utilityExpensePct" className="flex items-center gap-1">
                     <Zap className="h-3.5 w-3.5" />
-                    Kommunal xərclər (gəlirin %-i)
+                    {t("onboarding.finance.utilityPct")}
                   </Label>
                   <Input
                     id="utilityExpensePct"
@@ -542,16 +542,16 @@ export default function OnboardingWizard() {
                     step={0.1}
                     value={utilityExpensePct}
                     onChange={(e) => setUtilityExpensePct(e.target.value)}
-                    placeholder="Məs: 15"
+                    placeholder={t("onboarding.finance.utilityPctPlaceholder")}
                     data-testid="input-utility-expense-pct"
                   />
-                  <p className="text-xs text-muted-foreground">İşıq, su, qaz, internet — aylıq gəlirin bu faizi kommunal xərc kimi sayılacaq</p>
+                  <p className="text-xs text-muted-foreground">{t("onboarding.finance.utilityPctHint")}</p>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="cleaningExpenseMonthly" className="flex items-center gap-1">
                     <Brush className="h-3.5 w-3.5" />
-                    Aylıq təmizlik xərcləri ($)
+                    {t("onboarding.finance.cleaningMonthly")}
                   </Label>
                   <Input
                     id="cleaningExpenseMonthly"
@@ -560,16 +560,16 @@ export default function OnboardingWizard() {
                     step={1}
                     value={cleaningExpenseMonthly}
                     onChange={(e) => setCleaningExpenseMonthly(e.target.value)}
-                    placeholder="Məs: 300"
+                    placeholder={t("onboarding.finance.cleaningMonthlyPlaceholder")}
                     data-testid="input-cleaning-expense"
                   />
-                  <p className="text-xs text-muted-foreground">Hər ay sabit təmizlik xərci (kimya, ləvazimat, xarici şirkət)</p>
+                  <p className="text-xs text-muted-foreground">{t("onboarding.finance.cleaningMonthlyHint")}</p>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="defaultEmployeeTaxRate" className="flex items-center gap-1">
                     <Users className="h-3.5 w-3.5" />
-                    İşçi vergi faizi (%)
+                    {t("onboarding.finance.employeeTaxRate")}
                   </Label>
                   <Input
                     id="defaultEmployeeTaxRate"
@@ -579,29 +579,29 @@ export default function OnboardingWizard() {
                     step={0.1}
                     value={defaultEmployeeTaxRate}
                     onChange={(e) => setDefaultEmployeeTaxRate(e.target.value)}
-                    placeholder="Məs: 22"
+                    placeholder={t("onboarding.finance.employeeTaxRatePlaceholder")}
                     data-testid="input-employee-tax-rate"
                   />
-                  <p className="text-xs text-muted-foreground">Sosial sığorta, gəlir vergisi — maaşa əlavə ödənilən vergi faizi</p>
+                  <p className="text-xs text-muted-foreground">{t("onboarding.finance.employeeTaxRateHint")}</p>
                 </div>
               </div>
 
               <div className="p-4 rounded-md bg-muted/30 text-sm space-y-1">
-                <p className="font-medium text-foreground mb-2">Nümunə hesablama (aylıq $10,000 gəlir əsasında):</p>
+                <p className="font-medium text-foreground mb-2">{t("onboarding.finance.sampleCalc")}</p>
                 <div className="flex justify-between text-muted-foreground">
-                  <span>Kommunal xərclər ({utilityExpensePct || 0}%)</span>
+                  <span>{t("onboarding.finance.utilityCost")} ({utilityExpensePct || 0}%)</span>
                   <span className="text-red-500">${((parseFloat(utilityExpensePct) || 0) * 100).toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
-                  <span>Vergi ({countryTaxRate || 0}%)</span>
+                  <span>{t("onboarding.finance.taxCost")} ({countryTaxRate || 0}%)</span>
                   <span className="text-red-500">${((parseFloat(countryTaxRate) || 0) * 100).toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
-                  <span>Təmizlik (sabit)</span>
+                  <span>{t("onboarding.finance.cleaningCost")}</span>
                   <span className="text-red-500">${parseFloat(cleaningExpenseMonthly) || 0}</span>
                 </div>
                 <div className="flex justify-between font-medium border-t pt-1 mt-1">
-                  <span>Ümumi avtomatik xərc</span>
+                  <span>{t("onboarding.finance.totalAutoCost")}</span>
                   <span className="text-red-600">
                     ${(
                       (parseFloat(utilityExpensePct) || 0) * 100 +
@@ -612,7 +612,7 @@ export default function OnboardingWizard() {
                 </div>
               </div>
 
-              <p className="text-xs text-muted-foreground italic">Bu sahələri boş buraxsanız sistem avtomatik hesablama etməyəcək. Sonradan ayarlardan dəyişə bilərsiniz.</p>
+              <p className="text-xs text-muted-foreground italic">{t("onboarding.finance.skipNote")}</p>
             </CardContent>
           </Card>
         )}

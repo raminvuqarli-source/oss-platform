@@ -2082,6 +2082,28 @@
       "price": "Preis ($)",
       "total": "Zimmer gesamt"
     },
+    "finance": {
+      "title": "Finanzeinstellungen",
+      "description": "Basierend auf diesen Informationen berechnet das System automatisch Ihre monatlichen Ausgaben, Steuern und Löhne.",
+      "taxRate": "Landessteuersatz (%)",
+      "taxRatePlaceholder": "z.B. 18",
+      "taxRateHint": "MwSt., Umsatzsteuer usw. — dieser Prozentsatz des Umsatzes wird als Steuer berechnet",
+      "utilityPct": "Nebenkosten (% des Umsatzes)",
+      "utilityPctPlaceholder": "z.B. 15",
+      "utilityPctHint": "Strom, Wasser, Gas, Internet — dieser Prozentsatz des monatlichen Umsatzes gilt als Nebenkosten",
+      "cleaningMonthly": "Monatliche Reinigungskosten ($)",
+      "cleaningMonthlyPlaceholder": "z.B. 300",
+      "cleaningMonthlyHint": "Feste monatliche Reinigungskosten (Chemikalien, Zubehör, externe Firma)",
+      "employeeTaxRate": "Mitarbeitersteuerrate (%)",
+      "employeeTaxRatePlaceholder": "z.B. 22",
+      "employeeTaxRateHint": "Sozialversicherung, Einkommensteuer — Steuerrate zusätzlich zum Gehalt",
+      "sampleCalc": "Beispielrechnung (basierend auf monatlichem Umsatz von $10.000):",
+      "utilityCost": "Nebenkosten",
+      "taxCost": "Steuer",
+      "cleaningCost": "Reinigung (fest)",
+      "totalAutoCost": "Gesamte automatische Ausgaben",
+      "skipNote": "Wenn Sie diese Felder leer lassen, berechnet das System keine automatischen Kosten. Sie können dies später in den Einstellungen ändern."
+    },
     "pricingModels": {
       "nightly": "Pro Nacht",
       "monthly": "Monatlich"

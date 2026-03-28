@@ -2218,6 +2218,28 @@
       "price": "Qiymət ($)",
       "total": "Ümumi Otaqlar"
     },
+    "finance": {
+      "title": "Maliyyə Ayarları",
+      "description": "Bu məlumatlar əsasında sistem aylıq xərclərinizi, vergilərinizi və əmək haqqını avtomatik hesablayacaq.",
+      "taxRate": "Ölkənin vergi faizi (%)",
+      "taxRatePlaceholder": "Məs: 18",
+      "taxRateHint": "ƏDV, satış vergisi və s. — gəlirin bu faizi vergi kimi hesablanacaq",
+      "utilityPct": "Kommunal xərclər (gəlirin %-i)",
+      "utilityPctPlaceholder": "Məs: 15",
+      "utilityPctHint": "İşıq, su, qaz, internet — aylıq gəlirin bu faizi kommunal xərc kimi sayılacaq",
+      "cleaningMonthly": "Aylıq təmizlik xərcləri ($)",
+      "cleaningMonthlyPlaceholder": "Məs: 300",
+      "cleaningMonthlyHint": "Hər ay sabit təmizlik xərci (kimya, ləvazimat, xarici şirkət)",
+      "employeeTaxRate": "İşçi vergi faizi (%)",
+      "employeeTaxRatePlaceholder": "Məs: 22",
+      "employeeTaxRateHint": "Sosial sığorta, gəlir vergisi — maaşa əlavə ödənilən vergi faizi",
+      "sampleCalc": "Nümunə hesablama (aylıq $10,000 gəlir əsasında):",
+      "utilityCost": "Kommunal xərclər",
+      "taxCost": "Vergi",
+      "cleaningCost": "Təmizlik (sabit)",
+      "totalAutoCost": "Ümumi avtomatik xərc",
+      "skipNote": "Bu sahələri boş buraxsanız sistem avtomatik hesablama etməyəcək. Sonradan ayarlardan dəyişə bilərsiniz."
+    },
     "pricingModels": {
       "nightly": "Gecəlik",
       "monthly": "Aylıq"

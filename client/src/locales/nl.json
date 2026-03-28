@@ -2082,6 +2082,28 @@
       "price": "Prijs ($)",
       "total": "Totaal Kamers"
     },
+    "finance": {
+      "title": "Financiële Instellingen",
+      "description": "Op basis van deze informatie berekent het systeem automatisch uw maandelijkse kosten, belastingen en loonkosten.",
+      "taxRate": "Landelijk Belastingtarief (%)",
+      "taxRatePlaceholder": "bijv. 18",
+      "taxRateHint": "BTW, omzetbelasting, enz. — dit percentage van de omzet wordt als belasting berekend",
+      "utilityPct": "Nutsvoorzieningen (% van omzet)",
+      "utilityPctPlaceholder": "bijv. 15",
+      "utilityPctHint": "Elektriciteit, water, gas, internet — dit percentage van de maandelijkse omzet telt als nutskosten",
+      "cleaningMonthly": "Maandelijkse Schoonmaakkosten ($)",
+      "cleaningMonthlyPlaceholder": "bijv. 300",
+      "cleaningMonthlyHint": "Vaste maandelijkse schoonmaakkosten (chemicaliën, benodigdheden, extern bedrijf)",
+      "employeeTaxRate": "Werknemersbelastingtarief (%)",
+      "employeeTaxRatePlaceholder": "bijv. 22",
+      "employeeTaxRateHint": "Sociale verzekering, inkomstenbelasting — belastingtarief bovenop het salaris",
+      "sampleCalc": "Voorbeeldberekening (op basis van maandelijkse omzet van $10.000):",
+      "utilityCost": "Nutsvoorzieningen",
+      "taxCost": "Belasting",
+      "cleaningCost": "Schoonmaak (vast)",
+      "totalAutoCost": "Totale automatische kosten",
+      "skipNote": "Als u deze velden leeg laat, berekent het systeem geen automatische kosten. U kunt dit later in de instellingen wijzigen."
+    },
     "pricingModels": {
       "nightly": "Per Nacht",
       "monthly": "Maandelijks"

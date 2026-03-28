@@ -2082,6 +2082,28 @@
       "price": "Prix ($)",
       "total": "Total des chambres"
     },
+    "finance": {
+      "title": "Paramètres Financiers",
+      "description": "Sur la base de ces informations, le système calculera automatiquement vos dépenses mensuelles, taxes et charges salariales.",
+      "taxRate": "Taux d'imposition du pays (%)",
+      "taxRatePlaceholder": "ex. 18",
+      "taxRateHint": "TVA, taxe sur les ventes, etc. — ce pourcentage du chiffre d'affaires sera calculé comme taxe",
+      "utilityPct": "Charges (% du chiffre d'affaires)",
+      "utilityPctPlaceholder": "ex. 15",
+      "utilityPctHint": "Électricité, eau, gaz, internet — ce pourcentage du chiffre d'affaires mensuel sera compté comme charges",
+      "cleaningMonthly": "Frais de nettoyage mensuels ($)",
+      "cleaningMonthlyPlaceholder": "ex. 300",
+      "cleaningMonthlyHint": "Coût fixe mensuel de nettoyage (produits, fournitures, entreprise externe)",
+      "employeeTaxRate": "Taux de cotisation employé (%)",
+      "employeeTaxRatePlaceholder": "ex. 22",
+      "employeeTaxRateHint": "Assurance sociale, impôt sur le revenu — taux de cotisation en plus du salaire",
+      "sampleCalc": "Exemple de calcul (basé sur un chiffre d'affaires mensuel de 10 000$):",
+      "utilityCost": "Charges",
+      "taxCost": "Taxe",
+      "cleaningCost": "Nettoyage (fixe)",
+      "totalAutoCost": "Total des dépenses automatiques",
+      "skipNote": "Si vous laissez ces champs vides, le système ne calculera pas automatiquement les dépenses. Vous pourrez modifier cela plus tard dans les paramètres."
+    },
     "pricingModels": {
       "nightly": "Par nuit",
       "monthly": "Mensuel"

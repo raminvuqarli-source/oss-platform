@@ -2082,6 +2082,28 @@
       "price": "Precio ($)",
       "total": "Total de habitaciones"
     },
+    "finance": {
+      "title": "Configuración Financiera",
+      "description": "En base a esta información, el sistema calculará automáticamente sus gastos mensuales, impuestos y nómina.",
+      "taxRate": "Tasa de Impuesto del País (%)",
+      "taxRatePlaceholder": "ej. 18",
+      "taxRateHint": "IVA, impuesto sobre ventas, etc. — este porcentaje de los ingresos se calculará como impuesto",
+      "utilityPct": "Gastos de Servicios Públicos (% de ingresos)",
+      "utilityPctPlaceholder": "ej. 15",
+      "utilityPctHint": "Electricidad, agua, gas, internet — este porcentaje de los ingresos mensuales se contará como gasto de servicios",
+      "cleaningMonthly": "Gastos de Limpieza Mensuales ($)",
+      "cleaningMonthlyPlaceholder": "ej. 300",
+      "cleaningMonthlyHint": "Costo fijo mensual de limpieza (químicos, suministros, empresa externa)",
+      "employeeTaxRate": "Tasa de Impuesto del Empleado (%)",
+      "employeeTaxRatePlaceholder": "ej. 22",
+      "employeeTaxRateHint": "Seguro social, impuesto sobre la renta — tasa de impuesto adicional al salario",
+      "sampleCalc": "Cálculo de muestra (basado en ingresos mensuales de $10,000):",
+      "utilityCost": "Gastos de servicios",
+      "taxCost": "Impuesto",
+      "cleaningCost": "Limpieza (fijo)",
+      "totalAutoCost": "Total de gastos automáticos",
+      "skipNote": "Si deja estos campos vacíos, el sistema no calculará gastos automáticamente. Puede cambiarlo más tarde en la configuración."
+    },
     "pricingModels": {
       "nightly": "Por noche",
       "monthly": "Mensual"

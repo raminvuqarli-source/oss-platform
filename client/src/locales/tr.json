@@ -2082,6 +2082,28 @@
       "price": "Fiyat ($)",
       "total": "Toplam Oda"
     },
+    "finance": {
+      "title": "Finansal Ayarlar",
+      "description": "Bu bilgiler doğrultusunda sistem aylık giderlerinizi, vergilerinizi ve maaş bordronuzu otomatik olarak hesaplayacak.",
+      "taxRate": "Ülke Vergi Oranı (%)",
+      "taxRatePlaceholder": "örn. 18",
+      "taxRateHint": "KDV, satış vergisi vb. — gelirin bu yüzdesi vergi olarak hesaplanacak",
+      "utilityPct": "Fatura Giderleri (gelirin %'si)",
+      "utilityPctPlaceholder": "örn. 15",
+      "utilityPctHint": "Elektrik, su, gaz, internet — aylık gelirin bu yüzdesi fatura gideri olarak sayılacak",
+      "cleaningMonthly": "Aylık Temizlik Giderleri ($)",
+      "cleaningMonthlyPlaceholder": "örn. 300",
+      "cleaningMonthlyHint": "Sabit aylık temizlik maliyeti (kimyasal, malzeme, dış şirket)",
+      "employeeTaxRate": "Çalışan Vergi Oranı (%)",
+      "employeeTaxRatePlaceholder": "örn. 22",
+      "employeeTaxRateHint": "Sosyal sigorta, gelir vergisi — maaşa ek vergi oranı",
+      "sampleCalc": "Örnek hesaplama (aylık $10.000 gelir bazında):",
+      "utilityCost": "Fatura giderleri",
+      "taxCost": "Vergi",
+      "cleaningCost": "Temizlik (sabit)",
+      "totalAutoCost": "Toplam otomatik giderler",
+      "skipNote": "Bu alanları boş bırakırsanız sistem otomatik hesaplama yapmaz. Daha sonra ayarlardan değiştirebilirsiniz."
+    },
     "pricingModels": {
       "nightly": "Gecelik",
       "monthly": "Aylık"

@@ -2223,6 +2223,28 @@
       "price": "Price ($)",
       "total": "Total Rooms"
     },
+    "finance": {
+      "title": "Financial Settings",
+      "description": "Based on this information, the system will automatically calculate your monthly expenses, taxes, and payroll.",
+      "taxRate": "Country Tax Rate (%)",
+      "taxRatePlaceholder": "e.g. 18",
+      "taxRateHint": "VAT, sales tax, etc. — this percentage of revenue will be calculated as tax",
+      "utilityPct": "Utility Expenses (% of revenue)",
+      "utilityPctPlaceholder": "e.g. 15",
+      "utilityPctHint": "Electricity, water, gas, internet — this percentage of monthly revenue will be counted as utility expense",
+      "cleaningMonthly": "Monthly Cleaning Expenses ($)",
+      "cleaningMonthlyPlaceholder": "e.g. 300",
+      "cleaningMonthlyHint": "Fixed monthly cleaning cost (chemicals, supplies, external company)",
+      "employeeTaxRate": "Employee Tax Rate (%)",
+      "employeeTaxRatePlaceholder": "e.g. 22",
+      "employeeTaxRateHint": "Social insurance, income tax — tax rate added on top of salary",
+      "sampleCalc": "Sample calculation (based on monthly $10,000 revenue):",
+      "utilityCost": "Utility expenses",
+      "taxCost": "Tax",
+      "cleaningCost": "Cleaning (fixed)",
+      "totalAutoCost": "Total automatic expenses",
+      "skipNote": "If you leave these fields empty, the system will not automatically calculate expenses. You can change this later in settings."
+    },
     "pricingModels": {
       "nightly": "Per Night",
       "monthly": "Monthly"
