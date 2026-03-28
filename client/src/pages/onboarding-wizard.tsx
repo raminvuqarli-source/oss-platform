@@ -98,7 +98,7 @@ export default function OnboardingWizard() {
   useEffect(() => {
     if (onboardingData) {
       if (onboardingData.currentStep > 1) {
-        const step = Math.min(onboardingData.currentStep, 4);
+        const step = Math.min(onboardingData.currentStep, 5);
         setCurrentStep(step);
       }
       if (onboardingData.savedData) {
