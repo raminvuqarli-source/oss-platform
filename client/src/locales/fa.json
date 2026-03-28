@@ -531,7 +531,8 @@
     "spaces": "فضاها",
     "na": "نامشخص",
     "confirmed": "تأیید شده",
-    "registered": "ثبت‌نام شده"
+    "registered": "ثبت‌نام شده",
+    "rename": "تغییر نام"
   },
   "auth": {
     "email": "ایمیل",

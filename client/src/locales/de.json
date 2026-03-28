@@ -531,7 +531,8 @@
     "type": "Typ",
     "spaces": "Einheiten",
     "confirmed": "Bestätigt",
-    "registered": "Registriert"
+    "registered": "Registriert",
+    "rename": "Umbenennen"
   },
   "auth": {
     "email": "E-Mail",

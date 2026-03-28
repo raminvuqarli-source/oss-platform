@@ -531,7 +531,8 @@
     "type": "Tipo",
     "spaces": "espacios",
     "confirmed": "Confirmado",
-    "registered": "Registrado"
+    "registered": "Registrado",
+    "rename": "Renombrar"
   },
   "auth": {
     "email": "Correo electrónico",

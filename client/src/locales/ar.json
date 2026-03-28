@@ -531,7 +531,8 @@
     "type": "النوع",
     "spaces": "وحدات",
     "confirmed": "مؤكد",
-    "registered": "مسجّل"
+    "registered": "مسجّل",
+    "rename": "إعادة التسمية"
   },
   "auth": {
     "email": "البريد الإلكتروني",

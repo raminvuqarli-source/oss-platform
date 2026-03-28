@@ -638,6 +638,25 @@ function PropertyUnitsPanel({ propertyId }: { propertyId: string }) {
   const { isFeatureEnabled } = usePlanFeatures();
   const smartEnabled = isFeatureEnabled("smart_controls");
   const [filterGroup, setFilterGroup] = useState<string>("all");
+  const [renameUnitId, setRenameUnitId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const { toast } = useToast();
+
+  const renameMutation = useMutation({
+    mutationFn: async ({ unitId, name }: { unitId: string; name: string }) => {
+      const res = await apiRequest("PATCH", `/api/units/${unitId}`, { name });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/properties", propertyId, "units"] });
+      setRenameUnitId(null);
+      toast({ title: t('common.saved', 'Saved') });
+    },
+    onError: (err: any) => {
+      toast({ title: t('errors.somethingWentWrong'), description: err.message, variant: "destructive" });
+    },
+  });
+
   const { data: units, isLoading } = useQuery<Unit[]>({
     queryKey: ["/api/properties", propertyId, "units"],
     queryFn: async () => {
@@ -772,7 +791,50 @@ function PropertyUnitsPanel({ propertyId }: { propertyId: string }) {
                                     <p className="text-xs text-muted-foreground truncate">{unit.name}</p>
                                   )}
                                 </div>
+                                <button
+                                  className="shrink-0 p-1 rounded hover:bg-muted transition-colors"
+                                  title={t('common.rename', 'Rename')}
+                                  data-testid={`button-rename-unit-${unit.id}`}
+                                  onClick={() => {
+                                    setRenameUnitId(unit.id);
+                                    setRenameValue(unit.name || unit.unitNumber);
+                                  }}
+                                >
+                                  <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                                </button>
                               </div>
+                              {renameUnitId === unit.id && (
+                                <div className="mb-3 flex gap-1.5" data-testid={`rename-form-${unit.id}`}>
+                                  <Input
+                                    autoFocus
+                                    className="h-7 text-xs px-2"
+                                    value={renameValue}
+                                    onChange={(e) => setRenameValue(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") renameMutation.mutate({ unitId: unit.id, name: renameValue.trim() });
+                                      if (e.key === "Escape") setRenameUnitId(null);
+                                    }}
+                                    data-testid={`input-rename-unit-${unit.id}`}
+                                  />
+                                  <Button
+                                    size="sm"
+                                    className="h-7 px-2 text-xs"
+                                    disabled={renameMutation.isPending}
+                                    onClick={() => renameMutation.mutate({ unitId: unit.id, name: renameValue.trim() })}
+                                    data-testid={`button-save-rename-${unit.id}`}
+                                  >
+                                    {t('common.save', 'Save')}
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 px-2 text-xs"
+                                    onClick={() => setRenameUnitId(null)}
+                                  >
+                                    ✕
+                                  </Button>
+                                </div>
+                              )}
                               <div className="flex items-center justify-between gap-2">
                                 <UnitStatusBadge status={unit.status} />
                                 <span className="text-xs text-muted-foreground capitalize">

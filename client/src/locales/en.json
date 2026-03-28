@@ -536,7 +536,8 @@
     "type": "Type",
     "spaces": "spaces",
     "confirmed": "Confirmed",
-    "registered": "Registered"
+    "registered": "Registered",
+    "rename": "Rename"
   },
   "auth": {
     "email": "Email",

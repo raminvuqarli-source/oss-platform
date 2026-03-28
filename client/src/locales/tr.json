@@ -531,7 +531,8 @@
     "spaces": "alanlar",
     "na": "Yok",
     "confirmed": "Onaylandı",
-    "registered": "Kayıtlı"
+    "registered": "Kayıtlı",
+    "rename": "Yeniden adlandır"
   },
   "auth": {
     "email": "E-posta",

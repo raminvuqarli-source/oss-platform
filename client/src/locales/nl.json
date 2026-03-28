@@ -531,7 +531,8 @@
     "type": "Type",
     "spaces": "ruimtes",
     "confirmed": "Bevestigd",
-    "registered": "Geregistreerd"
+    "registered": "Geregistreerd",
+    "rename": "Hernoemen"
   },
   "auth": {
     "email": "E-mail",

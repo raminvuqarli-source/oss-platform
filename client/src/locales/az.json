@@ -536,7 +536,8 @@
     "spaces": "sahələr",
     "na": "Yoxdur",
     "confirmed": "Təsdiqləndi",
-    "registered": "Qeydiyyatlı"
+    "registered": "Qeydiyyatlı",
+    "rename": "Adını dəyiş"
   },
   "auth": {
     "email": "E-poçt",
