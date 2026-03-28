@@ -622,12 +622,14 @@ export function registerBookingRoutes(app: Express): void {
         );
         return {
           id: unit.id,
+          name: unit.name || null,
           unitNumber: unit.unitNumber,
           unitType: unit.unitType,
           status: unit.status,
           floor: unit.floor,
           capacity: unit.capacity,
           propertyId: unit.propertyId,
+          pricePerNight: unit.pricePerNight || null,
           hasActiveBooking: !!activeBooking,
           activeBookingStatus: activeBooking?.status || null,
           activeGuestName: null,

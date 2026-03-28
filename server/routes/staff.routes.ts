@@ -338,6 +338,21 @@ export function registerStaffRoutes(app: Express): void {
         tenantId: guestTenantId,
       });
 
+      if (discount && parseFloat(discount) > 0) {
+        const ownerId = staffUser.ownerId || (staffUser.role === "owner_admin" ? staffUser.id : null);
+        if (ownerId) {
+          const discountAmount = parseFloat(discount).toFixed(2);
+          const currency = req.body.currency || "USD";
+          await storage.createNotification({
+            userId: ownerId,
+            title: "Discount Applied on Booking",
+            message: `Reception (${staffUser.fullName}) applied a ${discountAmount} ${currency} discount to room ${roomNumber} for guest ${fullName}.`,
+            type: "warning",
+            tenantId: guestTenantId,
+          });
+        }
+      }
+
       let resetPasswordUrl: string | undefined;
       try {
         const crypto = await import("crypto");

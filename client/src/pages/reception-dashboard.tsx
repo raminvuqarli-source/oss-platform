@@ -651,12 +651,14 @@ function ReceptionRoomPrepPanel() {
 
 interface RoomUnit {
   id: string;
+  name: string | null;
   unitNumber: string;
   unitType: string;
   status: string;
   floor: number | null;
   capacity: number | null;
   propertyId: string;
+  pricePerNight: number | null;
   hasActiveBooking: boolean;
   activeBookingStatus: string | null;
 }
@@ -858,6 +860,12 @@ export default function ReceptionDashboard() {
   const [newStatus, setNewStatus] = useState<string>("");
   const [addGuestOpen, setAddGuestOpen] = useState(false);
   const [guestUpgradeOpen, setGuestUpgradeOpen] = useState(false);
+  const [selectedUnitId, setSelectedUnitId] = useState<string>("")
+
+  const { data: availableUnits = [] } = useQuery<RoomUnit[]>({
+    queryKey: ["/api/units/status"],
+    enabled: addGuestOpen,
+  });
   const [guestDetailOpen, setGuestDetailOpen] = useState(false);
   const [selectedGuestId, setSelectedGuestId] = useState<string | null>(null);
   const [guestForm, setGuestForm] = useState(() => {
@@ -1026,6 +1034,7 @@ export default function ReceptionDashboard() {
         const formatDate = (d: Date) => d.toISOString().split('T')[0];
         setGuestForm({ fullName: "", email: "", phoneNumber: "+994501234567", roomNumber: "", checkInDate: formatDate(today), checkInTime: "14:00", checkOutDate: formatDate(tomorrow), checkOutTime: "12:00", password: "", paymentAmount: "", paymentStatus: "pending", paymentMethod: "cash", bookingNumber: "", bookingSource: "", numberOfGuests: "", specialNotes: "", travelAgencyName: "", nightlyRate: "", discount: "" });
       setPhoneError("");
+      setSelectedUnitId("");
       queryClient.invalidateQueries({ queryKey: ["/api/users/guests"] });
       queryClient.invalidateQueries({ queryKey: ["/api/finance/transactions"] });
     },
@@ -1347,13 +1356,40 @@ export default function ReceptionDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label htmlFor="roomNumber">{t('dashboard.reception.roomNumber')}</Label>
-                  <Input
-                    id="roomNumber"
-                    data-testid="input-guest-room"
-                    placeholder={t('placeholders.roomNumber', '101')}
-                    value={guestForm.roomNumber}
-                    onChange={(e) => setGuestForm({ ...guestForm, roomNumber: e.target.value })}
-                  />
+                  {availableUnits.length > 0 ? (
+                    <Select
+                      value={selectedUnitId}
+                      onValueChange={(val) => {
+                        const unit = availableUnits.find(u => u.id === val);
+                        setSelectedUnitId(val);
+                        if (unit) {
+                          const autoRate = unit.pricePerNight ? (unit.pricePerNight / 100).toFixed(2) : "";
+                          setGuestForm(f => ({ ...f, roomNumber: unit.unitNumber, nightlyRate: autoRate }));
+                        }
+                      }}
+                    >
+                      <SelectTrigger data-testid="select-guest-room">
+                        <SelectValue placeholder={t('placeholders.roomNumber', 'Select room...')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableUnits.map(unit => (
+                          <SelectItem key={unit.id} value={unit.id}>
+                            {unit.name ? `${unit.name} (${unit.unitNumber})` : unit.unitNumber}
+                            {unit.pricePerNight ? ` — $${(unit.pricePerNight / 100).toFixed(0)}/night` : ""}
+                            {unit.hasActiveBooking ? ` ·  ${t('common.occupied', 'Occupied')}` : ""}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      id="roomNumber"
+                      data-testid="input-guest-room"
+                      placeholder={t('placeholders.roomNumber', '101')}
+                      value={guestForm.roomNumber}
+                      onChange={(e) => setGuestForm({ ...guestForm, roomNumber: e.target.value })}
+                    />
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="bookingNumber">{t('dashboard.reception.bookingNumber', 'Booking Number')}</Label>
@@ -1499,7 +1535,10 @@ export default function ReceptionDashboard() {
                 <h4 className="font-medium mb-3">{t('dashboard.reception.pricing', 'Pricing')}</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-2">
-                    <Label htmlFor="nightlyRate">{t('dashboard.reception.nightlyRate', 'Nightly Rate')}</Label>
+                    <Label htmlFor="nightlyRate">
+                      {t('dashboard.reception.nightlyRate', 'Nightly Rate')}
+                      {(() => { const u = availableUnits.find(u => u.id === selectedUnitId); return u?.pricePerNight ? <span className="ml-1 text-xs text-muted-foreground">({t('common.fromUnit', 'from room')})</span> : null; })()}
+                    </Label>
                     <Input
                       id="nightlyRate"
                       type="number"
@@ -1507,6 +1546,8 @@ export default function ReceptionDashboard() {
                       data-testid="input-nightly-rate"
                       placeholder={t('placeholders.nightlyRate', '0.00')}
                       value={guestForm.nightlyRate}
+                      readOnly={!!availableUnits.find(u => u.id === selectedUnitId)?.pricePerNight}
+                      className={availableUnits.find(u => u.id === selectedUnitId)?.pricePerNight ? "bg-muted" : ""}
                       onChange={(e) => setGuestForm({ ...guestForm, nightlyRate: e.target.value })}
                     />
                   </div>
