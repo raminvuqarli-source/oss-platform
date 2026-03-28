@@ -1459,14 +1459,16 @@ export default function ReceptionDashboard() {
                     value={guestForm.checkInDate}
                     onChange={(e) => {
                       const newCheckIn = e.target.value;
-                      const nextDay = new Date(newCheckIn);
-                      nextDay.setDate(nextDay.getDate() + 1);
-                      const autoCheckOut = nextDay.toISOString().split('T')[0];
-                      const currentCheckOut = guestForm.checkOutDate;
-                      setGuestForm({
-                        ...guestForm,
-                        checkInDate: newCheckIn,
-                        checkOutDate: (!currentCheckOut || currentCheckOut <= newCheckIn) ? autoCheckOut : currentCheckOut,
+                      setGuestForm(prev => {
+                        const nextDay = new Date(newCheckIn);
+                        nextDay.setDate(nextDay.getDate() + 1);
+                        const autoCheckOut = nextDay.toISOString().split('T')[0];
+                        const currentCheckOut = prev.checkOutDate;
+                        return {
+                          ...prev,
+                          checkInDate: newCheckIn,
+                          checkOutDate: (!currentCheckOut || currentCheckOut <= newCheckIn) ? autoCheckOut : currentCheckOut,
+                        };
                       });
                     }}
                   />
@@ -1475,7 +1477,7 @@ export default function ReceptionDashboard() {
                     type="time"
                     data-testid="input-guest-checkin-time"
                     value={guestForm.checkInTime}
-                    onChange={(e) => setGuestForm({ ...guestForm, checkInTime: e.target.value })}
+                    onChange={(e) => setGuestForm(prev => ({ ...prev, checkInTime: e.target.value }))}
                   />
                 </div>
               </div>
@@ -1487,13 +1489,19 @@ export default function ReceptionDashboard() {
                     type="date"
                     data-testid="input-guest-checkout-date"
                     value={guestForm.checkOutDate}
-                    min={guestForm.checkInDate}
+                    min={(() => {
+                      if (!guestForm.checkInDate) return undefined;
+                      const d = new Date(guestForm.checkInDate);
+                      d.setDate(d.getDate() + 1);
+                      return d.toISOString().split('T')[0];
+                    })()}
                     onChange={(e) => {
                       const newCheckOut = e.target.value;
-                      if (newCheckOut <= guestForm.checkInDate) {
-                        return;
-                      }
-                      setGuestForm({ ...guestForm, checkOutDate: newCheckOut });
+                      if (!newCheckOut) return;
+                      setGuestForm(prev => {
+                        if (newCheckOut <= prev.checkInDate) return prev;
+                        return { ...prev, checkOutDate: newCheckOut };
+                      });
                     }}
                   />
                   <Input
@@ -1501,7 +1509,7 @@ export default function ReceptionDashboard() {
                     type="time"
                     data-testid="input-guest-checkout-time"
                     value={guestForm.checkOutTime}
-                    onChange={(e) => setGuestForm({ ...guestForm, checkOutTime: e.target.value })}
+                    onChange={(e) => setGuestForm(prev => ({ ...prev, checkOutTime: e.target.value }))}
                   />
                 </div>
                 <p className="text-xs font-medium text-primary" data-testid="text-nights-count">
