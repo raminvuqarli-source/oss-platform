@@ -7,6 +7,7 @@ import { showErrorToast, isPlanLimitError } from "@/lib/error-handler";
 import { UpgradeModal } from "@/components/upgrade-modal";
 import { formatTimeAgo } from "@/lib/formatters";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -805,6 +806,233 @@ function RoomStatusPanel() {
           </Card>
         ))}
       </div>
+    </div>
+  );
+}
+
+interface StaffDmConversation {
+  peerId: string;
+  lastMessage: string;
+  lastMessageAt: string;
+  unreadCount: number;
+}
+
+function StaffChatView() {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const { user: currentUser } = useAuth();
+  const searchString = useSearch();
+  const urlParams = new URLSearchParams(searchString);
+  const urlStaffId = urlParams.get("staffId");
+
+  const [selectedStaffId, setSelectedStaffId] = useState<string | null>(urlStaffId);
+  const [message, setMessage] = useState("");
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const { data: staffUsers } = useQuery<Array<Omit<User, "password">>>({
+    queryKey: ["/api/users/staff"],
+  });
+
+  const { data: dmConversations } = useQuery<StaffDmConversation[]>({
+    queryKey: ["/api/chat/staff-dm/conversations"],
+    refetchInterval: 10000,
+  });
+
+  const { data: dmMessages, isLoading: messagesLoading } = useQuery<ChatMessage[]>({
+    queryKey: ["/api/chat/staff-dm", selectedStaffId],
+    enabled: !!selectedStaffId,
+    refetchInterval: 5000,
+  });
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      const viewport = scrollRef.current.closest('[data-radix-scroll-area-viewport]');
+      if (viewport) viewport.scrollTop = viewport.scrollHeight;
+    }
+  }, [dmMessages]);
+
+  const sendMutation = useMutation({
+    mutationFn: async ({ staffId, msg }: { staffId: string; msg: string }) => {
+      const res = await apiRequest("POST", `/api/chat/staff-dm/${staffId}`, { message: msg });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/chat/staff-dm", selectedStaffId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/chat/staff-dm/conversations"] });
+      setMessage("");
+      setTimeout(() => inputRef.current?.focus(), 0);
+    },
+    onError: (err: Error) => showErrorToast(toast, err),
+  });
+
+  const handleSend = () => {
+    if (!selectedStaffId || !message.trim()) return;
+    sendMutation.mutate({ staffId: selectedStaffId, msg: message.trim() });
+  };
+
+  const otherStaff = staffUsers?.filter(s => s.id !== currentUser?.id) ?? [];
+  const selectedPeer = staffUsers?.find(s => s.id === selectedStaffId);
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[calc(100vh-180px)]">
+      <Card className="md:col-span-1 flex flex-col overflow-hidden">
+        <CardHeader className="pb-3 flex-shrink-0">
+          <CardTitle className="text-base flex items-center gap-2">
+            <MessageSquare className="h-4 w-4" />
+            {t("staffChat.conversations", "Staff")}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0 flex-1 overflow-hidden">
+          <ScrollArea className="h-full">
+            {otherStaff.length > 0 ? (
+              <div className="divide-y">
+                {otherStaff.map((staff) => {
+                  const conv = dmConversations?.find(c => c.peerId === staff.id);
+                  return (
+                    <div
+                      key={staff.id}
+                      className={`p-3 cursor-pointer transition-colors hover:bg-muted/50 ${selectedStaffId === staff.id ? "bg-muted" : ""}`}
+                      onClick={() => {
+                        setSelectedStaffId(staff.id);
+                        queryClient.invalidateQueries({ queryKey: ["/api/chat/staff-dm", staff.id] });
+                      }}
+                      data-testid={`dm-staff-${staff.id}`}
+                    >
+                      <div className="flex items-start gap-2">
+                        <Avatar className="h-9 w-9 flex-shrink-0">
+                          <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                            {staff.fullName?.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase() || "?"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-1">
+                            <span className="font-medium text-sm truncate">{staff.fullName}</span>
+                            {conv?.lastMessageAt && (
+                              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                {formatTimeAgo(conv.lastMessageAt)}
+                              </span>
+                            )}
+                          </div>
+                          {conv ? (
+                            <p className="text-xs text-muted-foreground truncate mt-0.5">{conv.lastMessage}</p>
+                          ) : (
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {t(`staffList.roles.${staff.role}`, { defaultValue: staff.role })}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="p-8 text-center">
+                <MessageSquare className="h-8 w-8 mx-auto mb-2 text-muted-foreground opacity-40" />
+                <p className="text-sm text-muted-foreground">{t("staffChat.noStaff", "No staff members")}</p>
+              </div>
+            )}
+          </ScrollArea>
+        </CardContent>
+      </Card>
+
+      <Card className="md:col-span-2 flex flex-col overflow-hidden">
+        <CardHeader className="pb-3 flex-shrink-0">
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="text-base">
+              {selectedPeer
+                ? selectedPeer.fullName
+                : t("staffChat.selectStaff", "Select a staff member to chat")}
+            </CardTitle>
+            {selectedStaffId && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/chat/staff-dm", selectedStaffId] })}
+                data-testid="button-refresh-dm"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="flex flex-col flex-1 overflow-hidden p-4 gap-3">
+          {selectedStaffId ? (
+            <>
+              <ScrollArea className="flex-1 border rounded-md p-3">
+                {messagesLoading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-10 w-3/4" />
+                    <Skeleton className="h-10 w-2/3 ml-auto" />
+                    <Skeleton className="h-10 w-3/4" />
+                  </div>
+                ) : dmMessages && dmMessages.length > 0 ? (
+                  <div className="space-y-3">
+                    {dmMessages.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`flex ${msg.senderId === currentUser?.id ? "justify-end" : "justify-start"}`}
+                        data-testid={`dm-msg-${msg.id}`}
+                      >
+                        <div className={`max-w-[75%] rounded-lg px-3 py-2 text-sm ${
+                          msg.senderId === currentUser?.id
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted"
+                        }`}>
+                          <p className="break-words">{msg.message}</p>
+                          <p className={`text-xs mt-1 ${msg.senderId === currentUser?.id ? "opacity-70" : "text-muted-foreground"}`}>
+                            {msg.createdAt ? formatTimeAgo(msg.createdAt) : ""}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={scrollRef} />
+                  </div>
+                ) : (
+                  <div className="h-full flex items-center justify-center py-12">
+                    <div className="text-center">
+                      <MessageSquare className="h-8 w-8 mx-auto mb-2 text-muted-foreground opacity-40" />
+                      <p className="text-sm text-muted-foreground">{t("staffChat.startConversation", "Start a conversation")}</p>
+                    </div>
+                  </div>
+                )}
+              </ScrollArea>
+              <div className="flex gap-2 flex-shrink-0">
+                <Input
+                  ref={inputRef}
+                  placeholder={t("chat.typeMessage", "Type a message...")}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSend();
+                    }
+                  }}
+                  disabled={sendMutation.isPending}
+                  data-testid="input-staff-chat"
+                />
+                <Button
+                  onClick={handleSend}
+                  disabled={!message.trim() || sendMutation.isPending}
+                  size="icon"
+                  data-testid="button-send-staff-chat"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center">
+                <MessageSquare className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-30" />
+                <p className="text-muted-foreground">{t("staffChat.selectStaff", "Select a staff member to chat")}</p>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -1684,6 +1912,8 @@ export default function ReceptionDashboard() {
         <StaffMyPerformance />
       ) : currentView === "housekeeping" ? (
         <HousekeepingView />
+      ) : currentView === "staff-chat" ? (
+        <StaffChatView />
       ) : (
       <Tabs key={defaultTab} defaultValue={defaultTab} className="w-full min-w-0">
           <TabsList className="flex gap-1 h-auto flex-wrap justify-start p-1">
