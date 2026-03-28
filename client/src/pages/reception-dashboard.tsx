@@ -1489,19 +1489,10 @@ export default function ReceptionDashboard() {
                     type="date"
                     data-testid="input-guest-checkout-date"
                     value={guestForm.checkOutDate}
-                    min={(() => {
-                      if (!guestForm.checkInDate) return undefined;
-                      const d = new Date(guestForm.checkInDate);
-                      d.setDate(d.getDate() + 1);
-                      return d.toISOString().split('T')[0];
-                    })()}
                     onChange={(e) => {
                       const newCheckOut = e.target.value;
                       if (!newCheckOut) return;
-                      setGuestForm(prev => {
-                        if (newCheckOut <= prev.checkInDate) return prev;
-                        return { ...prev, checkOutDate: newCheckOut };
-                      });
+                      setGuestForm(prev => ({ ...prev, checkOutDate: newCheckOut }));
                     }}
                   />
                   <Input
