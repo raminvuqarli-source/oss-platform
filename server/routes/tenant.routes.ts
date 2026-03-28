@@ -44,6 +44,7 @@ export function registerTenantRoutes(app: Express): void {
       }
       res.json(owner);
     } catch (error) {
+      logger.error({ err: error }, "Failed to fetch owner profile");
       res.status(500).json({ message: "Failed to fetch owner profile" });
     }
   });
@@ -58,6 +59,7 @@ export function registerTenantRoutes(app: Express): void {
       const updated = await storage.updateOwner(user.ownerId, req.body);
       res.json(updated);
     } catch (error) {
+      logger.error({ err: error }, "Failed to update owner profile");
       res.status(500).json({ message: "Failed to update owner profile" });
     }
   });
@@ -77,6 +79,7 @@ export function registerTenantRoutes(app: Express): void {
       const props = await storage.getPropertiesByOwner(user.ownerId);
       res.json(props);
     } catch (error) {
+      logger.error({ err: error }, "Failed to fetch properties");
       res.status(500).json({ message: "Failed to fetch properties" });
     }
   });
@@ -95,6 +98,7 @@ export function registerTenantRoutes(app: Express): void {
       }
       res.json(property);
     } catch (error) {
+      logger.error({ err: error }, "Failed to fetch property");
       res.status(500).json({ message: "Failed to fetch property" });
     }
   });
@@ -151,6 +155,7 @@ export function registerTenantRoutes(app: Express): void {
       const updated = await storage.updateProperty(asString(req.params.id), req.body);
       res.json(updated);
     } catch (error) {
+      logger.error({ err: error }, "Failed to update property");
       res.status(500).json({ message: "Failed to update property" });
     }
   });
@@ -254,6 +259,7 @@ export function registerTenantRoutes(app: Express): void {
       const unitsList = await storage.getUnitsByProperty(asString(req.params.propertyId));
       res.json(unitsList);
     } catch (error) {
+      logger.error({ err: error }, "Failed to fetch units");
       res.status(500).json({ message: "Failed to fetch units" });
     }
   });
@@ -292,6 +298,7 @@ export function registerTenantRoutes(app: Express): void {
       });
       res.status(201).json(unit);
     } catch (error) {
+      logger.error({ err: error }, "Failed to create unit");
       res.status(500).json({ message: "Failed to create unit" });
     }
   });
@@ -334,6 +341,7 @@ export function registerTenantRoutes(app: Express): void {
 
       res.json(updated);
     } catch (error) {
+      logger.error({ err: error }, "Failed to update unit");
       res.status(500).json({ message: "Failed to update unit" });
     }
   });
@@ -353,6 +361,7 @@ export function registerTenantRoutes(app: Express): void {
       await storage.deleteUnit(asString(req.params.id));
       res.json({ message: "Unit deleted" });
     } catch (error) {
+      logger.error({ err: error }, "Failed to delete unit");
       res.status(500).json({ message: "Failed to delete unit" });
     }
   });
@@ -370,6 +379,7 @@ export function registerTenantRoutes(app: Express): void {
       const devicesList = await storage.getDevicesByProperty(asString(req.params.propertyId));
       res.json(devicesList);
     } catch (error) {
+      logger.error({ err: error }, "Failed to fetch devices");
       res.status(500).json({ message: "Failed to fetch devices" });
     }
   });
@@ -394,6 +404,7 @@ export function registerTenantRoutes(app: Express): void {
       });
       res.status(201).json(device);
     } catch (error) {
+      logger.error({ err: error }, "Failed to create device");
       res.status(500).json({ message: "Failed to create device" });
     }
   });
@@ -411,6 +422,7 @@ export function registerTenantRoutes(app: Express): void {
       const updated = await storage.updateDevice(asString(req.params.id), req.body);
       res.json(updated);
     } catch (error) {
+      logger.error({ err: error }, "Failed to update device");
       res.status(500).json({ message: "Failed to update device" });
     }
   });
@@ -428,6 +440,7 @@ export function registerTenantRoutes(app: Express): void {
       await storage.deleteDevice(asString(req.params.id));
       res.json({ message: "Device deleted" });
     } catch (error) {
+      logger.error({ err: error }, "Failed to delete device");
       res.status(500).json({ message: "Failed to delete device" });
     }
   });
@@ -472,6 +485,7 @@ export function registerTenantRoutes(app: Express): void {
       }
       res.json(sub);
     } catch (error) {
+      logger.error({ err: error }, "Failed to fetch subscription");
       res.status(500).json({ message: "Failed to fetch subscription" });
     }
   });
@@ -515,6 +529,7 @@ export function registerTenantRoutes(app: Express): void {
         })),
       });
     } catch (error) {
+      logger.error({ err: error }, "Failed to fetch owner analytics");
       res.status(500).json({ message: "Failed to fetch owner analytics" });
     }
   });

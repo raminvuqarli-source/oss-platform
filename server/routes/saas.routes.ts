@@ -2,6 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { storage } from "../storage";
 import { z } from "zod";
 import { asString } from "../utils/request";
+import { logger } from "../utils/logger";
 import { authenticateRequest, requireAuth, requireRole, requireFeature, requireUnitLimit } from "../middleware";
 import { hotels, type PlanType, PLAN_TYPE_TO_CODE } from "@shared/schema";
 import { ALL_BUSINESS_FEATURES, applyPlanFeatures, PLAN_CODE_FEATURES, SMART_PLAN_PRICING, SMART_PLAN_FEATURES, isSmartPlanActive, type BusinessFeature } from "@shared/planFeatures";
@@ -141,6 +142,7 @@ export function registerSaasRoutes(app: Express): void {
 
       res.json({ businessFeatures, plan: sub.planType, planCode, smartPlanType, planLimits, trialExpired });
     } catch (error) {
+      logger.error({ err: error }, "Failed to get features");
       res.status(500).json({ message: "Failed to get features" });
     }
   });
@@ -212,6 +214,7 @@ export function registerSaasRoutes(app: Express): void {
       const enabled = await storage.hasFeature(user.ownerId, featureName);
       res.json({ enabled, feature: featureName });
     } catch (error) {
+      logger.error({ err: error }, "Failed to check feature");
       res.status(500).json({ message: "Failed to check feature" });
     }
   });
@@ -248,6 +251,7 @@ export function registerSaasRoutes(app: Express): void {
         isActive: sub.isActive,
       });
     } catch (error) {
+      logger.error({ err: error }, "Failed to get subscription status");
       res.status(500).json({ message: "Failed to get subscription status" });
     }
   });
@@ -269,6 +273,7 @@ export function registerSaasRoutes(app: Express): void {
       
       res.json({ meters, warnings });
     } catch (error) {
+      logger.error({ err: error }, "Failed to get usage");
       res.status(500).json({ message: "Failed to get usage" });
     }
   });
@@ -292,6 +297,7 @@ export function registerSaasRoutes(app: Express): void {
         reason: allowed ? undefined : `You have reached your plan limit of ${meter.maxAllowed} ${resourceType}` 
       });
     } catch (error) {
+      logger.error({ err: error }, "Failed to check usage");
       res.status(500).json({ message: "Failed to check usage" });
     }
   });
@@ -324,6 +330,7 @@ export function registerSaasRoutes(app: Express): void {
 
       res.json(result);
     } catch (error) {
+      logger.error({ err: error }, "Failed to get audit logs");
       res.status(500).json({ message: "Failed to get audit logs" });
     }
   });
@@ -340,6 +347,7 @@ export function registerSaasRoutes(app: Express): void {
       const settings = await storage.getWhiteLabelSettings(user.ownerId);
       res.json(settings || null);
     } catch (error) {
+      logger.error({ err: error }, "Failed to get white label settings");
       res.status(500).json({ message: "Failed to get white label settings" });
     }
   });
@@ -369,6 +377,7 @@ export function registerSaasRoutes(app: Express): void {
       
       res.json(settings);
     } catch (error) {
+      logger.error({ err: error }, "Failed to update white label settings");
       res.status(500).json({ message: "Failed to update white label settings" });
     }
   });
@@ -392,6 +401,7 @@ export function registerSaasRoutes(app: Express): void {
         } : null,
       });
     } catch (error) {
+      logger.error({ err: error }, "Failed to get onboarding progress");
       res.status(500).json({ message: "Failed to get onboarding progress" });
     }
   });
@@ -407,6 +417,7 @@ export function registerSaasRoutes(app: Express): void {
       });
       res.json(progress);
     } catch (error) {
+      logger.error({ err: error }, "Failed to update onboarding");
       res.status(500).json({ message: "Failed to update onboarding" });
     }
   });
@@ -598,6 +609,7 @@ export function registerSaasRoutes(app: Express): void {
       const sub = await storage.getSubscriptionByOwner(user.ownerId);
       res.json({ billing, subscription: sub });
     } catch (error) {
+      logger.error({ err: error }, "Failed to get billing info");
       res.status(500).json({ message: "Failed to get billing info" });
     }
   });
@@ -610,6 +622,7 @@ export function registerSaasRoutes(app: Express): void {
       const invoicesList = await storage.getInvoicesByOwner(user.ownerId);
       res.json(invoicesList);
     } catch (error) {
+      logger.error({ err: error }, "Failed to get invoices");
       res.status(500).json({ message: "Failed to get invoices" });
     }
   });
@@ -679,6 +692,7 @@ export function registerSaasRoutes(app: Express): void {
       
       res.json({ subscription: updated, limits: newConfig.limits });
     } catch (error) {
+      logger.error({ err: error }, "Failed to change plan");
       res.status(500).json({ message: "Failed to change plan" });
     }
   });
@@ -738,6 +752,7 @@ export function registerSaasRoutes(app: Express): void {
       const telemetry = await storage.getDeviceTelemetry(asString(req.params.deviceId));
       res.json(telemetry);
     } catch (error) {
+      logger.error({ err: error }, "Failed to get telemetry");
       res.status(500).json({ message: "Failed to get telemetry" });
     }
   });
@@ -754,6 +769,7 @@ export function registerSaasRoutes(app: Express): void {
       });
       res.json(telemetry);
     } catch (error) {
+      logger.error({ err: error }, "Failed to create telemetry");
       res.status(500).json({ message: "Failed to create telemetry" });
     }
   });
@@ -766,6 +782,7 @@ export function registerSaasRoutes(app: Express): void {
       const snapshots = await storage.getAnalyticsSnapshots(user.ownerId, asString(req.params.type));
       res.json(snapshots);
     } catch (error) {
+      logger.error({ err: error }, "Failed to get analytics snapshots");
       res.status(500).json({ message: "Failed to get analytics snapshots" });
     }
   });
@@ -794,6 +811,7 @@ export function registerSaasRoutes(app: Express): void {
       
       res.json({ totalRevenue: totalRevenue / 100, revenueByProperty });
     } catch (error) {
+      logger.error({ err: error }, "Failed to get revenue analytics");
       res.status(500).json({ message: "Failed to get revenue analytics" });
     }
   });
@@ -847,6 +865,7 @@ export function registerSaasRoutes(app: Express): void {
         byCategory,
       });
     } catch (error) {
+      logger.error({ err: error }, "Failed to get occupancy analytics");
       res.status(500).json({ message: "Failed to get occupancy analytics" });
     }
   });
@@ -880,6 +899,7 @@ export function registerSaasRoutes(app: Express): void {
         byType,
       });
     } catch (error) {
+      logger.error({ err: error }, "Failed to get device analytics");
       res.status(500).json({ message: "Failed to get device analytics" });
     }
   });
@@ -912,6 +932,7 @@ export function registerSaasRoutes(app: Express): void {
       
       res.json({ totalGuests, totalBookings, byNationality, bySource });
     } catch (error) {
+      logger.error({ err: error }, "Failed to get guest analytics");
       res.status(500).json({ message: "Failed to get guest analytics" });
     }
   });

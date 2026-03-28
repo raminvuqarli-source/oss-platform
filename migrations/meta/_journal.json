@@ -113,6 +113,13 @@
       "when": 1774900000000,
       "tag": "0015_financial_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1774990000000,
+      "tag": "0016_add_property_additional_expenses",
+      "breakpoints": true
     }
   ]
 }
