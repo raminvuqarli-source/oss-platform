@@ -230,7 +230,6 @@ export default function Welcome() {
             <Building2 className="h-5 w-5 text-primary-foreground" />
           </div>
           <span className="text-lg font-bold tracking-tight">O.S.S</span>
-          <span className="text-xs font-semibold bg-orange-500 text-white px-1.5 py-0.5 rounded">TEST</span>
         </div>
         <nav className="hidden md:flex items-center gap-1">
           <Button variant="ghost" size="sm" onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })} data-testid="button-nav-features">
