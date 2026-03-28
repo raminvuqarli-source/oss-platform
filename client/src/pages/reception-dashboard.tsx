@@ -862,7 +862,7 @@ export default function ReceptionDashboard() {
   const [guestUpgradeOpen, setGuestUpgradeOpen] = useState(false);
   const [selectedUnitId, setSelectedUnitId] = useState<string>("")
 
-  const { data: availableUnits = [] } = useQuery<RoomUnit[]>({
+  const { data: availableUnits = [], isLoading: unitsLoading } = useQuery<RoomUnit[]>({
     queryKey: ["/api/units/status"],
     enabled: addGuestOpen,
   });
@@ -1356,9 +1356,18 @@ export default function ReceptionDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label htmlFor="roomNumber">{t('dashboard.reception.roomNumber')}</Label>
-                  {availableUnits.length > 0 ? (
+                  {!unitsLoading && availableUnits.length === 0 ? (
+                    <Input
+                      id="roomNumber"
+                      data-testid="input-guest-room"
+                      placeholder={t('placeholders.roomNumber', '101')}
+                      value={guestForm.roomNumber}
+                      onChange={(e) => setGuestForm({ ...guestForm, roomNumber: e.target.value })}
+                    />
+                  ) : (
                     <Select
                       value={selectedUnitId}
+                      disabled={unitsLoading}
                       onValueChange={(val) => {
                         const unit = availableUnits.find(u => u.id === val);
                         setSelectedUnitId(val);
@@ -1369,26 +1378,18 @@ export default function ReceptionDashboard() {
                       }}
                     >
                       <SelectTrigger data-testid="select-guest-room">
-                        <SelectValue placeholder={t('placeholders.roomNumber', 'Select room...')} />
+                        <SelectValue placeholder={unitsLoading ? t('common.loading', 'Loading...') : t('placeholders.selectRoom', 'Select room...')} />
                       </SelectTrigger>
                       <SelectContent>
                         {availableUnits.map(unit => (
                           <SelectItem key={unit.id} value={unit.id}>
                             {unit.name ? `${unit.name} (${unit.unitNumber})` : unit.unitNumber}
-                            {unit.pricePerNight ? ` — $${(unit.pricePerNight / 100).toFixed(0)}/night` : ""}
-                            {unit.hasActiveBooking ? ` ·  ${t('common.occupied', 'Occupied')}` : ""}
+                            {unit.pricePerNight ? ` — ${(unit.pricePerNight / 100).toFixed(0)} ${t('common.perNight', '/night')}` : ""}
+                            {unit.hasActiveBooking ? ` · ${t('common.occupied', 'Occupied')}` : ""}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                  ) : (
-                    <Input
-                      id="roomNumber"
-                      data-testid="input-guest-room"
-                      placeholder={t('placeholders.roomNumber', '101')}
-                      value={guestForm.roomNumber}
-                      onChange={(e) => setGuestForm({ ...guestForm, roomNumber: e.target.value })}
-                    />
                   )}
                 </div>
                 <div className="space-y-2">
@@ -1531,56 +1532,18 @@ export default function ReceptionDashboard() {
                 />
               </div>
               
-              <div className="border-t pt-4 mt-4">
-                <h4 className="font-medium mb-3">{t('dashboard.reception.pricing', 'Pricing')}</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="nightlyRate">
-                      {t('dashboard.reception.nightlyRate', 'Nightly Rate')}
-                      {(() => { const u = availableUnits.find(u => u.id === selectedUnitId); return u?.pricePerNight ? <span className="ml-1 text-xs text-muted-foreground">({t('common.fromUnit', 'from room')})</span> : null; })()}
-                    </Label>
-                    <Input
-                      id="nightlyRate"
-                      type="number"
-                      step="0.01"
-                      data-testid="input-nightly-rate"
-                      placeholder={t('placeholders.nightlyRate', '0.00')}
-                      value={guestForm.nightlyRate}
-                      readOnly={!!availableUnits.find(u => u.id === selectedUnitId)?.pricePerNight}
-                      className={availableUnits.find(u => u.id === selectedUnitId)?.pricePerNight ? "bg-muted" : ""}
-                      onChange={(e) => setGuestForm({ ...guestForm, nightlyRate: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="discount">{t('dashboard.reception.discount', 'Discount')}</Label>
-                    <Input
-                      id="discount"
-                      type="number"
-                      step="0.01"
-                      data-testid="input-discount"
-                      placeholder={t('placeholders.discount', '0.00')}
-                      value={guestForm.discount}
-                      onChange={(e) => setGuestForm({ ...guestForm, discount: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="totalPrice">{t('dashboard.reception.totalPrice', 'Total Price')}</Label>
-                    <Input
-                      id="totalPrice"
-                      type="text"
-                      readOnly
-                      data-testid="input-total-price"
-                      value={calculatedTotal > 0 ? calculatedTotal.toFixed(2) : ""}
-                      className="bg-muted"
-                    />
-                    {nightlyRateNum > 0 && (
-                      <p className="text-xs text-muted-foreground">
-                        {nights} {t('dashboard.reception.nights', 'night(s)')} x {nightlyRateNum.toFixed(2)}{discountNum > 0 ? ` - ${discountNum.toFixed(2)}` : ''}
-                      </p>
-                    )}
+              {calculatedTotal > 0 && (
+                <div className="border-t pt-4 mt-4">
+                  <div className="flex items-center justify-between bg-muted/50 rounded-lg px-4 py-3" data-testid="text-booking-summary">
+                    <div className="text-sm text-muted-foreground">
+                      {nights} {t('dashboard.reception.nights', 'night(s)')} × {nightlyRateNum.toFixed(2)}
+                    </div>
+                    <div className="text-lg font-bold text-primary" data-testid="text-total-price">
+                      = {calculatedTotal.toFixed(2)}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               <div className="border-t pt-4 mt-4">
                 <h4 className="font-medium mb-3">{t('dashboard.reception.roomPayment')}</h4>
