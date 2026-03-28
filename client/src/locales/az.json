@@ -1476,7 +1476,11 @@
     "quarterly": "Rüblük",
     "yearly": "İllik",
     "contactOssTeam": "O.S.S Komandası ilə əlaqə",
-    "totalSpaces": "Ümumi Otaqlar"
+    "totalSpaces": "Ümumi Otaqlar",
+    "editUnit": "Otağı Redaktə Et",
+    "unitNamePlaceholder": "Məs. Dəniz Görünüşlü Villa",
+    "pricePerNight": "Gecəlik qiymət ($)",
+    "night": "gecə"
   },
   "nav": {
     "smartHotel": "Ağıllı Otel",

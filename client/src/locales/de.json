@@ -1471,7 +1471,11 @@
     "quarterly": "Vierteljährlich",
     "yearly": "Jährlich",
     "contactOssTeam": "O.S.S Team kontaktieren",
-    "totalSpaces": "Gesamte Räume"
+    "totalSpaces": "Gesamte Räume",
+    "editUnit": "Raum bearbeiten",
+    "unitNamePlaceholder": "z.B. Meerblick-Villa",
+    "pricePerNight": "Preis pro Nacht ($)",
+    "night": "Nacht"
   },
   "nav": {
     "smartHotel": "Smart Hotel",

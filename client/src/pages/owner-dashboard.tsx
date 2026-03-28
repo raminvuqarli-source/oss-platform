@@ -638,18 +638,19 @@ function PropertyUnitsPanel({ propertyId }: { propertyId: string }) {
   const { isFeatureEnabled } = usePlanFeatures();
   const smartEnabled = isFeatureEnabled("smart_controls");
   const [filterGroup, setFilterGroup] = useState<string>("all");
-  const [renameUnitId, setRenameUnitId] = useState<string | null>(null);
-  const [renameValue, setRenameValue] = useState("");
+  const [editUnit, setEditUnit] = useState<{ id: string; name: string; price: string } | null>(null);
   const { toast } = useToast();
 
-  const renameMutation = useMutation({
-    mutationFn: async ({ unitId, name }: { unitId: string; name: string }) => {
-      const res = await apiRequest("PATCH", `/api/units/${unitId}`, { name });
+  const editUnitMutation = useMutation({
+    mutationFn: async ({ unitId, name, pricePerNight }: { unitId: string; name: string; pricePerNight?: number }) => {
+      const body: Record<string, unknown> = { name };
+      if (pricePerNight !== undefined) body.pricePerNight = pricePerNight;
+      const res = await apiRequest("PATCH", `/api/units/${unitId}`, body);
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/properties", propertyId, "units"] });
-      setRenameUnitId(null);
+      setEditUnit(null);
       toast({ title: t('common.saved', 'Saved') });
     },
     onError: (err: any) => {
@@ -720,6 +721,55 @@ function PropertyUnitsPanel({ propertyId }: { propertyId: string }) {
 
   return (
     <div className="space-y-6">
+      <Dialog open={!!editUnit} onOpenChange={(open) => { if (!open) setEditUnit(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{t('owner.editUnit', 'Edit Space')}</DialogTitle>
+          </DialogHeader>
+          {editUnit && (
+            <div className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <Label htmlFor="edit-unit-name">{t('common.name', 'Name')}</Label>
+                <Input
+                  id="edit-unit-name"
+                  autoFocus
+                  value={editUnit.name}
+                  onChange={(e) => setEditUnit({ ...editUnit, name: e.target.value })}
+                  placeholder={t('owner.unitNamePlaceholder', 'e.g. Ocean View Villa')}
+                  data-testid="input-edit-unit-name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-unit-price">{t('owner.pricePerNight', 'Price per night ($)')}</Label>
+                <Input
+                  id="edit-unit-price"
+                  type="number"
+                  min={0}
+                  step={1}
+                  value={editUnit.price}
+                  onChange={(e) => setEditUnit({ ...editUnit, price: e.target.value })}
+                  placeholder="e.g. 150"
+                  data-testid="input-edit-unit-price"
+                />
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setEditUnit(null)}>{t('common.cancel')}</Button>
+                <Button
+                  disabled={!editUnit.name.trim() || editUnitMutation.isPending}
+                  onClick={() => {
+                    const priceVal = editUnit.price ? Math.round(parseFloat(editUnit.price) * 100) : undefined;
+                    editUnitMutation.mutate({ unitId: editUnit.id, name: editUnit.name.trim(), pricePerNight: priceVal });
+                  }}
+                  data-testid="button-save-unit-edit"
+                >
+                  {editUnitMutation.isPending ? t('common.saving', 'Saving...') : t('common.save', 'Save')}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-2 flex-wrap">
           <Button
@@ -795,46 +845,15 @@ function PropertyUnitsPanel({ propertyId }: { propertyId: string }) {
                                   className="shrink-0 p-1 rounded hover:bg-muted transition-colors"
                                   title={t('common.rename', 'Rename')}
                                   data-testid={`button-rename-unit-${unit.id}`}
-                                  onClick={() => {
-                                    setRenameUnitId(unit.id);
-                                    setRenameValue(unit.name || unit.unitNumber);
-                                  }}
+                                  onClick={() => setEditUnit({
+                                    id: unit.id,
+                                    name: unit.name || unit.unitNumber,
+                                    price: unit.pricePerNight ? String(unit.pricePerNight / 100) : "",
+                                  })}
                                 >
                                   <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                                 </button>
                               </div>
-                              {renameUnitId === unit.id && (
-                                <div className="mb-3 flex gap-1.5" data-testid={`rename-form-${unit.id}`}>
-                                  <Input
-                                    autoFocus
-                                    className="h-7 text-xs px-2"
-                                    value={renameValue}
-                                    onChange={(e) => setRenameValue(e.target.value)}
-                                    onKeyDown={(e) => {
-                                      if (e.key === "Enter") renameMutation.mutate({ unitId: unit.id, name: renameValue.trim() });
-                                      if (e.key === "Escape") setRenameUnitId(null);
-                                    }}
-                                    data-testid={`input-rename-unit-${unit.id}`}
-                                  />
-                                  <Button
-                                    size="sm"
-                                    className="h-7 px-2 text-xs"
-                                    disabled={renameMutation.isPending}
-                                    onClick={() => renameMutation.mutate({ unitId: unit.id, name: renameValue.trim() })}
-                                    data-testid={`button-save-rename-${unit.id}`}
-                                  >
-                                    {t('common.save', 'Save')}
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="h-7 px-2 text-xs"
-                                    onClick={() => setRenameUnitId(null)}
-                                  >
-                                    ✕
-                                  </Button>
-                                </div>
-                              )}
                               <div className="flex items-center justify-between gap-2">
                                 <UnitStatusBadge status={unit.status} />
                                 <span className="text-xs text-muted-foreground capitalize">
@@ -844,6 +863,11 @@ function PropertyUnitsPanel({ propertyId }: { propertyId: string }) {
                               {unit.capacity && (
                                 <p className="text-xs text-muted-foreground mt-2">
                                   {unit.capacity} {t('owner.performance.guests').toLowerCase()}
+                                </p>
+                              )}
+                              {(unit as any).pricePerNight > 0 && (
+                                <p className="text-xs font-medium text-green-600 dark:text-green-400 mt-1" data-testid={`text-unit-price-${unit.id}`}>
+                                  ${((unit as any).pricePerNight / 100).toFixed(0)}/{t('owner.night', 'night')}
                                 </p>
                               )}
                               {smartEnabled && doorActivity && doorActivity[unit.unitNumber] && (

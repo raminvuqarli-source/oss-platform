@@ -1489,7 +1489,11 @@
     "quarterly": "Quarterly",
     "yearly": "Yearly",
     "contactOssTeam": "Contact O.S.S Team",
-    "totalSpaces": "Total Spaces"
+    "totalSpaces": "Total Spaces",
+    "editUnit": "Edit Space",
+    "unitNamePlaceholder": "e.g. Ocean View Villa",
+    "pricePerNight": "Price per night ($)",
+    "night": "night"
   },
   "nav": {
     "smartHotel": "Smart Hotel",

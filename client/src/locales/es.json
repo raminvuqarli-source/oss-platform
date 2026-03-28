@@ -1471,7 +1471,11 @@
     "quarterly": "Trimestral",
     "yearly": "Anual",
     "contactOssTeam": "Contactar al equipo O.S.S",
-    "totalSpaces": "Espacios totales"
+    "totalSpaces": "Espacios totales",
+    "editUnit": "Editar espacio",
+    "unitNamePlaceholder": "ej. Villa Vista al Mar",
+    "pricePerNight": "Precio por noche ($)",
+    "night": "noche"
   },
   "nav": {
     "smartHotel": "Hotel Inteligente",
