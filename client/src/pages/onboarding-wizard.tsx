@@ -19,7 +19,7 @@ import {
   Building2, BedDouble, Users, CheckCircle,
   ChevronRight, ChevronLeft, Plus, Trash2, Loader2,
   MapPin, Globe, Clock, Sparkles, UserPlus, Mail,
-  DollarSign, Percent, Zap, Brush,
+  DollarSign, Percent, Zap, Brush, Receipt,
 } from "lucide-react";
 import type { OnboardingProgress, Property } from "@shared/schema";
 
@@ -79,6 +79,7 @@ export default function OnboardingWizard() {
   const [utilityExpensePct, setUtilityExpensePct] = useState("");
   const [cleaningExpenseMonthly, setCleaningExpenseMonthly] = useState("");
   const [defaultEmployeeTaxRate, setDefaultEmployeeTaxRate] = useState("");
+  const [additionalExpensesMonthly, setAdditionalExpensesMonthly] = useState("");
 
   const [createdPropertyId, setCreatedPropertyId] = useState<string | null>(null);
 
@@ -189,11 +190,13 @@ export default function OnboardingWizard() {
           const utilityPct = parseFloat(utilityExpensePct) || 0;
           const cleaningMonthly = parseFloat(cleaningExpenseMonthly) || 0;
           const empTaxRate = parseFloat(defaultEmployeeTaxRate) || 0;
+          const additionalMonthly = parseFloat(additionalExpensesMonthly) || 0;
           await apiRequest("PATCH", `/api/properties/${propId}`, {
             countryTaxRate: Math.round(taxRate),
             utilityExpensePct: Math.round(utilityPct),
             cleaningExpenseMonthly: Math.round(cleaningMonthly * 100),
             defaultEmployeeTaxRate: Math.round(empTaxRate),
+            additionalExpensesMonthly: Math.round(additionalMonthly * 100),
           });
         }
         await updateProgressMutation.mutateAsync({
@@ -586,6 +589,30 @@ export default function OnboardingWizard() {
                 </div>
               </div>
 
+              <div className="border rounded-lg p-4 space-y-3 bg-orange-50/50 dark:bg-orange-950/20">
+                <div className="flex items-center gap-2">
+                  <Receipt className="h-4 w-4 text-orange-600" />
+                  <p className="font-medium text-sm">{t("onboarding.finance.additionalExpenses")}</p>
+                </div>
+                <p className="text-xs text-muted-foreground">{t("onboarding.finance.additionalExpensesHint")}</p>
+                <div className="space-y-2">
+                  <Label htmlFor="additionalExpensesMonthly" className="flex items-center gap-1 text-sm">
+                    {t("onboarding.finance.additionalExpensesLabel")}
+                  </Label>
+                  <Input
+                    id="additionalExpensesMonthly"
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={additionalExpensesMonthly}
+                    onChange={(e) => setAdditionalExpensesMonthly(e.target.value)}
+                    placeholder={t("onboarding.finance.additionalExpensesPlaceholder")}
+                    data-testid="input-additional-expenses"
+                  />
+                  <p className="text-xs text-muted-foreground">{t("onboarding.finance.additionalExpensesExample")}</p>
+                </div>
+              </div>
+
               <div className="p-4 rounded-md bg-muted/30 text-sm space-y-1">
                 <p className="font-medium text-foreground mb-2">{t("onboarding.finance.sampleCalc")}</p>
                 <div className="flex justify-between text-muted-foreground">
@@ -600,13 +627,20 @@ export default function OnboardingWizard() {
                   <span>{t("onboarding.finance.cleaningCost")}</span>
                   <span className="text-red-500">${parseFloat(cleaningExpenseMonthly) || 0}</span>
                 </div>
+                {(parseFloat(additionalExpensesMonthly) || 0) > 0 && (
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>{t("onboarding.finance.additionalCost")}</span>
+                    <span className="text-red-500">${parseFloat(additionalExpensesMonthly) || 0}</span>
+                  </div>
+                )}
                 <div className="flex justify-between font-medium border-t pt-1 mt-1">
                   <span>{t("onboarding.finance.totalAutoCost")}</span>
                   <span className="text-red-600">
                     ${(
                       (parseFloat(utilityExpensePct) || 0) * 100 +
                       (parseFloat(countryTaxRate) || 0) * 100 +
-                      (parseFloat(cleaningExpenseMonthly) || 0)
+                      (parseFloat(cleaningExpenseMonthly) || 0) +
+                      (parseFloat(additionalExpensesMonthly) || 0)
                     ).toFixed(0)}
                   </span>
                 </div>

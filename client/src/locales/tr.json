@@ -2106,6 +2106,12 @@
       "utilityCost": "Fatura giderleri",
       "taxCost": "Vergi",
       "cleaningCost": "Temizlik (sabit)",
+      "additionalExpenses": "Ek Giderler",
+      "additionalExpensesHint": "Yukarıda yer almayan diğer sabit aylık giderleri belirtin (ör: OTA komisyonları, abonelikler, sigorta).",
+      "additionalExpensesLabel": "Diğer Aylık Giderler ($)",
+      "additionalExpensesPlaceholder": "ör: 500",
+      "additionalExpensesExample": "Örnek: Booking.com %15 komisyonu = $10.000 gelirde yaklaşık $1.500/ay",
+      "additionalCost": "Ek giderler",
       "totalAutoCost": "Toplam otomatik giderler",
       "skipNote": "Bu alanları boş bırakırsanız sistem otomatik hesaplama yapmaz. Daha sonra ayarlardan değiştirebilirsiniz."
     },

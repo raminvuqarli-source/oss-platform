@@ -2247,6 +2247,12 @@
       "utilityCost": "Utility expenses",
       "taxCost": "Tax",
       "cleaningCost": "Cleaning (fixed)",
+      "additionalExpenses": "Additional Expenses",
+      "additionalExpensesHint": "Specify other fixed monthly costs not included above (e.g. OTA commissions, subscriptions, insurance).",
+      "additionalExpensesLabel": "Other Monthly Expenses ($)",
+      "additionalExpensesPlaceholder": "e.g. 500",
+      "additionalExpensesExample": "Example: Booking.com 15% commission = approx. $1,500/month on $10,000 revenue",
+      "additionalCost": "Additional expenses",
       "totalAutoCost": "Total automatic expenses",
       "skipNote": "If you leave these fields empty, the system will not automatically calculate expenses. You can change this later in settings."
     },

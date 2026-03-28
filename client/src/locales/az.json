@@ -2242,6 +2242,12 @@
       "utilityCost": "Kommunal xərclər",
       "taxCost": "Vergi",
       "cleaningCost": "Təmizlik (sabit)",
+      "additionalExpenses": "Əlavə Rasxodlar",
+      "additionalExpensesHint": "Yuxarıda göstərilməyən digər sabit aylıq xərcləri daxil edin (məs. OTA komissiyaları, abunəliklər, sığorta).",
+      "additionalExpensesLabel": "Digər Aylıq Xərclər ($)",
+      "additionalExpensesPlaceholder": "məs. 500",
+      "additionalExpensesExample": "Nümunə: Booking.com 15% komissiyası = $10,000 gəlirdən təxminən $1,500/ay",
+      "additionalCost": "Əlavə xərclər",
       "totalAutoCost": "Ümumi avtomatik xərc",
       "skipNote": "Bu sahələri boş buraxsanız sistem avtomatik hesablama etməyəcək. Sonradan ayarlardan dəyişə bilərsiniz."
     },

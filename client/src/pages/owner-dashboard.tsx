@@ -650,6 +650,7 @@ function PropertyUnitsPanel({ propertyId }: { propertyId: string }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/properties", propertyId, "units"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/units/status"] });
       setEditUnit(null);
       toast({ title: t('common.saved', 'Saved') });
     },

@@ -118,6 +118,7 @@ export const properties = pgTable("properties", {
   utilityExpensePct: integer("utility_expense_pct").default(0),
   cleaningExpenseMonthly: integer("cleaning_expense_monthly").default(0),
   defaultEmployeeTaxRate: integer("default_employee_tax_rate").default(0),
+  additionalExpensesMonthly: integer("additional_expenses_monthly").default(0),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   index("idx_properties_tenant_id").on(table.tenantId),
