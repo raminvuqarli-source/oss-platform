@@ -103,6 +103,12 @@ const PLAN_CODE_TO_PLANTYPE: Record<string, string> = {
   CORE_PRO: "pro",
 };
 
+const PLANTYPE_TO_PLAN_CODE: Record<string, string> = {
+  starter: "CORE_STARTER",
+  growth: "CORE_GROWTH",
+  pro: "CORE_PRO",
+};
+
 const FEATURE_LABEL_KEYS: Record<string, string> = {
   guest_management: "billing.features.guestManagement",
   staff_management: "billing.features.staffManagement",
@@ -147,6 +153,7 @@ export function BillingSection() {
   }, []);
   const [changePlanOpen, setChangePlanOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [selectedCorePlanCode, setSelectedCorePlanCode] = useState<string>("CORE_STARTER");
   const [smartEnabled, setSmartEnabled] = useState(false);
   const [selectedSmartIdx, setSelectedSmartIdx] = useState(1);
   const [roomCount, setRoomCount] = useState(10);
@@ -215,8 +222,8 @@ export function BillingSection() {
   });
 
   const epointMutation = useMutation({
-    mutationFn: async (planCode: string) => {
-      const res = await apiRequest("POST", "/api/epoint/create-order", { planCode });
+    mutationFn: async ({ planCode, smartPlanCode, smartRoomCount }: { planCode: string; smartPlanCode?: string; smartRoomCount?: number }) => {
+      const res = await apiRequest("POST", "/api/epoint/create-order", { planCode, smartPlanCode, smartRoomCount });
       return res.json();
     },
     onSuccess: (data) => {
@@ -244,13 +251,24 @@ export function BillingSection() {
       if (!contractStatus?.accepted || contractStatus.planCode !== planCode || contractStatus.smartPlanType !== smartPlanType) {
         await contractMutation.mutateAsync({ planCode, planType, smartPlanType, contractLanguage });
       }
-      epointMutation.mutate(planCode);
+      epointMutation.mutate({
+        planCode,
+        smartPlanCode: smartEnabled && smartPlans ? smartPlans[selectedSmartIdx]?.code : undefined,
+        smartRoomCount: smartEnabled ? roomCount : undefined,
+      });
     } catch {
       // contractMutation.onError handles the toast
     }
-  }, [termsAccepted, contractStatus, smartEnabled, smartPlans, selectedSmartIdx, contractMutation, epointMutation, toast]);
+  }, [termsAccepted, contractStatus, smartEnabled, smartPlans, selectedSmartIdx, roomCount, contractMutation, epointMutation, toast]);
 
   const currentPlan = billingData?.subscription?.planType || "starter";
+
+  useEffect(() => {
+    if (billingData?.subscription?.planType) {
+      const code = PLANTYPE_TO_PLAN_CODE[billingData.subscription.planType];
+      if (code) setSelectedCorePlanCode(code);
+    }
+  }, [billingData?.subscription?.planType]);
 
   if (billingLoading || !plans) {
     return <p className="text-sm text-muted-foreground p-4">{t('billing.loading')}</p>;
@@ -269,12 +287,23 @@ export function BillingSection() {
         {plans.map((plan) => {
           const planType = PLAN_CODE_TO_PLANTYPE[plan.code] || plan.code.toLowerCase();
           const isCurrent = currentPlan === planType;
+          const isSelected = selectedCorePlanCode === plan.code;
           return (
-            <Card key={plan.code} className={isCurrent ? "ring-2 ring-primary" : ""} data-testid={`card-plan-${planType}`}>
+            <Card
+              key={plan.code}
+              className={`cursor-pointer transition-all hover-elevate ${isSelected ? "ring-2 ring-primary" : "hover:ring-1 hover:ring-border"}`}
+              onClick={() => setSelectedCorePlanCode(plan.code)}
+              data-testid={`card-plan-${planType}`}
+            >
               <CardContent className="p-4 space-y-3">
-                <div className="flex items-center gap-2">
-                  <Building2 className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-semibold">{plan.displayName}</span>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-semibold">{plan.displayName}</span>
+                  </div>
+                  {isCurrent && (
+                    <Badge variant="secondary" className="text-xs shrink-0">{t('billing.current')}</Badge>
+                  )}
                 </div>
                 <p className="text-2xl font-bold">${plan.priceMonthlyUSD}<span className="text-sm font-normal text-muted-foreground">{t('landing.perMonth')}</span></p>
                 <ul className="space-y-1.5">
@@ -292,36 +321,9 @@ export function BillingSection() {
                     );
                   })}
                 </ul>
-                {isCurrent ? (
-                  <div className="space-y-2">
-                    <Badge variant="secondary" className="w-full justify-center">{t('billing.current')}</Badge>
-                    <Button
-                      className="w-full"
-                      variant="default"
-                      size="sm"
-                      onClick={() => handlePayWithContract(plan.code)}
-                      disabled={epointMutation.isPending || contractMutation.isPending || (!termsAccepted && !contractStatus?.accepted)}
-                      data-testid={`button-epoint-pay-${planType}`}
-                    >
-                      <CreditCard className="h-4 w-4 mr-1" />
-                      {(epointMutation.isPending || contractMutation.isPending) ? t('billing.loading') : t('billing.payWithCard', 'Pay with Card')}
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <Button
-                      className="w-full"
-                      variant="default"
-                      size="sm"
-                      onClick={() => handlePayWithContract(plan.code)}
-                      disabled={epointMutation.isPending || contractMutation.isPending || (!termsAccepted && !contractStatus?.accepted)}
-                      data-testid={`button-epoint-pay-${planType}`}
-                    >
-                      <CreditCard className="h-4 w-4 mr-1" />
-                      {(epointMutation.isPending || contractMutation.isPending) ? t('billing.loading') : t('billing.payWithCard', 'Pay with Card')}
-                    </Button>
-                  </div>
-                )}
+                <div className={`w-full py-1.5 rounded-md text-center text-xs font-medium transition-colors ${isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                  {isSelected ? t('pricing.selected', 'Selected') : t('pricing.selectPlan', 'Select')}
+                </div>
               </CardContent>
             </Card>
           );
@@ -500,6 +502,79 @@ export function BillingSection() {
           </>
         )}
       </div>
+
+      {(() => {
+        const selectedPlanConfig = plans.find((p) => p.code === selectedCorePlanCode);
+        const selectedSmartPlan = smartEnabled && smartPlans ? smartPlans[selectedSmartIdx] : null;
+        const corePriceUSD = selectedPlanConfig?.priceMonthlyUSD || 0;
+        const smartPriceUSD = selectedSmartPlan ? (selectedSmartPlan.priceMonthlyUSD || 0) * roomCount : 0;
+        const totalUSD = corePriceUSD + smartPriceUSD;
+        const isPaying = epointMutation.isPending || contractMutation.isPending;
+        const canPay = termsAccepted || !!contractStatus?.accepted;
+
+        return (
+          <Card className="border-primary/30 bg-primary/5" data-testid="card-payment-summary">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Calculator className="h-4 w-4 text-primary" />
+                {t('billing.paymentSummary', 'Payment Summary')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    {t('billing.corePlan', 'Core Plan')} — {selectedPlanConfig?.displayName || selectedCorePlanCode}
+                  </span>
+                  <span className="font-semibold">${corePriceUSD}<span className="text-xs text-muted-foreground">{t('landing.perMonth')}</span></span>
+                </div>
+
+                {selectedSmartPlan && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      {t('billing.smartRoomAddon', 'Smart Room')} — {selectedSmartPlan.displayName} × {roomCount} {roomCount !== 1 ? t('pricing.rooms', 'rooms') : t('pricing.room', 'room')}
+                    </span>
+                    <span className="font-semibold">${smartPriceUSD.toLocaleString()}<span className="text-xs text-muted-foreground">{t('landing.perMonth')}</span></span>
+                  </div>
+                )}
+
+                <div className="border-t border-primary/20 pt-2 flex items-center justify-between">
+                  <span className="font-semibold">{t('billing.totalMonthly', 'Total / month')}</span>
+                  <span className="text-xl font-bold text-primary">${totalUSD.toLocaleString()}</span>
+                </div>
+              </div>
+
+              {!canPay && (
+                <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+                  <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                  {t('billing.mustAcceptBeforeProceeding', 'Please accept the service agreement above before paying.')}
+                </p>
+              )}
+
+              <Button
+                className="w-full gap-2"
+                size="lg"
+                onClick={() => handlePayWithContract(selectedCorePlanCode)}
+                disabled={isPaying || !canPay}
+                data-testid="button-payment-summary-pay"
+              >
+                {isPaying ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {t('billing.loading', 'Processing...')}
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="h-4 w-4" />
+                    {t('billing.payWithCard', 'Pay with Card')} — ${totalUSD.toLocaleString()}
+                  </>
+                )}
+              </Button>
+              <p className="text-xs text-muted-foreground text-center">{t('pricing.exclVat', 'Excl. VAT')}</p>
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       <Dialog open={changePlanOpen} onOpenChange={setChangePlanOpen}>
         <DialogContent>

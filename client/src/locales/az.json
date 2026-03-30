@@ -445,7 +445,10 @@
       "allTypes": "Bütün Növlər",
       "entries": "qeyd"
     },
-    "payWithCard": "Kartla Ödə"
+    "payWithCard": "Kartla Ödə",
+    "paymentSummary": "Ödəniş Xülasəsi",
+    "corePlan": "Əsas Plan",
+    "totalMonthly": "Cəmi / ay"
   },
   "common": {
     "welcome": "Xoş gəldiniz",

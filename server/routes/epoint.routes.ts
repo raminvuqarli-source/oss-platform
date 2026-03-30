@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { storage } from "../storage";
 import { env } from "../config/env";
 import { type PlanType, type PlanCode, PLAN_TYPE_TO_CODE } from "@shared/schema";
-import { applyPlanFeatures, PLAN_CODE_FEATURES } from "@shared/planFeatures";
+import { applyPlanFeatures, PLAN_CODE_FEATURES, SMART_PLAN_PRICING } from "@shared/planFeatures";
 import { authenticateRequest, requireAuth, requireRole } from "../middleware";
 import crypto from "crypto";
 import { logger } from "../utils/logger";
@@ -279,7 +279,7 @@ export function registerEpointRoutes(app: Express): void {
       const user = await storage.getUser(req.session.userId!);
       if (!user?.ownerId) return res.status(400).json({ message: "No owner account" });
 
-      const { planCode } = req.body;
+      const { planCode, smartPlanCode, smartRoomCount } = req.body;
       if (!planCode || typeof planCode !== "string") {
         return res.status(400).json({ message: "Plan code is required" });
       }
@@ -287,8 +287,21 @@ export function registerEpointRoutes(app: Express): void {
       const planConfig = PLAN_CODE_FEATURES[planCode as PlanCode];
       if (!planConfig) return res.status(400).json({ message: "Invalid plan code" });
 
-      const amountAZN = planConfig.priceMonthlyAZN.toFixed(2);
-      const amountCents = Math.round(planConfig.priceMonthlyAZN * 100);
+      let totalAZN = planConfig.priceMonthlyAZN;
+      let descriptionParts = [`${planConfig.displayName} plan`];
+
+      if (smartPlanCode && typeof smartPlanCode === "string" && smartPlanCode !== "none") {
+        const smartConfig = SMART_PLAN_PRICING[smartPlanCode as keyof typeof SMART_PLAN_PRICING];
+        if (smartConfig) {
+          const rooms = Math.max(1, parseInt(smartRoomCount, 10) || 1);
+          const smartTotal = smartConfig.priceMonthlyAZN * rooms;
+          totalAZN += smartTotal;
+          descriptionParts.push(`${smartConfig.displayName} x${rooms} rooms`);
+        }
+      }
+
+      const amountAZN = totalAZN.toFixed(2);
+      const amountCents = Math.round(totalAZN * 100);
       const planType = PLAN_CODE_TO_TYPE[planCode as PlanCode];
 
       const baseUrl = env.BASE_URL;
@@ -301,7 +314,7 @@ export function registerEpointRoutes(app: Express): void {
         currency: "AZN",
         status: "pending",
         paymentMethodId: null,
-        customerNote: `Epoint payment - ${planCode}`,
+        customerNote: `Epoint payment - ${planCode}${smartPlanCode && smartPlanCode !== "none" ? ` + ${smartPlanCode} x${smartRoomCount || 1}` : ""}`,
         transferReference: null,
       });
 
@@ -314,7 +327,7 @@ export function registerEpointRoutes(app: Express): void {
         currency: "AZN",
         language: "az",
         order_id: order.id,
-        description: `O.S.S ${planConfig.displayName} plan subscription`,
+        description: `O.S.S ${descriptionParts.join(" + ")} subscription`,
         success_redirect_url: `${baseUrl}/settings?payment=success&orderId=${order.id}`,
         error_redirect_url: `${baseUrl}/settings?payment=declined&orderId=${order.id}`,
         callback_url: `${baseUrl}/api/epoint/webhook`,

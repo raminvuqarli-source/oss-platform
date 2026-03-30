@@ -445,7 +445,10 @@
       "allTypes": "All Types",
       "entries": "entries"
     },
-    "payWithCard": "Pay with Card"
+    "payWithCard": "Pay with Card",
+    "paymentSummary": "Payment Summary",
+    "corePlan": "Core Plan",
+    "totalMonthly": "Total / month"
   },
   "common": {
     "welcome": "Welcome",

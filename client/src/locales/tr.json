@@ -440,7 +440,10 @@
       "allTypes": "Tüm Türler",
       "entries": "kayıt"
     },
-    "payWithCard": "Kartla Öde"
+    "payWithCard": "Kartla Öde",
+    "paymentSummary": "Ödeme Özeti",
+    "corePlan": "Ana Plan",
+    "totalMonthly": "Toplam / ay"
   },
   "common": {
     "welcome": "Hoş geldiniz",
