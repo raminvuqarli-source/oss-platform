@@ -144,6 +144,7 @@ export function BillingSection() {
     remainingAZN: number;
     totalAZN: number;
     planType: string;
+    prevOrderId: string;
   }
 
   const [splitPending, setSplitPending] = useState<SplitPendingState | null>(null);
@@ -160,19 +161,29 @@ export function BillingSection() {
         queryClient.invalidateQueries({ queryKey: ["/api/subscription/status"] });
         queryClient.invalidateQueries({ queryKey: ["/api/invoices"] });
       } else if (paymentResult === "split_pending") {
-        const sp: SplitPendingState = {
-          splitGroupId: params.get("splitGroupId") || "",
-          splitIndex: parseInt(params.get("splitIndex") || "1", 10),
-          splitTotal: parseInt(params.get("splitTotal") || "1", 10),
-          planCode: params.get("planCode") || "",
-          smartPlanCode: params.get("smartPlanCode") || "",
-          smartRoomCount: parseInt(params.get("smartRoomCount") || "0", 10),
-          paidAZN: parseFloat(params.get("paidAZN") || "0"),
-          remainingAZN: parseFloat(params.get("remainingAZN") || "0"),
-          totalAZN: parseFloat(params.get("totalAZN") || "0"),
-          planType: params.get("planType") || "",
-        };
-        setSplitPending(sp);
+        const orderId = params.get("orderId");
+        if (orderId) {
+          fetch(`/api/epoint/split-status/${orderId}`, { credentials: "include" })
+            .then(r => r.json())
+            .then((data: any) => {
+              if (data.splitGroupId) {
+                setSplitPending({
+                  splitGroupId: data.splitGroupId,
+                  splitIndex: data.splitIndex,
+                  splitTotal: data.splitTotal,
+                  planCode: data.planCode,
+                  smartPlanCode: data.smartPlanCode || "",
+                  smartRoomCount: data.smartRoomCount || 0,
+                  paidAZN: data.paidAZN,
+                  remainingAZN: data.remainingAZN,
+                  totalAZN: data.totalAmountAZN,
+                  planType: data.planType || "",
+                  prevOrderId: String(data.prevOrderId || orderId),
+                });
+              }
+            })
+            .catch(() => {/* ignore */});
+        }
       } else if (paymentResult === "cancelled") {
         toast({ title: t('billing.paymentCancelled', 'Payment Cancelled'), description: t('billing.paymentCancelledDesc', 'You cancelled the payment.'), variant: "destructive" });
       } else if (paymentResult === "declined") {
@@ -295,15 +306,7 @@ export function BillingSection() {
   const nextSplitMutation = useMutation({
     mutationFn: async (sp: NonNullable<typeof splitPending>) => {
       const res = await apiRequest("POST", "/api/epoint/next-split", {
-        splitGroupId: sp.splitGroupId,
-        splitIndex: sp.splitIndex + 1,
-        splitTotal: sp.splitTotal,
-        planCode: sp.planCode,
-        smartPlanCode: sp.smartPlanCode || undefined,
-        smartRoomCount: sp.smartRoomCount || undefined,
-        remainingAZN: sp.remainingAZN,
-        totalAZN: sp.totalAZN,
-        planType: sp.planType,
+        prevOrderId: sp.prevOrderId,
       });
       return res.json();
     },

@@ -355,9 +355,9 @@ export function registerEpointRoutes(app: Express): void {
         transferReference: null,
       });
 
-      const remainingAfterFirst = parseFloat((totalAZN - firstSplitAZN).toFixed(2));
+      // Keep URLs short — only orderId; all split metadata is stored in customerNote
       const successUrl = isSplit
-        ? `${baseUrl}/settings?payment=split_pending&splitGroupId=${splitGroupId}&splitIndex=1&splitTotal=${splitTotal}&planCode=${planCode}&smartPlanCode=${smartPlanCode || ""}&smartRoomCount=${smartRoomCount || 0}&paidAZN=${firstSplitAZN}&remainingAZN=${remainingAfterFirst}&totalAZN=${totalAZN}&planType=${planType}`
+        ? `${baseUrl}/settings?payment=split_pending&orderId=${order.id}`
         : `${baseUrl}/settings?payment=success&orderId=${order.id}`;
 
       const epointData = {
@@ -367,9 +367,7 @@ export function registerEpointRoutes(app: Express): void {
         currency: "AZN",
         language: "az",
         order_id: order.id,
-        description: isSplit
-          ? `O.S.S ${descriptionParts.join(" + ")} (1/${splitTotal})`
-          : `O.S.S ${descriptionParts.join(" + ")} subscription`,
+        description: `OSS ${planCode}` + (isSplit ? ` p1of${splitTotal}` : ""),
         success_redirect_url: successUrl,
         error_redirect_url: `${baseUrl}/settings?payment=declined&orderId=${order.id}`,
         callback_url: `${baseUrl}/api/epoint/webhook`,
@@ -416,6 +414,49 @@ export function registerEpointRoutes(app: Express): void {
     }
   });
 
+  // ============== SPLIT STATUS (frontend reads metadata by orderId) ==============
+  app.get("/api/epoint/split-status/:orderId", authenticateRequest, requireRole("owner_admin"), async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user?.ownerId) return res.status(400).json({ message: "No owner account" });
+
+      const order = await storage.getPaymentOrder(String(req.params.orderId));
+      if (!order || order.ownerId !== user.ownerId) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      let meta: any = null;
+      try {
+        if (order.customerNote) meta = JSON.parse(order.customerNote);
+      } catch { /* not JSON */ }
+
+      if (!meta?.splitGroupId) {
+        return res.status(400).json({ message: "Not a split order" });
+      }
+
+      // Safe paid calculation: min(total, splitIndex * chunkSize)
+      const paidSoFar = Math.min(meta.totalAmountAZN, meta.splitIndex * EPOINT_MAX_AZN);
+      const remaining = Math.max(0, parseFloat((meta.totalAmountAZN - paidSoFar).toFixed(2)));
+
+      res.json({
+        splitGroupId: meta.splitGroupId,
+        splitIndex: meta.splitIndex,
+        splitTotal: meta.splitTotal,
+        planCode: meta.planCode,
+        smartPlanCode: meta.smartPlanCode || "",
+        smartRoomCount: meta.smartRoomCount || 0,
+        totalAmountAZN: meta.totalAmountAZN,
+        paidAZN: parseFloat(paidSoFar.toFixed(2)),
+        remainingAZN: remaining,
+        planType: order.planType,
+        prevOrderId: orderId,
+      });
+    } catch (error: any) {
+      logger.error({ err: error }, "Split status fetch error");
+      res.status(500).json({ message: "Failed to fetch split status" });
+    }
+  });
+
   // ============== SPLIT PAYMENT: NEXT PART ==============
   app.post("/api/epoint/next-split", authenticateRequest, requireRole("owner_admin"), async (req, res) => {
     try {
@@ -430,29 +471,44 @@ export function registerEpointRoutes(app: Express): void {
       const user = await storage.getUser(req.session.userId!);
       if (!user?.ownerId) return res.status(400).json({ message: "No owner account" });
 
-      const { splitGroupId, splitIndex, splitTotal, planCode, smartPlanCode, smartRoomCount, remainingAZN, totalAZN, planType } = req.body;
+      // Load metadata from the previous split order
+      const { prevOrderId } = req.body;
+      if (!prevOrderId) return res.status(400).json({ message: "prevOrderId is required" });
 
-      if (!splitGroupId || !splitIndex || !splitTotal || !planCode || remainingAZN === undefined) {
-        return res.status(400).json({ message: "Missing split payment parameters" });
+      const prevOrder = await storage.getPaymentOrder(String(prevOrderId));
+      if (!prevOrder || prevOrder.ownerId !== user.ownerId) {
+        return res.status(404).json({ message: "Previous order not found" });
       }
 
-      const currentSplitAZN = Math.min(EPOINT_MAX_AZN, parseFloat(remainingAZN));
+      let meta: any = null;
+      try {
+        if (prevOrder.customerNote) meta = JSON.parse(prevOrder.customerNote);
+      } catch { /* ignore */ }
+
+      if (!meta?.splitGroupId) return res.status(400).json({ message: "Not a split order" });
+
+      const { splitGroupId, splitIndex, splitTotal, planCode, smartPlanCode, smartRoomCount, totalAmountAZN } = meta;
+      const nextSplitIndex = splitIndex + 1;
+      // Safe paid calculation: min(total, splitIndex * chunkSize)
+      const alreadyPaidAZN = Math.min(totalAmountAZN, splitIndex * EPOINT_MAX_AZN);
+      const remainingAZN = Math.max(0, parseFloat((totalAmountAZN - alreadyPaidAZN).toFixed(2)));
+
+      const currentSplitAZN = Math.min(EPOINT_MAX_AZN, remainingAZN);
       const currentSplitCents = Math.round(currentSplitAZN * 100);
-      const isLastSplit = splitIndex >= splitTotal;
-      const newRemainingAZN = parseFloat((parseFloat(remainingAZN) - currentSplitAZN).toFixed(2));
+      const isLastSplit = nextSplitIndex >= splitTotal;
 
       const baseUrl = env.BASE_URL;
 
       const splitNote = JSON.stringify({
-        splitGroupId, splitIndex, splitTotal,
+        splitGroupId, splitIndex: nextSplitIndex, splitTotal,
         planCode, smartPlanCode: smartPlanCode || null, smartRoomCount: smartRoomCount || 0,
-        totalAmountAZN: parseFloat(totalAZN),
+        totalAmountAZN,
       });
 
       const order = await storage.createPaymentOrder({
         ownerId: user.ownerId,
         tenantId: req.tenantId || null,
-        planType: planType || PLAN_CODE_TO_TYPE[planCode as PlanCode],
+        planType: prevOrder.planType || PLAN_CODE_TO_TYPE[planCode as PlanCode],
         amount: currentSplitCents,
         currency: "AZN",
         status: "pending",
@@ -461,9 +517,10 @@ export function registerEpointRoutes(app: Express): void {
         transferReference: null,
       });
 
+      // Short URL — metadata lives in customerNote on the order
       const successUrl = isLastSplit
         ? `${baseUrl}/settings?payment=success&orderId=${order.id}`
-        : `${baseUrl}/settings?payment=split_pending&splitGroupId=${splitGroupId}&splitIndex=${splitIndex}&splitTotal=${splitTotal}&planCode=${planCode}&smartPlanCode=${smartPlanCode || ""}&smartRoomCount=${smartRoomCount || 0}&paidAZN=${currentSplitAZN}&remainingAZN=${newRemainingAZN}&totalAZN=${totalAZN}&planType=${planType}`;
+        : `${baseUrl}/settings?payment=split_pending&orderId=${order.id}`;
 
       const epointData = {
         public_key: publicKey,
@@ -472,7 +529,7 @@ export function registerEpointRoutes(app: Express): void {
         currency: "AZN",
         language: "az",
         order_id: order.id,
-        description: `O.S.S ${planCode} split ${splitIndex}/${splitTotal}`,
+        description: `OSS ${planCode} p${nextSplitIndex}of${splitTotal}`,
         success_redirect_url: successUrl,
         error_redirect_url: `${baseUrl}/settings?payment=declined&orderId=${order.id}`,
         callback_url: `${baseUrl}/api/epoint/webhook`,
