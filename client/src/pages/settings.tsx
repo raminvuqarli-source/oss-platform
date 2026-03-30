@@ -109,6 +109,8 @@ const PLANTYPE_TO_PLAN_CODE: Record<string, string> = {
   pro: "CORE_PRO",
 };
 
+const EPOINT_MAX_AZN = 800;
+
 const FEATURE_LABEL_KEYS: Record<string, string> = {
   guest_management: "billing.features.guestManagement",
   staff_management: "billing.features.staffManagement",
@@ -131,6 +133,21 @@ export function BillingSection() {
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
 
+  interface SplitPendingState {
+    splitGroupId: string;
+    splitIndex: number;
+    splitTotal: number;
+    planCode: string;
+    smartPlanCode: string;
+    smartRoomCount: number;
+    paidAZN: number;
+    remainingAZN: number;
+    totalAZN: number;
+    planType: string;
+  }
+
+  const [splitPending, setSplitPending] = useState<SplitPendingState | null>(null);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const paymentResult = params.get("payment");
@@ -142,6 +159,20 @@ export function BillingSection() {
         queryClient.invalidateQueries({ queryKey: ["/api/billing/invoices"] });
         queryClient.invalidateQueries({ queryKey: ["/api/subscription/status"] });
         queryClient.invalidateQueries({ queryKey: ["/api/invoices"] });
+      } else if (paymentResult === "split_pending") {
+        const sp: SplitPendingState = {
+          splitGroupId: params.get("splitGroupId") || "",
+          splitIndex: parseInt(params.get("splitIndex") || "1", 10),
+          splitTotal: parseInt(params.get("splitTotal") || "1", 10),
+          planCode: params.get("planCode") || "",
+          smartPlanCode: params.get("smartPlanCode") || "",
+          smartRoomCount: parseInt(params.get("smartRoomCount") || "0", 10),
+          paidAZN: parseFloat(params.get("paidAZN") || "0"),
+          remainingAZN: parseFloat(params.get("remainingAZN") || "0"),
+          totalAZN: parseFloat(params.get("totalAZN") || "0"),
+          planType: params.get("planType") || "",
+        };
+        setSplitPending(sp);
       } else if (paymentResult === "cancelled") {
         toast({ title: t('billing.paymentCancelled', 'Payment Cancelled'), description: t('billing.paymentCancelledDesc', 'You cancelled the payment.'), variant: "destructive" });
       } else if (paymentResult === "declined") {
@@ -261,6 +292,32 @@ export function BillingSection() {
     }
   }, [termsAccepted, contractStatus, smartEnabled, smartPlans, selectedSmartIdx, roomCount, contractMutation, epointMutation, toast]);
 
+  const nextSplitMutation = useMutation({
+    mutationFn: async (sp: NonNullable<typeof splitPending>) => {
+      const res = await apiRequest("POST", "/api/epoint/next-split", {
+        splitGroupId: sp.splitGroupId,
+        splitIndex: sp.splitIndex + 1,
+        splitTotal: sp.splitTotal,
+        planCode: sp.planCode,
+        smartPlanCode: sp.smartPlanCode || undefined,
+        smartRoomCount: sp.smartRoomCount || undefined,
+        remainingAZN: sp.remainingAZN,
+        totalAZN: sp.totalAZN,
+        planType: sp.planType,
+      });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+      }
+    },
+    onError: (error: any) => {
+      const message = error?.message || t('billing.epointError', 'Failed to initiate payment');
+      toast({ title: t('billing.somethingWentWrong'), description: message, variant: "destructive" });
+    },
+  });
+
   const currentPlan = billingData?.subscription?.planType || "starter";
 
   useEffect(() => {
@@ -276,6 +333,76 @@ export function BillingSection() {
 
   return (
     <div className="space-y-4" data-testid="billing-section">
+
+      {/* ===== SPLIT PAYMENT PROGRESS BANNER ===== */}
+      {splitPending && (
+        <Card className="border-amber-400/60 bg-amber-50 dark:bg-amber-950/30" data-testid="card-split-progress">
+          <CardContent className="p-5 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-md bg-amber-500/10">
+                <CreditCard className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm text-amber-800 dark:text-amber-200">
+                  {t('billing.splitPaymentInProgress', 'Split Payment In Progress')}
+                </p>
+                <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
+                  {t('billing.splitPaymentDesc', `Payment ${splitPending.splitIndex} of ${splitPending.splitTotal} completed. Continue to pay the next instalment.`
+                    .replace(`${splitPending.splitIndex}`, String(splitPending.splitIndex))
+                    .replace(`${splitPending.splitTotal}`, String(splitPending.splitTotal)))}
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="shrink-0 text-amber-600"
+                onClick={() => setSplitPending(null)}
+                data-testid="button-split-dismiss"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Progress bar */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-xs text-amber-700 dark:text-amber-300">
+                <span>{t('billing.splitPaid', 'Paid')}: {splitPending.paidAZN.toFixed(2)} AZN</span>
+                <span>{t('billing.splitRemaining', 'Remaining')}: {splitPending.remainingAZN.toFixed(2)} AZN</span>
+              </div>
+              <Progress
+                value={(splitPending.paidAZN / splitPending.totalAZN) * 100}
+                className="h-2 bg-amber-200 dark:bg-amber-800"
+              />
+              <div className="flex justify-between text-xs text-amber-600 dark:text-amber-400">
+                <span>{splitPending.splitIndex}/{splitPending.splitTotal} {t('billing.splitInstalment', 'instalments')}</span>
+                <span>{t('billing.splitTotal', 'Total')}: {splitPending.totalAZN.toFixed(2)} AZN</span>
+              </div>
+            </div>
+
+            <Button
+              className="w-full gap-2 bg-amber-600 hover:bg-amber-700 text-white"
+              onClick={() => nextSplitMutation.mutate(splitPending)}
+              disabled={nextSplitMutation.isPending}
+              data-testid="button-split-continue"
+            >
+              {nextSplitMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t('billing.loading', 'Processing...')}
+                </>
+              ) : (
+                <>
+                  <CreditCard className="h-4 w-4" />
+                  {t('billing.splitContinue', `Continue to payment ${splitPending.splitIndex + 1} of ${splitPending.splitTotal}`
+                    .replace(String(splitPending.splitIndex + 1), String(splitPending.splitIndex + 1))
+                    .replace(String(splitPending.splitTotal), String(splitPending.splitTotal)))} — {Math.min(EPOINT_MAX_AZN, splitPending.remainingAZN).toFixed(2)} AZN
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="flex items-center gap-3 flex-wrap">
         <p className="text-sm text-muted-foreground">{t('billing.currentPlan')}</p>
         <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" data-testid="badge-current-plan">

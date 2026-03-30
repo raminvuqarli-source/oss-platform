@@ -18,6 +18,7 @@ import { logActionAsync } from "../services/auditLogService";
 
 const EPOINT_API_URL = "https://epoint.az/api/1/request";
 const EPOINT_STATUS_URL = "https://epoint.az/api/1/get-status";
+const EPOINT_MAX_AZN = 800;
 
 const PLAN_CODE_TO_TYPE: Record<PlanCode, PlanType> = {
   CORE_STARTER: "starter",
@@ -125,6 +126,32 @@ async function processEpointPayment(order: any, callbackData: any, paymentStatus
     transferReference: callbackData.transaction || order.transferReference,
     reviewedAt: new Date(),
   });
+
+  // Check if this is a split payment
+  let splitMeta: { splitIndex: number; splitTotal: number; splitGroupId: string } | null = null;
+  try {
+    if (order.customerNote) {
+      const noteData = JSON.parse(order.customerNote);
+      if (noteData.splitIndex && noteData.splitTotal) {
+        splitMeta = noteData;
+      }
+    }
+  } catch { /* not JSON or no split info */ }
+
+  if (splitMeta && splitMeta.splitIndex < splitMeta.splitTotal) {
+    logger.info({ orderId, splitIndex: splitMeta.splitIndex, splitTotal: splitMeta.splitTotal }, "Split payment partial — subscription not yet activated");
+    logActionAsync({
+      tenantId: order.tenantId || null,
+      userId: order.ownerId,
+      ownerId: order.ownerId,
+      action: "payment_split_partial",
+      entityType: "payment_order",
+      entityId: orderId,
+      description: `Split payment ${splitMeta.splitIndex}/${splitMeta.splitTotal} completed — ${order.amount} ${order.currency || "AZN"}`,
+      newValues: { splitIndex: splitMeta.splitIndex, splitTotal: splitMeta.splitTotal },
+    });
+    return;
+  }
 
   const planType = order.planType as PlanType;
   const planDefaults = applyPlanFeatures(planType);
@@ -300,40 +327,55 @@ export function registerEpointRoutes(app: Express): void {
         }
       }
 
-      const amountAZN = totalAZN.toFixed(2);
-      const amountCents = Math.round(totalAZN * 100);
       const planType = PLAN_CODE_TO_TYPE[planCode as PlanCode];
-
       const baseUrl = env.BASE_URL;
+      const merchantId = env.EPOINT_MERCHANT_ID;
+
+      // Split payment logic: Epoint max = 800 AZN per transaction
+      const isSplit = totalAZN > EPOINT_MAX_AZN;
+      const splitTotal = isSplit ? Math.ceil(totalAZN / EPOINT_MAX_AZN) : 1;
+      const splitGroupId = isSplit ? crypto.randomUUID() : null;
+      const firstSplitAZN = isSplit ? Math.min(EPOINT_MAX_AZN, totalAZN) : totalAZN;
+      const firstSplitCents = Math.round(firstSplitAZN * 100);
+      const totalCents = Math.round(totalAZN * 100);
+
+      const splitNote = isSplit
+        ? JSON.stringify({ splitGroupId, splitIndex: 1, splitTotal, planCode, smartPlanCode: smartPlanCode || null, smartRoomCount: smartRoomCount || 0, totalAmountAZN: totalAZN })
+        : `Epoint payment - ${planCode}${smartPlanCode && smartPlanCode !== "none" ? ` + ${smartPlanCode} x${smartRoomCount || 1}` : ""}`;
 
       const order = await storage.createPaymentOrder({
         ownerId: user.ownerId,
         tenantId: req.tenantId || null,
         planType,
-        amount: amountCents,
+        amount: isSplit ? firstSplitCents : totalCents,
         currency: "AZN",
         status: "pending",
         paymentMethodId: null,
-        customerNote: `Epoint payment - ${planCode}${smartPlanCode && smartPlanCode !== "none" ? ` + ${smartPlanCode} x${smartRoomCount || 1}` : ""}`,
+        customerNote: splitNote,
         transferReference: null,
       });
 
-      const merchantId = env.EPOINT_MERCHANT_ID;
+      const remainingAfterFirst = parseFloat((totalAZN - firstSplitAZN).toFixed(2));
+      const successUrl = isSplit
+        ? `${baseUrl}/settings?payment=split_pending&splitGroupId=${splitGroupId}&splitIndex=1&splitTotal=${splitTotal}&planCode=${planCode}&smartPlanCode=${smartPlanCode || ""}&smartRoomCount=${smartRoomCount || 0}&paidAZN=${firstSplitAZN}&remainingAZN=${remainingAfterFirst}&totalAZN=${totalAZN}&planType=${planType}`
+        : `${baseUrl}/settings?payment=success&orderId=${order.id}`;
 
       const epointData = {
         public_key: publicKey,
         merchant_id: merchantId,
-        amount: amountAZN,
+        amount: (isSplit ? firstSplitAZN : totalAZN).toFixed(2),
         currency: "AZN",
         language: "az",
         order_id: order.id,
-        description: `O.S.S ${descriptionParts.join(" + ")} subscription`,
-        success_redirect_url: `${baseUrl}/settings?payment=success&orderId=${order.id}`,
+        description: isSplit
+          ? `O.S.S ${descriptionParts.join(" + ")} (1/${splitTotal})`
+          : `O.S.S ${descriptionParts.join(" + ")} subscription`,
+        success_redirect_url: successUrl,
         error_redirect_url: `${baseUrl}/settings?payment=declined&orderId=${order.id}`,
         callback_url: `${baseUrl}/api/epoint/webhook`,
       };
 
-      logger.info({ description: epointData.description, amount: epointData.amount }, "Creating Epoint order");
+      logger.info({ description: epointData.description, amount: epointData.amount, isSplit, splitTotal }, "Creating Epoint order");
 
       const { data, signature } = signData(privateKey, epointData);
 
@@ -358,16 +400,107 @@ export function registerEpointRoutes(app: Express): void {
 
       await storage.updatePaymentOrder(order.id, {
         transferReference: epointResponse.transaction || null,
-        customerNote: `Epoint transaction: ${epointResponse.transaction || ""}`,
+        // Preserve split metadata in customerNote; only update if not a split order
+        ...(isSplit ? {} : { customerNote: `Epoint transaction: ${epointResponse.transaction || ""}` }),
       });
 
       res.json({
         paymentUrl: epointResponse.redirect_url,
         orderId: order.id,
+        isSplit,
+        splitTotal: isSplit ? splitTotal : 1,
       });
     } catch (error: any) {
       logger.error({ err: error }, "Create Epoint order error");
       res.status(500).json({ message: `Failed to create Epoint order: ${error?.message || "Unknown error"}` });
+    }
+  });
+
+  // ============== SPLIT PAYMENT: NEXT PART ==============
+  app.post("/api/epoint/next-split", authenticateRequest, requireRole("owner_admin"), async (req, res) => {
+    try {
+      const privateKey = env.EPOINT_PRIVATE_KEY;
+      const publicKey = env.EPOINT_PUBLIC_KEY;
+      const merchantId = env.EPOINT_MERCHANT_ID;
+
+      if (!privateKey || !publicKey) {
+        return res.status(503).json({ message: "Epoint payment is not configured." });
+      }
+
+      const user = await storage.getUser(req.session.userId!);
+      if (!user?.ownerId) return res.status(400).json({ message: "No owner account" });
+
+      const { splitGroupId, splitIndex, splitTotal, planCode, smartPlanCode, smartRoomCount, remainingAZN, totalAZN, planType } = req.body;
+
+      if (!splitGroupId || !splitIndex || !splitTotal || !planCode || remainingAZN === undefined) {
+        return res.status(400).json({ message: "Missing split payment parameters" });
+      }
+
+      const currentSplitAZN = Math.min(EPOINT_MAX_AZN, parseFloat(remainingAZN));
+      const currentSplitCents = Math.round(currentSplitAZN * 100);
+      const isLastSplit = splitIndex >= splitTotal;
+      const newRemainingAZN = parseFloat((parseFloat(remainingAZN) - currentSplitAZN).toFixed(2));
+
+      const baseUrl = env.BASE_URL;
+
+      const splitNote = JSON.stringify({
+        splitGroupId, splitIndex, splitTotal,
+        planCode, smartPlanCode: smartPlanCode || null, smartRoomCount: smartRoomCount || 0,
+        totalAmountAZN: parseFloat(totalAZN),
+      });
+
+      const order = await storage.createPaymentOrder({
+        ownerId: user.ownerId,
+        tenantId: req.tenantId || null,
+        planType: planType || PLAN_CODE_TO_TYPE[planCode as PlanCode],
+        amount: currentSplitCents,
+        currency: "AZN",
+        status: "pending",
+        paymentMethodId: null,
+        customerNote: splitNote,
+        transferReference: null,
+      });
+
+      const successUrl = isLastSplit
+        ? `${baseUrl}/settings?payment=success&orderId=${order.id}`
+        : `${baseUrl}/settings?payment=split_pending&splitGroupId=${splitGroupId}&splitIndex=${splitIndex}&splitTotal=${splitTotal}&planCode=${planCode}&smartPlanCode=${smartPlanCode || ""}&smartRoomCount=${smartRoomCount || 0}&paidAZN=${currentSplitAZN}&remainingAZN=${newRemainingAZN}&totalAZN=${totalAZN}&planType=${planType}`;
+
+      const epointData = {
+        public_key: publicKey,
+        merchant_id: merchantId,
+        amount: currentSplitAZN.toFixed(2),
+        currency: "AZN",
+        language: "az",
+        order_id: order.id,
+        description: `O.S.S ${planCode} split ${splitIndex}/${splitTotal}`,
+        success_redirect_url: successUrl,
+        error_redirect_url: `${baseUrl}/settings?payment=declined&orderId=${order.id}`,
+        callback_url: `${baseUrl}/api/epoint/webhook`,
+      };
+
+      logger.info({ splitIndex, splitTotal, amount: currentSplitAZN, isLastSplit }, "Creating next split Epoint order");
+
+      const { data, signature } = signData(privateKey, epointData);
+      const requestBody = new URLSearchParams({ data, signature }).toString();
+
+      const epointRes = await fetch(EPOINT_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: requestBody,
+      });
+
+      const epointResponse = await epointRes.json() as any;
+
+      if (epointResponse.status !== "success" || !epointResponse.redirect_url) {
+        const errorReason = epointResponse.message || epointResponse.error || epointResponse.status || "Unknown error";
+        await storage.updatePaymentOrder(order.id, { status: "rejected", adminNote: `Epoint API error: ${errorReason}` });
+        return res.status(502).json({ message: `Payment gateway error: ${errorReason}` });
+      }
+
+      res.json({ paymentUrl: epointResponse.redirect_url, orderId: order.id });
+    } catch (error: any) {
+      logger.error({ err: error }, "Next split Epoint order error");
+      res.status(500).json({ message: `Failed to create next split order: ${error?.message || "Unknown error"}` });
     }
   });
 
