@@ -443,7 +443,11 @@
     "payWithCard": "Оплатить картой",
     "paymentSummary": "Сводка платежа",
     "corePlan": "Основной план",
-    "totalMonthly": "Итого / месяц"
+    "totalMonthly": "Итого / месяц",
+    "splitNoticeTitle": "Платёж будет разбит на части",
+    "splitNoticeDesc": "Сумма {{total}} AZN превышает лимит {{max}} AZN за транзакцию. Будет оплачено в {{count}} частях по {{max}} AZN.",
+    "payFirstInstalment": "Оплатить 1-ю часть",
+    "instalments": "части"
   },
   "common": {
     "welcome": "Добро пожаловать",

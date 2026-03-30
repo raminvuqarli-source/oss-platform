@@ -448,7 +448,11 @@
     "payWithCard": "Pay with Card",
     "paymentSummary": "Payment Summary",
     "corePlan": "Core Plan",
-    "totalMonthly": "Total / month"
+    "totalMonthly": "Total / month",
+    "splitNoticeTitle": "Payment will be split into instalments",
+    "splitNoticeDesc": "Total {{total}} AZN exceeds the {{max}} AZN limit per transaction. It will be charged in {{count}} instalments of up to {{max}} AZN each.",
+    "payFirstInstalment": "Pay 1st instalment",
+    "instalments": "parts"
   },
   "common": {
     "welcome": "Welcome",

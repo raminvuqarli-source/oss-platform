@@ -443,7 +443,11 @@
     "payWithCard": "Kartla Öde",
     "paymentSummary": "Ödeme Özeti",
     "corePlan": "Ana Plan",
-    "totalMonthly": "Toplam / ay"
+    "totalMonthly": "Toplam / ay",
+    "splitNoticeTitle": "Ödeme taksitlere bölünecek",
+    "splitNoticeDesc": "Toplam {{total}} AZN, işlem başına {{max}} AZN limitini aşıyor. {{count}} taksit halinde, her biri {{max}} AZN olmak üzere tahsil edilecek.",
+    "payFirstInstalment": "1. taksiti öde",
+    "instalments": "taksit"
   },
   "common": {
     "welcome": "Hoş geldiniz",

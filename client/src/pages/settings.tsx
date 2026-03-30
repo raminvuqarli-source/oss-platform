@@ -55,6 +55,7 @@ import {
 } from "lucide-react";
 import type { Subscription, PlanCode } from "@shared/schema";
 import type { FeatureAccess, BusinessFeature } from "@shared/planFeatures";
+import { PLAN_CODE_FEATURES, SMART_PLAN_PRICING } from "@shared/planFeatures";
 import { DynamicPricingSection } from "@/components/dynamic-pricing";
 
 interface PlanFromAPI {
@@ -642,6 +643,19 @@ export function BillingSection() {
         const isPaying = epointMutation.isPending || contractMutation.isPending;
         const canPay = termsAccepted || !!contractStatus?.accepted;
 
+        // Calculate AZN total for split payment notice
+        const corePriceAZN = PLAN_CODE_FEATURES[selectedCorePlanCode as PlanCode]?.priceMonthlyAZN || 0;
+        const smartKey = smartEnabled && smartPlans[selectedSmartIdx]?.code !== "none"
+          ? smartPlans[selectedSmartIdx]?.code as keyof typeof SMART_PLAN_PRICING
+          : null;
+        const smartPriceAZN = smartKey && SMART_PLAN_PRICING[smartKey]
+          ? (SMART_PLAN_PRICING[smartKey].priceMonthlyAZN * roomCount)
+          : 0;
+        const totalAZN = corePriceAZN + smartPriceAZN;
+        const splitCount = totalAZN > EPOINT_MAX_AZN ? Math.ceil(totalAZN / EPOINT_MAX_AZN) : 1;
+        const isSplitNeeded = splitCount > 1;
+        const firstInstalment = isSplitNeeded ? Math.min(EPOINT_MAX_AZN, totalAZN) : totalAZN;
+
         return (
           <Card className="border-primary/30 bg-primary/5" data-testid="card-payment-summary">
             <CardHeader className="pb-3">
@@ -674,6 +688,36 @@ export function BillingSection() {
                 </div>
               </div>
 
+              {/* Split payment notice when total > 800 AZN */}
+              {isSplitNeeded && (
+                <div className="rounded-lg border border-amber-300/60 bg-amber-50 dark:bg-amber-950/30 p-3 space-y-1.5" data-testid="notice-split-payment">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                    <p className="text-xs font-semibold text-amber-800 dark:text-amber-200">
+                      {t('billing.splitNoticeTitle', 'Payment will be split into instalments')}
+                    </p>
+                  </div>
+                  <p className="text-xs text-amber-700 dark:text-amber-300 leading-relaxed">
+                    {t('billing.splitNoticeDesc',
+                      `Total ${totalAZN.toFixed(2)} AZN exceeds the ${EPOINT_MAX_AZN} AZN limit per transaction. It will be charged in ${splitCount} instalments of up to ${EPOINT_MAX_AZN} AZN each.`
+                        .replace('{{total}}', totalAZN.toFixed(2))
+                        .replace('{{max}}', String(EPOINT_MAX_AZN))
+                        .replace('{{count}}', String(splitCount))
+                    )}
+                  </p>
+                  <div className="flex flex-wrap gap-1 pt-0.5">
+                    {Array.from({ length: splitCount }).map((_, i) => {
+                      const amt = i < splitCount - 1 ? EPOINT_MAX_AZN : parseFloat((totalAZN - (splitCount - 1) * EPOINT_MAX_AZN).toFixed(2));
+                      return (
+                        <span key={i} className="inline-flex items-center rounded-full bg-amber-100 dark:bg-amber-900/50 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-300">
+                          {i + 1}: {amt.toFixed(0)} ₼
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {!canPay && (
                 <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
                   <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
@@ -692,6 +736,12 @@ export function BillingSection() {
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     {t('billing.loading', 'Processing...')}
+                  </>
+                ) : isSplitNeeded ? (
+                  <>
+                    <CreditCard className="h-4 w-4" />
+                    {t('billing.payFirstInstalment', 'Pay 1st instalment')} — {firstInstalment.toFixed(2)} ₼
+                    <span className="ml-1 text-xs opacity-75">({splitCount} {t('billing.instalments', 'parts')})</span>
                   </>
                 ) : (
                   <>

@@ -448,7 +448,11 @@
     "payWithCard": "Kartla Ödə",
     "paymentSummary": "Ödəniş Xülasəsi",
     "corePlan": "Əsas Plan",
-    "totalMonthly": "Cəmi / ay"
+    "totalMonthly": "Cəmi / ay",
+    "splitNoticeTitle": "Ödəniş hissələrə bölünəcək",
+    "splitNoticeDesc": "Cəmi {{total}} AZN hər əməliyyat üçün {{max}} AZN limitini keçir. {{count}} hissəyə, maksimum {{max}} AZN olmaqla ödəniləcək.",
+    "payFirstInstalment": "1-ci hissəni ödə",
+    "instalments": "hissə"
   },
   "common": {
     "welcome": "Xoş gəldiniz",
