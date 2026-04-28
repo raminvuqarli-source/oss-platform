@@ -6,7 +6,13 @@
     "expired": "Uw proefperiode is verlopen",
     "upgradeNow": "Nu upgraden",
     "upgradePrompt": "Upgrade naar een betaald plan om alle functies te blijven gebruiken",
-    "features": "De proefperiode bevat alle Basic-plan functies"
+    "features": "De proefperiode bevat alle Basic-plan functies",
+    "endingSoon": "⚠️ Nog {{days}} dag(en) proefperiode — account wordt verwijderd!",
+    "deletionWarning": "Als u niet upgradet voor het einde van de proefperiode, wordt uw account permanent verwijderd.",
+    "renewalSoon": "🔔 Uw abonnement wordt verlengd over {{days}} dag(en)",
+    "nextBilling": "Volgende factuurdatum: {{date}}",
+    "renewalAutomatic": "Automatische verlenging actief.",
+    "billingDetails": "Betalingsgegevens"
   },
   "welcome": {
     "title": "Slim Hospitalityplatform",

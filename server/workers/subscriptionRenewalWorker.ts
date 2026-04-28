@@ -7,7 +7,7 @@ import crypto from "crypto";
 import { logger } from "../utils/logger";
 import { enqueuePaymentRetry, type PaymentRetryJobData } from "./paymentRetryWorker";
 import {
-  checkTrialEndingSubscriptions,
+  checkEndingSubscriptions,
   sendSubscriptionSuspendedNotification,
 } from "../services/billingEmailService";
 
@@ -36,11 +36,26 @@ async function processRenewal(sub: any): Promise<void> {
   if (sub.status === "trial") {
     const trialEnd = sub.trialEndsAt || sub.currentPeriodEnd;
     if (trialEnd && new Date(trialEnd) <= new Date()) {
-      renewalLogger.info({ subId, ownerId }, "Trial ended — expiring (no auto-renewal for trials)");
-      await storage.updateSubscription(subId, {
-        status: "expired",
-        isActive: false,
-      });
+      renewalLogger.info({ subId, ownerId }, "Trial ended — auto-deleting account");
+      try {
+        // Resolve owner email before deletion for the abuse-prevention log
+        const ownerInfo = await storage.getOwner(ownerId);
+        const ownerUsers = await storage.getUsersByOwner(ownerId, sub.tenantId || ownerId);
+        const ownerAdmin = ownerUsers.find((u: any) => u.role === "owner_admin");
+        const ownerEmail = ownerAdmin?.email || ownerInfo?.email || "";
+        const hotelName = ownerInfo?.name || ownerInfo?.email || "";
+        // Log to abuse-prevention table before deletion
+        if (ownerEmail) {
+          await storage.logDeletedTrialAccount(ownerEmail, hotelName, "trial_expired");
+          renewalLogger.info({ ownerId, email: ownerEmail }, "Logged deleted trial account");
+        }
+        // Delete the entire owner account and all related data
+        await storage.deleteOwnerAccount(ownerId);
+        renewalLogger.info({ ownerId }, "Trial account fully deleted");
+      } catch (delErr: any) {
+        renewalLogger.error({ err: delErr.message, ownerId }, "Failed to delete trial account — marking expired instead");
+        await storage.updateSubscription(subId, { status: "expired", isActive: false });
+      }
     }
     return;
   }
@@ -227,9 +242,9 @@ async function checkSubscriptions(): Promise<void> {
   renewalLogger.info("Running daily subscription renewal check");
 
   try {
-    await checkTrialEndingSubscriptions();
+    await checkEndingSubscriptions();
   } catch (err: any) {
-    renewalLogger.error({ err: err.message }, "Trial ending email check failed — continuing with renewals");
+    renewalLogger.error({ err: err.message }, "Ending subscriptions check failed — continuing with renewals");
   }
 
   try {

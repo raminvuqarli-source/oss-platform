@@ -6,7 +6,13 @@
     "expired": "Ihre Testphase ist abgelaufen",
     "upgradeNow": "Jetzt upgraden",
     "upgradePrompt": "Upgraden Sie auf einen kostenpflichtigen Plan, um alle Funktionen weiter zu nutzen",
-    "features": "Die Testphase umfasst alle Basic-Plan-Funktionen"
+    "features": "Die Testphase umfasst alle Basic-Plan-Funktionen",
+    "endingSoon": "⚠️ Noch {{days}} Tag(e) im Testzeitraum — Konto wird gelöscht!",
+    "deletionWarning": "Wenn Sie nicht upgraden, bevor der Testzeitraum endet, wird Ihr Konto dauerhaft gelöscht.",
+    "renewalSoon": "🔔 Ihr Abonnement verlängert sich in {{days}} Tag(en)",
+    "nextBilling": "Nächstes Rechnungsdatum: {{date}}",
+    "renewalAutomatic": "Automatische Verlängerung ist aktiv.",
+    "billingDetails": "Rechnungsdetails"
   },
   "welcome": {
     "title": "Intelligente Hospitality-Plattform",

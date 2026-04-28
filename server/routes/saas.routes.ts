@@ -232,23 +232,38 @@ export function registerSaasRoutes(app: Express): void {
       if (!sub) return res.status(403).json({ error: "PLAN_LIMIT", message: "No active subscription found." });
 
       const isTrial = sub.planType === "trial";
+      const subStatus = (sub as any).status || "active";
       let remainingDays = 0;
       let isExpired = false;
+      let daysUntilRenewal: number | null = null;
+      let nextBillingDate: string | null = null;
+
+      const now = new Date();
 
       if (isTrial && sub.trialEndsAt) {
-        const now = new Date();
-        const diff = sub.trialEndsAt.getTime() - now.getTime();
+        const diff = new Date(sub.trialEndsAt).getTime() - now.getTime();
         remainingDays = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
         isExpired = diff <= 0;
+      } else if (!isTrial && (sub as any).currentPeriodEnd) {
+        const periodEnd = new Date((sub as any).currentPeriodEnd);
+        const diff = periodEnd.getTime() - now.getTime();
+        daysUntilRenewal = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+        nextBillingDate = periodEnd.toISOString();
+        if (diff <= 0) isExpired = true;
       }
 
       res.json({
         planType: sub.planType,
+        planCode: (sub as any).planCode,
+        status: subStatus,
         isTrial,
         trialEndsAt: sub.trialEndsAt,
         remainingDays,
         isExpired,
         isActive: sub.isActive,
+        daysUntilRenewal,
+        nextBillingDate,
+        autoRenew: (sub as any).autoRenew ?? true,
       });
     } catch (error) {
       logger.error({ err: error }, "Failed to get subscription status");

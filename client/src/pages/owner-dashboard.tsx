@@ -4810,11 +4810,16 @@ export default function OwnerDashboard() {
 
   const { data: trialStatus } = useQuery<{
     planType: string;
+    planCode: string;
+    status: string;
     isTrial: boolean;
     trialEndsAt: string | null;
     remainingDays: number;
     isExpired: boolean;
     isActive: boolean;
+    daysUntilRenewal: number | null;
+    nextBillingDate: string | null;
+    autoRenew: boolean;
   }>({
     queryKey: ["/api/subscription/status"],
     enabled: !!user,
@@ -4893,11 +4898,12 @@ export default function OwnerDashboard() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto" data-testid="owner-dashboard">
+      {/* Trial countdown banner */}
       {trialStatus?.isTrial && (
         <Card
           className={trialStatus.isExpired
             ? "border-destructive bg-destructive/5"
-            : trialStatus.remainingDays <= 3
+            : trialStatus.remainingDays <= 5
               ? "border-yellow-500 bg-yellow-500/5"
               : "border-blue-500 bg-blue-500/5"
           }
@@ -4907,6 +4913,8 @@ export default function OwnerDashboard() {
             <div className="flex items-center gap-3">
               {trialStatus.isExpired ? (
                 <AlertTriangle className="h-5 w-5 text-destructive shrink-0" />
+              ) : trialStatus.remainingDays <= 5 ? (
+                <AlertTriangle className="h-5 w-5 text-yellow-500 shrink-0" />
               ) : (
                 <Clock className="h-5 w-5 text-blue-500 shrink-0" />
               )}
@@ -4914,23 +4922,57 @@ export default function OwnerDashboard() {
                 <p className="font-medium text-sm">
                   {trialStatus.isExpired
                     ? t("trial.expired")
-                    : t("trial.banner")}
+                    : trialStatus.remainingDays <= 5
+                      ? t("trial.endingSoon", { days: trialStatus.remainingDays, defaultValue: `⚠️ ${trialStatus.remainingDays} gün sınaq qalıb — hesabınız silinəcək!` })
+                      : t("trial.banner")}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {trialStatus.isExpired
                     ? t("trial.upgradePrompt")
                     : trialStatus.remainingDays <= 1
                       ? t("trial.lastDay")
-                      : t("trial.daysRemaining", { days: trialStatus.remainingDays })}
+                      : trialStatus.remainingDays <= 5
+                        ? t("trial.deletionWarning", { defaultValue: "14 gün bitdikdən sonra ödəniş olmazsa hesabınız tam silinəcək." })
+                        : t("trial.daysRemaining", { days: trialStatus.remainingDays })}
                 </p>
               </div>
             </div>
             <Button
               size="sm"
+              variant={trialStatus.remainingDays <= 5 ? "destructive" : "default"}
               onClick={() => navigate("/owner/billing")}
               data-testid="button-trial-upgrade"
             >
               {t("trial.upgradeNow")}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Paid plan renewal countdown (shown when ≤5 days to renewal) */}
+      {trialStatus && !trialStatus.isTrial && trialStatus.daysUntilRenewal !== null && trialStatus.daysUntilRenewal <= 5 && !trialStatus.isExpired && (
+        <Card className="border-orange-500 bg-orange-500/5" data-testid="renewal-banner">
+          <CardContent className="flex flex-wrap items-center justify-between gap-4 py-3">
+            <div className="flex items-center gap-3">
+              <Clock className="h-5 w-5 text-orange-500 shrink-0" />
+              <div>
+                <p className="font-medium text-sm">
+                  {t("trial.renewalSoon", { days: trialStatus.daysUntilRenewal, defaultValue: `🔔 Abunəliyiniz ${trialStatus.daysUntilRenewal} gündən sonra yenilənəcək` })}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {trialStatus.nextBillingDate
+                    ? t("trial.nextBilling", { date: new Date(trialStatus.nextBillingDate).toLocaleDateString(), defaultValue: `Növbəti ödəniş: ${new Date(trialStatus.nextBillingDate).toLocaleDateString()}` })
+                    : t("trial.renewalAutomatic", { defaultValue: "Avtomatik yenilənmə aktiv." })}
+                </p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => navigate("/owner/billing")}
+              data-testid="button-billing-details"
+            >
+              {t("trial.billingDetails", { defaultValue: "Ödəniş məlumatı" })}
             </Button>
           </CardContent>
         </Card>

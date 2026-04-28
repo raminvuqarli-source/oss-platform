@@ -6,7 +6,13 @@
     "expired": "Your trial has expired",
     "upgradeNow": "Upgrade Now",
     "upgradePrompt": "Upgrade to a paid plan to continue using all features",
-    "features": "Trial includes all Basic plan features"
+    "features": "Trial includes all Basic plan features",
+    "endingSoon": "⚠️ Only {{days}} day(s) left in your trial — account will be deleted!",
+    "deletionWarning": "If you don't upgrade before the trial ends, your account will be permanently deleted.",
+    "renewalSoon": "🔔 Your subscription renews in {{days}} day(s)",
+    "nextBilling": "Next billing date: {{date}}",
+    "renewalAutomatic": "Auto-renewal is active.",
+    "billingDetails": "Billing Details"
   },
   "welcome": {
     "title": "Run Your Hotel Like a 5-Star Operation — Automatically",

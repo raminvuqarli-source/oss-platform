@@ -269,13 +269,21 @@ export async function sendRefundApprovedNotification(params: {
   }
 }
 
+const WARNING_DAYS = 5;
+
 export async function checkTrialEndingSubscriptions(): Promise<void> {
-  emailLogger.info("Checking for trial subscriptions ending within 3 days");
+  return checkEndingSubscriptions();
+}
 
+export async function checkEndingSubscriptions(): Promise<void> {
+  emailLogger.info(`Checking for subscriptions ending within ${WARNING_DAYS} days`);
+
+  const now = new Date();
+  const warningDate = new Date(now.getTime() + WARNING_DAYS * 24 * 60 * 60 * 1000);
+  const appUrl = getAppUrl();
+
+  // ---- Trials ending within 5 days ----
   try {
-    const now = new Date();
-    const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
-
     const trialSubs = await db
       .select()
       .from(subscriptions)
@@ -284,28 +292,127 @@ export async function checkTrialEndingSubscriptions(): Promise<void> {
           eq(subscriptions.status, "trial"),
           eq(subscriptions.isActive, true),
           gte(subscriptions.currentPeriodEnd, now),
-          sql`${subscriptions.currentPeriodEnd} <= ${threeDaysFromNow}`
+          sql`${subscriptions.currentPeriodEnd} <= ${warningDate}`
         )
       );
 
-    emailLogger.info({ count: trialSubs.length }, "Trial subscriptions ending within 3 days");
+    emailLogger.info({ count: trialSubs.length }, `Trial subscriptions ending within ${WARNING_DAYS} days`);
 
     for (const sub of trialSubs) {
       try {
         const trialEnd = sub.trialEndsAt || sub.currentPeriodEnd;
         if (!trialEnd) continue;
 
+        const daysLeft = Math.max(1, Math.ceil((new Date(trialEnd).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+
+        // Send email
         await sendTrialEndingNotification({
           ownerId: sub.ownerId,
           tenantId: sub.tenantId,
           trialEndDate: new Date(trialEnd),
           planType: sub.planType || "Trial",
         });
+
+        // Create in-app notification for the owner_admin
+        try {
+          const allUsers = await storage.getUsersByOwner(sub.ownerId, sub.tenantId || sub.ownerId);
+          const ownerUser = allUsers.find((u: any) => u.role === "owner_admin");
+          if (ownerUser) {
+            const dedupKey = `trial_warning_notif:${sub.ownerId}:${new Date(trialEnd).toISOString().slice(0, 10)}`;
+            if (!isDuplicate(dedupKey)) {
+              await storage.createNotification({
+                userId: ownerUser.id,
+                title: `⚠️ Trial ending in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`,
+                message: `Your free trial expires in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}. After expiry your account will be permanently deleted. Upgrade now to keep your data.`,
+                type: "payment",
+                actionUrl: `${appUrl}/owner/billing`,
+                tenantId: sub.tenantId || null,
+              } as any);
+              emailLogger.info({ userId: ownerUser.id, daysLeft }, "Trial warning in-app notification created");
+            }
+          }
+        } catch (notifErr: any) {
+          emailLogger.warn({ err: notifErr.message }, "Failed to create trial warning in-app notification");
+        }
       } catch (err: any) {
         emailLogger.error({ err: err.message, subId: sub.id }, "Failed to send trial ending notification");
       }
     }
   } catch (err: any) {
     emailLogger.error({ err: err.message }, "Trial ending check failed");
+  }
+
+  // ---- Paid subscriptions renewing within 5 days ----
+  try {
+    const paidSubs = await db
+      .select()
+      .from(subscriptions)
+      .where(
+        and(
+          sql`${subscriptions.status} NOT IN ('trial', 'expired', 'suspended')`,
+          eq(subscriptions.isActive, true),
+          sql`${subscriptions.currentPeriodEnd} IS NOT NULL`,
+          gte(subscriptions.currentPeriodEnd, now),
+          sql`${subscriptions.currentPeriodEnd} <= ${warningDate}`
+        )
+      );
+
+    emailLogger.info({ count: paidSubs.length }, `Paid subscriptions renewing within ${WARNING_DAYS} days`);
+
+    for (const sub of paidSubs) {
+      try {
+        const periodEnd = (sub as any).currentPeriodEnd;
+        if (!periodEnd) continue;
+
+        const daysLeft = Math.max(1, Math.ceil((new Date(periodEnd).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+        const endStr = new Date(periodEnd).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+
+        // Send renewal reminder email
+        const dedupKey = `renewal_reminder:${sub.ownerId}:${new Date(periodEnd).toISOString().slice(0, 10)}`;
+        if (!isDuplicate(dedupKey)) {
+          const ownerInfo = await resolveOwnerEmail(sub.ownerId, sub.tenantId);
+          if (ownerInfo) {
+            const planCode = (sub as any).planCode || "CORE_STARTER";
+            const { PLAN_CODE_FEATURES } = await import("@shared/planFeatures");
+            const planConfig = PLAN_CODE_FEATURES[planCode as keyof typeof PLAN_CODE_FEATURES];
+            const planName = planConfig?.displayName || sub.planType || "Subscription";
+            const amountStr = planConfig ? planConfig.priceMonthlyAZN.toFixed(2) : "0.00";
+
+            await sendSubscriptionRenewalEmail({
+              to: ownerInfo.email,
+              ownerName: ownerInfo.name,
+              planName,
+              renewalDate: endStr,
+              amount: amountStr,
+              currency: "AZN",
+            });
+            emailLogger.info({ ownerId: sub.ownerId, daysLeft }, "Paid renewal reminder email sent");
+          }
+
+          // Create in-app notification
+          try {
+            const allUsers = await storage.getUsersByOwner(sub.ownerId, sub.tenantId || sub.ownerId);
+            const ownerUser = allUsers.find((u: any) => u.role === "owner_admin");
+            if (ownerUser) {
+              await storage.createNotification({
+                userId: ownerUser.id,
+                title: `🔔 Subscription renews in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`,
+                message: `Your subscription will automatically renew on ${endStr}. Ensure your payment details are up to date.`,
+                type: "payment",
+                actionUrl: `${appUrl}/owner/billing`,
+                tenantId: sub.tenantId || null,
+              } as any);
+              emailLogger.info({ userId: ownerUser.id, daysLeft }, "Renewal reminder in-app notification created");
+            }
+          } catch (notifErr: any) {
+            emailLogger.warn({ err: notifErr.message }, "Failed to create renewal reminder in-app notification");
+          }
+        }
+      } catch (err: any) {
+        emailLogger.error({ err: err.message, subId: sub.id }, "Failed to send renewal reminder");
+      }
+    }
+  } catch (err: any) {
+    emailLogger.error({ err: err.message }, "Paid renewal reminder check failed");
   }
 }

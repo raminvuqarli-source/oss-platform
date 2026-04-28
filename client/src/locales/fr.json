@@ -6,7 +6,13 @@
     "expired": "Votre période d'essai a expiré",
     "upgradeNow": "Mettre à niveau",
     "upgradePrompt": "Passez à un plan payant pour continuer à utiliser toutes les fonctionnalités",
-    "features": "L'essai inclut toutes les fonctionnalités du plan Basic"
+    "features": "L'essai inclut toutes les fonctionnalités du plan Basic",
+    "endingSoon": "⚠️ Plus que {{days}} jour(s) d'essai — le compte sera supprimé !",
+    "deletionWarning": "Si vous ne passez pas à un plan payant avant la fin de la période d'essai, votre compte sera définitivement supprimé.",
+    "renewalSoon": "🔔 Votre abonnement se renouvelle dans {{days}} jour(s)",
+    "nextBilling": "Prochaine date de facturation : {{date}}",
+    "renewalAutomatic": "Renouvellement automatique actif.",
+    "billingDetails": "Détails de facturation"
   },
   "welcome": {
     "title": "Plateforme Hôtelière Intelligente",

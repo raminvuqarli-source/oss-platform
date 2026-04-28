@@ -224,6 +224,8 @@ import {
   waiterCalls,
   type WaiterCall,
   type InsertWaiterCall,
+  deletedTrialAccounts,
+  type DeletedTrialAccount,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -620,6 +622,10 @@ export interface IStorage {
   createWaiterCall(data: InsertWaiterCall): Promise<WaiterCall>;
   getWaiterCalls(propertyId: string, status?: string): Promise<WaiterCall[]>;
   acknowledgeWaiterCall(id: string, userId: string): Promise<WaiterCall | undefined>;
+  // Deleted trial accounts (abuse prevention)
+  logDeletedTrialAccount(email: string, hotelName?: string | null, reason?: string): Promise<void>;
+  isTrialEmailDeleted(email: string): Promise<boolean>;
+  deleteOwnerAccount(ownerId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3251,6 +3257,36 @@ export class DatabaseStorage implements IStorage {
       .where(eq(waiterCalls.id, id))
       .returning();
     return c;
+  }
+
+  // ===================== DELETED TRIAL ACCOUNTS =====================
+  async logDeletedTrialAccount(email: string, hotelName?: string | null, reason = "trial_expired"): Promise<void> {
+    await db.insert(deletedTrialAccounts).values({ email: email.toLowerCase(), hotelName: hotelName || null, reason });
+  }
+
+  async isTrialEmailDeleted(email: string): Promise<boolean> {
+    const rows = await db.select({ id: deletedTrialAccounts.id }).from(deletedTrialAccounts)
+      .where(eq(deletedTrialAccounts.email, email.toLowerCase()))
+      .limit(1);
+    return rows.length > 0;
+  }
+
+  async deleteOwnerAccount(ownerId: string): Promise<void> {
+    // Delete in safe order to respect FK constraints (child tables first)
+    // Users & sessions
+    await db.delete(users).where(eq(users.ownerId, ownerId));
+    // Subscriptions
+    await db.delete(subscriptions).where(eq(subscriptions.ownerId, ownerId));
+    // Properties (cascade via in-memory list)
+    const props = await db.select({ id: properties.id }).from(properties).where(eq(properties.ownerId, ownerId));
+    for (const prop of props) {
+      await db.delete(units).where(eq(units.propertyId, prop.id));
+      await db.delete(devices).where(eq(devices.propertyId, prop.id));
+      await db.delete(bookings).where(eq(bookings.propertyId, prop.id));
+    }
+    await db.delete(properties).where(eq(properties.ownerId, ownerId));
+    // Owner record last
+    await db.delete(owners).where(eq(owners.id, ownerId));
   }
 }
 

@@ -6,7 +6,13 @@
     "expired": "Sınaq müddətiniz bitib",
     "upgradeNow": "İndi Yüksəldin",
     "upgradePrompt": "Bütün funksiyalardan istifadə etməyə davam etmək üçün ödənişli plana keçin",
-    "features": "Sınaq bütün Əsas plan funksiyalarını əhatə edir"
+    "features": "Sınaq bütün Əsas plan funksiyalarını əhatə edir",
+    "endingSoon": "⚠️ Sınaq müddətinizin bitmisənə {{days}} gün qalıb — hesabınız silinəcək!",
+    "deletionWarning": "Sınaq müddəti bitdikdən sonra ödəniş etməsəniz hesabınız tam silinəcək.",
+    "renewalSoon": "🔔 Abunəliyiniz {{days}} gündən sonra yenilənəcək",
+    "nextBilling": "Növbəti ödəniş tarixi: {{date}}",
+    "renewalAutomatic": "Avtomatik yenilənmə aktiv.",
+    "billingDetails": "Ödəniş məlumatı"
   },
   "welcome": {
     "title": "Ağıllı Qonaqpərvərlik Platforması",

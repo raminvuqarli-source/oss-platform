@@ -6,7 +6,13 @@
     "expired": "Deneme süreniz doldu",
     "upgradeNow": "Şimdi Yükselt",
     "upgradePrompt": "Tüm özellikleri kullanmaya devam etmek için ücretli plana geçin",
-    "features": "Deneme süresi tüm Temel plan özelliklerini içerir"
+    "features": "Deneme süresi tüm Temel plan özelliklerini içerir",
+    "endingSoon": "⚠️ Deneme sürenizde {{days}} gün kaldı — hesabınız silinecek!",
+    "deletionWarning": "Deneme süresi dolmadan ödeme yapmazsanız hesabınız kalıcı olarak silinecektir.",
+    "renewalSoon": "🔔 Aboneliğiniz {{days}} gün içinde yenilenecek",
+    "nextBilling": "Sonraki fatura tarihi: {{date}}",
+    "renewalAutomatic": "Otomatik yenileme aktif.",
+    "billingDetails": "Ödeme Detayları"
   },
   "welcome": {
     "title": "Akıllı Konaklama Platformu",

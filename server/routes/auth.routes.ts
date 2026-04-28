@@ -820,15 +820,25 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
       ) as Record<string, PlanType>;
       const resolvedPlanType: PlanType = CODE_TO_PLAN_TYPE[resolvedPlanCode] || "starter";
 
+      // Check if this email previously had a trial that was deleted (abuse prevention)
+      const registrantEmail = (email || hotelData.email || "").toLowerCase();
+      const isAbuseEmail = registrantEmail ? await storage.isTrialEmailDeleted(registrantEmail) : false;
+
       const trialEndsAt = new Date();
-      trialEndsAt.setDate(trialEndsAt.getDate() + 14);
+      if (!isAbuseEmail) {
+        trialEndsAt.setDate(trialEndsAt.getDate() + 14);
+      }
+      // If abuse detected: subscription starts as "active" (paid required immediately) with no trial
+      const planType: PlanType = isAbuseEmail ? resolvedPlanType : "trial";
       const planDefaults = applyPlanFeatures(resolvedPlanType);
       await storage.createSubscription({
         ownerId: owner.id,
-        planType: "trial",
+        planType,
         planCode: resolvedPlanCode,
         ...planDefaults,
-        trialEndsAt,
+        trialEndsAt: isAbuseEmail ? null : trialEndsAt,
+        isActive: !isAbuseEmail, // Abuse accounts start inactive, must pay first
+        ...(isAbuseEmail ? { status: "expired" } : {}),
       });
 
       const hotel = await storage.createHotel({

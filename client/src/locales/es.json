@@ -6,7 +6,13 @@
     "expired": "Tu período de prueba ha expirado",
     "upgradeNow": "Actualizar ahora",
     "upgradePrompt": "Actualiza a un plan de pago para seguir usando todas las funciones",
-    "features": "La prueba incluye todas las funciones del plan Básico"
+    "features": "La prueba incluye todas las funciones del plan Básico",
+    "endingSoon": "⚠️ Quedan {{days}} día(s) de prueba — ¡la cuenta será eliminada!",
+    "deletionWarning": "Si no actualiza antes de que termine el período de prueba, su cuenta será eliminada permanentemente.",
+    "renewalSoon": "🔔 Su suscripción se renueva en {{days}} día(s)",
+    "nextBilling": "Próxima fecha de facturación: {{date}}",
+    "renewalAutomatic": "Renovación automática activa.",
+    "billingDetails": "Detalles de facturación"
   },
   "welcome": {
     "title": "Plataforma de Hospitalidad Inteligente",

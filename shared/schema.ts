@@ -2330,3 +2330,13 @@ export const waiterCalls = pgTable("waiter_calls", {
 export const insertWaiterCallSchema = createInsertSchema(waiterCalls).omit({ id: true, calledAt: true });
 export type InsertWaiterCall = z.infer<typeof insertWaiterCallSchema>;
 export type WaiterCall = typeof waiterCalls.$inferSelect;
+
+// Deleted trial accounts — tracks emails/hotel names to prevent re-trial abuse
+export const deletedTrialAccounts = pgTable("deleted_trial_accounts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: varchar("email").notNull(),
+  hotelName: varchar("hotel_name"),
+  deletedAt: timestamp("deleted_at").defaultNow(),
+  reason: varchar("reason").default("trial_expired"),
+});
+export type DeletedTrialAccount = typeof deletedTrialAccounts.$inferSelect;
