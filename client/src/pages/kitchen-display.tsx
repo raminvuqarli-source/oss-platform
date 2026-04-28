@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ChefHat, Bell, Clock, CheckCircle2, RefreshCw, MapPin, BedDouble, UtensilsCrossed } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 type PosOrderItem = {
   id: string;
@@ -48,6 +49,7 @@ const STATUS_HEADER_COLORS: Record<string, string> = {
 };
 
 export default function KitchenDisplay() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -95,8 +97,8 @@ export default function KitchenDisplay() {
   function OrderCard({ order }: { order: PosOrder }) {
     const isDineIn = order.orderType === "dine_in" || !!order.tableNumber;
     const locationLabel = isDineIn
-      ? (order.tableNumber ? `Masa ${order.tableNumber}` : "Restoran")
-      : (order.roomNumber ? `Otaq ${order.roomNumber}` : "Otağa çatdırılma");
+      ? (order.tableNumber ? `${t('restaurant.table')} ${order.tableNumber}` : t('restaurant.restaurantLabel'))
+      : (order.roomNumber ? `${t('restaurant.room')} ${order.roomNumber}` : t('restaurant.roomDeliveryLabel'));
 
     return (
       <Card
@@ -126,9 +128,9 @@ export default function KitchenDisplay() {
               order.kitchenStatus === "ready" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200" :
               "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400"
             }`}>
-              {order.kitchenStatus === "pending" ? "⏳ GÖZLƏNİLİR" :
-               order.kitchenStatus === "cooking" ? "🔥 BİŞİRİLİR" :
-               order.kitchenStatus === "ready" ? "✅ HAZIRDIR" : "ÇATDIRILDI"}
+              {order.kitchenStatus === "pending" ? `⏳ ${t('restaurant.statusPending').toUpperCase()}` :
+               order.kitchenStatus === "cooking" ? `🔥 ${t('restaurant.statusCooking').toUpperCase()}` :
+               order.kitchenStatus === "ready" ? `✅ ${t('restaurant.statusReady').toUpperCase()}` : "✓"}
             </span>
           </div>
           <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
@@ -184,7 +186,7 @@ export default function KitchenDisplay() {
                 data-testid={`button-start-cooking-${order.id}`}
               >
                 <ChefHat className="h-3.5 w-3.5 mr-1.5" />
-                🔥 Bişirməyə Başla
+                {t('restaurant.startCooking')}
               </Button>
             )}
             {order.kitchenStatus === "cooking" && (
@@ -196,12 +198,12 @@ export default function KitchenDisplay() {
                 data-testid={`button-mark-ready-${order.id}`}
               >
                 <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-                ✅ Hazırdır — Qarsonu Çağır
+                {t('restaurant.markReady')}
               </Button>
             )}
             {order.kitchenStatus === "ready" && (
               <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 w-full justify-center py-2 text-sm">
-                ✅ Hazırdır — Qarson gözlənilir
+                {t('restaurant.waiterNotified')}
               </Badge>
             )}
           </div>
@@ -213,7 +215,7 @@ export default function KitchenDisplay() {
   return (
     <>
       <Helmet>
-        <title>Mətbəx Ekranı (KDS) | O.S.S</title>
+        <title>{t('restaurant.kitchenDisplay')} | O.S.S</title>
       </Helmet>
       <div className="min-h-screen bg-slate-900 text-white p-4">
         <div className="max-w-7xl mx-auto">
@@ -224,23 +226,23 @@ export default function KitchenDisplay() {
                 <ChefHat className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">Mətbəx Ekranı</h1>
-                <p className="text-sm text-slate-400">Canlı sifariş idarəetməsi</p>
+                <h1 className="text-2xl font-bold text-white">{t('restaurant.kitchenDisplay')}</h1>
+                <p className="text-sm text-slate-400">{t('restaurant.orderDialogDesc')}</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
               <div className="flex gap-5 text-center">
                 <div>
                   <p className="text-2xl font-bold text-amber-400" data-testid="text-pending-count">{pending.length}</p>
-                  <p className="text-xs text-slate-400">Gözlənilir</p>
+                  <p className="text-xs text-slate-400">{t('restaurant.statusPending')}</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-blue-400" data-testid="text-cooking-count">{cooking.length}</p>
-                  <p className="text-xs text-slate-400">Bişirilir</p>
+                  <p className="text-xs text-slate-400">{t('restaurant.statusCooking')}</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-emerald-400" data-testid="text-ready-count">{ready.length}</p>
-                  <p className="text-xs text-slate-400">Hazırdır</p>
+                  <p className="text-xs text-slate-400">{t('restaurant.statusReady')}</p>
                 </div>
               </div>
               <Button
@@ -251,7 +253,7 @@ export default function KitchenDisplay() {
                 data-testid="button-refresh-orders"
               >
                 <RefreshCw className="h-4 w-4 mr-1" />
-                Yenilə
+                {t('common.refresh', 'Refresh')}
               </Button>
             </div>
           </div>
@@ -260,9 +262,9 @@ export default function KitchenDisplay() {
           {!isLoading && active.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
               {[
-                { label: "⏳ GÖZLƏNİLİR", count: pending.length, color: "text-amber-400 border-amber-600" },
-                { label: "🔥 BİŞİRİLİR", count: cooking.length, color: "text-blue-400 border-blue-600" },
-                { label: "✅ HAZIRDIR", count: ready.length, color: "text-emerald-400 border-emerald-600" },
+                { label: `⏳ ${t('restaurant.statusPending').toUpperCase()}`, count: pending.length, color: "text-amber-400 border-amber-600" },
+                { label: `🔥 ${t('restaurant.statusCooking').toUpperCase()}`, count: cooking.length, color: "text-blue-400 border-blue-600" },
+                { label: `✅ ${t('restaurant.statusReady').toUpperCase()}`, count: ready.length, color: "text-emerald-400 border-emerald-600" },
               ].map(col => (
                 <div key={col.label} className={`text-center py-2 rounded-lg border ${col.color} bg-slate-800/50`}>
                   <span className={`text-sm font-bold ${col.color.split(" ")[0]}`}>{col.label}</span>
@@ -281,8 +283,8 @@ export default function KitchenDisplay() {
           ) : active.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-slate-500">
               <ChefHat className="h-16 w-16 mb-4 opacity-30" />
-              <p className="text-xl font-medium">Aktiv sifariş yoxdur</p>
-              <p className="text-sm">Yeni sifarişlər avtomatik görünəcək</p>
+              <p className="text-xl font-medium">{t('restaurant.noMenuAvailable', 'No active orders')}</p>
+              <p className="text-sm">{t('common.autoRefresh', 'New orders will appear automatically')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

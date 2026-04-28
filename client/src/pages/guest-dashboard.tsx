@@ -391,9 +391,9 @@ export default function GuestDashboard() {
       setSelectedMenuItems({});
       setOrderFoodOpen(false);
       setTableNumber("");
-      toast({ title: "Sifariş verildi!", description: "Mətbəx sifarişinizi aldı." });
+      toast({ title: t('restaurant.orderPlaced'), description: t('restaurant.orderPlacedDesc') });
     },
-    onError: () => toast({ title: "Sifariş vermək alınmadı", variant: "destructive" }),
+    onError: () => toast({ title: t('restaurant.orderFailed'), variant: "destructive" }),
   });
 
   const handlePlaceOrder = () => {
@@ -1353,7 +1353,7 @@ export default function GuestDashboard() {
             <div className="p-1.5 bg-orange-500 rounded-lg">
               <UtensilsCrossed className="h-4 w-4 text-white" />
             </div>
-            <CardTitle className="text-base">Restoran Xidmətləri</CardTitle>
+            <CardTitle className="text-base">{t('restaurant.title')}</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -1367,7 +1367,7 @@ export default function GuestDashboard() {
               data-testid="button-call-waiter"
             >
               <Bell className="h-5 w-5 text-orange-500" />
-              <span className="text-xs font-medium">Qarson Çağır</span>
+              <span className="text-xs font-medium">{t('restaurant.callWaiter')}</span>
             </Button>
             <Button
               className="h-14 flex-col gap-1 bg-orange-500 hover:bg-orange-600 text-white"
@@ -1375,14 +1375,14 @@ export default function GuestDashboard() {
               data-testid="button-order-food"
             >
               <UtensilsCrossed className="h-5 w-5" />
-              <span className="text-xs font-medium">Yemək Sifariş Et</span>
+              <span className="text-xs font-medium">{t('restaurant.orderFood')}</span>
             </Button>
           </div>
 
           {/* Menu preview — top available items */}
           {restaurantMenu && restaurantMenu.items.filter(i => i.isAvailable).length > 0 && (
             <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-2">Bu gün menüdə</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-2">{t('restaurant.todayOnMenu')}</p>
               <div className="flex gap-2 flex-wrap">
                 {restaurantMenu.items.filter(i => i.isAvailable).slice(0, 5).map(item => (
                   <button
@@ -1403,7 +1403,7 @@ export default function GuestDashboard() {
                     onClick={() => setOrderFoodOpen(true)}
                     data-testid="button-see-full-menu"
                   >
-                    +{restaurantMenu.items.filter(i => i.isAvailable).length - 5} daha...
+                    {t('restaurant.moreDishes', { count: restaurantMenu.items.filter(i => i.isAvailable).length - 5 })}
                   </button>
                 )}
               </div>
@@ -1421,9 +1421,9 @@ export default function GuestDashboard() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <UtensilsCrossed className="h-5 w-5 text-orange-500" />
-              Yemək Sifariş Et
+              {t('restaurant.orderFood')}
             </DialogTitle>
-            <DialogDescription>Menyudan seçin, sifariş birbaşa mətbəxə göndərilir.</DialogDescription>
+            <DialogDescription>{t('restaurant.orderDialogDesc')}</DialogDescription>
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto space-y-4 pr-1">
@@ -1439,7 +1439,7 @@ export default function GuestDashboard() {
                 data-testid="button-order-type-dine-in"
               >
                 <UtensilsCrossed className="h-4 w-4" />
-                Restoranda yemək
+                {t('restaurant.dineIn')}
               </button>
               <button
                 className={`p-3 rounded-xl border-2 text-sm font-medium flex flex-col items-center gap-1 transition-all ${
@@ -1451,29 +1451,29 @@ export default function GuestDashboard() {
                 data-testid="button-order-type-room-delivery"
               >
                 <Bell className="h-4 w-4" />
-                Otağa çatdırılma
+                {t('restaurant.roomDelivery')}
               </button>
             </div>
 
             {/* Table number input for dine-in */}
             {orderType === "dine_in" && (
               <div className="space-y-1.5">
-                <Label htmlFor="table-number">Masa nömrəsi</Label>
+                <Label htmlFor="table-number">{t('restaurant.tableNumber')}</Label>
                 <Input
                   id="table-number"
-                  placeholder="Məs: 5, A3, VIP..."
+                  placeholder={t('restaurant.tableNumberPlaceholder')}
                   value={tableNumber}
                   onChange={(e) => setTableNumber(e.target.value)}
                   data-testid="input-table-number"
                   className="text-sm"
                 />
-                <p className="text-xs text-muted-foreground">Masanızın üzərindəki nömrəni daxil edin.</p>
+                <p className="text-xs text-muted-foreground">{t('restaurant.tableNumberHint')}</p>
               </div>
             )}
             {orderType === "room_delivery" && booking?.roomNumber && (
               <div className="flex items-center gap-2 p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 text-sm text-blue-700 dark:text-blue-300">
                 <Bell className="h-4 w-4 shrink-0" />
-                Otaq {booking.roomNumber}-ə çatdırılacaq
+                {t('restaurant.deliverTo', { room: booking.roomNumber })}
               </div>
             )}
 
@@ -1481,7 +1481,7 @@ export default function GuestDashboard() {
             {!restaurantMenu || restaurantMenu.items.filter(i => i.isAvailable).length === 0 ? (
               <div className="flex flex-col items-center py-8 text-muted-foreground">
                 <UtensilsCrossed className="h-10 w-10 mb-3 opacity-30" />
-                <p>Menü hal-hazırda mövcud deyil</p>
+                <p>{t('restaurant.noMenuAvailable')}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -1541,7 +1541,7 @@ export default function GuestDashboard() {
             <div className="border-t pt-3 mt-2">
               <div className="flex items-center justify-between text-sm mb-3">
                 <span className="text-muted-foreground">
-                  {Object.values(selectedMenuItems).reduce((s, q) => s + q, 0)} məhsul
+                  {t('restaurant.itemCount', { count: Object.values(selectedMenuItems).reduce((s, q) => s + q, 0) })}
                 </span>
                 <span className="font-semibold text-orange-600 dark:text-orange-400">
                   {restaurantMenu
@@ -1555,7 +1555,7 @@ export default function GuestDashboard() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setOrderFoodOpen(false); setSelectedMenuItems({}); setTableNumber(""); }}>Ləğv et</Button>
+            <Button variant="outline" onClick={() => { setOrderFoodOpen(false); setSelectedMenuItems({}); setTableNumber(""); }}>{t('restaurant.cancel')}</Button>
             <Button
               className="bg-orange-500 hover:bg-orange-600 text-white"
               onClick={handlePlaceOrder}
@@ -1563,8 +1563,11 @@ export default function GuestDashboard() {
               data-testid="button-place-order"
             >
               {placeOrderMutation.isPending
-                ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Göndərilir...</>
-                : `Sifariş ver${Object.values(selectedMenuItems).reduce((s, q) => s + q, 0) > 0 ? ` (${Object.values(selectedMenuItems).reduce((s, q) => s + q, 0)})` : ""}`
+                ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{t('restaurant.sending')}</>
+                : (() => {
+                    const cnt = Object.values(selectedMenuItems).reduce((s, q) => s + q, 0);
+                    return cnt > 0 ? `${t('restaurant.placeOrder')} (${cnt})` : t('restaurant.placeOrder');
+                  })()
               }
             </Button>
           </DialogFooter>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,6 +34,7 @@ type Analytics = {
 };
 
 export default function RestaurantManager() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -285,7 +287,7 @@ export default function RestaurantManager() {
             </TabsTrigger>
             <TabsTrigger value="staff" data-testid="tab-manager-staff">
               <Users className="h-4 w-4 mr-1" />
-              Heyət {myRestaurantStaff.length > 0 && `(${myRestaurantStaff.length})`}
+              {t('restaurant.staff')} {myRestaurantStaff.length > 0 && `(${myRestaurantStaff.length})`}
             </TabsTrigger>
           </TabsList>
 
@@ -428,20 +430,20 @@ export default function RestaurantManager() {
           <TabsContent value="staff" className="mt-4 space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-semibold">Restoran Heyəti</h3>
-                <p className="text-sm text-muted-foreground">Qarson, mətbəx işçisi, restoran müdiri</p>
+                <h3 className="font-semibold">{t('restaurant.restaurantStaff')}</h3>
+                <p className="text-sm text-muted-foreground">{t('restaurant.restaurantStaffDesc')}</p>
               </div>
               <Button size="sm" onClick={() => setShowAddStaffDialog(true)} data-testid="button-add-restaurant-staff">
                 <UserPlus className="h-4 w-4 mr-1.5" />
-                İşçi Əlavə Et
+                {t('restaurant.addStaff')}
               </Button>
             </div>
 
             {myRestaurantStaff.length === 0 ? (
               <div className="flex flex-col items-center py-12 text-muted-foreground">
                 <Users className="h-12 w-12 mb-3 opacity-30" />
-                <p className="font-medium">Restoran işçisi yoxdur</p>
-                <p className="text-sm">Qarson, mətbəx işçisi və ya müdir əlavə edin</p>
+                <p className="font-medium">{t('restaurant.noStaff')}</p>
+                <p className="text-sm">{t('restaurant.noStaffHint')}</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -458,9 +460,9 @@ export default function RestaurantManager() {
                     </div>
                     <Badge variant="secondary" className="shrink-0">
                       <Shield className="h-3 w-3 mr-1" />
-                      {member.role === "waiter" ? "Qarson" :
-                       member.role === "kitchen_staff" ? "Mətbəx" :
-                       member.role === "restaurant_manager" ? "Müdir" : member.role}
+                      {member.role === "waiter" ? t('restaurant.waiter') :
+                       member.role === "kitchen_staff" ? t('restaurant.kitchenStaff') :
+                       member.role === "restaurant_manager" ? t('restaurant.manager') : member.role}
                     </Badge>
                   </div>
                 ))}
@@ -551,64 +553,64 @@ export default function RestaurantManager() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <UserPlus className="h-5 w-5" />
-              Restoran İşçisi Əlavə Et
+              {t('restaurant.addStaffTitle')}
             </DialogTitle>
-            <DialogDescription>Qarson, mətbəx işçisi və ya restoran müdiri yaradın.</DialogDescription>
+            <DialogDescription>{t('restaurant.addStaffDesc')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label htmlFor="rs-fullname">Ad Soyad *</Label>
-              <Input id="rs-fullname" placeholder="Əli Əliyev" value={staffForm.fullName}
+              <Label htmlFor="rs-fullname">{t('restaurant.fullName')} *</Label>
+              <Input id="rs-fullname" placeholder="Ali Aliyev" value={staffForm.fullName}
                 onChange={e => setStaffForm(f => ({ ...f, fullName: e.target.value }))}
                 data-testid="input-rs-fullname" />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="rs-username">İstifadəçi adı *</Label>
+              <Label htmlFor="rs-username">{t('restaurant.username')} *</Label>
               <Input id="rs-username" placeholder="ali.aliyev" value={staffForm.username}
                 onChange={e => setStaffForm(f => ({ ...f, username: e.target.value }))}
                 data-testid="input-rs-username" />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="rs-password">Şifrə *</Label>
+              <Label htmlFor="rs-password">{t('restaurant.password')} *</Label>
               <Input id="rs-password" type="password" placeholder="••••••••" value={staffForm.password}
                 onChange={e => setStaffForm(f => ({ ...f, password: e.target.value }))}
                 data-testid="input-rs-password" />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="rs-email">E-poçt</Label>
+              <Label htmlFor="rs-email">{t('restaurant.email')}</Label>
               <Input id="rs-email" type="email" placeholder="ali@hotel.com" value={staffForm.email}
                 onChange={e => setStaffForm(f => ({ ...f, email: e.target.value }))}
                 data-testid="input-rs-email" />
             </div>
             <div className="space-y-1.5">
-              <Label>Vəzifə *</Label>
+              <Label>{t('restaurant.roleLabel')} *</Label>
               <Select value={staffForm.role} onValueChange={v => setStaffForm(f => ({ ...f, role: v }))}>
                 <SelectTrigger data-testid="select-rs-role">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="waiter">
-                    <div className="flex items-center gap-2"><Utensils className="h-3.5 w-3.5" />Qarson</div>
+                    <div className="flex items-center gap-2"><Utensils className="h-3.5 w-3.5" />{t('restaurant.waiter')}</div>
                   </SelectItem>
                   <SelectItem value="kitchen_staff">
-                    <div className="flex items-center gap-2"><ChefHat className="h-3.5 w-3.5" />Mətbəx İşçisi</div>
+                    <div className="flex items-center gap-2"><ChefHat className="h-3.5 w-3.5" />{t('restaurant.kitchenStaff')}</div>
                   </SelectItem>
                   <SelectItem value="restaurant_manager">
-                    <div className="flex items-center gap-2"><Users className="h-3.5 w-3.5" />Restoran Müdiri</div>
+                    <div className="flex items-center gap-2"><Users className="h-3.5 w-3.5" />{t('restaurant.manager')}</div>
                   </SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAddStaffDialog(false)}>Ləğv et</Button>
+            <Button variant="outline" onClick={() => setShowAddStaffDialog(false)}>{t('restaurant.cancel')}</Button>
             <Button
               onClick={() => createStaff.mutate(staffForm)}
               disabled={!staffForm.fullName || !staffForm.username || !staffForm.password || createStaff.isPending}
               data-testid="button-submit-rs-staff"
             >
               {createStaff.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Hesab Yarat
+              {t('restaurant.createAccount')}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Bell, Package, CheckCircle2, Clock, Utensils } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { formatDistanceToNow } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 type PosOrder = {
   id: string;
@@ -31,6 +32,7 @@ type WaiterCall = {
 };
 
 export default function WaiterView() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const wsRef = useRef<WebSocket | null>(null);
@@ -49,18 +51,18 @@ export default function WaiterView() {
     mutationFn: (id: string) => apiRequest("PATCH", `/api/restaurant/orders/${id}/deliver`, {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/restaurant/orders"] });
-      toast({ title: "Order marked as delivered" });
+      toast({ title: t('restaurant.markedDelivered') });
     },
-    onError: () => toast({ title: "Failed to update order", variant: "destructive" }),
+    onError: () => toast({ title: t('errors.generic', 'Failed to update order'), variant: "destructive" }),
   });
 
   const acknowledgeCall = useMutation({
     mutationFn: (id: string) => apiRequest("PATCH", `/api/restaurant/waiter-calls/${id}/acknowledge`, {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/restaurant/waiter-calls"] });
-      toast({ title: "Acknowledged" });
+      toast({ title: t('restaurant.acknowledged') });
     },
-    onError: () => toast({ title: "Failed to acknowledge", variant: "destructive" }),
+    onError: () => toast({ title: t('errors.generic', 'Failed to acknowledge'), variant: "destructive" }),
   });
 
   useEffect(() => {
@@ -72,12 +74,12 @@ export default function WaiterView() {
         const msg = JSON.parse(evt.data);
         if (msg.type === "RESTAURANT_ORDER_READY") {
           queryClient.invalidateQueries({ queryKey: ["/api/restaurant/orders"] });
-          toast({ title: `Order ready — Table ${msg.order?.tableNumber || "?"}`, description: "Pick up from kitchen!" });
+          toast({ title: t('restaurant.orderReady', { table: msg.order?.tableNumber || "?" }), description: t('restaurant.pickUpFromKitchen') });
         }
         if (msg.type === "RESTAURANT_CALL_WAITER") {
           queryClient.invalidateQueries({ queryKey: ["/api/restaurant/waiter-calls"] });
           toast({
-            title: `Waiter needed — ${msg.tableNumber ? `Table ${msg.tableNumber}` : msg.roomNumber ? `Room ${msg.roomNumber}` : "Unknown"}`,
+            title: `${t('restaurant.waiterNeeded')} — ${msg.tableNumber ? `${t('restaurant.table')} ${msg.tableNumber}` : msg.roomNumber ? `${t('restaurant.room')} ${msg.roomNumber}` : ""}`,
             description: msg.guestName || undefined,
           });
         }
@@ -92,7 +94,7 @@ export default function WaiterView() {
   return (
     <>
       <Helmet>
-        <title>Waiter View | O.S.S</title>
+        <title>{t('restaurant.waiter', 'Waiter')} | O.S.S</title>
       </Helmet>
       <div className="p-4 max-w-3xl mx-auto space-y-4">
         <div className="flex items-center gap-3">
@@ -100,19 +102,19 @@ export default function WaiterView() {
             <Utensils className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Waiter View</h1>
-            <p className="text-sm text-muted-foreground">Pickup ready orders & respond to calls</p>
+            <h1 className="text-xl font-bold">{t('restaurant.waiter')}</h1>
+            <p className="text-sm text-muted-foreground">{t('restaurant.markReady')}</p>
           </div>
           <div className="ml-auto flex gap-2">
             {readyOrders.length > 0 && (
               <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
-                {readyOrders.length} ready
+                {t('restaurant.readyCount', { count: readyOrders.length })}
               </Badge>
             )}
             {pendingCalls.length > 0 && (
               <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 animate-pulse">
                 <Bell className="h-3 w-3 mr-1" />
-                {pendingCalls.length} calls
+                {pendingCalls.length}
               </Badge>
             )}
           </div>
@@ -122,17 +124,17 @@ export default function WaiterView() {
           <TabsList className="w-full" data-testid="tabs-waiter">
             <TabsTrigger value="orders" className="flex-1" data-testid="tab-orders">
               <Package className="h-4 w-4 mr-1" />
-              Orders
+              {t('restaurant.placeOrder', 'Orders')}
             </TabsTrigger>
             <TabsTrigger value="calls" className="flex-1" data-testid="tab-calls">
               <Bell className="h-4 w-4 mr-1" />
-              Waiter Calls {pendingCalls.length > 0 && `(${pendingCalls.length})`}
+              {t('restaurant.callWaiter')} {pendingCalls.length > 0 && `(${pendingCalls.length})`}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="orders" className="space-y-3 mt-3">
             <div className="flex items-center gap-2 mb-2">
-              <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Ready for Pickup</h2>
+              <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">{t('restaurant.statusReady')}</h2>
             </div>
             {ordersLoading ? (
               <div className="space-y-2">
@@ -141,7 +143,7 @@ export default function WaiterView() {
             ) : readyOrders.length === 0 ? (
               <div className="flex flex-col items-center py-12 text-muted-foreground">
                 <CheckCircle2 className="h-12 w-12 mb-3 opacity-30" />
-                <p>No orders ready for pickup</p>
+                <p>{t('restaurant.noMenuAvailable', 'No orders ready for pickup')}</p>
               </div>
             ) : (
               readyOrders.map(order => (
@@ -149,9 +151,9 @@ export default function WaiterView() {
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base">
-                        {order.tableNumber ? `Table ${order.tableNumber}` : order.guestName || `Order #${order.id.slice(-6).toUpperCase()}`}
+                        {order.tableNumber ? `${t('restaurant.table')} ${order.tableNumber}` : order.guestName || `#${order.id.slice(-6).toUpperCase()}`}
                       </CardTitle>
-                      <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">READY</Badge>
+                      <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">{t('restaurant.statusReady').toUpperCase()}</Badge>
                     </div>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Clock className="h-3 w-3" />
@@ -160,7 +162,7 @@ export default function WaiterView() {
                   </CardHeader>
                   <CardContent>
                     {order.notes && <p className="text-sm text-muted-foreground mb-2 italic">{order.notes}</p>}
-                    <p className="text-sm font-medium mb-3">Total: ${(order.totalCents / 100).toFixed(2)}</p>
+                    <p className="text-sm font-medium mb-3">{(order.totalCents / 100).toFixed(2)} ₼</p>
                     <Button
                       className="w-full"
                       onClick={() => deliverOrder.mutate(order.id)}
@@ -168,7 +170,7 @@ export default function WaiterView() {
                       data-testid={`button-deliver-${order.id}`}
                     >
                       <CheckCircle2 className="h-4 w-4 mr-2" />
-                      Mark Delivered
+                      {t('restaurant.markedDelivered')}
                     </Button>
                   </CardContent>
                 </Card>
@@ -177,12 +179,12 @@ export default function WaiterView() {
 
             {/* All active orders list */}
             <div className="mt-4">
-              <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-2">All Active Orders</h2>
+              <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-2">{t('restaurant.restaurantLabel')}</h2>
               {orders.filter(o => o.kitchenStatus !== "delivered").map(order => (
                 <div key={order.id} className="flex items-center justify-between p-3 rounded-lg border mb-2" data-testid={`row-order-${order.id}`}>
                   <div>
                     <p className="font-medium text-sm">
-                      {order.tableNumber ? `Table ${order.tableNumber}` : order.guestName || `#${order.id.slice(-6).toUpperCase()}`}
+                      {order.tableNumber ? `${t('restaurant.table')} ${order.tableNumber}` : order.guestName || `#${order.id.slice(-6).toUpperCase()}`}
                     </p>
                     <p className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}</p>
                   </div>
@@ -200,7 +202,7 @@ export default function WaiterView() {
             ) : pendingCalls.length === 0 ? (
               <div className="flex flex-col items-center py-12 text-muted-foreground">
                 <Bell className="h-12 w-12 mb-3 opacity-30" />
-                <p>No pending waiter calls</p>
+                <p>{t('restaurant.waiterNeeded', 'No pending waiter calls')}</p>
               </div>
             ) : (
               pendingCalls.map(call => (
@@ -209,7 +211,7 @@ export default function WaiterView() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-semibold">
-                          {call.tableNumber ? `Table ${call.tableNumber}` : call.roomNumber ? `Room ${call.roomNumber}` : "Waiter Requested"}
+                          {call.tableNumber ? `${t('restaurant.table')} ${call.tableNumber}` : call.roomNumber ? `${t('restaurant.room')} ${call.roomNumber}` : t('restaurant.callWaiter')}
                         </p>
                         <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                           <Clock className="h-3 w-3" />
@@ -222,7 +224,7 @@ export default function WaiterView() {
                         disabled={acknowledgeCall.isPending}
                         data-testid={`button-ack-call-${call.id}`}
                       >
-                        Acknowledge
+                        {t('restaurant.acknowledged')}
                       </Button>
                     </div>
                   </CardContent>
