@@ -31,6 +31,7 @@ import { registerRefundRoutes } from "./refund.routes";
 import { registerAiChatRoutes } from "./ai-chat.routes";
 import { registerFolioRoutes } from "./folio.routes";
 import { registerRestaurantRoutes } from "./restaurant.routes";
+import { registerMarketingRoutes } from "./marketing.routes";
 import { initWebSocket } from "../websocket/index";
 import path from "path";
 
@@ -80,6 +81,7 @@ export async function registerRoutes(
   registerAiChatRoutes(app);
   registerFolioRoutes(app);
   registerRestaurantRoutes(app);
+  registerMarketingRoutes(app);
   initWebSocket(httpServer, app);
 
   return httpServer;

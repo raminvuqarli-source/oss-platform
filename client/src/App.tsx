@@ -39,6 +39,7 @@ const BillingPage = lazy(() => import("@/pages/billing"));
 const KitchenDisplay = lazy(() => import("@/pages/kitchen-display"));
 const WaiterView = lazy(() => import("@/pages/waiter-view"));
 const RestaurantManager = lazy(() => import("@/pages/restaurant-manager"));
+const MarketingDashboard = lazy(() => import("@/pages/marketing-dashboard"));
 
 function PageLoader() {
   return (
@@ -120,6 +121,8 @@ function DashboardRouter() {
       return <Redirect to="/restaurant/waiter" />;
     case "restaurant_manager":
       return <Redirect to="/restaurant/manager" />;
+    case "marketing_staff":
+      return <Redirect to="/marketing" />;
     default:
       return <GuestDashboard />;
   }
@@ -134,6 +137,15 @@ function OssAdminProtectedRoute() {
   if (user.role !== "oss_super_admin") return <Redirect to="/dashboard" />;
 
   return <OssAdminDashboard />;
+}
+
+// Marketing Staff route guard
+function MarketingProtectedRoute() {
+  const { user, isLoading } = useAuth();
+  if (isLoading) return <PageLoader />;
+  if (!user) return <Redirect to="/login" />;
+  if (user.role !== "marketing_staff") return <Redirect to="/dashboard" />;
+  return <MarketingDashboard />;
 }
 
 // Auth guard wrapper: redirects unauthenticated users, wraps content in DashboardLayout
@@ -212,6 +224,9 @@ function Router() {
         </Route>
         <Route path="/oss-admin">
           <OssAdminProtectedRoute />
+        </Route>
+        <Route path="/marketing">
+          <MarketingProtectedRoute />
         </Route>
         <Route>
           <AuthFallback />

@@ -251,6 +251,10 @@ export default function OssAdminDashboard() {
               <ClipboardCheck className="h-4 w-4" />
               {t("ossAdmin.board", "Board Panel")}
             </TabsTrigger>
+            <TabsTrigger value="marketing" className="gap-2" data-testid="tab-marketing">
+              <TrendingUp className="h-4 w-4" />
+              {t("ossAdmin.marketing", "Marketing")}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-4">
@@ -458,6 +462,10 @@ export default function OssAdminDashboard() {
 
           <TabsContent value="board" className="space-y-4">
             <BoardPanel />
+          </TabsContent>
+
+          <TabsContent value="marketing" className="space-y-4">
+            <OssMarketingPanel />
           </TabsContent>
 
         </Tabs>
@@ -2033,6 +2041,181 @@ function BoardPanel() {
             <Button onClick={() => createMutation.mutate(formData)} disabled={createMutation.isPending || !formData.reporterName || !formData.region || !formData.title || !formData.content} data-testid="button-submit-report">
               {createMutation.isPending && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
               {t("common.save", "Save")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ─── Marketing Panel ──────────────────────────────────────────────────────────
+interface MarketingUser {
+  id: string;
+  fullName: string;
+  username: string;
+  email: string | null;
+  referralCode: string | null;
+  referredCount: number;
+}
+
+function OssMarketingPanel() {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editCodeId, setEditCodeId] = useState<string | null>(null);
+  const [codeInput, setCodeInput] = useState("");
+  const [form, setForm] = useState({ username: "", password: "", fullName: "", email: "", referralCode: "" });
+
+  const { data: marketingUsers, isLoading } = useQuery<MarketingUser[]>({
+    queryKey: ["/api/oss-admin/marketing-users"],
+  });
+
+  const createMutation = useMutation({
+    mutationFn: async (data: typeof form) => {
+      const res = await apiRequest("POST", "/api/oss-admin/marketing-users", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/oss-admin/marketing-users"] });
+      setCreateOpen(false);
+      setForm({ username: "", password: "", fullName: "", email: "", referralCode: "" });
+      toast({ title: t("common.success"), description: t("ossAdmin.marketing.userCreated", "Marketing staff created") });
+    },
+    onError: (err) => showErrorToast(toast, err),
+  });
+
+  const setCodeMutation = useMutation({
+    mutationFn: async ({ userId, code }: { userId: string; code: string }) => {
+      const res = await apiRequest("PATCH", `/api/oss-admin/marketing-users/${userId}/referral-code`, { referralCode: code });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/oss-admin/marketing-users"] });
+      setEditCodeId(null);
+      setCodeInput("");
+      toast({ title: t("common.success"), description: t("ossAdmin.referralCodeSet", "Referral code updated") });
+    },
+    onError: (err) => showErrorToast(toast, err),
+  });
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>{t("ossAdmin.marketing.title", "Marketing Staff")}</CardTitle>
+              <CardDescription>{t("ossAdmin.marketing.desc", "Create marketing accounts and assign referral codes. Staff log in at /marketing to see their referred hotels.")}</CardDescription>
+            </div>
+            <Button onClick={() => setCreateOpen(true)} data-testid="button-create-marketing-user">
+              <UserPlus className="h-4 w-4 mr-2" />
+              {t("ossAdmin.marketing.addStaff", "Add Staff")}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1, 2].map(i => <Skeleton key={i} className="h-14 w-full" />)}
+            </div>
+          ) : marketingUsers && marketingUsers.length > 0 ? (
+            <div className="divide-y">
+              {marketingUsers.map((u) => (
+                <div key={u.id} className="py-3 space-y-2" data-testid={`marketing-user-row-${u.id}`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{u.fullName}</p>
+                      <p className="text-sm text-muted-foreground">{u.username}{u.email ? ` • ${u.email}` : ""}</p>
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      {u.referredCount} {t("ossAdmin.marketing.hotels", "hotel(s)")}
+                    </Badge>
+                  </div>
+                  {editCodeId === u.id ? (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        className="h-8 text-xs uppercase font-mono w-44"
+                        placeholder={t("ossAdmin.marketing.codePlaceholder", "e.g. RENA")}
+                        value={codeInput}
+                        onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
+                        maxLength={20}
+                        data-testid={`input-marketing-code-${u.id}`}
+                      />
+                      <Button size="sm" className="h-8 text-xs" onClick={() => setCodeMutation.mutate({ userId: u.id, code: codeInput })} disabled={setCodeMutation.isPending} data-testid={`button-save-marketing-code-${u.id}`}>
+                        {setCodeMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : t("common.save")}
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => { setEditCodeId(null); setCodeInput(""); }}>
+                        {t("common.cancel")}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      {u.referralCode ? (
+                        <Badge className="font-mono text-xs bg-primary/10 text-primary border border-primary/20">{u.referralCode}</Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground italic">{t("ossAdmin.noReferralCode", "No referral code")}</span>
+                      )}
+                      <Button size="sm" variant="ghost" className="h-6 text-xs px-2" onClick={() => { setEditCodeId(u.id); setCodeInput(u.referralCode || ""); }} data-testid={`button-edit-marketing-code-${u.id}`}>
+                        ✏️ {u.referralCode ? t("ossAdmin.editCode", "Edit") : t("ossAdmin.setCode", "Set code")}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-10 text-muted-foreground">
+              <Users className="h-10 w-10 mx-auto mb-3 opacity-40" />
+              <p className="text-sm">{t("ossAdmin.marketing.noStaff", "No marketing staff yet")}</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("ossAdmin.marketing.createTitle", "Create Marketing Staff")}</DialogTitle>
+            <DialogDescription>{t("ossAdmin.marketing.createDesc", "Create a login for a marketing team member. They will see only their referred hotels.")}</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="space-y-3">
+              <div>
+                <Label>{t("auth.fullName")} *</Label>
+                <Input value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} data-testid="input-marketing-fullname" />
+              </div>
+              <div>
+                <Label>{t("auth.username")} *</Label>
+                <Input value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} data-testid="input-marketing-username" />
+              </div>
+              <div>
+                <Label>{t("auth.email")}</Label>
+                <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} data-testid="input-marketing-email" />
+              </div>
+              <div>
+                <Label>{t("auth.password")} *</Label>
+                <Input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} data-testid="input-marketing-password" />
+              </div>
+              <div>
+                <Label>{t("ossAdmin.marketing.referralCode", "Referral Code")} <span className="text-muted-foreground text-xs">({t("common.optional", "optional")})</span></Label>
+                <Input
+                  className="uppercase font-mono"
+                  placeholder="e.g. RENA"
+                  value={form.referralCode}
+                  onChange={(e) => setForm({ ...form, referralCode: e.target.value.toUpperCase() })}
+                  maxLength={20}
+                  data-testid="input-marketing-referral-code"
+                />
+                <p className="text-xs text-muted-foreground mt-1">{t("ossAdmin.marketing.codeHint", "You can also set this later")}</p>
+              </div>
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateOpen(false)}>{t("common.cancel")}</Button>
+            <Button onClick={() => createMutation.mutate(form)} disabled={createMutation.isPending || !form.username || !form.password || !form.fullName} data-testid="button-confirm-create-marketing">
+              {createMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              {t("common.create")}
             </Button>
           </DialogFooter>
         </DialogContent>

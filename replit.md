@@ -81,7 +81,7 @@ Preferred communication style: Simple, everyday language.
 - **UI Integration**: Sidebar navigation fully wired for restaurant roles and finance panel integration.
 
 ### Automated Systems
-- **Marketing Referral System**: Tracks referral sources and generates commissions for referring staff members.
+- **Marketing Referral System**: `referral_source`, `referral_staff_id`, `referral_notes` on `owners` table; `referral_commissions` table tracks pending/paid commissions. Registration form captures referral source + optional staff referral code (validated on register). New `marketing_staff` role: OSS super admin creates marketing accounts from **Marketing** tab in admin panel, assigns referral codes; staff log in and land at `/marketing` — dedicated panel showing only their referred hotels, subscription/trial status, and hotel details. APIs: `POST|GET /api/oss-admin/marketing-users`, `PATCH /api/oss-admin/marketing-users/:id/referral-code`, `GET /api/marketing/me|my-hotels|my-commissions`.
 - **Multi-Property Business Entity Check**: Validates that new properties belong to the same legal business entity as the owner.
 - **Password Reset Error Surface**: Improved error handling for `forgot-password` API.
 - **Automated Database Backup**: Daily `pg_dump` backups with retention and monitoring.

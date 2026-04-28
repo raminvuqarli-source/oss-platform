@@ -282,6 +282,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
   createReferralCommission(data: { staffUserId: string; ownerId: string; status: string }): Promise<void>;
+  getReferralCommissionsByStaff(staffUserId: string): Promise<ReferralCommission[]>;
   getAllUsers(tenantId: string): Promise<User[]>;
   getUsersByHotel(hotelId: string, tenantId: string): Promise<User[]>;
   getUsersByOwner(ownerId: string, tenantId: string): Promise<User[]>;
@@ -841,6 +842,10 @@ export class DatabaseStorage implements IStorage {
       ownerId: data.ownerId,
       status: data.status,
     });
+  }
+
+  async getReferralCommissionsByStaff(staffUserId: string): Promise<ReferralCommission[]> {
+    return db.select().from(referralCommissions).where(eq(referralCommissions.staffUserId, staffUserId));
   }
 
   async createUser(user: InsertUser): Promise<User> {
