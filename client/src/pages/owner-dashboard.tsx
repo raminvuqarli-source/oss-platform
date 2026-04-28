@@ -2169,14 +2169,105 @@ function BroadcastMessageDialog({ open, onOpenChange, staffCount }: { open: bool
   );
 }
 
+function InlineStaffChat({ staffId, staffName }: { staffId: string; staffName: string }) {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const [message, setMessage] = useState("");
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const { data: messages, isLoading } = useQuery<any[]>({
+    queryKey: ["/api/chat/staff-dm", staffId],
+    queryFn: async () => {
+      const res = await fetch(`/api/chat/staff-dm/${staffId}`, { credentials: "include" });
+      if (!res.ok) return [];
+      return res.json();
+    },
+    refetchInterval: 5000,
+  });
+
+  const sendMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", `/api/chat/staff-dm/${staffId}`, { message: message.trim() });
+    },
+    onSuccess: () => {
+      setMessage("");
+      queryClient.invalidateQueries({ queryKey: ["/api/chat/staff-dm", staffId] });
+    },
+    onError: () => {
+      toast({ title: t("errors.somethingWentWrong", "Something went wrong"), variant: "destructive" });
+    },
+  });
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="px-4 py-3 border-b flex items-center gap-2 bg-muted/30">
+        <MessageSquare className="h-4 w-4 text-primary" />
+        <span className="font-medium text-sm">{staffName}</span>
+      </div>
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto p-3 space-y-2 min-h-0"
+      >
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <RefreshCw className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : messages && messages.length > 0 ? (
+          messages.map((msg: any) => (
+            <div key={msg.id} className={`flex ${msg.senderId === staffId ? "justify-start" : "justify-end"}`}>
+              <div className={`max-w-[80%] rounded-xl px-3 py-2 text-sm ${msg.senderId === staffId ? "bg-muted" : "bg-primary text-primary-foreground"}`}>
+                <p>{msg.message}</p>
+                <p className="text-[10px] opacity-60 mt-0.5">{new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+            {t("owner.staffMessage.noMessages", "No messages yet. Start the conversation!")}
+          </div>
+        )}
+      </div>
+      <div className="p-3 border-t flex gap-2">
+        <Input
+          placeholder={t("owner.staffMessage.placeholder", "Type a message...")}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          data-testid="input-inline-staff-message"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              if (message.trim()) sendMutation.mutate();
+            }
+          }}
+          className="flex-1"
+        />
+        <Button
+          size="icon"
+          onClick={() => sendMutation.mutate()}
+          disabled={!message.trim() || sendMutation.isPending}
+          data-testid="button-send-inline-message"
+        >
+          <Send className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function StaffManagementView() {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
   const [addStaffPropertyId, setAddStaffPropertyId] = useState<string | null>(null);
-  const [messageStaffId, setMessageStaffId] = useState<string | null>(null);
-  const [messageStaffName, setMessageStaffName] = useState("");
   const [broadcastOpen, setBroadcastOpen] = useState(false);
+  const [activeChatStaffId, setActiveChatStaffId] = useState<string | null>(null);
+  const [activeChatStaffName, setActiveChatStaffName] = useState("");
 
   const { data: staff, isLoading } = useQuery<any[]>({
     queryKey: ["/api/users/staff"],
@@ -2212,13 +2303,19 @@ function StaffManagementView() {
       reception: t("roles.reception", "Reception"),
       staff: t("roles.staff", "Staff"),
       property_manager: t("roles.propertyManager", "Property Manager"),
+      restaurant_manager: "Restaurant Manager",
+      waiter: "Waiter",
+      kitchen_staff: "Kitchen Staff",
     };
     return labels[role] || role;
   };
 
+  const activePropertyId = addStaffPropertyId || allProperties?.[0]?.id || "";
+
   if (isLoading) {
     return (
       <div className="space-y-4">
+        <Skeleton className="h-16 w-full" />
         <Skeleton className="h-10 w-full" />
         <Skeleton className="h-64 w-full" />
       </div>
@@ -2227,6 +2324,56 @@ function StaffManagementView() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h2 className="text-xl font-semibold">{t("nav.staff", "Staff")}</h2>
+          <p className="text-sm text-muted-foreground">{staff?.length || 0} {t("owner.staffManagement.teamMemberCount", "team members")}</p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          {staff && staff.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setBroadcastOpen(true)}
+              data-testid="button-message-all-staff"
+            >
+              <Send className="h-4 w-4 mr-1.5" />
+              {t("owner.broadcast.button", "Message All")}
+            </Button>
+          )}
+          {allProperties && allProperties.length > 1 && (
+            <Select
+              value={activePropertyId}
+              onValueChange={(val) => setAddStaffPropertyId(val)}
+            >
+              <SelectTrigger className="w-[160px]" data-testid="select-staff-property">
+                <SelectValue placeholder={t("owner.selectProperty", "Select property")} />
+              </SelectTrigger>
+              <SelectContent>
+                {allProperties.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          {activePropertyId ? (
+            <AddStaffDialog
+              propertyId={activePropertyId}
+              onSuccess={() => {
+                queryClient.invalidateQueries({ queryKey: ["/api/users/staff"] });
+              }}
+            />
+          ) : (
+            <Button size="sm" disabled variant="outline">
+              <Plus className="h-4 w-4 mr-1.5" />
+              {t("owner.addStaff", "Add Staff")}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-5">
@@ -2236,7 +2383,7 @@ function StaffManagementView() {
               </div>
               <div>
                 <p className="text-2xl font-bold" data-testid="stat-total-staff">{staff?.length || 0}</p>
-                <p className="text-xs text-muted-foreground">{t("nav.staff", "Staff")}</p>
+                <p className="text-xs text-muted-foreground">{t("nav.staff", "Total Staff")}</p>
               </div>
             </div>
           </CardContent>
@@ -2273,58 +2420,34 @@ function StaffManagementView() {
         </Card>
       </div>
 
-      <div className="flex items-center gap-3 flex-wrap">
-        <Input
-          placeholder={t("common.search", "Search") + "..."}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="max-w-xs"
-          data-testid="input-search-staff"
-        />
-        <div className="ml-auto flex items-center gap-2">
-          {staff && staff.length > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setBroadcastOpen(true)}
-              data-testid="button-message-all-staff"
-            >
-              <Send className="h-4 w-4 mr-1.5" />
-              {t("owner.broadcast.button", "Message All")}
-            </Button>
-          )}
-          {allProperties && allProperties.length > 1 && (
-            <Select
-              value={addStaffPropertyId || allProperties[0]?.id || ""}
-              onValueChange={(val) => setAddStaffPropertyId(val)}
-            >
-              <SelectTrigger className="w-[180px]" data-testid="select-staff-property">
-                <SelectValue placeholder={t("owner.selectProperty", "Select property")} />
-              </SelectTrigger>
-              <SelectContent>
-                {allProperties.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-          {allProperties && allProperties.length > 0 && (
-            <AddStaffDialog
-              propertyId={addStaffPropertyId || allProperties[0]?.id || ""}
-              onSuccess={() => {
-                queryClient.invalidateQueries({ queryKey: ["/api/users/staff"] });
-              }}
-            />
-          )}
-        </div>
-      </div>
+      {/* Search */}
+      <Input
+        placeholder={t("common.search", "Search staff") + "..."}
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="max-w-sm"
+        data-testid="input-search-staff"
+      />
 
+      {/* Staff list */}
       {filteredStaff.length === 0 ? (
         <Card>
-          <CardContent className="p-12 text-center">
-            <Users className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-40" />
-            <p className="font-semibold text-lg">{t("owner.noStaffYet", "No staff members yet")}</p>
-            <p className="text-sm text-muted-foreground mt-1">{t("owner.addStaffToStart", "Add staff members from your property settings")}</p>
+          <CardContent className="p-12 text-center space-y-4">
+            <Users className="h-16 w-16 mx-auto text-muted-foreground opacity-40" />
+            <div>
+              <p className="font-semibold text-lg">{t("owner.noStaffYet", "No staff members yet")}</p>
+              <p className="text-sm text-muted-foreground mt-1">{t("owner.addStaffToStart", "Add your first team member to get started")}</p>
+            </div>
+            {activePropertyId && (
+              <div className="flex justify-center">
+                <AddStaffDialog
+                  propertyId={activePropertyId}
+                  onSuccess={() => {
+                    queryClient.invalidateQueries({ queryKey: ["/api/users/staff"] });
+                  }}
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
       ) : (
@@ -2358,17 +2481,24 @@ function StaffManagementView() {
                     )}
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant={activeChatStaffId === member.id ? "default" : "outline"}
                       className="ml-1"
                       data-testid={`button-message-staff-${member.id}`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        setMessageStaffId(member.id);
-                        setMessageStaffName(member.fullName || member.username || "Staff");
+                        if (activeChatStaffId === member.id) {
+                          setActiveChatStaffId(null);
+                          setActiveChatStaffName("");
+                        } else {
+                          setActiveChatStaffId(member.id);
+                          setActiveChatStaffName(member.fullName || member.username || "Staff");
+                        }
                       }}
                     >
                       <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
-                      {t("owner.staffMessage.button", "Message")}
+                      {activeChatStaffId === member.id
+                        ? t("owner.staffMessage.chatOpen", "Chat Open")
+                        : t("owner.staffMessage.button", "Message")}
                     </Button>
                   </div>
                 </div>
@@ -2378,14 +2508,77 @@ function StaffManagementView() {
         </div>
       )}
 
-      {messageStaffId && (
-        <StaffMessageDialog
-          staffId={messageStaffId}
-          staffName={messageStaffName}
-          open={!!messageStaffId}
-          onOpenChange={(open) => { if (!open) { setMessageStaffId(null); setMessageStaffName(""); } }}
-        />
-      )}
+      {/* Staff Messaging Panel */}
+      <Card data-testid="card-staff-messaging">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5 text-primary" />
+              <CardTitle className="text-base">{t("owner.staffMessaging.title", "Staff Messaging")}</CardTitle>
+            </div>
+            {staff && staff.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setBroadcastOpen(true)}
+                data-testid="button-broadcast-message"
+              >
+                <Send className="h-3.5 w-3.5 mr-1.5" />
+                {t("owner.broadcast.button", "Broadcast")}
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          {!staff || staff.length === 0 ? (
+            <div className="p-8 text-center text-sm text-muted-foreground">
+              <MessageSquare className="h-10 w-10 mx-auto mb-3 opacity-30" />
+              <p>{t("owner.staffMessaging.noStaff", "Add staff members to start messaging")}</p>
+            </div>
+          ) : (
+            <div className="flex border-t" style={{ height: "420px" }}>
+              {/* Left: staff list */}
+              <div className="w-56 border-r flex-shrink-0 overflow-y-auto">
+                {staff.map((member: any) => (
+                  <button
+                    key={member.id}
+                    onClick={() => {
+                      setActiveChatStaffId(member.id);
+                      setActiveChatStaffName(member.fullName || member.username || "Staff");
+                    }}
+                    data-testid={`button-chat-staff-${member.id}`}
+                    className={`w-full flex items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-muted/50 border-b last:border-b-0 ${activeChatStaffId === member.id ? "bg-primary/10 border-l-2 border-l-primary" : ""}`}
+                  >
+                    <Avatar className="h-8 w-8 flex-shrink-0">
+                      <AvatarImage src={member.avatarUrl} />
+                      <AvatarFallback className="text-xs">{member.fullName?.charAt(0) || "S"}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">{member.fullName || member.username}</p>
+                      <p className="text-xs text-muted-foreground truncate">{getRoleLabel(member.role)}</p>
+                    </div>
+                    {member.isOnline && (
+                      <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
+                    )}
+                  </button>
+                ))}
+              </div>
+              {/* Right: chat */}
+              <div className="flex-1 min-w-0">
+                {activeChatStaffId ? (
+                  <InlineStaffChat staffId={activeChatStaffId} staffName={activeChatStaffName} />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground px-6">
+                    <MessageSquare className="h-12 w-12 mb-3 opacity-20" />
+                    <p className="text-sm">{t("owner.staffMessaging.selectStaff", "Select a staff member to start a conversation")}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <BroadcastMessageDialog
         open={broadcastOpen}
         onOpenChange={setBroadcastOpen}
