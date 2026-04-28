@@ -127,6 +127,17 @@ export function registerTenantRoutes(app: Express): void {
         return res.status(400).json({ message: "Owner account not found. Please contact support." });
       }
 
+      // Business entity validation: if owner has a taxId on file and the incoming
+      // property provides a different taxId, block the creation.
+      if (req.body.taxId && user.role !== "oss_super_admin") {
+        const existingOwner = await storage.getOwner(ownerId);
+        if (existingOwner?.taxId && existingOwner.taxId !== req.body.taxId.trim()) {
+          return res.status(403).json({
+            message: "New properties must belong to the same legal business entity. The Tax ID (VÖEN) does not match the one registered on your account.",
+          });
+        }
+      }
+
       const { ownerId: _bodyOwnerId, id: _id, createdAt: _ca, ...propertyData } = req.body;
       const property = await storage.createProperty({ ...propertyData, ownerId });
       await storage.ensureDefaultRatePlan(property.id, property.tenantId || ownerId);

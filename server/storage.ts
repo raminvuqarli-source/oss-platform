@@ -208,6 +208,7 @@ import {
   cancellationPolicies,
   type CancellationPolicy,
   type InsertCancellationPolicy,
+  referralCommissions,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -260,8 +261,10 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByReferralCode(code: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
+  createReferralCommission(data: { staffUserId: string; ownerId: string; status: string }): Promise<void>;
   getAllUsers(tenantId: string): Promise<User[]>;
   getUsersByHotel(hotelId: string, tenantId: string): Promise<User[]>;
   getUsersByOwner(ownerId: string, tenantId: string): Promise<User[]>;
@@ -781,6 +784,19 @@ export class DatabaseStorage implements IStorage {
   async getUserByEmail(email: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
     return result[0];
+  }
+
+  async getUserByReferralCode(code: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.referralCode, code)).limit(1);
+    return result[0];
+  }
+
+  async createReferralCommission(data: { staffUserId: string; ownerId: string; status: string }): Promise<void> {
+    await db.insert(referralCommissions).values({
+      staffUserId: data.staffUserId,
+      ownerId: data.ownerId,
+      status: data.status,
+    });
   }
 
   async createUser(user: InsertUser): Promise<User> {

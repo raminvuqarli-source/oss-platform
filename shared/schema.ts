@@ -68,6 +68,14 @@ export const owners = pgTable("owners", {
   address: text("address"),
   logoUrl: text("logo_url"),
   status: text("status").notNull().default("active"),
+  // Business entity fields (for multi-property validation)
+  taxId: text("tax_id"),
+  legalName: text("legal_name"),
+  registrationNumber: text("registration_number"),
+  // Marketing referral fields
+  referralSource: text("referral_source"),       // google | instagram | event | staff_referral | other
+  referralStaffId: varchar("referral_staff_id"), // FK to users.id (marketing staff)
+  referralNotes: text("referral_notes"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -78,6 +86,27 @@ export const insertOwnerSchema = createInsertSchema(owners).omit({
 
 export type InsertOwner = z.infer<typeof insertOwnerSchema>;
 export type Owner = typeof owners.$inferSelect;
+
+// Referral Commissions — tracks commission owed to marketing staff for referrals
+export const referralCommissions = pgTable("referral_commissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  staffUserId: varchar("staff_user_id").notNull(),   // marketing staff member
+  ownerId: varchar("owner_id").notNull(),             // referred hotel owner
+  commissionPct: text("commission_pct").default("10.00"),
+  status: text("status").notNull().default("pending"), // pending | paid | cancelled
+  amountCents: integer("amount_cents"),               // calculated on first payment
+  paidAt: timestamp("paid_at"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertReferralCommissionSchema = createInsertSchema(referralCommissions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertReferralCommission = z.infer<typeof insertReferralCommissionSchema>;
+export type ReferralCommission = typeof referralCommissions.$inferSelect;
 
 // Properties table - belongs to an owner
 export const properties = pgTable("properties", {
@@ -329,6 +358,7 @@ export const users = pgTable("users", {
   propertyId: varchar("property_id"),
   tenantId: varchar("tenant_id"),
   language: text("language").default("en"),
+  referralCode: text("referral_code").unique(), // marketing staff referral code
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   index("idx_users_tenant_id").on(table.tenantId),

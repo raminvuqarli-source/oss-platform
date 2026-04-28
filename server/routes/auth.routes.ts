@@ -68,6 +68,12 @@ const hotelRegistrationSchema = z.object({
     billingCurrency: z.string().optional(),
     billingContactEmail: z.string().email().optional().or(z.literal("")),
   }),
+  // Marketing referral fields
+  referral: z.object({
+    source: z.enum(["google", "instagram", "linkedin", "event", "staff_referral", "existing_client", "other"]),
+    staffReferralCode: z.string().optional(),
+    notes: z.string().optional(),
+  }).optional(),
 });
 
 export async function registerAuthRoutes(httpServer: Server, app: Express): Promise<void> {
@@ -652,11 +658,18 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
           expiresAt,
         });
 
-        sendPasswordResetEmail({
+        const emailResult = await sendPasswordResetEmail({
           to: email,
           resetToken: token,
           userName: user.fullName || user.username,
-        }).catch((err) => logger.error({ err }, "Failed to send password reset email"));
+        });
+        if (!emailResult.success) {
+          logger.error({ error: emailResult.error }, "Password reset email delivery failed");
+          return res.status(500).json({
+            message: "Your account was found but the reset email could not be delivered. Please contact support.",
+            debug: process.env.NODE_ENV !== "production" ? emailResult.error : undefined,
+          });
+        }
       }
 
       res.json({ message: "If an account exists with this email, reset instructions have been sent." });
@@ -729,7 +742,7 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
   app.post("/api/auth/register-hotel", authRateLimiter, async (req, res) => {
     try {
       const validatedData = hotelRegistrationSchema.parse(req.body);
-      const { username, password, fullName, email, role, hotelData, planCode: requestedPlanCode } = validatedData;
+      const { username, password, fullName, email, role, hotelData, planCode: requestedPlanCode, referral } = validatedData;
 
       if (username.toLowerCase().startsWith("demo_")) {
         return res.status(400).json({ message: "This username prefix is reserved." });
@@ -743,6 +756,16 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
       if (existingUser) {
         return res.status(400).json({ message: "Username already exists" });
       }
+
+      // Resolve referral staff if a referral code was provided
+      let referralStaffId: string | null = null;
+      if (referral?.source === "staff_referral" && referral.staffReferralCode) {
+        const staffMember = await storage.getUserByReferralCode(referral.staffReferralCode.trim().toUpperCase());
+        if (!staffMember) {
+          return res.status(400).json({ message: "Invalid staff referral code. Please check the code and try again." });
+        }
+        referralStaffId = staffMember.id;
+      }
       
       const owner = await storage.createOwner({
         name: fullName,
@@ -752,6 +775,9 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
         country: hotelData.country || null,
         city: hotelData.city || null,
         address: hotelData.address || null,
+        referralSource: referral?.source || null,
+        referralStaffId: referralStaffId || null,
+        referralNotes: referral?.notes || null,
       });
 
       const property = await storage.createProperty({
@@ -881,6 +907,15 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
         } catch (emailError) {
           logger.error({ err: emailError }, "Welcome email failed");
         }
+      }
+
+      // Create referral commission record if a valid staff referral was made
+      if (referralStaffId) {
+        storage.createReferralCommission({
+          staffUserId: referralStaffId,
+          ownerId: owner.id,
+          status: "pending",
+        }).catch((err) => logger.error({ err }, "Failed to create referral commission"));
       }
 
       req.session.save((saveErr) => {

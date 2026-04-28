@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { showErrorToast } from "@/lib/error-handler";
 import { useAuth } from "@/lib/auth-context";
-import { Building2, User, Mail, MapPin, Lock, ArrowLeft, Home, Star, Sparkles, Globe } from "lucide-react";
+import { Building2, User, Mail, MapPin, Lock, ArrowLeft, Home, Star, Sparkles, Globe, Megaphone } from "lucide-react";
 import { Link } from "wouter";
 import { InternationalPhoneInput } from "@/components/phone-input";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -48,11 +48,13 @@ export default function HotelRegister() {
     adminUsername: "",
     adminPassword: "",
     adminEmail: "",
+    referralSource: "",
+    staffReferralCode: "",
   });
 
   const registerMutation = useMutation({
     mutationFn: async (data: typeof form) => {
-      const payload = {
+      const payload: Record<string, any> = {
         username: data.adminUsername,
         password: data.adminPassword,
         fullName: data.adminFullName,
@@ -68,8 +70,14 @@ export default function HotelRegister() {
           email: data.hotelEmail,
           totalRooms: parseInt(data.totalRooms) || 1,
           starRating: data.starRating || undefined,
-        }
+        },
       };
+      if (data.referralSource) {
+        payload.referral = {
+          source: data.referralSource,
+          staffReferralCode: data.referralSource === "staff_referral" ? data.staffReferralCode.trim().toUpperCase() : undefined,
+        };
+      }
       await authRegister(payload);
       return payload;
     },
@@ -338,6 +346,55 @@ export default function HotelRegister() {
                     />
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Marketing Referral Section */}
+            <div className="border-t pt-6 space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Megaphone className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-lg">How did you hear about O.S.S?</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                This helps us understand how to reach more hotels like yours.
+              </p>
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="referralSource">Referral Source</Label>
+                  <Select
+                    value={form.referralSource}
+                    onValueChange={(value) => setForm({ ...form, referralSource: value, staffReferralCode: "" })}
+                  >
+                    <SelectTrigger data-testid="select-referral-source">
+                      <SelectValue placeholder="Select how you found us (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="google">Google Search</SelectItem>
+                      <SelectItem value="instagram">Instagram / Social Media</SelectItem>
+                      <SelectItem value="linkedin">LinkedIn</SelectItem>
+                      <SelectItem value="event">Conference / Trade Show</SelectItem>
+                      <SelectItem value="staff_referral">Referred by O.S.S Representative</SelectItem>
+                      <SelectItem value="existing_client">Referred by Existing Client</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {form.referralSource === "staff_referral" && (
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="staffReferralCode">Representative Code *</Label>
+                    <Input
+                      id="staffReferralCode"
+                      placeholder="Enter the code provided by the O.S.S representative"
+                      value={form.staffReferralCode}
+                      onChange={(e) => setForm({ ...form, staffReferralCode: e.target.value.toUpperCase() })}
+                      data-testid="input-staff-referral-code"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Your representative should have given you a unique referral code.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 

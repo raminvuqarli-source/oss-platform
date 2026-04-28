@@ -71,6 +71,9 @@ Preferred communication style: Simple, everyday language.
 - **Files**: `client/src/components/ai-chat-widget.tsx`, `server/routes/ai-chat.routes.ts`.
 
 ### Automated Systems
+- **Marketing Referral System**: `referral_source`, `referral_staff_id`, `referral_notes` fields on `owners` table. New `referral_commissions` table tracks pending/paid commissions per referring staff member. Registration form includes "How did you hear about us?" with optional staff referral code validation (code stored as `referral_code` on `users`). Backend validates staff referral code on `POST /api/auth/register-hotel` and creates a commission record automatically.
+- **Multi-Property Business Entity Check**: `POST /api/properties` validates that if the owner has a `tax_id` on file and the new property provides a different `tax_id`, creation is blocked with message: "New properties must belong to the same legal business entity." Super admins are exempt.
+- **Password Reset Error Surface**: `POST /api/auth/forgot-password` no longer silently swallows email failures. If the email delivery returns an error (e.g. missing API key), the API now returns HTTP 500 with a descriptive message so the issue is visible during debugging.
 - **Automated Database Backup**: Daily `pg_dump` backups, retaining the last 7, with monitoring for failures.
 - **Production Monitoring & Error Tracking**: Centralized alert tracking with admin email notifications for critical system events.
 - **Billing Email Notification System**: Sends transactional emails for payment success/failure, trial ending, subscription suspension, and refund approvals.
