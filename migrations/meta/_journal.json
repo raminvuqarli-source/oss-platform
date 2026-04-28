@@ -148,6 +148,13 @@
       "when": 1775500000000,
       "tag": "0020_deleted_trial_accounts",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1775600000000,
+      "tag": "0021_restaurant_staff_cleaning",
+      "breakpoints": true
     }
   ]
 }
