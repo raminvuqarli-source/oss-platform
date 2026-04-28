@@ -256,6 +256,12 @@ export function getRoleDisplayName(role: string, t?: (key: string) => string): s
       return "Staff";
     case "guest":
       return "Guest";
+    case "restaurant_manager":
+      return "Restaurant Manager";
+    case "waiter":
+      return "Waiter";
+    case "kitchen_staff":
+      return "Kitchen Staff";
     default:
       return role;
   }

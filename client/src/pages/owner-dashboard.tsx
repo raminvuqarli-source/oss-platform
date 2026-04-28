@@ -941,6 +941,9 @@ const systemRoleToStaffRole: Record<string, string> = {
   reception: "front_desk",
   admin: "manager",
   staff: "cleaner",
+  restaurant_manager: "restaurant_manager",
+  waiter: "waiter",
+  kitchen_staff: "kitchen_staff",
 };
 
 function AddStaffDialog({ propertyId, onSuccess }: { propertyId: string; onSuccess: () => void }) {
@@ -1046,6 +1049,9 @@ function AddStaffDialog({ propertyId, onSuccess }: { propertyId: string; onSucce
           <SelectItem value="front_desk">{t('owner.staffRoles.front_desk')}</SelectItem>
           <SelectItem value="manager">{t('owner.staffRoles.manager')}</SelectItem>
           <SelectItem value="cleaner">{t('owner.staffRoles.cleaner')}</SelectItem>
+          <SelectItem value="restaurant_manager">Restaurant Manager</SelectItem>
+          <SelectItem value="waiter">Waiter</SelectItem>
+          <SelectItem value="kitchen_staff">Kitchen Staff</SelectItem>
         </SelectContent>
       </Select>
       <p className="text-xs text-muted-foreground">{roleDescription(staffRole)}</p>
@@ -1295,7 +1301,7 @@ function StaffDetailDialog({ member, propertyId, open, onOpenChange }: {
 
   const updateMutation = useMutation({
     mutationFn: async () => {
-      const staffRoleToSystem: Record<string, string> = { front_desk: "reception", manager: "admin", cleaner: "staff" };
+      const staffRoleToSystem: Record<string, string> = { front_desk: "reception", manager: "admin", cleaner: "staff", restaurant_manager: "restaurant_manager", waiter: "waiter", kitchen_staff: "kitchen_staff" };
       const res = await apiRequest("PATCH", `/api/properties/${propertyId}/staff/${member.id}`, {
         fullName,
         email: email || null,
@@ -1427,6 +1433,9 @@ function StaffDetailDialog({ member, propertyId, open, onOpenChange }: {
                     <SelectItem value="front_desk">{t('owner.staffRoles.front_desk')}</SelectItem>
                     <SelectItem value="manager">{t('owner.staffRoles.manager')}</SelectItem>
                     <SelectItem value="cleaner">{t('owner.staffRoles.cleaner')}</SelectItem>
+                    <SelectItem value="restaurant_manager">Restaurant Manager</SelectItem>
+                    <SelectItem value="waiter">Waiter</SelectItem>
+                    <SelectItem value="kitchen_staff">Kitchen Staff</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

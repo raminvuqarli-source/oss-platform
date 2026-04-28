@@ -64,6 +64,9 @@ import {
   Home,
   Star,
   SprayCan,
+  ChefHat,
+  UtensilsCrossed,
+  Utensils,
 } from "lucide-react";
 import type { Notification } from "@shared/schema";
 import { getRoleDisplayName } from "@/lib/permissions";
@@ -197,6 +200,12 @@ function DashboardSidebar() {
             ],
           },
           {
+            label: "Restaurant",
+            items: [
+              { title: "Restaurant Management", icon: UtensilsCrossed, url: "/restaurant/manager", testId: "nav-restaurant-manager" },
+            ],
+          },
+          {
             label: t("nav.group.system", "System"),
             items: [
               { title: t("common.settings"), icon: Settings, url: "/settings", view: undefined, testId: "nav-settings" },
@@ -266,6 +275,13 @@ function DashboardSidebar() {
             ],
           },
           {
+            label: "Restaurant",
+            items: [
+              { title: "Restaurant Management", icon: UtensilsCrossed, url: "/restaurant/manager", testId: "nav-restaurant-manager" },
+              { title: "Kitchen Display (KDS)", icon: ChefHat, url: "/restaurant/kitchen", testId: "nav-restaurant-kitchen" },
+            ],
+          },
+          {
             label: t("nav.group.communication", "Communication"),
             items: [
               { title: t("nav.guestMessages", "Guest Messages"), icon: MessageSquare, url: "/dashboard?view=messages", testId: "nav-messages" },
@@ -275,6 +291,58 @@ function DashboardSidebar() {
           {
             label: t("nav.group.system", "System"),
             items: [
+              { title: t("common.settings"), icon: Settings, url: "/settings", testId: "nav-settings" },
+            ],
+          },
+        ];
+
+      case "restaurant_manager":
+        return [
+          {
+            label: "Restaurant",
+            items: [
+              { title: "Restaurant Management", icon: UtensilsCrossed, url: "/restaurant/manager", testId: "nav-restaurant-manager" },
+              { title: "Kitchen Display (KDS)", icon: ChefHat, url: "/restaurant/kitchen", testId: "nav-restaurant-kitchen" },
+              { title: "Waiter View", icon: Utensils, url: "/restaurant/waiter", testId: "nav-restaurant-waiter" },
+            ],
+          },
+          {
+            label: t("nav.group.system", "System"),
+            items: [
+              { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-notifications" },
+              { title: t("common.settings"), icon: Settings, url: "/settings", testId: "nav-settings" },
+            ],
+          },
+        ];
+
+      case "kitchen_staff":
+        return [
+          {
+            label: "Kitchen",
+            items: [
+              { title: "Kitchen Display (KDS)", icon: ChefHat, url: "/restaurant/kitchen", testId: "nav-kitchen-display" },
+            ],
+          },
+          {
+            label: t("nav.group.system", "System"),
+            items: [
+              { title: t("common.settings"), icon: Settings, url: "/settings", testId: "nav-settings" },
+            ],
+          },
+        ];
+
+      case "waiter":
+        return [
+          {
+            label: "Restaurant",
+            items: [
+              { title: "Order Management", icon: Utensils, url: "/restaurant/waiter", testId: "nav-waiter-orders" },
+            ],
+          },
+          {
+            label: t("nav.group.system", "System"),
+            items: [
+              { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-notifications" },
               { title: t("common.settings"), icon: Settings, url: "/settings", testId: "nav-settings" },
             ],
           },
@@ -312,6 +380,12 @@ function DashboardSidebar() {
         return <Crown className="h-3 w-3" />;
       case "owner_admin":
         return <Building2 className="h-3 w-3" />;
+      case "restaurant_manager":
+        return <UtensilsCrossed className="h-3 w-3" />;
+      case "kitchen_staff":
+        return <ChefHat className="h-3 w-3" />;
+      case "waiter":
+        return <Utensils className="h-3 w-3" />;
       default:
         return <User className="h-3 w-3" />;
     }

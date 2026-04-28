@@ -1,0 +1,40 @@
+### CRITICAL TASK: FULL UI/UX INTEGRATION (ENGLISH ONLY)
+
+The backend is ready, but the UI is missing. I need you to integrate the Restaurant/POS modules into the frontend. **STRICT REQUIREMENT:** Use ONLY English for all UI labels, button text, and navigation items. Do not use any other language.
+
+#### 1. Sidebar & Navigation Update
+- **File:** `client/src/components/layout/sidebar.tsx`
+- **Task:** Add the following navigation links based on user roles:
+  - **Owner/Admin:** Add "Restaurant Management" and "POS Analytics".
+  - **Waiter:** Add "Order Management" and "Guest Requests".
+  - **Kitchen Staff:** Add "Kitchen Display System (KDS)".
+- Use standard Lucide icons for these new menu items.
+
+#### 2. Staff Management Modal (Role Expansion)
+- **File:** Identify the "Add Team Member" modal component.
+- **Update:** Add these roles to the selection dropdown:
+  - `restaurant_manager`
+  - `waiter`
+  - `kitchen_staff`
+- Ensure the labels in the dropdown are displayed as "Restaurant Manager", "Waiter", and "Kitchen Staff".
+
+#### 3. App Routing & Access Control
+- **File:** `client/src/App.tsx`
+- **Task:** Define and protect the following routes:
+  - `/restaurant/manager`
+  - `/restaurant/waiter`
+  - `/restaurant/kitchen`
+- Implement a redirect logic: Upon login, if a user has the `waiter` role, they should be automatically redirected to the `/restaurant/waiter` dashboard.
+
+#### 4. Guest Dashboard Enhancements
+- **File:** `client/src/pages/guest-dashboard.tsx`
+- **Task:** Add two new interactive action cards for the guest:
+  - **"Order Food"**: Triggers the menu modal.
+  - **"Call for Service"**: Triggers the WebSocket notification for the waiter.
+- Ensure these buttons follow the existing UI theme and are clearly labeled in English.
+
+#### 5. Financial Dashboard Update
+- **File:** `client/src/pages/finance-dashboard.tsx`
+- **Task:** Add a summary widget for "Restaurant Revenue". It should display total income from settled POS orders.
+
+**IMPORTANT:** Scan the codebase for any hardcoded strings in other languages and replace them with English equivalents within these specific modules.

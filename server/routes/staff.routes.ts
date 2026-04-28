@@ -172,9 +172,9 @@ export function registerStaffRoutes(app: Express): void {
         return res.status(400).json({ message: "Missing required fields: fullName, username, password, and role are required" });
       }
 
-      const VALID_ROLES = ["admin", "manager", "reception", "cleaner", "front_desk"];
+      const VALID_ROLES = ["admin", "manager", "reception", "cleaner", "front_desk", "restaurant_manager", "waiter", "kitchen_staff"];
       if (!VALID_ROLES.includes(rawRole)) {
-        return res.status(400).json({ message: `Invalid role "${rawRole}". Must be one of: admin, manager, reception, cleaner` });
+        return res.status(400).json({ message: `Invalid role "${rawRole}". Must be one of: admin, manager, reception, cleaner, restaurant_manager, waiter, kitchen_staff` });
       }
 
       const existingUser = await storage.getUserByUsername(username);
@@ -188,6 +188,9 @@ export function registerStaffRoutes(app: Express): void {
         cleaner: "staff",
         reception: "reception",
         admin: "admin",
+        restaurant_manager: "restaurant_manager",
+        waiter: "waiter",
+        kitchen_staff: "kitchen_staff",
       };
       const userRole = roleMapping[rawRole] || "staff";
 
@@ -703,9 +706,9 @@ export function registerStaffRoutes(app: Express): void {
         return res.status(400).json({ message: "Missing required fields: fullName, username, password, and role are required" });
       }
 
-      const VALID_ROLES = ["admin", "manager", "reception", "cleaner", "front_desk"];
+      const VALID_ROLES = ["admin", "manager", "reception", "cleaner", "front_desk", "restaurant_manager", "waiter", "kitchen_staff"];
       if (!VALID_ROLES.includes(rawRole)) {
-        return res.status(400).json({ message: `Invalid staff role "${rawRole}". Must be one of: admin, manager, reception, cleaner` });
+        return res.status(400).json({ message: `Invalid staff role "${rawRole}". Must be one of: admin, manager, reception, cleaner, restaurant_manager, waiter, kitchen_staff` });
       }
 
       const existingUser = await storage.getUserByUsername(username);
@@ -719,6 +722,9 @@ export function registerStaffRoutes(app: Express): void {
         cleaner: "staff",
         reception: "reception",
         admin: "admin",
+        restaurant_manager: "restaurant_manager",
+        waiter: "waiter",
+        kitchen_staff: "kitchen_staff",
       };
 
       const userRole = roleMapping[rawRole] || "staff";
@@ -821,9 +827,12 @@ export function registerStaffRoutes(app: Express): void {
         front_desk: "reception",
         manager: "admin",
         cleaner: "staff",
+        restaurant_manager: "restaurant_manager",
+        waiter: "waiter",
+        kitchen_staff: "kitchen_staff",
       };
 
-      const userRole = roleMapping[invitation.staffRole] || "staff";
+      const userRole = roleMapping[invitation.staffRole] || invitation.staffRole || "staff";
 
       const matchingHotel = invitation.propertyId
         ? await storage.getHotelByPropertyId(invitation.propertyId)

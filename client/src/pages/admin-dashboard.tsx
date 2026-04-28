@@ -594,7 +594,7 @@ export default function AdminDashboard() {
     username: "",
     password: "",
     email: "",
-    role: "reception" as "admin" | "manager" | "reception" | "cleaner",
+    role: "reception" as "admin" | "manager" | "reception" | "cleaner" | "restaurant_manager" | "waiter" | "kitchen_staff",
   });
   const [selectedChatGuestId, setSelectedChatGuestId] = useState<string | null>(null);
   const [chatMessage, setChatMessage] = useState("");
@@ -1074,7 +1074,7 @@ export default function AdminDashboard() {
                       <Label htmlFor="staff-role">{t('common.role')} *</Label>
                       <Select
                         value={staffForm.role}
-                        onValueChange={(value: "admin" | "manager" | "reception" | "cleaner") => setStaffForm({ ...staffForm, role: value })}
+                        onValueChange={(value: "admin" | "manager" | "reception" | "cleaner" | "restaurant_manager" | "waiter" | "kitchen_staff") => setStaffForm({ ...staffForm, role: value })}
                       >
                         <SelectTrigger data-testid="select-staff-role">
                           <SelectValue placeholder={t('staff.selectRole', 'Select role')} />
@@ -1084,6 +1084,9 @@ export default function AdminDashboard() {
                           <SelectItem value="manager">{t('staff.managerRole', 'Manager')}</SelectItem>
                           <SelectItem value="reception">{t('staff.receptionRole', 'Reception (Guest Management)')}</SelectItem>
                           <SelectItem value="cleaner">{t('staff.cleanerRole', 'Cleaner')}</SelectItem>
+                          <SelectItem value="restaurant_manager">Restaurant Manager</SelectItem>
+                          <SelectItem value="waiter">Waiter</SelectItem>
+                          <SelectItem value="kitchen_staff">Kitchen Staff</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

@@ -27,6 +27,8 @@ import {
   CheckCircle,
   AlertCircle,
   RefreshCw,
+  UtensilsCrossed,
+  TrendingUp,
 } from "lucide-react";
 import type { FinancialTransaction } from "@shared/schema";
 
@@ -104,6 +106,15 @@ export function FinancePanel({ isReadOnly = false }: FinancePanelProps) {
 
   const { data: transactions, isLoading } = useQuery<FinancialTransaction[]>({
     queryKey: ["/api/finance/transactions"],
+  });
+
+  const { data: restaurantAnalytics } = useQuery<{
+    today: { orderCount: number; revenueCents: number };
+    activeOrders: { pending: number; cooking: number; ready: number; delivered: number };
+    pendingSettlement: number;
+  }>({
+    queryKey: ["/api/restaurant/analytics"],
+    refetchInterval: 60000,
   });
 
   const createMutation = useMutation({
@@ -316,6 +327,41 @@ export function FinancePanel({ isReadOnly = false }: FinancePanelProps) {
 
   return (
     <div className="space-y-4">
+      {/* Restaurant Revenue Summary Widget */}
+      <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-background" data-testid="card-restaurant-revenue">
+        <CardHeader className="pb-2 pt-4 px-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <UtensilsCrossed className="h-4 w-4 text-primary" />
+              <CardTitle className="text-sm font-semibold">Restaurant Revenue</CardTitle>
+            </div>
+            <TrendingUp className="h-4 w-4 text-emerald-500" />
+          </div>
+        </CardHeader>
+        <CardContent className="pb-4 px-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <p className="text-2xl font-bold text-primary" data-testid="text-restaurant-revenue-today">
+                ${((restaurantAnalytics?.today.revenueCents ?? 0) / 100).toFixed(2)}
+              </p>
+              <p className="text-xs text-muted-foreground">Today's Revenue</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold" data-testid="text-restaurant-orders-today">
+                {restaurantAnalytics?.today.orderCount ?? 0}
+              </p>
+              <p className="text-xs text-muted-foreground">Today's Orders</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-amber-500" data-testid="text-restaurant-pending-settlement">
+                {restaurantAnalytics?.pendingSettlement ?? 0}
+              </p>
+              <p className="text-xs text-muted-foreground">Pending Settlement</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
         <SearchInput
           value={searchTerm}
