@@ -3334,7 +3334,7 @@ function MessagesView() {
   );
 }
 
-function PerformanceView() {
+function PerformanceView({ selectedPropertyId }: { selectedPropertyId: string | null }) {
   const { t } = useTranslation();
 
   const { data: revenueData, isLoading: revenueLoading } = useQuery<{
@@ -3370,8 +3370,22 @@ function PerformanceView() {
     }).format(amount);
   };
 
-  const totalTransactions = revenueData?.revenueByProperty?.reduce((sum, prop) => sum + (prop.transactionCount || 0), 0) || 0;
-  const propertiesCount = propertiesData?.length || 0;
+  const filteredRevenue = selectedPropertyId
+    ? revenueData?.revenueByProperty?.filter(p => String(p.propertyId) === selectedPropertyId) ?? []
+    : revenueData?.revenueByProperty ?? [];
+
+  const filteredOccupancy = selectedPropertyId
+    ? occupancyData?.byProperty?.filter(p => String(p.propertyId) === selectedPropertyId) ?? []
+    : occupancyData?.byProperty ?? [];
+
+  const displayRevenue = filteredRevenue.reduce((sum, p) => sum + (p.revenue || 0), 0);
+  const displayOccupancy = filteredOccupancy.length > 0
+    ? Math.round(filteredOccupancy.reduce((sum, p) => sum + p.rate, 0) / filteredOccupancy.length)
+    : (selectedPropertyId ? 0 : (occupancyData?.occupancyRate || 0));
+  const displayTotalUnits = filteredOccupancy.reduce((sum, p) => sum + p.totalUnits, 0) || (selectedPropertyId ? 0 : (occupancyData?.totalUnits || 0));
+  const displayOccupiedUnits = filteredOccupancy.reduce((sum, p) => sum + p.occupiedUnits, 0) || (selectedPropertyId ? 0 : (occupancyData?.occupiedUnits || 0));
+  const totalTransactions = filteredRevenue.reduce((sum, p) => sum + (p.transactionCount || 0), 0);
+  const propertiesCount = selectedPropertyId ? 1 : (propertiesData?.length || 0);
 
   return (
     <div className="space-y-6" data-testid="performance-view">
@@ -3393,7 +3407,7 @@ function PerformanceView() {
               <Skeleton className="h-7 w-32" />
             ) : (
               <p className="text-2xl font-bold" data-testid="text-total-revenue">
-                {formatCurrencyValue(revenueData?.totalRevenue || 0)}
+                {formatCurrencyValue(displayRevenue)}
               </p>
             )}
           </CardContent>
@@ -3412,10 +3426,10 @@ function PerformanceView() {
             ) : (
               <>
                 <p className="text-2xl font-bold" data-testid="text-occupancy-rate">
-                  {occupancyData?.occupancyRate || 0}%
+                  {displayOccupancy}%
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {occupancyData?.occupiedUnits || 0} / {occupancyData?.totalUnits || 0} {t('common.spaces')}
+                  {displayOccupiedUnits} / {displayTotalUnits} {t('common.spaces')}
                 </p>
               </>
             )}
@@ -3516,7 +3530,7 @@ function PerformanceView() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <Card data-testid="card-revenue-breakdown">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">{t('owner.revenueByProperty', 'Revenue by Property')}</CardTitle>
+            <CardTitle className="text-base">{selectedPropertyId ? t('owner.revenueThisProperty', 'Bu Mülkün Gəliri') : t('owner.revenueByProperty', 'Revenue by Property')}</CardTitle>
           </CardHeader>
           <CardContent>
             {revenueLoading ? (
@@ -3528,9 +3542,9 @@ function PerformanceView() {
                   </div>
                 ))}
               </div>
-            ) : revenueData?.revenueByProperty && revenueData.revenueByProperty.length > 0 ? (
+            ) : filteredRevenue.length > 0 ? (
               <div className="space-y-3">
-                {revenueData.revenueByProperty.map((item, idx) => (
+                {filteredRevenue.map((item, idx) => (
                   <div key={item.propertyId || idx} className="flex items-center justify-between pb-3 border-b last:border-0" data-testid={`row-revenue-property-${item.propertyId || idx}`}>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate" data-testid={`text-revenue-property-name-${item.propertyId || idx}`}>
@@ -3557,7 +3571,7 @@ function PerformanceView() {
 
         <Card data-testid="card-occupancy-breakdown">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">{t('owner.occupancyByProperty', 'Occupancy by Property')}</CardTitle>
+            <CardTitle className="text-base">{selectedPropertyId ? t('owner.occupancyThisProperty', 'Bu Mülkün Tutumu') : t('owner.occupancyByProperty', 'Occupancy by Property')}</CardTitle>
           </CardHeader>
           <CardContent>
             {occupancyLoading ? (
@@ -3569,9 +3583,9 @@ function PerformanceView() {
                   </div>
                 ))}
               </div>
-            ) : occupancyData?.byProperty && occupancyData.byProperty.length > 0 ? (
+            ) : filteredOccupancy.length > 0 ? (
               <div className="space-y-4">
-                {occupancyData.byProperty.map((item, idx) => (
+                {filteredOccupancy.map((item, idx) => (
                   <div key={item.propertyId || idx} data-testid={`row-occupancy-property-${item.propertyId || idx}`}>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium truncate" data-testid={`text-occupancy-property-name-${item.propertyId || idx}`}>
@@ -4915,7 +4929,7 @@ export default function OwnerDashboard() {
       case "escalations":
         return <EscalationsView />;
       case "performance":
-        return <PerformanceView />;
+        return <PerformanceView selectedPropertyId={selectedPropertyId} />;
       case "finance":
         return <FinanceCenterView />;
       case "staff-performance":
@@ -5041,6 +5055,42 @@ export default function OwnerDashboard() {
           {t("owner.contactOssTeam", "Contact O.S.S Team")}
         </Button>
       </div>
+      {/* Property context switcher — only shown for multi-property owners on data views */}
+      {allProperties && allProperties.length > 1 && !["properties", "calendar", "tasks", "messages", "staff-chat", "escalations"].includes(currentView ?? "") && (
+        <Card className="border-dashed" data-testid="card-property-context-switcher">
+          <CardContent className="flex flex-wrap items-center gap-3 py-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground shrink-0">
+              <Building2 className="h-4 w-4" />
+              <span>{t("owner.viewingDataFor", "Məlumatlar:")}</span>
+            </div>
+            <Select
+              value={selectedPropertyId ?? "all"}
+              onValueChange={(val) => setSelectedPropertyId(val === "all" ? null : val)}
+              data-testid="select-property-context"
+            >
+              <SelectTrigger className="w-auto min-w-[180px] h-8 text-sm font-medium" data-testid="trigger-property-context">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  🏢 {t("owner.allProperties", "Bütün Mülklər")}
+                </SelectItem>
+                {allProperties.map((p) => (
+                  <SelectItem key={p.id} value={String(p.id)} data-testid={`option-property-${p.id}`}>
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {selectedPropertyId && (
+              <Badge variant="secondary" className="text-xs" data-testid="badge-filtered-property">
+                {t("owner.filteredView", "Filtrlənmiş görünüş")}
+              </Badge>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       <div className="relative">
         {trialStatus?.isTrial && trialStatus.isExpired && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg" data-testid="trial-expired-overlay">
