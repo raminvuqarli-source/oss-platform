@@ -114,6 +114,37 @@ export function registerAdminRoutes(app: Express): void {
     }
   });
 
+  // OSS Admin: Set referral code for a team user
+  app.patch("/api/oss-admin/users/:userId/referral-code", requireRole("oss_super_admin"), async (req, res) => {
+    try {
+      const userId = asString(req.params.userId);
+      const { referralCode } = req.body;
+
+      if (!referralCode || typeof referralCode !== "string") {
+        return res.status(400).json({ message: "referralCode is required" });
+      }
+
+      const code = referralCode.trim().toUpperCase();
+      if (!/^[A-Z0-9_-]{2,20}$/.test(code)) {
+        return res.status(400).json({ message: "Referral code must be 2–20 uppercase letters/numbers only" });
+      }
+
+      // Check uniqueness
+      const existing = await storage.getUserByReferralCode(code);
+      if (existing && existing.id !== userId) {
+        return res.status(409).json({ message: "This referral code is already used by another user" });
+      }
+
+      const updated = await storage.updateUser(userId, { referralCode: code });
+      if (!updated) return res.status(404).json({ message: "User not found" });
+
+      res.json({ referralCode: updated.referralCode });
+    } catch (error) {
+      logger.error({ err: error }, "Error setting referral code");
+      res.status(500).json({ message: "Failed to set referral code" });
+    }
+  });
+
   // OSS Admin: Get platform-wide statistics
   app.get("/api/oss-admin/platform-stats", requireRole("oss_super_admin"), async (req, res) => {
     try {

@@ -650,6 +650,8 @@ function OssUsersPanel() {
   const { toast } = useToast();
   const [createOpen, setCreateOpen] = useState(false);
   const [formData, setFormData] = useState({ username: "", password: "", fullName: "", email: "" });
+  const [editCodeUserId, setEditCodeUserId] = useState<string | null>(null);
+  const [codeInput, setCodeInput] = useState("");
 
   const { data: users, isLoading } = useQuery<User[]>({
     queryKey: ["/api/oss-admin/users"],
@@ -669,6 +671,20 @@ function OssUsersPanel() {
     onError: (error) => showErrorToast(toast, error),
   });
 
+  const setReferralCodeMutation = useMutation({
+    mutationFn: async ({ userId, code }: { userId: string; code: string }) => {
+      const response = await apiRequest("PATCH", `/api/oss-admin/users/${userId}/referral-code`, { referralCode: code });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/oss-admin/users"] });
+      setEditCodeUserId(null);
+      setCodeInput("");
+      toast({ title: t("common.success"), description: t("ossAdmin.referralCodeSet", "Referral code updated") });
+    },
+    onError: (error) => showErrorToast(toast, error),
+  });
+
   const handleCreate = () => {
     if (!formData.username || !formData.password || !formData.fullName) {
       toast({ title: t("common.error"), description: t("ossAdmin.fillRequired", "Please fill all required fields"), variant: "destructive" });
@@ -677,13 +693,18 @@ function OssUsersPanel() {
     createMutation.mutate(formData);
   };
 
+  const handleSetCode = (userId: string) => {
+    if (!codeInput.trim()) return;
+    setReferralCodeMutation.mutate({ userId, code: codeInput.trim().toUpperCase() });
+  };
+
   return (
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
           <div>
             <CardTitle>{t("ossAdmin.teamUsers", "OSS Team Users")}</CardTitle>
-            <CardDescription>{t("ossAdmin.manageTeam", "Manage super admin team members")}</CardDescription>
+            <CardDescription>{t("ossAdmin.manageTeam", "Manage super admin team members and their referral codes")}</CardDescription>
           </div>
           <Button onClick={() => setCreateOpen(true)} data-testid="button-create-user">
             <UserPlus className="h-4 w-4 mr-2" />
@@ -700,12 +721,52 @@ function OssUsersPanel() {
         ) : users && users.length > 0 ? (
           <div className="divide-y">
             {users.map((user) => (
-              <div key={user.id} className="py-3 flex items-center justify-between" data-testid={`user-row-${user.id}`}>
-                <div>
-                  <p className="font-medium">{user.fullName}</p>
-                  <p className="text-sm text-muted-foreground">{user.username} • {user.email}</p>
+              <div key={user.id} className="py-3 space-y-2" data-testid={`user-row-${user.id}`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">{user.fullName}</p>
+                    <p className="text-sm text-muted-foreground">{user.username}{user.email ? ` • ${user.email}` : ""}</p>
+                  </div>
+                  <Badge variant="secondary">{t("ossAdmin.roleLabel", "OSS Admin")}</Badge>
                 </div>
-                <Badge variant="secondary">{t("ossAdmin.roleLabel", "OSS Admin")}</Badge>
+                {/* Referral code row */}
+                {editCodeUserId === user.id ? (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      className="h-8 text-xs uppercase font-mono w-40"
+                      placeholder="e.g. RENATA"
+                      value={codeInput}
+                      onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
+                      maxLength={20}
+                      data-testid={`input-referral-code-${user.id}`}
+                    />
+                    <Button size="sm" className="h-8 text-xs" onClick={() => handleSetCode(user.id)} disabled={setReferralCodeMutation.isPending} data-testid={`button-save-code-${user.id}`}>
+                      {setReferralCodeMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : t("common.save")}
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => { setEditCodeUserId(null); setCodeInput(""); }}>
+                      {t("common.cancel")}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    {(user as any).referralCode ? (
+                      <Badge variant="outline" className="font-mono text-xs gap-1">
+                        🔗 {(user as any).referralCode}
+                      </Badge>
+                    ) : (
+                      <span className="text-xs text-muted-foreground italic">{t("ossAdmin.noReferralCode", "No referral code")}</span>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 text-xs px-2"
+                      onClick={() => { setEditCodeUserId(user.id); setCodeInput((user as any).referralCode || ""); }}
+                      data-testid={`button-edit-code-${user.id}`}
+                    >
+                      ✏️ {(user as any).referralCode ? t("ossAdmin.editCode", "Edit") : t("ossAdmin.setCode", "Set code")}
+                    </Button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
