@@ -201,12 +201,6 @@ function DashboardSidebar() {
             ],
           },
           {
-            label: "Restaurant",
-            items: [
-              { title: "Restaurant Management", icon: UtensilsCrossed, url: "/restaurant/manager", testId: "nav-restaurant-manager" },
-            ],
-          },
-          {
             label: t("nav.group.system", "System"),
             items: [
               { title: t("common.settings"), icon: Settings, url: "/settings", view: undefined, testId: "nav-settings" },
