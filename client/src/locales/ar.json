@@ -1781,7 +1781,10 @@
       "negotiation": "تفاوض",
       "closedWon": "مغلق - ناجح",
       "closedLost": "مغلق - خاسر"
-    }
+    },
+    "referralInfo": "معلومات الإحالة",
+    "referralStaff": "تمت الإحالة بواسطة",
+    "referralNotes": "ملاحظات"
   },
   "roomPrep": {
     "title": "تجهيز الغرفة والاحتفالات",

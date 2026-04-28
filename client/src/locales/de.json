@@ -1781,7 +1781,10 @@
       "negotiation": "Verhandlung",
       "closedWon": "Abgeschlossen gewonnen",
       "closedLost": "Abgeschlossen verloren"
-    }
+    },
+    "referralInfo": "Empfehlungsinfo",
+    "referralStaff": "Empfohlen von",
+    "referralNotes": "Notizen"
   },
   "roomPrep": {
     "title": "Zimmervorbereitung & Feier",

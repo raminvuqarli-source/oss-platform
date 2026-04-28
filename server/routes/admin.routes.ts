@@ -250,8 +250,16 @@ export function registerAdminRoutes(app: Express): void {
       const staffRoles = ["staff", "reception", "admin", "property_manager"];
       const staffCount = ownerUsers.filter(u => staffRoles.includes(u.role)).length;
 
+      // Resolve referral staff name if present
+      let referralStaffName: string | null = null;
+      if (owner.referralStaffId) {
+        const referralStaff = adminAllUsers.find(u => u.id === owner.referralStaffId);
+        referralStaffName = referralStaff?.fullName || referralStaff?.username || null;
+      }
+
       res.json({
         owner,
+        referralStaffName,
         user: ownerUser ? {
           fullName: ownerUser.fullName,
           email: ownerUser.email,

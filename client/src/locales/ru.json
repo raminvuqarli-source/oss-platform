@@ -1788,7 +1788,10 @@
       "closedWon": "Закрыто успешно",
       "closedLost": "Закрыто неуспешно"
     },
-    "roleLabel": "Администратор OSS"
+    "roleLabel": "Администратор OSS",
+    "referralInfo": "Реферальная информация",
+    "referralStaff": "Кто рекомендовал",
+    "referralNotes": "Заметки"
   },
   "roomPrep": {
     "title": "Подготовка номера и праздники",

@@ -1781,7 +1781,10 @@
       "negotiation": "Onderhandeling",
       "closedWon": "Gewonnen Gesloten",
       "closedLost": "Verloren Gesloten"
-    }
+    },
+    "referralInfo": "Verwijzingsinfo",
+    "referralStaff": "Doorverwezen door",
+    "referralNotes": "Notities"
   },
   "roomPrep": {
     "title": "Kamervoorbereiding & Viering",

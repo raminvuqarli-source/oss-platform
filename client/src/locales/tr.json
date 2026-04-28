@@ -1788,7 +1788,10 @@
       "closedWon": "Kazanılarak Kapatıldı",
       "closedLost": "Kaybedilerek Kapatıldı"
     },
-    "roleLabel": "OSS Yönetici"
+    "roleLabel": "OSS Yönetici",
+    "referralInfo": "Referans Bilgisi",
+    "referralStaff": "Öneren",
+    "referralNotes": "Notlar"
   },
   "roomPrep": {
     "title": "Oda Hazırlığı ve Kutlama",

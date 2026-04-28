@@ -38,7 +38,15 @@ export interface CustomerSummary {
 }
 
 export interface CustomerDetail {
-  owner: any;
+  owner: {
+    id: string;
+    companyName: string;
+    referralSource: string | null;
+    referralStaffId: string | null;
+    referralNotes: string | null;
+    [key: string]: any;
+  };
+  referralStaffName: string | null;
   user: { fullName: string; email: string; username: string; createdAt: string | null };
   properties: { id: string; name: string; type: string; totalUnits: number; city: string; country: string }[];
   subscription: any;

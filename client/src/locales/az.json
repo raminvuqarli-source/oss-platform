@@ -1923,7 +1923,10 @@
       "deleted": "Hesabat silindi",
       "noReports": "Hələ idarə heyəti hesabatı yoxdur",
       "linkedContracts": "Əlaqəli Müqavilələr"
-    }
+    },
+    "referralInfo": "Referral məlumatı",
+    "referralStaff": "Tövsiyə edən",
+    "referralNotes": "Qeydlər"
   },
   "roomPrep": {
     "title": "Otaq Hazırlığı və Bayram",

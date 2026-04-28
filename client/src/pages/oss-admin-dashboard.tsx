@@ -1288,6 +1288,40 @@ function OssCustomersPanel() {
                   </CardContent>
                 </Card>
 
+                {/* Referral Info Card */}
+                {customerDetail.owner?.referralSource && (
+                  <Card className="border-purple-500/30 bg-purple-500/5" data-testid="referral-info-card">
+                    <CardHeader className="p-3 pb-2">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <span>📣</span>
+                        {t("ossAdmin.referralInfo", "Referral Info")}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3 pt-0 space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">{t("hotel.referralSource", "How did they hear about us?")}</span>
+                        <Badge variant="secondary" className="capitalize">
+                          {customerDetail.owner.referralSource.replace("_", " ")}
+                        </Badge>
+                      </div>
+                      {customerDetail.owner.referralSource === "staff_referral" && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">{t("ossAdmin.referralStaff", "Referred by staff")}</span>
+                          <span className="font-medium">
+                            {customerDetail.referralStaffName || customerDetail.owner.referralStaffId || "-"}
+                          </span>
+                        </div>
+                      )}
+                      {customerDetail.owner.referralNotes && (
+                        <div className="pt-1 border-t">
+                          <p className="text-muted-foreground mb-1">{t("ossAdmin.referralNotes", "Notes")}</p>
+                          <p className="text-xs bg-muted rounded p-2">{customerDetail.owner.referralNotes}</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
                 {customerDetail.properties.length > 0 && (
                   <Card>
                     <CardHeader className="p-3 pb-2">

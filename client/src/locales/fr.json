@@ -1781,7 +1781,10 @@
       "negotiation": "Négociation",
       "closedWon": "Conclue gagnée",
       "closedLost": "Conclue perdue"
-    }
+    },
+    "referralInfo": "Info parrainage",
+    "referralStaff": "Recommandé par",
+    "referralNotes": "Notes"
   },
   "roomPrep": {
     "title": "Préparation de Chambre & Célébration",

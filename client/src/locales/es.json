@@ -1781,7 +1781,10 @@
       "negotiation": "Negociación",
       "closedWon": "Cerrada Ganada",
       "closedLost": "Cerrada Perdida"
-    }
+    },
+    "referralInfo": "Info de referido",
+    "referralStaff": "Referido por",
+    "referralNotes": "Notas"
   },
   "roomPrep": {
     "title": "Preparación de Habitación y Celebraciones",

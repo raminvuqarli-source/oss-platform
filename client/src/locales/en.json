@@ -1921,7 +1921,10 @@
       "deleted": "Report deleted",
       "noReports": "No board reports yet",
       "linkedContracts": "Linked Contracts"
-    }
+    },
+    "referralInfo": "Referral Info",
+    "referralStaff": "Referred by",
+    "referralNotes": "Notes"
   },
   "roomPrep": {
     "title": "Room Preparation & Celebration",

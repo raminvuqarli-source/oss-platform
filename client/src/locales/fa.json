@@ -1781,7 +1781,10 @@
       "closedWon": "بسته شده - موفق",
       "closedLost": "بسته شده - ناموفق"
     },
-    "roleLabel": "مدیر OSS"
+    "roleLabel": "مدیر OSS",
+    "referralInfo": "اطلاعات ارجاع",
+    "referralStaff": "ارجاع‌دهنده",
+    "referralNotes": "یادداشت‌ها"
   },
   "roomPrep": {
     "title": "آماده‌سازی اتاق و جشن",
