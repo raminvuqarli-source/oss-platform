@@ -6,14 +6,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
 import {
   ChefHat, UtensilsCrossed, Plus, Edit2, Trash2,
-  TrendingUp, DollarSign, ShoppingBag, Clock, CheckCircle2, CreditCard
+  DollarSign, ShoppingBag, Clock, CheckCircle2, CreditCard,
+  Users, UserPlus, Loader2, Shield, Utensils
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -37,11 +39,13 @@ export default function RestaurantManager() {
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const [showItemDialog, setShowItemDialog] = useState(false);
   const [showSettleDialog, setShowSettleDialog] = useState<PosOrder | null>(null);
+  const [showAddStaffDialog, setShowAddStaffDialog] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [categoryForm, setCategoryForm] = useState({ name: "", sortOrder: "0" });
   const [itemForm, setItemForm] = useState({ name: "", description: "", priceCents: "", categoryId: "" });
   const [settleType, setSettleType] = useState("cash");
+  const [staffForm, setStaffForm] = useState({ fullName: "", username: "", password: "", email: "", role: "waiter" });
 
   const { data: menu } = useQuery<{ categories: Category[]; items: MenuItem[] }>({
     queryKey: ["/api/restaurant/menu"],
@@ -57,6 +61,27 @@ export default function RestaurantManager() {
 
   const categories = menu?.categories || [];
   const items = menu?.items || [];
+
+  const { data: restaurantStaff = [] } = useQuery<any[]>({
+    queryKey: ["/api/users/staff"],
+  });
+
+  const restaurantRoles = ["waiter", "kitchen_staff", "restaurant_manager"];
+  const myRestaurantStaff = restaurantStaff.filter((s: any) => restaurantRoles.includes(s.role));
+
+  const createStaff = useMutation({
+    mutationFn: async (data: object) => {
+      const res = await apiRequest("POST", "/api/admin/create-staff", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users/staff"] });
+      setShowAddStaffDialog(false);
+      setStaffForm({ fullName: "", username: "", password: "", email: "", role: "waiter" });
+      toast({ title: "İşçi yaradıldı", description: "Yeni restoran işçisi əlavə edildi." });
+    },
+    onError: (err: any) => toast({ title: err?.message || "Xəta baş verdi", variant: "destructive" }),
+  });
 
   const createCategory = useMutation({
     mutationFn: (data: object) => apiRequest("POST", "/api/restaurant/menu/categories", data),
@@ -258,6 +283,10 @@ export default function RestaurantManager() {
               <ChefHat className="h-4 w-4 mr-1" />
               Menu
             </TabsTrigger>
+            <TabsTrigger value="staff" data-testid="tab-manager-staff">
+              <Users className="h-4 w-4 mr-1" />
+              Heyət {myRestaurantStaff.length > 0 && `(${myRestaurantStaff.length})`}
+            </TabsTrigger>
           </TabsList>
 
           {/* Orders Tab */}
@@ -394,6 +423,50 @@ export default function RestaurantManager() {
               </div>
             </div>
           </TabsContent>
+
+          {/* Staff Tab */}
+          <TabsContent value="staff" className="mt-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold">Restoran Heyəti</h3>
+                <p className="text-sm text-muted-foreground">Qarson, mətbəx işçisi, restoran müdiri</p>
+              </div>
+              <Button size="sm" onClick={() => setShowAddStaffDialog(true)} data-testid="button-add-restaurant-staff">
+                <UserPlus className="h-4 w-4 mr-1.5" />
+                İşçi Əlavə Et
+              </Button>
+            </div>
+
+            {myRestaurantStaff.length === 0 ? (
+              <div className="flex flex-col items-center py-12 text-muted-foreground">
+                <Users className="h-12 w-12 mb-3 opacity-30" />
+                <p className="font-medium">Restoran işçisi yoxdur</p>
+                <p className="text-sm">Qarson, mətbəx işçisi və ya müdir əlavə edin</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {myRestaurantStaff.map((member: any) => (
+                  <div key={member.id} className="flex items-center gap-3 p-3 border rounded-xl" data-testid={`row-restaurant-staff-${member.id}`}>
+                    <Avatar className="h-9 w-9">
+                      <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                        {member.fullName?.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase() || "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{member.fullName}</p>
+                      <p className="text-xs text-muted-foreground">{member.email || member.username}</p>
+                    </div>
+                    <Badge variant="secondary" className="shrink-0">
+                      <Shield className="h-3 w-3 mr-1" />
+                      {member.role === "waiter" ? "Qarson" :
+                       member.role === "kitchen_staff" ? "Mətbəx" :
+                       member.role === "restaurant_manager" ? "Müdir" : member.role}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
         </Tabs>
       </div>
 
@@ -467,6 +540,75 @@ export default function RestaurantManager() {
             <Button onClick={handleItemSubmit} disabled={createItem.isPending || updateItem.isPending}
               data-testid="button-save-item">
               {editingItem ? "Update" : "Create"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Restaurant Staff Dialog */}
+      <Dialog open={showAddStaffDialog} onOpenChange={setShowAddStaffDialog}>
+        <DialogContent className="sm:max-w-md" data-testid="dialog-add-restaurant-staff">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="h-5 w-5" />
+              Restoran İşçisi Əlavə Et
+            </DialogTitle>
+            <DialogDescription>Qarson, mətbəx işçisi və ya restoran müdiri yaradın.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="rs-fullname">Ad Soyad *</Label>
+              <Input id="rs-fullname" placeholder="Əli Əliyev" value={staffForm.fullName}
+                onChange={e => setStaffForm(f => ({ ...f, fullName: e.target.value }))}
+                data-testid="input-rs-fullname" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="rs-username">İstifadəçi adı *</Label>
+              <Input id="rs-username" placeholder="ali.aliyev" value={staffForm.username}
+                onChange={e => setStaffForm(f => ({ ...f, username: e.target.value }))}
+                data-testid="input-rs-username" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="rs-password">Şifrə *</Label>
+              <Input id="rs-password" type="password" placeholder="••••••••" value={staffForm.password}
+                onChange={e => setStaffForm(f => ({ ...f, password: e.target.value }))}
+                data-testid="input-rs-password" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="rs-email">E-poçt</Label>
+              <Input id="rs-email" type="email" placeholder="ali@hotel.com" value={staffForm.email}
+                onChange={e => setStaffForm(f => ({ ...f, email: e.target.value }))}
+                data-testid="input-rs-email" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Vəzifə *</Label>
+              <Select value={staffForm.role} onValueChange={v => setStaffForm(f => ({ ...f, role: v }))}>
+                <SelectTrigger data-testid="select-rs-role">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="waiter">
+                    <div className="flex items-center gap-2"><Utensils className="h-3.5 w-3.5" />Qarson</div>
+                  </SelectItem>
+                  <SelectItem value="kitchen_staff">
+                    <div className="flex items-center gap-2"><ChefHat className="h-3.5 w-3.5" />Mətbəx İşçisi</div>
+                  </SelectItem>
+                  <SelectItem value="restaurant_manager">
+                    <div className="flex items-center gap-2"><Users className="h-3.5 w-3.5" />Restoran Müdiri</div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddStaffDialog(false)}>Ləğv et</Button>
+            <Button
+              onClick={() => createStaff.mutate(staffForm)}
+              disabled={!staffForm.fullName || !staffForm.username || !staffForm.password || createStaff.isPending}
+              data-testid="button-submit-rs-staff"
+            >
+              {createStaff.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Hesab Yarat
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -270,6 +270,8 @@ export default function GuestDashboard() {
   
   const [orderFoodOpen, setOrderFoodOpen] = useState(false);
   const [selectedMenuItems, setSelectedMenuItems] = useState<Record<string, number>>({});
+  const [orderType, setOrderType] = useState<"dine_in" | "room_delivery">("dine_in");
+  const [tableNumber, setTableNumber] = useState("");
 
   const [localTemperature, setLocalTemperature] = useState<number>(22);
   const [localBrightness, setLocalBrightness] = useState<number>(50);
@@ -364,7 +366,6 @@ export default function GuestDashboard() {
 
   const { data: restaurantMenu } = useQuery<{ categories: Array<{ id: string; name: string }>; items: Array<{ id: string; name: string; description: string | null; priceCents: number; categoryId: string | null; isAvailable: boolean }> }>({
     queryKey: ["/api/restaurant/menu"],
-    enabled: orderFoodOpen,
   });
 
   const callWaiterMutation = useMutation({
@@ -381,14 +382,18 @@ export default function GuestDashboard() {
       apiRequest("POST", "/api/restaurant/orders", {
         bookingId: booking?.id,
         guestName: user?.fullName,
+        orderType,
+        tableNumber: orderType === "dine_in" && tableNumber ? tableNumber : null,
+        roomNumber: orderType === "room_delivery" ? (booking?.roomNumber || null) : null,
         items,
       }),
     onSuccess: () => {
       setSelectedMenuItems({});
       setOrderFoodOpen(false);
-      toast({ title: "Order placed!", description: "The kitchen has received your order." });
+      setTableNumber("");
+      toast({ title: "Sifariş verildi!", description: "Mətbəx sifarişinizi aldı." });
     },
-    onError: () => toast({ title: "Failed to place order", variant: "destructive" }),
+    onError: () => toast({ title: "Sifariş vermək alınmadı", variant: "destructive" }),
   });
 
   const handlePlaceOrder = () => {
@@ -1341,111 +1346,226 @@ export default function GuestDashboard() {
         </div>
       </div>
 
-      {/* Restaurant Quick Actions */}
-      <div className="flex gap-3 flex-wrap">
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2 border-primary/30 hover:bg-primary/5"
-          onClick={() => callWaiterMutation.mutate()}
-          disabled={callWaiterMutation.isPending}
-          data-testid="button-call-waiter"
-        >
-          <Bell className="h-4 w-4 text-primary" />
-          Call Waiter
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2 border-primary/30 hover:bg-primary/5"
-          onClick={() => setOrderFoodOpen(true)}
-          data-testid="button-order-food"
-        >
-          <UtensilsCrossed className="h-4 w-4 text-primary" />
-          Order Food
-        </Button>
-      </div>
-
-      {/* Order Food Dialog */}
-      <Dialog open={orderFoodOpen} onOpenChange={setOrderFoodOpen}>
-        <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Order Food</DialogTitle>
-            <DialogDescription>Select items and we'll send your order to the kitchen.</DialogDescription>
-          </DialogHeader>
-          {!restaurantMenu || restaurantMenu.items.length === 0 ? (
-            <div className="flex flex-col items-center py-8 text-muted-foreground">
-              <UtensilsCrossed className="h-10 w-10 mb-3 opacity-30" />
-              <p>Menu not available right now</p>
+      {/* ─── RESTORAN BÖLMƏSI ──────────────────────────────────────── */}
+      <Card className="border-orange-200/60 dark:border-orange-800/40 bg-gradient-to-br from-orange-50/60 to-background dark:from-orange-950/20" data-testid="card-restaurant-section">
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-orange-500 rounded-lg">
+              <UtensilsCrossed className="h-4 w-4 text-white" />
             </div>
-          ) : (
-            <div className="space-y-4">
-              {restaurantMenu.categories.map(cat => {
-                const catItems = restaurantMenu.items.filter(i => i.categoryId === cat.id && i.isAvailable);
-                if (catItems.length === 0) return null;
-                return (
-                  <div key={cat.id}>
-                    <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-2">{cat.name}</h4>
-                    <div className="space-y-2">
-                      {catItems.map(item => (
-                        <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg" data-testid={`menu-item-${item.id}`}>
-                          <div className="flex-1">
-                            <p className="font-medium text-sm">{item.name}</p>
-                            {item.description && <p className="text-xs text-muted-foreground">{item.description}</p>}
-                            <p className="text-sm font-semibold text-primary">${(item.priceCents / 100).toFixed(2)}</p>
+            <CardTitle className="text-base">Restoran Xidmətləri</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Quick action buttons */}
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              variant="outline"
+              className="h-14 flex-col gap-1 border-orange-200 hover:bg-orange-50 dark:border-orange-800 dark:hover:bg-orange-950"
+              onClick={() => callWaiterMutation.mutate()}
+              disabled={callWaiterMutation.isPending}
+              data-testid="button-call-waiter"
+            >
+              <Bell className="h-5 w-5 text-orange-500" />
+              <span className="text-xs font-medium">Qarson Çağır</span>
+            </Button>
+            <Button
+              className="h-14 flex-col gap-1 bg-orange-500 hover:bg-orange-600 text-white"
+              onClick={() => setOrderFoodOpen(true)}
+              data-testid="button-order-food"
+            >
+              <UtensilsCrossed className="h-5 w-5" />
+              <span className="text-xs font-medium">Yemək Sifariş Et</span>
+            </Button>
+          </div>
+
+          {/* Menu preview — top available items */}
+          {restaurantMenu && restaurantMenu.items.filter(i => i.isAvailable).length > 0 && (
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-2">Bu gün menüdə</p>
+              <div className="flex gap-2 flex-wrap">
+                {restaurantMenu.items.filter(i => i.isAvailable).slice(0, 5).map(item => (
+                  <button
+                    key={item.id}
+                    className="text-xs px-2.5 py-1.5 rounded-full border bg-background hover:bg-orange-50 dark:hover:bg-orange-950 hover:border-orange-300 transition-colors"
+                    onClick={() => {
+                      setSelectedMenuItems(prev => ({ ...prev, [item.id]: (prev[item.id] || 0) + 1 }));
+                      setOrderFoodOpen(true);
+                    }}
+                    data-testid={`quick-add-${item.id}`}
+                  >
+                    {item.name} · {(item.priceCents / 100).toFixed(2)} ₼
+                  </button>
+                ))}
+                {restaurantMenu.items.filter(i => i.isAvailable).length > 5 && (
+                  <button
+                    className="text-xs px-2.5 py-1.5 rounded-full border bg-background hover:bg-orange-50 dark:hover:bg-orange-950 hover:border-orange-300 transition-colors text-muted-foreground"
+                    onClick={() => setOrderFoodOpen(true)}
+                    data-testid="button-see-full-menu"
+                  >
+                    +{restaurantMenu.items.filter(i => i.isAvailable).length - 5} daha...
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ─── SİFARİŞ DİALOQU ────────────────────────────────────── */}
+      <Dialog open={orderFoodOpen} onOpenChange={(open) => {
+        setOrderFoodOpen(open);
+        if (!open) { setSelectedMenuItems({}); setTableNumber(""); }
+      }}>
+        <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UtensilsCrossed className="h-5 w-5 text-orange-500" />
+              Yemək Sifariş Et
+            </DialogTitle>
+            <DialogDescription>Menyudan seçin, sifariş birbaşa mətbəxə göndərilir.</DialogDescription>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+            {/* Order type selector */}
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                className={`p-3 rounded-xl border-2 text-sm font-medium flex flex-col items-center gap-1 transition-all ${
+                  orderType === "dine_in"
+                    ? "border-orange-500 bg-orange-50 dark:bg-orange-950 text-orange-700 dark:text-orange-300"
+                    : "border-muted bg-background hover:border-muted-foreground/30"
+                }`}
+                onClick={() => setOrderType("dine_in")}
+                data-testid="button-order-type-dine-in"
+              >
+                <UtensilsCrossed className="h-4 w-4" />
+                Restoranda yemək
+              </button>
+              <button
+                className={`p-3 rounded-xl border-2 text-sm font-medium flex flex-col items-center gap-1 transition-all ${
+                  orderType === "room_delivery"
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300"
+                    : "border-muted bg-background hover:border-muted-foreground/30"
+                }`}
+                onClick={() => setOrderType("room_delivery")}
+                data-testid="button-order-type-room-delivery"
+              >
+                <Bell className="h-4 w-4" />
+                Otağa çatdırılma
+              </button>
+            </div>
+
+            {/* Table number input for dine-in */}
+            {orderType === "dine_in" && (
+              <div className="space-y-1.5">
+                <Label htmlFor="table-number">Masa nömrəsi</Label>
+                <Input
+                  id="table-number"
+                  placeholder="Məs: 5, A3, VIP..."
+                  value={tableNumber}
+                  onChange={(e) => setTableNumber(e.target.value)}
+                  data-testid="input-table-number"
+                  className="text-sm"
+                />
+                <p className="text-xs text-muted-foreground">Masanızın üzərindəki nömrəni daxil edin.</p>
+              </div>
+            )}
+            {orderType === "room_delivery" && booking?.roomNumber && (
+              <div className="flex items-center gap-2 p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 text-sm text-blue-700 dark:text-blue-300">
+                <Bell className="h-4 w-4 shrink-0" />
+                Otaq {booking.roomNumber}-ə çatdırılacaq
+              </div>
+            )}
+
+            {/* Menu items */}
+            {!restaurantMenu || restaurantMenu.items.filter(i => i.isAvailable).length === 0 ? (
+              <div className="flex flex-col items-center py-8 text-muted-foreground">
+                <UtensilsCrossed className="h-10 w-10 mb-3 opacity-30" />
+                <p>Menü hal-hazırda mövcud deyil</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {restaurantMenu.categories.map(cat => {
+                  const catItems = restaurantMenu.items.filter(i => i.categoryId === cat.id && i.isAvailable);
+                  if (catItems.length === 0) return null;
+                  return (
+                    <div key={cat.id}>
+                      <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-2">{cat.name}</h4>
+                      <div className="space-y-2">
+                        {catItems.map(item => (
+                          <div key={item.id} className="flex items-center justify-between p-3 border rounded-xl hover:border-orange-200 transition-colors" data-testid={`menu-item-${item.id}`}>
+                            <div className="flex-1 min-w-0 pr-3">
+                              <p className="font-medium text-sm truncate">{item.name}</p>
+                              {item.description && <p className="text-xs text-muted-foreground truncate">{item.description}</p>}
+                              <p className="text-sm font-semibold text-orange-600 dark:text-orange-400 mt-0.5">{(item.priceCents / 100).toFixed(2)} ₼</p>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <Button size="sm" variant="outline" className="h-7 w-7 p-0 rounded-full"
+                                onClick={() => setSelectedMenuItems(prev => ({ ...prev, [item.id]: Math.max(0, (prev[item.id] || 0) - 1) }))}
+                                data-testid={`button-decrease-${item.id}`}>−</Button>
+                              <span className="w-5 text-center text-sm font-bold" data-testid={`qty-${item.id}`}>{selectedMenuItems[item.id] || 0}</span>
+                              <Button size="sm" className="h-7 w-7 p-0 rounded-full bg-orange-500 hover:bg-orange-600 text-white"
+                                onClick={() => setSelectedMenuItems(prev => ({ ...prev, [item.id]: (prev[item.id] || 0) + 1 }))}
+                                data-testid={`button-increase-${item.id}`}>+</Button>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-7 w-7 p-0"
-                              onClick={() => setSelectedMenuItems(prev => ({ ...prev, [item.id]: Math.max(0, (prev[item.id] || 0) - 1) }))}
-                              data-testid={`button-decrease-${item.id}`}
-                            >-</Button>
-                            <span className="w-5 text-center text-sm font-medium" data-testid={`qty-${item.id}`}>{selectedMenuItems[item.id] || 0}</span>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-7 w-7 p-0"
-                              onClick={() => setSelectedMenuItems(prev => ({ ...prev, [item.id]: (prev[item.id] || 0) + 1 }))}
-                              data-testid={`button-increase-${item.id}`}
-                            >+</Button>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+                {restaurantMenu.items.filter(i => !i.categoryId && i.isAvailable).map(item => (
+                  <div key={item.id} className="flex items-center justify-between p-3 border rounded-xl hover:border-orange-200 transition-colors" data-testid={`menu-item-${item.id}`}>
+                    <div className="flex-1 min-w-0 pr-3">
+                      <p className="font-medium text-sm truncate">{item.name}</p>
+                      {item.description && <p className="text-xs text-muted-foreground truncate">{item.description}</p>}
+                      <p className="text-sm font-semibold text-orange-600 dark:text-orange-400 mt-0.5">{(item.priceCents / 100).toFixed(2)} ₼</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Button size="sm" variant="outline" className="h-7 w-7 p-0 rounded-full"
+                        onClick={() => setSelectedMenuItems(prev => ({ ...prev, [item.id]: Math.max(0, (prev[item.id] || 0) - 1) }))}
+                        data-testid={`button-decrease-${item.id}`}>−</Button>
+                      <span className="w-5 text-center text-sm font-bold" data-testid={`qty-${item.id}`}>{selectedMenuItems[item.id] || 0}</span>
+                      <Button size="sm" className="h-7 w-7 p-0 rounded-full bg-orange-500 hover:bg-orange-600 text-white"
+                        onClick={() => setSelectedMenuItems(prev => ({ ...prev, [item.id]: (prev[item.id] || 0) + 1 }))}
+                        data-testid={`button-increase-${item.id}`}>+</Button>
                     </div>
                   </div>
-                );
-              })}
-              {/* Items without category */}
-              {restaurantMenu.items.filter(i => !i.categoryId && i.isAvailable).map(item => (
-                <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg" data-testid={`menu-item-${item.id}`}>
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">{item.name}</p>
-                    {item.description && <p className="text-xs text-muted-foreground">{item.description}</p>}
-                    <p className="text-sm font-semibold text-primary">${(item.priceCents / 100).toFixed(2)}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button size="sm" variant="outline" className="h-7 w-7 p-0"
-                      onClick={() => setSelectedMenuItems(prev => ({ ...prev, [item.id]: Math.max(0, (prev[item.id] || 0) - 1) }))}
-                      data-testid={`button-decrease-${item.id}`}>-</Button>
-                    <span className="w-5 text-center text-sm font-medium" data-testid={`qty-${item.id}`}>{selectedMenuItems[item.id] || 0}</span>
-                    <Button size="sm" variant="outline" className="h-7 w-7 p-0"
-                      onClick={() => setSelectedMenuItems(prev => ({ ...prev, [item.id]: (prev[item.id] || 0) + 1 }))}
-                      data-testid={`button-increase-${item.id}`}>+</Button>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Order summary + footer */}
+          {Object.values(selectedMenuItems).some(q => q > 0) && (
+            <div className="border-t pt-3 mt-2">
+              <div className="flex items-center justify-between text-sm mb-3">
+                <span className="text-muted-foreground">
+                  {Object.values(selectedMenuItems).reduce((s, q) => s + q, 0)} məhsul
+                </span>
+                <span className="font-semibold text-orange-600 dark:text-orange-400">
+                  {restaurantMenu
+                    ? (Object.entries(selectedMenuItems).reduce((sum, [id, qty]) => {
+                        const item = restaurantMenu.items.find(i => i.id === id);
+                        return sum + (item ? item.priceCents * qty : 0);
+                      }, 0) / 100).toFixed(2) + " ₼"
+                    : ""}
+                </span>
+              </div>
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOrderFoodOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => { setOrderFoodOpen(false); setSelectedMenuItems({}); setTableNumber(""); }}>Ləğv et</Button>
             <Button
+              className="bg-orange-500 hover:bg-orange-600 text-white"
               onClick={handlePlaceOrder}
               disabled={placeOrderMutation.isPending || Object.values(selectedMenuItems).every(q => q === 0)}
               data-testid="button-place-order"
             >
-              {placeOrderMutation.isPending ? "Placing..." : `Place Order${Object.values(selectedMenuItems).reduce((s, q) => s + q, 0) > 0 ? ` (${Object.values(selectedMenuItems).reduce((s, q) => s + q, 0)} items)` : ""}`}
+              {placeOrderMutation.isPending
+                ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Göndərilir...</>
+                : `Sifariş ver${Object.values(selectedMenuItems).reduce((s, q) => s + q, 0) > 0 ? ` (${Object.values(selectedMenuItems).reduce((s, q) => s + q, 0)})` : ""}`
+              }
             </Button>
           </DialogFooter>
         </DialogContent>

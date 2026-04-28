@@ -121,7 +121,7 @@ export function registerRestaurantRoutes(app: Express): void {
       const user = await storage.getUser(req.session.userId!);
       if (!user?.propertyId) return res.status(400).json({ message: "No property linked" });
 
-      const { tableNumber, guestName, bookingId, notes, items } = req.body;
+      const { tableNumber, roomNumber, orderType, guestName, bookingId, notes, items } = req.body;
       if (!items || items.length === 0) return res.status(400).json({ message: "Order must have at least one item" });
 
       const orderItems = items as Array<{ menuItemId?: string; itemName: string; quantity: number; unitPriceCents: number }>;
@@ -132,6 +132,8 @@ export function registerRestaurantRoutes(app: Express): void {
           tenantId: user.tenantId || user.ownerId || "",
           propertyId: user.propertyId,
           tableNumber: tableNumber || null,
+          roomNumber: roomNumber || null,
+          orderType: orderType || (tableNumber ? "dine_in" : "room_delivery"),
           guestName: guestName || user.fullName || null,
           bookingId: bookingId || null,
           notes: notes || null,

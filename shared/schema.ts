@@ -2284,6 +2284,8 @@ export const posOrders = pgTable("pos_orders", {
   folioId: varchar("folio_id"),
   bookingId: varchar("booking_id"),
   tableNumber: varchar("table_number"),
+  roomNumber: varchar("room_number"),
+  orderType: varchar("order_type").default("dine_in"),
   guestName: varchar("guest_name"),
   waiterId: varchar("waiter_id"),
   kitchenStatus: varchar("kitchen_status").notNull().default("pending"),

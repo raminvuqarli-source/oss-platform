@@ -610,7 +610,7 @@ export interface IStorage {
 
   // Restaurant / POS — Orders
   createPosOrder(order: InsertPosOrder, items: InsertPosOrderItem[]): Promise<PosOrder>;
-  getPosOrders(propertyId: string, filters?: { kitchenStatus?: string; settlementStatus?: string }): Promise<PosOrder[]>;
+  getPosOrders(propertyId: string, filters?: { kitchenStatus?: string; settlementStatus?: string }): Promise<(PosOrder & { items: PosOrderItem[] })[]>;
   getPosOrder(id: string): Promise<(PosOrder & { items: PosOrderItem[] }) | undefined>;
   updatePosOrderKitchenStatus(id: string, status: string, timestamp?: Date): Promise<PosOrder | undefined>;
   updatePosOrderWaiter(id: string, waiterId: string): Promise<PosOrder | undefined>;
@@ -3189,11 +3189,20 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
-  async getPosOrders(propertyId: string, filters?: { kitchenStatus?: string; settlementStatus?: string }): Promise<PosOrder[]> {
+  async getPosOrders(propertyId: string, filters?: { kitchenStatus?: string; settlementStatus?: string }): Promise<(PosOrder & { items: PosOrderItem[] })[]> {
     const conditions = [eq(posOrders.propertyId, propertyId)];
     if (filters?.kitchenStatus) conditions.push(eq(posOrders.kitchenStatus, filters.kitchenStatus));
     if (filters?.settlementStatus) conditions.push(eq(posOrders.settlementStatus, filters.settlementStatus));
-    return db.select().from(posOrders).where(and(...conditions)).orderBy(desc(posOrders.createdAt));
+    const orders = await db.select().from(posOrders).where(and(...conditions)).orderBy(desc(posOrders.createdAt));
+    if (orders.length === 0) return [];
+    const orderIds = orders.map(o => o.id);
+    const allItems = await db.select().from(posOrderItems).where(inArray(posOrderItems.orderId, orderIds));
+    const itemsByOrder = allItems.reduce((acc, item) => {
+      if (!acc[item.orderId]) acc[item.orderId] = [];
+      acc[item.orderId].push(item);
+      return acc;
+    }, {} as Record<string, PosOrderItem[]>);
+    return orders.map(o => ({ ...o, items: itemsByOrder[o.id] || [] }));
   }
 
   async getPosOrder(id: string): Promise<(PosOrder & { items: PosOrderItem[] }) | undefined> {
