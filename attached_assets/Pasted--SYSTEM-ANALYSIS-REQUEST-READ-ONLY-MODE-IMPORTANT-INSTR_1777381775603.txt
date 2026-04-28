@@ -1,0 +1,27 @@
+### SYSTEM ANALYSIS REQUEST - READ ONLY MODE
+
+**IMPORTANT INSTRUCTION:** Please do NOT modify, delete, or overwrite any existing code or files at this stage. Your task is strictly to analyze the current codebase and provide information, explanations, and architectural suggestions based on my questions. I only need a comprehensive report and code samples in the chat window, not direct changes to the project files.
+
+---
+
+### System Context: Orange Smart Service (O.S.S) PMS
+I am developing a Property Management System (PMS) called **Orange Smart Service (O.S.S)** using C# and .NET. I need you to analyze the current codebase and provide technical information for the following modules:
+
+1. **POS (Point of Sale) Integration:** - Check the current database schema: Is there any existing logic for "Orders," "Menu Items," or "Transactions"? If not, propose a minimal schema to link POS sales to a guest's room bill (Folio).
+
+2. **Multi-Property Security:** - How can we programmatically prevent users from registering multiple independent hotels under a single subscription "Core"? Propose a validation logic to ensure one "Core" equals one legitimate business entity.
+
+3. **Password Recovery:** - The "Forget Password" functionality is currently broken. Please inspect the SMTP configuration and the Token generation logic in the files. What is missing?
+
+4. **Housekeeping Workflow:** - How does the system currently handle room statuses? Suggest how housekeeping staff should interact with the system (API endpoints or status logic).
+
+5. **SPA & Wellness Module:** - What features currently exist for the SPA department? How should we handle "Time-Slot" based appointments and therapist schedules?
+
+6. **Staff Notifications:** - When a Hotel Owner sends a broadcast message to all staff, where is this data stored or displayed? Suggest a real-time notification architecture.
+
+7. **Marketing Referral (New Feature):** - During Hotel Registration, we need a field: "How did you hear about O.S.S?". If they mention a marketing staff member, we need to track this for commission. Suggest the DB updates and UI logic for this.
+
+8. **External Integrations:**
+   - Suggest how the API should be structured to connect with Channel Managers like SiteMinder or Channex.
+
+**Please provide a detailed report based on your analysis of the files.**
