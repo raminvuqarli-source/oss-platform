@@ -51,6 +51,7 @@ import {
   LockOpen,
   LightbulbOff,
   XCircle,
+  Bell,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -267,6 +268,9 @@ export default function GuestDashboard() {
   const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   
+  const [orderFoodOpen, setOrderFoodOpen] = useState(false);
+  const [selectedMenuItems, setSelectedMenuItems] = useState<Record<string, number>>({});
+
   const [localTemperature, setLocalTemperature] = useState<number>(22);
   const [localBrightness, setLocalBrightness] = useState<number>(50);
   const [localBathroomBrightness, setLocalBathroomBrightness] = useState<number>(50);
@@ -357,6 +361,47 @@ export default function GuestDashboard() {
       showErrorToast(toast, error);
     },
   });
+
+  const { data: restaurantMenu } = useQuery<{ categories: Array<{ id: string; name: string }>; items: Array<{ id: string; name: string; description: string | null; priceCents: number; categoryId: string | null; isAvailable: boolean }> }>({
+    queryKey: ["/api/restaurant/menu"],
+    enabled: orderFoodOpen,
+  });
+
+  const callWaiterMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/restaurant/waiter-call", {
+      roomNumber: booking?.unitId || undefined,
+      bookingId: booking?.id || undefined,
+    }),
+    onSuccess: () => toast({ title: "Waiter notified", description: "A waiter will be with you shortly." }),
+    onError: () => toast({ title: "Could not call waiter", variant: "destructive" }),
+  });
+
+  const placeOrderMutation = useMutation({
+    mutationFn: (items: Array<{ menuItemId: string; itemName: string; quantity: number; unitPriceCents: number }>) =>
+      apiRequest("POST", "/api/restaurant/orders", {
+        bookingId: booking?.id,
+        guestName: user?.fullName,
+        items,
+      }),
+    onSuccess: () => {
+      setSelectedMenuItems({});
+      setOrderFoodOpen(false);
+      toast({ title: "Order placed!", description: "The kitchen has received your order." });
+    },
+    onError: () => toast({ title: "Failed to place order", variant: "destructive" }),
+  });
+
+  const handlePlaceOrder = () => {
+    if (!restaurantMenu) return;
+    const items = Object.entries(selectedMenuItems)
+      .filter(([, qty]) => qty > 0)
+      .map(([id, qty]) => {
+        const item = restaurantMenu.items.find(i => i.id === id)!;
+        return { menuItemId: id, itemName: item.name, quantity: qty, unitPriceCents: item.priceCents };
+      });
+    if (items.length === 0) return;
+    placeOrderMutation.mutate(items);
+  };
 
   const handleCreatePrepOrder = () => {
     if (!prepOccasion) return;
@@ -1295,6 +1340,116 @@ export default function GuestDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Restaurant Quick Actions */}
+      <div className="flex gap-3 flex-wrap">
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2 border-primary/30 hover:bg-primary/5"
+          onClick={() => callWaiterMutation.mutate()}
+          disabled={callWaiterMutation.isPending}
+          data-testid="button-call-waiter"
+        >
+          <Bell className="h-4 w-4 text-primary" />
+          Call Waiter
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2 border-primary/30 hover:bg-primary/5"
+          onClick={() => setOrderFoodOpen(true)}
+          data-testid="button-order-food"
+        >
+          <UtensilsCrossed className="h-4 w-4 text-primary" />
+          Order Food
+        </Button>
+      </div>
+
+      {/* Order Food Dialog */}
+      <Dialog open={orderFoodOpen} onOpenChange={setOrderFoodOpen}>
+        <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Order Food</DialogTitle>
+            <DialogDescription>Select items and we'll send your order to the kitchen.</DialogDescription>
+          </DialogHeader>
+          {!restaurantMenu || restaurantMenu.items.length === 0 ? (
+            <div className="flex flex-col items-center py-8 text-muted-foreground">
+              <UtensilsCrossed className="h-10 w-10 mb-3 opacity-30" />
+              <p>Menu not available right now</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {restaurantMenu.categories.map(cat => {
+                const catItems = restaurantMenu.items.filter(i => i.categoryId === cat.id && i.isAvailable);
+                if (catItems.length === 0) return null;
+                return (
+                  <div key={cat.id}>
+                    <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-2">{cat.name}</h4>
+                    <div className="space-y-2">
+                      {catItems.map(item => (
+                        <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg" data-testid={`menu-item-${item.id}`}>
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">{item.name}</p>
+                            {item.description && <p className="text-xs text-muted-foreground">{item.description}</p>}
+                            <p className="text-sm font-semibold text-primary">${(item.priceCents / 100).toFixed(2)}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 w-7 p-0"
+                              onClick={() => setSelectedMenuItems(prev => ({ ...prev, [item.id]: Math.max(0, (prev[item.id] || 0) - 1) }))}
+                              data-testid={`button-decrease-${item.id}`}
+                            >-</Button>
+                            <span className="w-5 text-center text-sm font-medium" data-testid={`qty-${item.id}`}>{selectedMenuItems[item.id] || 0}</span>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 w-7 p-0"
+                              onClick={() => setSelectedMenuItems(prev => ({ ...prev, [item.id]: (prev[item.id] || 0) + 1 }))}
+                              data-testid={`button-increase-${item.id}`}
+                            >+</Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+              {/* Items without category */}
+              {restaurantMenu.items.filter(i => !i.categoryId && i.isAvailable).map(item => (
+                <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg" data-testid={`menu-item-${item.id}`}>
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">{item.name}</p>
+                    {item.description && <p className="text-xs text-muted-foreground">{item.description}</p>}
+                    <p className="text-sm font-semibold text-primary">${(item.priceCents / 100).toFixed(2)}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="outline" className="h-7 w-7 p-0"
+                      onClick={() => setSelectedMenuItems(prev => ({ ...prev, [item.id]: Math.max(0, (prev[item.id] || 0) - 1) }))}
+                      data-testid={`button-decrease-${item.id}`}>-</Button>
+                    <span className="w-5 text-center text-sm font-medium" data-testid={`qty-${item.id}`}>{selectedMenuItems[item.id] || 0}</span>
+                    <Button size="sm" variant="outline" className="h-7 w-7 p-0"
+                      onClick={() => setSelectedMenuItems(prev => ({ ...prev, [item.id]: (prev[item.id] || 0) + 1 }))}
+                      data-testid={`button-increase-${item.id}`}>+</Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOrderFoodOpen(false)}>Cancel</Button>
+            <Button
+              onClick={handlePlaceOrder}
+              disabled={placeOrderMutation.isPending || Object.values(selectedMenuItems).every(q => q === 0)}
+              data-testid="button-place-order"
+            >
+              {placeOrderMutation.isPending ? "Placing..." : `Place Order${Object.values(selectedMenuItems).reduce((s, q) => s + q, 0) > 0 ? ` (${Object.values(selectedMenuItems).reduce((s, q) => s + q, 0)} items)` : ""}`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div ref={servicesRef}>
         <div className="flex items-center justify-between gap-4 mb-4">

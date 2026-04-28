@@ -209,6 +209,21 @@ import {
   type CancellationPolicy,
   type InsertCancellationPolicy,
   referralCommissions,
+  posMenuCategories,
+  type PosMenuCategory,
+  type InsertPosMenuCategory,
+  posMenuItems,
+  type PosMenuItem,
+  type InsertPosMenuItem,
+  posOrders,
+  type PosOrder,
+  type InsertPosOrder,
+  posOrderItems,
+  type PosOrderItem,
+  type InsertPosOrderItem,
+  waiterCalls,
+  type WaiterCall,
+  type InsertWaiterCall,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -582,6 +597,29 @@ export interface IStorage {
   // API Usage Logs
   createApiUsageLog(tenantId: string, endpoint: string): Promise<void>;
   countApiUsageThisMonth(tenantId: string): Promise<number>;
+
+  // Restaurant / POS — Menu
+  getPosMenuCategories(propertyId: string): Promise<PosMenuCategory[]>;
+  createPosMenuCategory(data: InsertPosMenuCategory): Promise<PosMenuCategory>;
+  updatePosMenuCategory(id: string, updates: Partial<PosMenuCategory>): Promise<PosMenuCategory | undefined>;
+  deletePosMenuCategory(id: string): Promise<void>;
+  getPosMenuItems(propertyId: string, categoryId?: string): Promise<PosMenuItem[]>;
+  createPosMenuItem(data: InsertPosMenuItem): Promise<PosMenuItem>;
+  updatePosMenuItem(id: string, updates: Partial<PosMenuItem>): Promise<PosMenuItem | undefined>;
+  deletePosMenuItem(id: string): Promise<void>;
+
+  // Restaurant / POS — Orders
+  createPosOrder(order: InsertPosOrder, items: InsertPosOrderItem[]): Promise<PosOrder>;
+  getPosOrders(propertyId: string, filters?: { kitchenStatus?: string; settlementStatus?: string }): Promise<PosOrder[]>;
+  getPosOrder(id: string): Promise<(PosOrder & { items: PosOrderItem[] }) | undefined>;
+  updatePosOrderKitchenStatus(id: string, status: string, timestamp?: Date): Promise<PosOrder | undefined>;
+  updatePosOrderWaiter(id: string, waiterId: string): Promise<PosOrder | undefined>;
+  settlePosOrder(id: string, settlementStatus: string, folioId?: string): Promise<PosOrder | undefined>;
+
+  // Restaurant — Waiter Calls
+  createWaiterCall(data: InsertWaiterCall): Promise<WaiterCall>;
+  getWaiterCalls(propertyId: string, status?: string): Promise<WaiterCall[]>;
+  acknowledgeWaiterCall(id: string, userId: string): Promise<WaiterCall | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3095,6 +3133,115 @@ export class DatabaseStorage implements IStorage {
     }
     const [s] = await db.insert(dailyFinancialSummaries).values(data).returning();
     return s;
+  }
+
+  // ===================== RESTAURANT / POS — MENU =====================
+
+  async getPosMenuCategories(propertyId: string): Promise<PosMenuCategory[]> {
+    return db.select().from(posMenuCategories)
+      .where(eq(posMenuCategories.propertyId, propertyId))
+      .orderBy(posMenuCategories.sortOrder, posMenuCategories.name);
+  }
+
+  async createPosMenuCategory(data: InsertPosMenuCategory): Promise<PosMenuCategory> {
+    const [c] = await db.insert(posMenuCategories).values(data).returning();
+    return c;
+  }
+
+  async updatePosMenuCategory(id: string, updates: Partial<PosMenuCategory>): Promise<PosMenuCategory | undefined> {
+    const [c] = await db.update(posMenuCategories).set(updates).where(eq(posMenuCategories.id, id)).returning();
+    return c;
+  }
+
+  async deletePosMenuCategory(id: string): Promise<void> {
+    await db.delete(posMenuCategories).where(eq(posMenuCategories.id, id));
+  }
+
+  async getPosMenuItems(propertyId: string, categoryId?: string): Promise<PosMenuItem[]> {
+    const conditions = [eq(posMenuItems.propertyId, propertyId)];
+    if (categoryId) conditions.push(eq(posMenuItems.categoryId, categoryId));
+    return db.select().from(posMenuItems).where(and(...conditions)).orderBy(posMenuItems.name);
+  }
+
+  async createPosMenuItem(data: InsertPosMenuItem): Promise<PosMenuItem> {
+    const [item] = await db.insert(posMenuItems).values(data).returning();
+    return item;
+  }
+
+  async updatePosMenuItem(id: string, updates: Partial<PosMenuItem>): Promise<PosMenuItem | undefined> {
+    const [item] = await db.update(posMenuItems).set(updates).where(eq(posMenuItems.id, id)).returning();
+    return item;
+  }
+
+  async deletePosMenuItem(id: string): Promise<void> {
+    await db.delete(posMenuItems).where(eq(posMenuItems.id, id));
+  }
+
+  // ===================== RESTAURANT / POS — ORDERS =====================
+
+  async createPosOrder(order: InsertPosOrder, items: InsertPosOrderItem[]): Promise<PosOrder> {
+    return db.transaction(async (tx) => {
+      const [o] = await tx.insert(posOrders).values(order).returning();
+      if (items.length > 0) {
+        await tx.insert(posOrderItems).values(items.map(item => ({ ...item, orderId: o.id })));
+      }
+      return o;
+    });
+  }
+
+  async getPosOrders(propertyId: string, filters?: { kitchenStatus?: string; settlementStatus?: string }): Promise<PosOrder[]> {
+    const conditions = [eq(posOrders.propertyId, propertyId)];
+    if (filters?.kitchenStatus) conditions.push(eq(posOrders.kitchenStatus, filters.kitchenStatus));
+    if (filters?.settlementStatus) conditions.push(eq(posOrders.settlementStatus, filters.settlementStatus));
+    return db.select().from(posOrders).where(and(...conditions)).orderBy(desc(posOrders.createdAt));
+  }
+
+  async getPosOrder(id: string): Promise<(PosOrder & { items: PosOrderItem[] }) | undefined> {
+    const order = await db.select().from(posOrders).where(eq(posOrders.id, id)).limit(1);
+    if (!order[0]) return undefined;
+    const items = await db.select().from(posOrderItems).where(eq(posOrderItems.orderId, id));
+    return { ...order[0], items };
+  }
+
+  async updatePosOrderKitchenStatus(id: string, status: string, timestamp?: Date): Promise<PosOrder | undefined> {
+    const updates: Partial<PosOrder> = { kitchenStatus: status };
+    if (status === "ready") updates.readyAt = timestamp || new Date();
+    if (status === "delivered") updates.deliveredAt = timestamp || new Date();
+    const [o] = await db.update(posOrders).set(updates).where(eq(posOrders.id, id)).returning();
+    return o;
+  }
+
+  async updatePosOrderWaiter(id: string, waiterId: string): Promise<PosOrder | undefined> {
+    const [o] = await db.update(posOrders).set({ waiterId }).where(eq(posOrders.id, id)).returning();
+    return o;
+  }
+
+  async settlePosOrder(id: string, settlementStatus: string, folioId?: string): Promise<PosOrder | undefined> {
+    const updates: Partial<PosOrder> = { settlementStatus, settledAt: new Date() };
+    if (folioId) updates.folioId = folioId;
+    const [o] = await db.update(posOrders).set(updates).where(eq(posOrders.id, id)).returning();
+    return o;
+  }
+
+  // ===================== RESTAURANT — WAITER CALLS =====================
+
+  async createWaiterCall(data: InsertWaiterCall): Promise<WaiterCall> {
+    const [c] = await db.insert(waiterCalls).values(data).returning();
+    return c;
+  }
+
+  async getWaiterCalls(propertyId: string, status?: string): Promise<WaiterCall[]> {
+    const conditions = [eq(waiterCalls.propertyId, propertyId)];
+    if (status) conditions.push(eq(waiterCalls.status, status));
+    return db.select().from(waiterCalls).where(and(...conditions)).orderBy(desc(waiterCalls.calledAt));
+  }
+
+  async acknowledgeWaiterCall(id: string, userId: string): Promise<WaiterCall | undefined> {
+    const [c] = await db.update(waiterCalls)
+      .set({ status: "acknowledged", acknowledgedAt: new Date(), acknowledgedBy: userId })
+      .where(eq(waiterCalls.id, id))
+      .returning();
+    return c;
   }
 }
 

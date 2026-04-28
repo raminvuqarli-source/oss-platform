@@ -23,6 +23,25 @@ function broadcastToOwner(ownerId: string, message: any) {
   }
 }
 
+// Exported so other modules can push real-time events to all staff of a tenant
+export function broadcastToTenant(tenantId: string, message: any) {
+  broadcastToOwner(tenantId, message);
+}
+
+// Alias using propertyId — resolved at the call site by the caller
+export function broadcastToProperty(propertyId: string, message: any) {
+  // We broadcast to all tenants that have this propertyId in their connection set.
+  // Since connections are keyed by tenantId (ownerId), we iterate all and let clients filter.
+  ownerConnections.forEach((clients, _tenantId) => {
+    const data = JSON.stringify({ ...message, propertyId });
+    clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(data);
+      }
+    });
+  });
+}
+
 function parseSessionId(cookieHeader: string | undefined): string | null {
   if (!cookieHeader) return null;
   const cookies = cookie.parse(cookieHeader);

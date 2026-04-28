@@ -2243,3 +2243,88 @@ export const insertLeadSchema = createInsertSchema(leads).omit({
 });
 export type InsertLead = z.infer<typeof insertLeadSchema>;
 export type Lead = typeof leads.$inferSelect;
+
+// ===================== RESTAURANT / POS ECOSYSTEM =====================
+
+export const posMenuCategories = pgTable("pos_menu_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull(),
+  propertyId: varchar("property_id").notNull(),
+  name: varchar("name").notNull(),
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+export const insertPosMenuCategorySchema = createInsertSchema(posMenuCategories).omit({ id: true, createdAt: true });
+export type InsertPosMenuCategory = z.infer<typeof insertPosMenuCategorySchema>;
+export type PosMenuCategory = typeof posMenuCategories.$inferSelect;
+
+export const posMenuItems = pgTable("pos_menu_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull(),
+  propertyId: varchar("property_id").notNull(),
+  categoryId: varchar("category_id"),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  priceCents: integer("price_cents").notNull(),
+  imageUrl: text("image_url"),
+  isAvailable: boolean("is_available").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+export const insertPosMenuItemSchema = createInsertSchema(posMenuItems).omit({ id: true, createdAt: true });
+export type InsertPosMenuItem = z.infer<typeof insertPosMenuItemSchema>;
+export type PosMenuItem = typeof posMenuItems.$inferSelect;
+
+// kitchen_status: pending | cooking | ready | delivered
+// settlement_status: pending | posted_to_folio | cash_paid | cancelled
+export const posOrders = pgTable("pos_orders", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull(),
+  propertyId: varchar("property_id").notNull(),
+  folioId: varchar("folio_id"),
+  bookingId: varchar("booking_id"),
+  tableNumber: varchar("table_number"),
+  guestName: varchar("guest_name"),
+  waiterId: varchar("waiter_id"),
+  kitchenStatus: varchar("kitchen_status").notNull().default("pending"),
+  settlementStatus: varchar("settlement_status").notNull().default("pending"),
+  notes: text("notes"),
+  totalCents: integer("total_cents").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  readyAt: timestamp("ready_at"),
+  deliveredAt: timestamp("delivered_at"),
+  settledAt: timestamp("settled_at"),
+});
+export const insertPosOrderSchema = createInsertSchema(posOrders).omit({ id: true, createdAt: true });
+export type InsertPosOrder = z.infer<typeof insertPosOrderSchema>;
+export type PosOrder = typeof posOrders.$inferSelect;
+
+export const posOrderItems = pgTable("pos_order_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  orderId: varchar("order_id").notNull(),
+  menuItemId: varchar("menu_item_id"),
+  itemName: varchar("item_name").notNull(),
+  quantity: integer("quantity").notNull().default(1),
+  unitPriceCents: integer("unit_price_cents").notNull(),
+  totalCents: integer("total_cents").notNull(),
+});
+export const insertPosOrderItemSchema = createInsertSchema(posOrderItems).omit({ id: true });
+export type InsertPosOrderItem = z.infer<typeof insertPosOrderItemSchema>;
+export type PosOrderItem = typeof posOrderItems.$inferSelect;
+
+// Waiter call logs — guest calls waiter from table / room
+export const waiterCalls = pgTable("waiter_calls", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull(),
+  propertyId: varchar("property_id").notNull(),
+  bookingId: varchar("booking_id"),
+  tableNumber: varchar("table_number"),
+  roomNumber: varchar("room_number"),
+  status: varchar("status").notNull().default("pending"), // pending | acknowledged
+  calledAt: timestamp("called_at").defaultNow(),
+  acknowledgedAt: timestamp("acknowledged_at"),
+  acknowledgedBy: varchar("acknowledged_by"),
+});
+export const insertWaiterCallSchema = createInsertSchema(waiterCalls).omit({ id: true, calledAt: true });
+export type InsertWaiterCall = z.infer<typeof insertWaiterCallSchema>;
+export type WaiterCall = typeof waiterCalls.$inferSelect;

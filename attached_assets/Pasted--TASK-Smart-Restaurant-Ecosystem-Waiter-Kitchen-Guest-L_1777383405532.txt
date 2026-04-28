@@ -1,0 +1,34 @@
+### TASK: Smart Restaurant Ecosystem (Waiter-Kitchen-Guest Loop)
+
+I need to implement a full-cycle restaurant management system within O.S.S. This involves specific roles, real-time interactions, and financial approvals.
+
+#### 1. Hierarchy & User Management
+- **Owner Role:** Can create/assign **Restaurant Managers**.
+- **Restaurant Manager Dashboard:**
+  - Capability to create **Kitchen Staff** and **Waiters**.
+  - Full Menu Management (Add/Edit/Delete items, prices, and categories).
+  - Ability to view total daily restaurant turnover.
+
+#### 2. The Service Loop (Real-Time Workflow)
+- **Guest Order:** Guest selects a table, chooses items from the menu, and submits.
+- **Kitchen Task:** Immediate notification to Kitchen Staff. Once prepared, Kitchen clicks "READY".
+- **Waiter Action:** - Upon "READY" status, the Waiter gets a real-time alert.
+  - Waiter picks up the food and clicks a **"DELIVERED" (VERDİM)** button once served.
+- **Guest Interaction:** Add a **"CALL WAITER" (QARSONU ÇAĞIR)** button in the Guest Panel.
+  - Trigger a high-priority visual/audio alert on the Waiter and Manager dashboards.
+  - Waiters must have an "Acknowledge" button to dismiss the call.
+
+#### 3. Financial Settlement
+- **Reception/Cashier Approval:** After the Waiter clicks "DELIVERED", the order moves to a "Pending Settlement" list for the Restaurant Reception.
+- **Approval Logic:** Once the Receptionist confirms the order:
+  - If linked to a room, auto-post to `folio_charges` (chargeType: "restaurant").
+  - If a walk-in guest, mark as "Cash/Card Paid".
+- **Reporting:** Update the Owner's dashboard to display restaurant-specific analytics (revenue per day/waiter/category).
+
+#### 4. Technical Specifications
+- **Schema Updates:** - Add `waiter_id` and `kitchen_status` (Pending, Cooking, Ready, Delivered) to `pos_orders`.
+  - Create a `service_requests` table to track "Call Waiter" logs and response times.
+- **WebSocket Logic:** Implement `ORDER_READY`, `GUEST_CALL_WAITER`, and `NEW_ORDER` events in `server/websocket/index.ts`.
+- **UI:** Create separate views for `KitchenDisplay`, `WaiterView`, and `RestaurantManagerAdmin`.
+
+**Please implement the Database changes first, followed by the Backend logic and Real-time notifications. Finally, build the Frontend interfaces for each role.**

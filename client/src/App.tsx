@@ -36,6 +36,9 @@ const PrivacyPolicy = lazy(() => import("@/pages/privacy-policy"));
 const TermsOfService = lazy(() => import("@/pages/terms-of-service"));
 const OnboardingWizard = lazy(() => import("@/pages/onboarding-wizard"));
 const BillingPage = lazy(() => import("@/pages/billing"));
+const KitchenDisplay = lazy(() => import("@/pages/kitchen-display"));
+const WaiterView = lazy(() => import("@/pages/waiter-view"));
+const RestaurantManager = lazy(() => import("@/pages/restaurant-manager"));
 
 function PageLoader() {
   return (
@@ -111,6 +114,12 @@ function DashboardRouter() {
       return <OwnerDashboardWithOnboarding />;
     case "oss_super_admin":
       return <Redirect to="/oss-admin" />;
+    case "kitchen_staff":
+      return <Redirect to="/restaurant/kitchen" />;
+    case "waiter":
+      return <Redirect to="/restaurant/waiter" />;
+    case "restaurant_manager":
+      return <Redirect to="/restaurant/manager" />;
     default:
       return <GuestDashboard />;
   }
@@ -178,6 +187,9 @@ const protectedRoutes: { path: string; component: React.ComponentType; guardTria
   { path: "/settings", component: Settings, guardTrial: true },
   { path: "/staff", component: StaffList, guardTrial: true },
   { path: "/guests", component: GuestsPage, guardTrial: true },
+  { path: "/restaurant/kitchen", component: KitchenDisplay },
+  { path: "/restaurant/waiter", component: WaiterView },
+  { path: "/restaurant/manager", component: RestaurantManager },
 ];
 
 function Router() {

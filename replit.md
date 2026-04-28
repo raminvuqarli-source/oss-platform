@@ -70,6 +70,16 @@ Preferred communication style: Simple, everyday language.
 - **Public Endpoints**: `POST /api/ai-chat` and `POST /api/ai-chat/lead` are whitelisted as public (no auth required).
 - **Files**: `client/src/components/ai-chat-widget.tsx`, `server/routes/ai-chat.routes.ts`.
 
+### Smart Restaurant Ecosystem
+- **Waiter-Kitchen-Guest Loop**: Full POS-style restaurant management. Tables: `pos_menu_categories`, `pos_menu_items`, `pos_orders`, `pos_order_items`, `waiter_calls`. New user roles: `restaurant_manager`, `kitchen_staff`, `waiter`.
+- **Kitchen Display System** (`/restaurant/kitchen`): Real-time KDS with WebSocket push, order cards with status flow (pending→cooking→ready).
+- **Waiter View** (`/restaurant/waiter`): Picks up ready orders, marks delivered, acknowledges waiter calls with real-time notifications.
+- **Restaurant Manager** (`/restaurant/manager`): Menu CRUD (categories + items), live order board, settlement flow (cash/card/room charge → folio post), today's analytics.
+- **Guest Ordering**: "Call Waiter" one-tap button and "Order Food" modal with categorized menu + quantity picker added to guest dashboard.
+- **Settlement Integration**: If `bookingId` present, restaurant charges are posted to the guest's open folio as `chargeType: "restaurant"` with idempotency key.
+- **APIs**: `/api/restaurant/menu`, `/api/restaurant/menu/categories`, `/api/restaurant/menu/items`, `/api/restaurant/orders`, `/api/restaurant/orders/:id/kitchen-status`, `/api/restaurant/orders/:id/deliver`, `/api/restaurant/orders/:id/settle`, `/api/restaurant/waiter-call`, `/api/restaurant/waiter-calls`, `/api/restaurant/waiter-calls/:id/acknowledge`, `/api/restaurant/analytics`.
+- **WebSocket Events**: `RESTAURANT_NEW_ORDER`, `RESTAURANT_ORDER_READY`, `RESTAURANT_ORDER_DELIVERED`, `RESTAURANT_CALL_WAITER`, `RESTAURANT_WAITER_ACKNOWLEDGED` — broadcast via `broadcastToProperty()`.
+
 ### Automated Systems
 - **Marketing Referral System**: `referral_source`, `referral_staff_id`, `referral_notes` fields on `owners` table. New `referral_commissions` table tracks pending/paid commissions per referring staff member. Registration form includes "How did you hear about us?" with optional staff referral code validation (code stored as `referral_code` on `users`). Backend validates staff referral code on `POST /api/auth/register-hotel` and creates a commission record automatically.
 - **Multi-Property Business Entity Check**: `POST /api/properties` validates that if the owner has a `tax_id` on file and the new property provides a different `tax_id`, creation is blocked with message: "New properties must belong to the same legal business entity." Super admins are exempt.
