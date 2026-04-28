@@ -39,6 +39,7 @@ const BillingPage = lazy(() => import("@/pages/billing"));
 const KitchenDisplay = lazy(() => import("@/pages/kitchen-display"));
 const WaiterView = lazy(() => import("@/pages/waiter-view"));
 const RestaurantManager = lazy(() => import("@/pages/restaurant-manager"));
+const RestaurantCleaner = lazy(() => import("@/pages/restaurant-cleaner"));
 const MarketingDashboard = lazy(() => import("@/pages/marketing-dashboard"));
 
 function PageLoader() {
@@ -121,6 +122,8 @@ function DashboardRouter() {
       return <Redirect to="/restaurant/waiter" />;
     case "restaurant_manager":
       return <Redirect to="/restaurant/manager" />;
+    case "restaurant_cleaner":
+      return <Redirect to="/restaurant/cleaner" />;
     case "marketing_staff":
       return <Redirect to="/marketing" />;
     default:
@@ -202,6 +205,7 @@ const protectedRoutes: { path: string; component: React.ComponentType; guardTria
   { path: "/restaurant/kitchen", component: KitchenDisplay },
   { path: "/restaurant/waiter", component: WaiterView },
   { path: "/restaurant/manager", component: RestaurantManager },
+  { path: "/restaurant/cleaner", component: RestaurantCleaner },
 ];
 
 function Router() {

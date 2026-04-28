@@ -70,15 +70,20 @@ Preferred communication style: Simple, everyday language.
 - **Public Endpoints**: `POST /api/ai-chat` and `POST /api/ai-chat/lead` are whitelisted.
 
 ### Smart Restaurant Ecosystem
-- **Waiter-Kitchen-Guest Loop**: Full POS-style restaurant management with dedicated user roles (`restaurant_manager`, `kitchen_staff`, `waiter`).
-- **Kitchen Display System**: Real-time KDS with WebSocket push for order status updates.
-- **Waiter View**: Manages order delivery and acknowledges waiter calls with real-time notifications.
-- **Restaurant Manager**: Menu CRUD, live order board, settlement flow, and daily analytics.
+- **Roles**: `restaurant_manager`, `kitchen_staff`, `waiter`, `restaurant_cleaner` — each with their own dashboard and sidebar navigation.
+- **Kitchen Display System**: Real-time KDS with WebSocket push; prominent "HAZIRDIR" button broadcasts readiness to all staff.
+- **Waiter View**: Manages order delivery with prominent "HAZIRDIR — Çatdırıldı" button; waiter call acknowledgement.
+- **Restaurant Manager Dashboard**: 8-tab panel: Sifarişlər, Hesablaşma, Otaqlar (room billing), Menyu, Qarsonlar (waiter profiles), Temizlik (cleaning tasks), Heyat (staff), Maliyyə (finance breakdown).
+- **Waiter Profile Management**: Manager can set salary, tax rate, and table assignments per waiter via edit modal.
+- **Cleaning Task System**: Manager creates tasks with location/assignment; cleaners mark done with optional photo upload.
+- **Restaurant Cleaner Dashboard** (`/restaurant/cleaner`): Shows assigned tasks, mark in-progress/done, photo upload to prove completion.
+- **Room Orders View**: Manager sees all rooms with pending restaurant bills, grouped by room, with settle button.
+- **Restaurant Finance Tab**: Today/month revenue, all-time totals, breakdown by payment type (cash/card/room charge), order status distribution.
+- **Hotel Owner/Manager Finance Integration**: `RestaurantRevenueCard` in owner dashboard performance tab showing restaurant revenue metrics.
 - **Guest Ordering**: "Call Waiter" button and "Order Food" modal on guest dashboard.
 - **Settlement Integration**: Restaurant charges can be posted to the guest's open folio.
-- **APIs**: Comprehensive set of APIs for menu, orders, waiter calls, and analytics.
-- **WebSocket Events**: Real-time events for new orders, order status changes, and waiter calls.
-- **UI Integration**: Sidebar navigation fully wired for restaurant roles and finance panel integration.
+- **New DB Tables**: `restaurant_cleaning_tasks`, `restaurant_staff_profiles`.
+- **WebSocket Events**: Real-time events for new orders, order status changes, waiter calls, and cleaning task updates.
 
 ### Automated Systems
 - **Marketing Referral System**: `referral_source`, `referral_staff_id`, `referral_notes` on `owners` table; `referral_commissions` table tracks pending/paid commissions. Registration form captures referral source + optional staff referral code (validated on register). New `marketing_staff` role: OSS super admin creates marketing accounts from **Marketing** tab in admin panel, assigns referral codes; staff log in and land at `/marketing` — dedicated panel showing only their referred hotels, subscription/trial status, and hotel details. APIs: `POST|GET /api/oss-admin/marketing-users`, `PATCH /api/oss-admin/marketing-users/:id/referral-code`, `GET /api/marketing/me|my-hotels|my-commissions`.

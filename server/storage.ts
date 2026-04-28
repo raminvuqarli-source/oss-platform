@@ -224,6 +224,12 @@ import {
   waiterCalls,
   type WaiterCall,
   type InsertWaiterCall,
+  restaurantCleaningTasks,
+  type RestaurantCleaningTask,
+  type InsertRestaurantCleaningTask,
+  restaurantStaffProfiles,
+  type RestaurantStaffProfile,
+  type InsertRestaurantStaffProfile,
   deletedTrialAccounts,
   type DeletedTrialAccount,
 } from "@shared/schema";
@@ -623,6 +629,17 @@ export interface IStorage {
   createWaiterCall(data: InsertWaiterCall): Promise<WaiterCall>;
   getWaiterCalls(propertyId: string, status?: string): Promise<WaiterCall[]>;
   acknowledgeWaiterCall(id: string, userId: string): Promise<WaiterCall | undefined>;
+
+  // Restaurant — Cleaning Tasks
+  createRestaurantCleaningTask(data: InsertRestaurantCleaningTask): Promise<RestaurantCleaningTask>;
+  getRestaurantCleaningTasks(propertyId: string, assignedToId?: string): Promise<RestaurantCleaningTask[]>;
+  updateRestaurantCleaningTask(id: string, updates: Partial<RestaurantCleaningTask>): Promise<RestaurantCleaningTask | undefined>;
+
+  // Restaurant — Staff Profiles
+  upsertRestaurantStaffProfile(data: InsertRestaurantStaffProfile): Promise<RestaurantStaffProfile>;
+  getRestaurantStaffProfile(userId: string, propertyId: string): Promise<RestaurantStaffProfile | undefined>;
+  getRestaurantStaffProfiles(propertyId: string): Promise<RestaurantStaffProfile[]>;
+
   // Deleted trial accounts (abuse prevention)
   logDeletedTrialAccount(email: string, hotelName?: string | null, reason?: string): Promise<void>;
   isTrialEmailDeleted(email: string): Promise<boolean>;
@@ -3262,6 +3279,48 @@ export class DatabaseStorage implements IStorage {
       .where(eq(waiterCalls.id, id))
       .returning();
     return c;
+  }
+
+  // ===================== RESTAURANT CLEANING TASKS =====================
+  async createRestaurantCleaningTask(data: InsertRestaurantCleaningTask): Promise<RestaurantCleaningTask> {
+    const [t] = await db.insert(restaurantCleaningTasks).values(data).returning();
+    return t;
+  }
+
+  async getRestaurantCleaningTasks(propertyId: string, assignedToId?: string): Promise<RestaurantCleaningTask[]> {
+    const conditions = [eq(restaurantCleaningTasks.propertyId, propertyId)];
+    if (assignedToId) conditions.push(eq(restaurantCleaningTasks.assignedToId, assignedToId));
+    return db.select().from(restaurantCleaningTasks).where(and(...conditions)).orderBy(desc(restaurantCleaningTasks.createdAt));
+  }
+
+  async updateRestaurantCleaningTask(id: string, updates: Partial<RestaurantCleaningTask>): Promise<RestaurantCleaningTask | undefined> {
+    const [t] = await db.update(restaurantCleaningTasks).set(updates).where(eq(restaurantCleaningTasks.id, id)).returning();
+    return t;
+  }
+
+  // ===================== RESTAURANT STAFF PROFILES =====================
+  async upsertRestaurantStaffProfile(data: InsertRestaurantStaffProfile): Promise<RestaurantStaffProfile> {
+    const existing = await this.getRestaurantStaffProfile(data.userId, data.propertyId);
+    if (existing) {
+      const [updated] = await db.update(restaurantStaffProfiles)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(restaurantStaffProfiles.id, existing.id))
+        .returning();
+      return updated;
+    }
+    const [created] = await db.insert(restaurantStaffProfiles).values(data).returning();
+    return created;
+  }
+
+  async getRestaurantStaffProfile(userId: string, propertyId: string): Promise<RestaurantStaffProfile | undefined> {
+    const [p] = await db.select().from(restaurantStaffProfiles)
+      .where(and(eq(restaurantStaffProfiles.userId, userId), eq(restaurantStaffProfiles.propertyId, propertyId)))
+      .limit(1);
+    return p;
+  }
+
+  async getRestaurantStaffProfiles(propertyId: string): Promise<RestaurantStaffProfile[]> {
+    return db.select().from(restaurantStaffProfiles).where(eq(restaurantStaffProfiles.propertyId, propertyId));
   }
 
   // ===================== DELETED TRIAL ACCOUNTS =====================

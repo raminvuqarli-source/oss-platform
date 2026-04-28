@@ -191,20 +191,20 @@ export default function KitchenDisplay() {
             )}
             {order.kitchenStatus === "cooking" && (
               <Button
-                size="sm"
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                size="lg"
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base py-3"
                 onClick={() => updateStatus.mutate({ id: order.id, status: "ready" })}
                 disabled={updateStatus.isPending}
                 data-testid={`button-mark-ready-${order.id}`}
               >
-                <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-                {t('restaurant.markReady')}
+                <CheckCircle2 className="h-5 w-5 mr-2" />
+                ✅ HAZIRDIR
               </Button>
             )}
             {order.kitchenStatus === "ready" && (
-              <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 w-full justify-center py-2 text-sm">
-                {t('restaurant.waiterNotified')}
-              </Badge>
+              <div className="w-full rounded-lg bg-emerald-600 text-white text-center py-3 font-bold text-base animate-pulse">
+                ✅ HAZIRDIR — Qarson gözləyir
+              </div>
             )}
           </div>
         </CardContent>

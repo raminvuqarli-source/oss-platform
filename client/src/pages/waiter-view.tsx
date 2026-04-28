@@ -164,13 +164,13 @@ export default function WaiterView() {
                     {order.notes && <p className="text-sm text-muted-foreground mb-2 italic">{order.notes}</p>}
                     <p className="text-sm font-medium mb-3">{(order.totalCents / 100).toFixed(2)} ₼</p>
                     <Button
-                      className="w-full"
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base py-3 h-auto"
                       onClick={() => deliverOrder.mutate(order.id)}
                       disabled={deliverOrder.isPending}
                       data-testid={`button-deliver-${order.id}`}
                     >
-                      <CheckCircle2 className="h-4 w-4 mr-2" />
-                      {t('restaurant.markedDelivered')}
+                      <CheckCircle2 className="h-5 w-5 mr-2" />
+                      ✅ HAZIRDIR — Çatdırıldı
                     </Button>
                   </CardContent>
                 </Card>

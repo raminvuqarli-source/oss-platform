@@ -354,6 +354,120 @@ export function registerRestaurantRoutes(app: Express): void {
     }
   });
 
+  // ─── ROOM ORDERS VIEW ─────────────────────────────────────────────────
+  // Manager sees all orders from room numbers (room_delivery type)
+  app.get("/api/restaurant/room-orders", requireRestaurantRole(...MANAGER_ROLES), async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user?.propertyId) return res.status(400).json({ message: "No property linked" });
+      const orders = await storage.getPosOrders(user.propertyId);
+      const roomOrders = orders.filter(o => o.roomNumber && o.settlementStatus === "pending");
+      // Group by room
+      const grouped: Record<string, { roomNumber: string; orders: typeof orders; totalCents: number }> = {};
+      for (const o of roomOrders) {
+        const room = o.roomNumber!;
+        if (!grouped[room]) grouped[room] = { roomNumber: room, orders: [], totalCents: 0 };
+        grouped[room].orders.push(o);
+        grouped[room].totalCents += o.totalCents;
+      }
+      res.json(Object.values(grouped));
+    } catch (err) {
+      res.status(500).json({ message: "Failed to fetch room orders" });
+    }
+  });
+
+  // ─── CLEANING TASKS ───────────────────────────────────────────────────
+  const CLEANING_ROLES = ["restaurant_cleaner", "restaurant_manager", "owner_admin", "admin"];
+
+  app.get("/api/restaurant/cleaning-tasks", requireRestaurantRole(...CLEANING_ROLES), async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user?.propertyId) return res.status(400).json({ message: "No property linked" });
+      const isCleaner = user.role === "restaurant_cleaner";
+      const tasks = await storage.getRestaurantCleaningTasks(
+        user.propertyId,
+        isCleaner ? user.id : undefined
+      );
+      res.json(tasks);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to fetch cleaning tasks" });
+    }
+  });
+
+  app.post("/api/restaurant/cleaning-tasks", requireRestaurantRole(...MANAGER_ROLES), async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user?.propertyId) return res.status(400).json({ message: "No property linked" });
+      const { description, location, assignedToId } = req.body;
+      if (!description) return res.status(400).json({ message: "Description is required" });
+      const task = await storage.createRestaurantCleaningTask({
+        tenantId: user.tenantId || user.ownerId || "",
+        propertyId: user.propertyId,
+        description,
+        location: location || null,
+        assignedToId: assignedToId || null,
+        createdById: user.id,
+        status: "pending",
+      });
+      res.status(201).json(task);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to create cleaning task" });
+    }
+  });
+
+  app.patch("/api/restaurant/cleaning-tasks/:id", requireRestaurantRole(...CLEANING_ROLES), async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      const { status, photoUrl } = req.body;
+      const updates: Record<string, unknown> = {};
+      if (status) updates.status = status;
+      if (photoUrl) updates.photoUrl = photoUrl;
+      if (status === "done") updates.completedAt = new Date();
+      const task = await storage.updateRestaurantCleaningTask(req.params.id, updates);
+      if (!task) return res.status(404).json({ message: "Task not found" });
+      broadcastToProperty(task.propertyId, {
+        type: "RESTAURANT_CLEANING_TASK_UPDATED",
+        task,
+        timestamp: new Date().toISOString(),
+      });
+      res.json(task);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to update cleaning task" });
+    }
+  });
+
+  // ─── STAFF PROFILES ───────────────────────────────────────────────────
+
+  app.get("/api/restaurant/staff-profiles", requireRestaurantRole(...MANAGER_ROLES), async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user?.propertyId) return res.status(400).json({ message: "No property linked" });
+      const profiles = await storage.getRestaurantStaffProfiles(user.propertyId);
+      res.json(profiles);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to fetch staff profiles" });
+    }
+  });
+
+  app.put("/api/restaurant/staff-profiles/:userId", requireRestaurantRole(...MANAGER_ROLES), async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user?.propertyId) return res.status(400).json({ message: "No property linked" });
+      const { salaryAmount, taxRate, tablesAssigned, notes } = req.body;
+      const profile = await storage.upsertRestaurantStaffProfile({
+        userId: req.params.userId,
+        propertyId: user.propertyId,
+        salaryAmount: salaryAmount || "0",
+        taxRate: taxRate || "0",
+        tablesAssigned: tablesAssigned || null,
+        notes: notes || null,
+      });
+      res.json(profile);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to save staff profile" });
+    }
+  });
+
   // ─── ANALYTICS ────────────────────────────────────────────────────────
 
   app.get("/api/restaurant/analytics", requireRestaurantRole(...MANAGER_ROLES), async (req, res) => {
@@ -380,13 +494,29 @@ export function registerRestaurantRoutes(app: Express): void {
         o => o.kitchenStatus === "delivered" && o.settlementStatus === "pending"
       ).length;
 
+      // Monthly breakdown for finance tab
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const monthOrders = allOrders.filter(o => new Date(o.createdAt!) >= monthStart);
+      const monthRevenueCents = monthOrders
+        .filter(o => o.settlementStatus !== "cancelled" && o.settlementStatus !== "pending")
+        .reduce((s, o) => s + o.totalCents, 0);
+
+      // By payment type
+      const cashCents = allOrders.filter(o => o.settlementStatus === "cash_paid")
+        .reduce((s, o) => s + o.totalCents, 0);
+      const cardCents = allOrders.filter(o => o.settlementStatus === "card_paid")
+        .reduce((s, o) => s + o.totalCents, 0);
+      const roomChargeCents = allOrders.filter(o => o.settlementStatus === "posted_to_folio")
+        .reduce((s, o) => s + o.totalCents, 0);
+
       res.json({
-        today: {
-          orderCount: todayOrders.length,
-          revenueCents: totalRevenueCents,
-        },
+        today: { orderCount: todayOrders.length, revenueCents: totalRevenueCents },
+        month: { orderCount: monthOrders.length, revenueCents: monthRevenueCents },
         activeOrders: byStatus,
         pendingSettlement,
+        totalAllTime: allOrders.filter(o => !["cancelled","pending"].includes(o.settlementStatus)).reduce((s,o)=>s+o.totalCents,0),
+        byPaymentType: { cashCents, cardCents, roomChargeCents },
       });
     } catch (err) {
       logger.error({ err }, "Failed to fetch restaurant analytics");

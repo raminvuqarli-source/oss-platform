@@ -338,7 +338,7 @@ export type InsertHotel = z.infer<typeof insertHotelSchema>;
 export type Hotel = typeof hotels.$inferSelect;
 
 // User roles - updated for multi-tenant
-export type UserRole = "guest" | "reception" | "admin" | "oss_super_admin" | "owner_admin" | "property_manager" | "staff" | "marketing_staff";
+export type UserRole = "guest" | "reception" | "admin" | "oss_super_admin" | "owner_admin" | "property_manager" | "staff" | "marketing_staff" | "kitchen_staff" | "waiter" | "restaurant_manager" | "restaurant_cleaner";
 
 // Supported languages
 export type LanguageCode = "en" | "az" | "ar" | "tr" | "de" | "es" | "nl";
@@ -2330,6 +2330,39 @@ export const waiterCalls = pgTable("waiter_calls", {
 export const insertWaiterCallSchema = createInsertSchema(waiterCalls).omit({ id: true, calledAt: true });
 export type InsertWaiterCall = z.infer<typeof insertWaiterCallSchema>;
 export type WaiterCall = typeof waiterCalls.$inferSelect;
+
+// Restaurant cleaning tasks — created by manager/reception, done by restaurant_cleaner
+export const restaurantCleaningTasks = pgTable("restaurant_cleaning_tasks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull(),
+  propertyId: varchar("property_id").notNull(),
+  description: text("description").notNull(),
+  location: varchar("location"), // e.g. "Table 3", "Kitchen floor"
+  assignedToId: varchar("assigned_to_id"),
+  createdById: varchar("created_by_id"),
+  status: varchar("status").notNull().default("pending"), // pending | in_progress | done
+  completedAt: timestamp("completed_at"),
+  photoUrl: text("photo_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+export const insertRestaurantCleaningTaskSchema = createInsertSchema(restaurantCleaningTasks).omit({ id: true, createdAt: true });
+export type InsertRestaurantCleaningTask = z.infer<typeof insertRestaurantCleaningTaskSchema>;
+export type RestaurantCleaningTask = typeof restaurantCleaningTasks.$inferSelect;
+
+// Restaurant staff profiles — salary, tax, table assignments for waiters
+export const restaurantStaffProfiles = pgTable("restaurant_staff_profiles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  propertyId: varchar("property_id").notNull(),
+  salaryAmount: varchar("salary_amount").default("0"),
+  taxRate: varchar("tax_rate").default("0"),
+  tablesAssigned: text("tables_assigned"), // comma-separated table numbers
+  notes: text("notes"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+export const insertRestaurantStaffProfileSchema = createInsertSchema(restaurantStaffProfiles).omit({ id: true });
+export type InsertRestaurantStaffProfile = z.infer<typeof insertRestaurantStaffProfileSchema>;
+export type RestaurantStaffProfile = typeof restaurantStaffProfiles.$inferSelect;
 
 // Deleted trial accounts — tracks emails/hotel names to prevent re-trial abuse
 export const deletedTrialAccounts = pgTable("deleted_trial_accounts", {

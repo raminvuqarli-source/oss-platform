@@ -75,6 +75,7 @@ import {
   Upload,
   ImageIcon,
   X as XIcon,
+  UtensilsCrossed,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SiWhatsapp } from "react-icons/si";
@@ -3458,6 +3459,8 @@ function PerformanceView() {
         </Card>
       </div>
 
+      <RestaurantRevenueCard />
+
       {financeSummary && (
         <Card data-testid="card-finance-summary">
           <CardHeader className="pb-3">
@@ -4593,6 +4596,56 @@ function EscalationsView() {
         </div>
       )}
     </div>
+  );
+}
+
+function RestaurantRevenueCard() {
+  const { data: analytics } = useQuery<any>({
+    queryKey: ["/api/restaurant/analytics"],
+    retry: false,
+  });
+
+  if (!analytics) return null;
+
+  const fmt = (cents: number) => `₼${(cents / 100).toFixed(2)}`;
+
+  return (
+    <Card data-testid="card-restaurant-revenue">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <UtensilsCrossed className="h-4 w-4 text-orange-500" />
+          Restoran Gəlirləri
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div>
+            <p className="text-xs text-muted-foreground">Bu gün</p>
+            <p className="text-lg font-bold text-emerald-600" data-testid="text-restaurant-today">{fmt(analytics.today?.revenueCents ?? 0)}</p>
+            <p className="text-xs text-muted-foreground">{analytics.today?.orderCount ?? 0} sifariş</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Bu ay</p>
+            <p className="text-lg font-bold text-blue-600" data-testid="text-restaurant-month">{fmt(analytics.month?.revenueCents ?? 0)}</p>
+            <p className="text-xs text-muted-foreground">{analytics.month?.orderCount ?? 0} sifariş</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Nağd ödəniş</p>
+            <p className="text-lg font-bold" data-testid="text-restaurant-cash">{fmt(analytics.byPaymentType?.cashCents ?? 0)}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Otaq hesabına</p>
+            <p className="text-lg font-bold text-purple-600" data-testid="text-restaurant-room">{fmt(analytics.byPaymentType?.roomChargeCents ?? 0)}</p>
+          </div>
+        </div>
+        <div className="border-t pt-3 mt-3">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Ümumi restoran gəliri (bütün vaxt)</span>
+            <span className="font-bold text-emerald-600" data-testid="text-restaurant-total">{fmt(analytics.totalAllTime ?? 0)}</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

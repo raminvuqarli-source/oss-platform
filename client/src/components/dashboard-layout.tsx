@@ -67,6 +67,7 @@ import {
   ChefHat,
   UtensilsCrossed,
   Utensils,
+  Sparkles,
 } from "lucide-react";
 import type { Notification } from "@shared/schema";
 import { getRoleDisplayName } from "@/lib/permissions";
@@ -336,13 +337,29 @@ function DashboardSidebar() {
           {
             label: "Restaurant",
             items: [
-              { title: "Order Management", icon: Utensils, url: "/restaurant/waiter", testId: "nav-waiter-orders" },
+              { title: "Sifarişlər", icon: Utensils, url: "/restaurant/waiter", testId: "nav-waiter-orders" },
             ],
           },
           {
             label: t("nav.group.system", "System"),
             items: [
               { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-notifications" },
+              { title: t("common.settings"), icon: Settings, url: "/settings", testId: "nav-settings" },
+            ],
+          },
+        ];
+
+      case "restaurant_cleaner":
+        return [
+          {
+            label: "Temizlik",
+            items: [
+              { title: "Temizlik Tapşırıqları", icon: Sparkles, url: "/restaurant/cleaner", testId: "nav-restaurant-cleaner" },
+            ],
+          },
+          {
+            label: t("nav.group.system", "System"),
+            items: [
               { title: t("common.settings"), icon: Settings, url: "/settings", testId: "nav-settings" },
             ],
           },
@@ -386,6 +403,8 @@ function DashboardSidebar() {
         return <ChefHat className="h-3 w-3" />;
       case "waiter":
         return <Utensils className="h-3 w-3" />;
+      case "restaurant_cleaner":
+        return <Sparkles className="h-3 w-3" />;
       default:
         return <User className="h-3 w-3" />;
     }
