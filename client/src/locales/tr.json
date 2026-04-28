@@ -690,7 +690,21 @@
       "boutique": "Butik Otel",
       "resort": "Tatil Köyü",
       "apartment": "Apart Otel"
-    }
+    },
+    "referralTitle": "O.S.S'i nasıl duydunuz?",
+    "referralSubtitle": "Bu, sizinki gibi otellere nasıl ulaştığımızı anlamamıza yardımcı olur.",
+    "referralSource": "Kaynak",
+    "referralSelectPlaceholder": "Bizi nasıl buldunuzu seçin (isteğe bağlı)",
+    "referralGoogle": "Google Arama",
+    "referralInstagram": "Instagram / Sosyal Medya",
+    "referralLinkedin": "LinkedIn",
+    "referralEvent": "Konferans / Fuar",
+    "referralStaff": "O.S.S Temsilcisi Tarafından Tavsiye",
+    "referralClient": "Mevcut Müşteri Tarafından Tavsiye",
+    "referralOther": "Diğer",
+    "staffReferralCode": "Temsilci Kodu",
+    "staffReferralCodePlaceholder": "O.S.S temsilcisi tarafından sağlanan kodu girin",
+    "staffReferralCodeHint": "Temsilcinizin size benzersiz bir referans kodu vermiş olması gerekir."
   },
   "dashboard": {
     "guest": {

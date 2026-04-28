@@ -683,7 +683,21 @@
       "username": "admin",
       "password": "اختر كلمة مرور آمنة",
       "confirmPassword": "تأكيد كلمة المرور"
-    }
+    },
+    "referralTitle": "كيف سمعت عن O.S.S؟",
+    "referralSubtitle": "يساعدنا هذا على فهم كيفية الوصول إلى المزيد من الفنادق مثل فندقك.",
+    "referralSource": "المصدر",
+    "referralSelectPlaceholder": "اختر كيف وجدتنا (اختياري)",
+    "referralGoogle": "بحث Google",
+    "referralInstagram": "إنستغرام / وسائل التواصل الاجتماعي",
+    "referralLinkedin": "LinkedIn",
+    "referralEvent": "مؤتمر / معرض تجاري",
+    "referralStaff": "بتوصية من ممثل O.S.S",
+    "referralClient": "بتوصية من عميل حالي",
+    "referralOther": "أخرى",
+    "staffReferralCode": "رمز الممثل",
+    "staffReferralCodePlaceholder": "أدخل الرمز الذي قدمه ممثل O.S.S",
+    "staffReferralCodeHint": "كان ينبغي أن يعطيك ممثلك رمز إحالة فريداً."
   },
   "dashboard": {
     "guest": {

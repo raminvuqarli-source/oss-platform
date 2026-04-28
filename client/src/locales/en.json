@@ -695,7 +695,21 @@
       "username": "admin",
       "password": "Choose a secure password",
       "confirmPassword": "Confirm your password"
-    }
+    },
+    "referralTitle": "How did you hear about O.S.S?",
+    "referralSubtitle": "This helps us understand how to reach more hotels like yours.",
+    "referralSource": "Referral Source",
+    "referralSelectPlaceholder": "Select how you found us (optional)",
+    "referralGoogle": "Google Search",
+    "referralInstagram": "Instagram / Social Media",
+    "referralLinkedin": "LinkedIn",
+    "referralEvent": "Conference / Trade Show",
+    "referralStaff": "Referred by O.S.S Representative",
+    "referralClient": "Referred by Existing Client",
+    "referralOther": "Other",
+    "staffReferralCode": "Representative Code",
+    "staffReferralCodePlaceholder": "Enter the code provided by the O.S.S representative",
+    "staffReferralCodeHint": "Your representative should have given you a unique referral code."
   },
   "dashboard": {
     "guest": {

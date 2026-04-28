@@ -683,7 +683,21 @@
       "username": "admin",
       "password": "Kies een veilig wachtwoord",
       "confirmPassword": "Bevestig uw wachtwoord"
-    }
+    },
+    "referralTitle": "Hoe heeft u van O.S.S gehoord?",
+    "referralSubtitle": "Dit helpt ons te begrijpen hoe we meer hotels zoals het uwe kunnen bereiken.",
+    "referralSource": "Bron",
+    "referralSelectPlaceholder": "Selecteer hoe u ons heeft gevonden (optioneel)",
+    "referralGoogle": "Google Zoeken",
+    "referralInstagram": "Instagram / Sociale Media",
+    "referralLinkedin": "LinkedIn",
+    "referralEvent": "Conferentie / Beurs",
+    "referralStaff": "Aanbevolen door O.S.S-vertegenwoordiger",
+    "referralClient": "Aanbevolen door bestaande klant",
+    "referralOther": "Anders",
+    "staffReferralCode": "Vertegenwoordigerscode",
+    "staffReferralCodePlaceholder": "Voer de code in die door de O.S.S-vertegenwoordiger is verstrekt",
+    "staffReferralCodeHint": "Uw vertegenwoordiger had u een unieke verwijzingscode moeten geven."
   },
   "dashboard": {
     "guest": {

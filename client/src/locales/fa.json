@@ -683,7 +683,21 @@
       "boutique": "هتل بوتیک",
       "resort": "اقامتگاه تفریحی",
       "apartment": "هتل آپارتمان"
-    }
+    },
+    "referralTitle": "چطور درباره O.S.S شنیدید؟",
+    "referralSubtitle": "این به ما کمک می‌کند تا بفهمیم چطور می‌توانیم به هتل‌های بیشتری مثل شما دسترسی پیدا کنیم.",
+    "referralSource": "منبع",
+    "referralSelectPlaceholder": "انتخاب کنید چطور ما را یافتید (اختیاری)",
+    "referralGoogle": "جستجوی Google",
+    "referralInstagram": "اینستاگرام / شبکه‌های اجتماعی",
+    "referralLinkedin": "LinkedIn",
+    "referralEvent": "کنفرانس / نمایشگاه تجاری",
+    "referralStaff": "معرفی توسط نماینده O.S.S",
+    "referralClient": "معرفی توسط مشتری موجود",
+    "referralOther": "سایر",
+    "staffReferralCode": "کد نماینده",
+    "staffReferralCodePlaceholder": "کد ارائه شده توسط نماینده O.S.S را وارد کنید",
+    "staffReferralCodeHint": "نماینده شما باید یک کد ارجاع منحصر به فرد به شما داده باشد."
   },
   "dashboard": {
     "guest": {

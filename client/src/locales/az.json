@@ -695,7 +695,21 @@
       "boutique": "Butik Otel",
       "resort": "Kurort",
       "apartment": "Apart Otel"
-    }
+    },
+    "referralTitle": "O.S.S haqqında necə eşitdiniz?",
+    "referralSubtitle": "Bu, sizinki kimi otellərimizə necə çatdığımızı anlamağa kömək edir.",
+    "referralSource": "Mənbə",
+    "referralSelectPlaceholder": "Necə tapdığınızı seçin (isteğe bağlı)",
+    "referralGoogle": "Google Axtarışı",
+    "referralInstagram": "Instagram / Sosial Media",
+    "referralLinkedin": "LinkedIn",
+    "referralEvent": "Konfrans / Sərgi",
+    "referralStaff": "O.S.S Nümayəndəsi tərəfindən tövsiyə",
+    "referralClient": "Mövcud Müştəri tərəfindən tövsiyə",
+    "referralOther": "Digər",
+    "staffReferralCode": "Nümayəndə Kodu",
+    "staffReferralCodePlaceholder": "O.S.S nümayəndəsi tərəfindən verilən kodu daxil edin",
+    "staffReferralCodeHint": "Nümayəndəniz sizə unikal bir referans kodu vermiş olmalıdır."
   },
   "dashboard": {
     "guest": {

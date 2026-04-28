@@ -353,45 +353,45 @@ export default function HotelRegister() {
             <div className="border-t pt-6 space-y-4">
               <div className="flex items-center gap-2 mb-2">
                 <Megaphone className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold text-lg">How did you hear about O.S.S?</h3>
+                <h3 className="font-semibold text-lg">{t('hotel.referralTitle')}</h3>
               </div>
               <p className="text-sm text-muted-foreground">
-                This helps us understand how to reach more hotels like yours.
+                {t('hotel.referralSubtitle')}
               </p>
               <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="referralSource">Referral Source</Label>
+                  <Label htmlFor="referralSource">{t('hotel.referralSource')}</Label>
                   <Select
                     value={form.referralSource}
                     onValueChange={(value) => setForm({ ...form, referralSource: value, staffReferralCode: "" })}
                   >
                     <SelectTrigger data-testid="select-referral-source">
-                      <SelectValue placeholder="Select how you found us (optional)" />
+                      <SelectValue placeholder={t('hotel.referralSelectPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="google">Google Search</SelectItem>
-                      <SelectItem value="instagram">Instagram / Social Media</SelectItem>
-                      <SelectItem value="linkedin">LinkedIn</SelectItem>
-                      <SelectItem value="event">Conference / Trade Show</SelectItem>
-                      <SelectItem value="staff_referral">Referred by O.S.S Representative</SelectItem>
-                      <SelectItem value="existing_client">Referred by Existing Client</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="google">{t('hotel.referralGoogle')}</SelectItem>
+                      <SelectItem value="instagram">{t('hotel.referralInstagram')}</SelectItem>
+                      <SelectItem value="linkedin">{t('hotel.referralLinkedin')}</SelectItem>
+                      <SelectItem value="event">{t('hotel.referralEvent')}</SelectItem>
+                      <SelectItem value="staff_referral">{t('hotel.referralStaff')}</SelectItem>
+                      <SelectItem value="existing_client">{t('hotel.referralClient')}</SelectItem>
+                      <SelectItem value="other">{t('hotel.referralOther')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 {form.referralSource === "staff_referral" && (
                   <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="staffReferralCode">Representative Code *</Label>
+                    <Label htmlFor="staffReferralCode">{t('hotel.staffReferralCode')} *</Label>
                     <Input
                       id="staffReferralCode"
-                      placeholder="Enter the code provided by the O.S.S representative"
+                      placeholder={t('hotel.staffReferralCodePlaceholder')}
                       value={form.staffReferralCode}
                       onChange={(e) => setForm({ ...form, staffReferralCode: e.target.value.toUpperCase() })}
                       data-testid="input-staff-referral-code"
                     />
                     <p className="text-xs text-muted-foreground">
-                      Your representative should have given you a unique referral code.
+                      {t('hotel.staffReferralCodeHint')}
                     </p>
                   </div>
                 )}

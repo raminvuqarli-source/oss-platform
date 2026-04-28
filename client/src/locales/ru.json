@@ -690,7 +690,21 @@
       "boutique": "Бутик-отель",
       "resort": "Курорт",
       "apartment": "Апарт-отель"
-    }
+    },
+    "referralTitle": "Как вы узнали об O.S.S?",
+    "referralSubtitle": "Это помогает нам понять, как привлекать больше отелей, подобных вашему.",
+    "referralSource": "Источник",
+    "referralSelectPlaceholder": "Как вы нас нашли (необязательно)",
+    "referralGoogle": "Поиск Google",
+    "referralInstagram": "Instagram / Социальные сети",
+    "referralLinkedin": "LinkedIn",
+    "referralEvent": "Конференция / Выставка",
+    "referralStaff": "Рекомендация представителя O.S.S",
+    "referralClient": "Рекомендация существующего клиента",
+    "referralOther": "Другое",
+    "staffReferralCode": "Код представителя",
+    "staffReferralCodePlaceholder": "Введите код, предоставленный представителем O.S.S",
+    "staffReferralCodeHint": "Ваш представитель должен был предоставить вам уникальный реферальный код."
   },
   "dashboard": {
     "guest": {

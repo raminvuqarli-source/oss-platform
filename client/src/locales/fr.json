@@ -683,7 +683,21 @@
       "username": "admin",
       "password": "Choisissez un mot de passe sécurisé",
       "confirmPassword": "Confirmez votre mot de passe"
-    }
+    },
+    "referralTitle": "Comment avez-vous entendu parler d'O.S.S ?",
+    "referralSubtitle": "Cela nous aide à comprendre comment atteindre plus d'hôtels comme le vôtre.",
+    "referralSource": "Source",
+    "referralSelectPlaceholder": "Sélectionnez comment vous nous avez trouvés (facultatif)",
+    "referralGoogle": "Recherche Google",
+    "referralInstagram": "Instagram / Réseaux sociaux",
+    "referralLinkedin": "LinkedIn",
+    "referralEvent": "Conférence / Salon",
+    "referralStaff": "Recommandé par un représentant O.S.S",
+    "referralClient": "Recommandé par un client existant",
+    "referralOther": "Autre",
+    "staffReferralCode": "Code du représentant",
+    "staffReferralCodePlaceholder": "Entrez le code fourni par le représentant O.S.S",
+    "staffReferralCodeHint": "Votre représentant aurait dû vous remettre un code de parrainage unique."
   },
   "dashboard": {
     "guest": {
