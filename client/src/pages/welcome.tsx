@@ -1486,7 +1486,7 @@ export default function Welcome() {
                 })}
               </motion.div>
 
-              {/* Additional role showcase cards */}
+              {/* Additional demo role cards */}
               <div className="mt-6 space-y-4">
                 <p className="text-center text-sm text-muted-foreground font-medium">More roles included in your subscription:</p>
                 <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -1496,7 +1496,7 @@ export default function Welcome() {
                       <motion.div key={role.id} variants={fadeUp}>
                         <Card
                           className="group cursor-pointer transition-all duration-300 border-border/40 hover:border-primary/20 hover:shadow-md hover:-translate-y-0.5 h-full"
-                          onClick={() => navigateToRegister()}
+                          onClick={() => handleDemoLogin(role.id)}
                           data-testid={`card-demo-info-${role.id}`}
                         >
                           <CardContent className="p-5 space-y-3">
@@ -1509,12 +1509,12 @@ export default function Welcome() {
                             <p className="text-xs text-muted-foreground leading-relaxed">{role.desc}</p>
                             <Button
                               className="w-full rounded-xl"
-                              variant="ghost"
+                              variant="outline"
                               size="sm"
-                              onClick={(e) => { e.stopPropagation(); navigateToRegister(); }}
+                              onClick={(e) => { e.stopPropagation(); handleDemoLogin(role.id); }}
                               data-testid={`button-demo-info-${role.id}`}
                             >
-                              Start Free Trial
+                              {role.title} kimi kəşf edin
                               <ArrowRight className="ml-1.5 h-3 w-3" />
                             </Button>
                           </CardContent>
