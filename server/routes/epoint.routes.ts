@@ -833,33 +833,38 @@ export function registerEpointRoutes(app: Express): void {
         return res.status(503).json({ message: "Epoint payment is not configured." });
       }
 
-      const user = (req as any).user;
-      if (!user?.tenantId) return res.status(403).json({ message: "No tenant" });
+      const user = await storage.getUser(req.session.userId!);
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
       if (!["owner_admin", "admin", "property_manager"].includes(user.role)) {
         return res.status(403).json({ message: "Forbidden" });
       }
+
+      const tenantId = req.session.demoSessionTenantId || user.tenantId || user.ownerId || null;
+      if (!tenantId) return res.status(403).json({ message: "No tenant" });
 
       const { packageId } = req.body;
       const pkg = WHATSAPP_PACKAGES.find((p) => p.id === packageId);
       if (!pkg) return res.status(400).json({ message: "Invalid package" });
 
-      const hotels = await storage.getAllHotels(user.tenantId);
+      const hotels = await storage.getAllHotels(tenantId);
       const hotel = hotels[0];
       if (!hotel) return res.status(404).json({ message: "Hotel not found" });
 
       const amountAZN = pkg.priceAZN;
       const amountCents = Math.round(amountAZN * 100);
 
+      const ownerId = user.ownerId || user.id;
+
       const order = await storage.createPaymentOrder({
-        ownerId: user.ownerId ?? user.id,
-        tenantId: user.tenantId,
+        ownerId,
+        tenantId,
         planType: "whatsapp_package" as any,
         orderType: "whatsapp_package",
         amount: amountCents,
         currency: "AZN",
         status: "pending",
         paymentMethodId: null,
-        customerNote: JSON.stringify({ packageId, hotelId: hotel.id, tenantId: user.tenantId }),
+        customerNote: JSON.stringify({ packageId, hotelId: hotel.id, tenantId }),
         transferReference: null,
       } as any);
 

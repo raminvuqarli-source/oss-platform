@@ -13,14 +13,17 @@ export function registerBillingAddonRoutes(app: Express) {
   // GET /api/billing/addons — hotel's current addon status
   app.get("/api/billing/addons", requireAuth, async (req, res) => {
     try {
-      const user = (req as any).user;
-      if (!user?.tenantId) return res.status(403).json({ error: "No tenant" });
+      const user = await storage.getUser(req.session.userId!);
+      if (!user) return res.status(401).json({ error: "Unauthorized" });
 
-      const hotels = await storage.getAllHotels(user.tenantId);
+      const tenantId = req.session.demoSessionTenantId || user.tenantId || user.ownerId || null;
+      if (!tenantId) return res.status(403).json({ error: "No tenant" });
+
+      const hotels = await storage.getAllHotels(tenantId);
       const hotel = hotels[0];
       if (!hotel) return res.status(404).json({ error: "Hotel not found" });
 
-      const logs = await storage.getBillingLogsByTenant(user.tenantId);
+      const logs = await storage.getBillingLogsByTenant(tenantId);
 
       return res.json({
         hotel: {
@@ -41,63 +44,19 @@ export function registerBillingAddonRoutes(app: Express) {
     }
   });
 
-  // POST /api/billing/whatsapp/purchase — purchase a WhatsApp package
-  app.post("/api/billing/whatsapp/purchase", requireAuth, async (req, res) => {
-    try {
-      const user = (req as any).user;
-      if (!user?.tenantId) return res.status(403).json({ error: "No tenant" });
-      if (!["owner_admin", "admin", "property_manager"].includes(user.role)) {
-        return res.status(403).json({ error: "Forbidden" });
-      }
-
-      const { packageId } = req.body;
-      const pkg = WHATSAPP_PACKAGES.find((p) => p.id === packageId);
-      if (!pkg) return res.status(400).json({ error: "Invalid package" });
-
-      const hotels = await storage.getAllHotels(user.tenantId);
-      const hotel = hotels[0];
-      if (!hotel) return res.status(404).json({ error: "Hotel not found" });
-
-      const newBalance = (hotel.whatsappBalance ?? 0) + pkg.messages;
-
-      await storage.updateHotelBilling(hotel.id, {
-        isWhatsappEnabled: true,
-        whatsappBalance: newBalance,
-      });
-
-      await storage.createBillingLog({
-        tenantId: user.tenantId,
-        hotelId: hotel.id,
-        ownerId: user.ownerId ?? user.id,
-        eventType: "whatsapp_package",
-        description: `Purchased WhatsApp ${pkg.name} package — ${pkg.messages} messages`,
-        amountUsd: String(pkg.priceUsd),
-        messagesAdded: pkg.messages,
-        packageName: pkg.name,
-        status: "completed",
-      });
-
-      return res.json({
-        success: true,
-        newBalance,
-        message: `Successfully added ${pkg.messages} WhatsApp messages`,
-      });
-    } catch (err) {
-      console.error("[billing/whatsapp/purchase]", err);
-      return res.status(500).json({ error: "Internal server error" });
-    }
-  });
-
   // POST /api/billing/whatsapp/toggle — enable or disable WhatsApp addon
   app.post("/api/billing/whatsapp/toggle", requireAuth, async (req, res) => {
     try {
-      const user = (req as any).user;
-      if (!user?.tenantId) return res.status(403).json({ error: "No tenant" });
+      const user = await storage.getUser(req.session.userId!);
+      if (!user) return res.status(401).json({ error: "Unauthorized" });
       if (!["owner_admin", "admin", "property_manager"].includes(user.role)) {
         return res.status(403).json({ error: "Forbidden" });
       }
 
-      const hotels = await storage.getAllHotels(user.tenantId);
+      const tenantId = req.session.demoSessionTenantId || user.tenantId || user.ownerId || null;
+      if (!tenantId) return res.status(403).json({ error: "No tenant" });
+
+      const hotels = await storage.getAllHotels(tenantId);
       const hotel = hotels[0];
       if (!hotel) return res.status(404).json({ error: "Hotel not found" });
 
