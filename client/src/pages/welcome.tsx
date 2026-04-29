@@ -957,13 +957,13 @@ export default function Welcome() {
                   <Badge variant="secondary" className="text-xs rounded-full">{t('pricing.optionalAddon')}</Badge>
                   <div className="flex items-center justify-center gap-2">
                     <Network className="h-5 w-5 text-primary" />
-                    <h3 className="font-heading text-2xl font-bold">Channel Manager</h3>
+                    <h3 className="font-heading text-2xl font-bold">{t('pricing.channexAddon')}</h3>
                   </div>
                   <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                    Sync with Booking.com, Airbnb, and Expedia in real-time.
+                    {t('pricing.channexAddonDesc')}
                   </p>
                   <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 text-xs rounded-full">
-                    📈 50% more bookings on average
+                    {t('pricing.channexBadge')}
                   </Badge>
                 </div>
 
@@ -975,7 +975,7 @@ export default function Welcome() {
                     data-testid="switch-channex-toggle"
                   />
                   <label htmlFor="channex-toggle" className="text-sm font-medium cursor-pointer">
-                    Activate Channel Manager Integration
+                    {t('pricing.channexToggle')}
                   </label>
                 </div>
 
@@ -985,27 +985,27 @@ export default function Welcome() {
                       <CardContent className="p-6 space-y-3">
                         <div className="flex items-center gap-2 text-sm font-semibold">
                           <Network className="h-4 w-4 text-primary" />
-                          Channel Manager — Pricing
+                          {t('pricing.channexPricingTitle')}
                         </div>
                         <ul className="space-y-2 text-sm text-muted-foreground">
-                          <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500 shrink-0" />Two-way sync with Booking.com, Airbnb &amp; Expedia</li>
-                          <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500 shrink-0" />Automatic availability &amp; rate updates</li>
-                          <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500 shrink-0" />Bookings imported directly into your dashboard</li>
-                          <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500 shrink-0" />No double-bookings, ever</li>
+                          <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500 shrink-0" />{t('pricing.channexFeature1')}</li>
+                          <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500 shrink-0" />{t('pricing.channexFeature2')}</li>
+                          <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500 shrink-0" />{t('pricing.channexFeature3')}</li>
+                          <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500 shrink-0" />{t('pricing.channexFeature4')}</li>
                         </ul>
                         <div className="border-t border-border/50 pt-3">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground">Add-on price</span>
+                            <span className="text-sm text-muted-foreground">{t('pricing.channexAddonPriceLabel')}</span>
                             <span className="font-bold text-primary text-lg">
                               +${channexAddonPrice}
-                              {selectedCore?.code === "CORE_PRO" ? <span className="text-xs font-normal text-muted-foreground"> ({roomCount} rooms × $2)</span> : ""}
+                              {selectedCore?.code === "CORE_PRO" ? <span className="text-xs font-normal text-muted-foreground"> {t('pricing.channexCalcRooms', { count: roomCount })}</span> : ""}
                               /mo
                             </span>
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">
-                            {selectedCore?.code === "CORE_STARTER" && "Starter plan: up to 20 rooms — $20 flat/month"}
-                            {selectedCore?.code === "CORE_GROWTH" && "Growth plan: up to 30 rooms — $30 flat/month"}
-                            {selectedCore?.code === "CORE_PRO" && "Pro plan: $2.00/room/month"}
+                            {selectedCore?.code === "CORE_STARTER" && t('pricing.channexStarterNote')}
+                            {selectedCore?.code === "CORE_GROWTH" && t('pricing.channexGrowthNote')}
+                            {selectedCore?.code === "CORE_PRO" && t('pricing.channexProNote')}
                           </p>
                         </div>
                       </CardContent>
@@ -1061,9 +1061,9 @@ export default function Welcome() {
                           <div>
                             <label className="text-sm font-medium flex items-center gap-1.5">
                               <Network className="h-4 w-4 text-primary" />
-                              Channel Manager
+                              {t('pricing.channexCalcLabel')}
                             </label>
-                            <p className="text-xs text-muted-foreground mt-0.5">Booking.com, Airbnb, Expedia</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{t('pricing.channexCalcSub')}</p>
                           </div>
                           <Switch
                             checked={channexEnabled}
@@ -1140,8 +1140,8 @@ export default function Welcome() {
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground flex items-center gap-1.5">
                               <Network className="h-3.5 w-3.5" />
-                              Channel Manager
-                              {selectedCore?.code === "CORE_PRO" && <span className="text-xs">({roomCount} rooms)</span>}
+                              {t('pricing.channexCalcLabel')}
+                              {selectedCore?.code === "CORE_PRO" && <span className="text-xs">{t('pricing.channexCalcRooms', { count: roomCount })}</span>}
                             </span>
                             <span className="font-medium">+${channexAddonPrice.toLocaleString()}</span>
                           </div>

@@ -303,17 +303,17 @@ export default function HotelRegister() {
             <div className="border-t pt-6 space-y-4">
               <div className="flex items-center gap-2 mb-2">
                 <Network className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold text-lg">Channel Manager (Channex)</h3>
+                <h3 className="font-semibold text-lg">{t('hotel.channexTitle')}</h3>
               </div>
               <p className="text-sm text-muted-foreground">
-                Sync your rooms with Booking.com, Airbnb, and Expedia automatically.
+                {t('hotel.channexDesc')}
               </p>
 
               <div className="rounded-xl border border-border/60 bg-muted/30 p-4 space-y-4">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-sm font-medium">Activate Channel Manager Integration</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">📈 50% more bookings on average</p>
+                    <p className="text-sm font-medium">{t('hotel.channexToggleLabel')}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t('hotel.channexToggleSub')}</p>
                   </div>
                   <Switch
                     id="channex-enabled"
@@ -326,17 +326,17 @@ export default function HotelRegister() {
                 {channexEnabled && (
                   <div className="space-y-2">
                     <Label htmlFor="channexUuid">
-                      Channex Property UUID <span className="text-muted-foreground font-normal">(optional — you can add this later in Settings)</span>
+                      {t('hotel.channexUuidLabel')} <span className="text-muted-foreground font-normal">{t('hotel.channexUuidOptional')}</span>
                     </Label>
                     <Input
                       id="channexUuid"
-                      placeholder="e.g. 070a5be1-503a-466f-b3fb-005b352cb256"
+                      placeholder={t('hotel.channexUuidPlaceholder')}
                       value={channexUuid}
                       onChange={(e) => setChannexUuid(e.target.value)}
                       data-testid="input-channex-uuid"
                     />
                     <p className="text-xs text-muted-foreground">
-                      Find your Property UUID in your Channex dashboard → Properties → your property → UUID.
+                      {t('hotel.channexUuidHint')}
                     </p>
                   </div>
                 )}
