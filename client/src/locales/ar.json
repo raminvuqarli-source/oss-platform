@@ -466,7 +466,91 @@
       "allTypes": "كل الأنواع",
       "entries": "سجلات"
     },
-    "payWithCard": "ادفع بالبطاقة"
+    "payWithCard": "ادفع بالبطاقة",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "popular": "الأكثر شيوعاً",
+    "history": {
+      "title": "المعاملات الأخيرة"
+    },
+    "addons": {
+      "title": "الاشتراك والإضافات",
+      "subtitle": "إدارة الإضافات النشطة وشراء خدمات جديدة"
+    },
+    "channex": {
+      "title": "مدير القنوات",
+      "desc": "مزامنة OTA مع Booking.com وAirbnb وغيرها",
+      "rooms": "الغرف المتصلة",
+      "monthlyFee": "الرسوم الشهرية",
+      "contactUs": "تواصل معنا لتفعيل مدير القنوات."
+    },
+    "wa": {
+      "title": "إشعارات واتساب",
+      "desc": "أرسل رسائل تلقائية للضيوف عبر واتساب",
+      "starter": "البداية",
+      "starterDesc": "مثالي للعقارات الصغيرة",
+      "growth": "النمو",
+      "growthDesc": "للفنادق النامية",
+      "pro": "برو",
+      "proDesc": "العمليات عالية الحجم",
+      "messages": "رسائل",
+      "perThousand": " لكل 1,000",
+      "remainingMessages": "الرسائل المتبقية",
+      "purchaseTitle": "شراء حزمة واتساب",
+      "purchaseSubtitle": "أعد شحن رصيد رسائل واتساب",
+      "buyNow": "اشتري الآن",
+      "msgs": "رسالة",
+      "purchaseSuccess": "تم تفعيل الحزمة",
+      "purchaseSuccessDesc": "تمت إضافة رسائل واتساب.",
+      "purchaseError": "فشل شراء الحزمة. حاول مرة أخرى."
+    },
+    "contact": {
+      "title": "هل تحتاج حزمة مخصصة؟",
+      "desc": "تواصل مع فريقنا لمناقشة أسعار المؤسسات أو تفعيل Channex.",
+      "cta": "تواصل مع المبيعات"
+    },
+    "report": {
+      "overview": "نظرة عامة على الإيرادات",
+      "channex": "تقرير Channex",
+      "whatsapp": "تقرير واتساب",
+      "channexMonthly": "Channex الشهري",
+      "waAllTime": "واتساب الكلي",
+      "last30d": "آخر 30 يوماً",
+      "addonSales": "مبيعات الإضافات",
+      "totalHotels": "إجمالي الفنادق",
+      "withAddons": "بإضافات",
+      "revenueSummary": "ملخص الإيرادات",
+      "allTime": "الكلي",
+      "totalMonthly": "إجمالي الإيرادات الشهرية",
+      "channexTitle": "تقرير مدير القنوات",
+      "channexDesc": "الفنادق مع تكامل Channex النشط والرسوم الشهرية",
+      "noChannex": "لا توجد فنادق مع Channex بعد",
+      "hotels": "فنادق",
+      "active": "نشط",
+      "location": "الموقع",
+      "rooms": "الغرف",
+      "monthlyFee": "الرسوم الشهرية",
+      "channexUuid": "UUID Channex",
+      "hotel": "الفندق",
+      "whatsappTitle": "تقرير واتساب",
+      "whatsappDesc": "الفنادق ذات حزم واتساب",
+      "noWhatsapp": "لم يتم شراء حزم واتساب بعد",
+      "totalRevenue": "إجمالي الإيرادات",
+      "status": "الحالة",
+      "used": "مُستخدم",
+      "totalSpent": "إجمالي المنفق"
+    },
+    "admin": {
+      "credit": "رصيد",
+      "creditTitle": "إضافة رصيد واتساب",
+      "creditDesc": "إضافة رصيد رسائل واتساب يدوياً لهذا الفندق",
+      "messagesCount": "عدد الرسائل للإضافة",
+      "creditNoteLabel": "ملاحظة (اختياري)",
+      "creditNotePlaceholder": "سبب الرصيد...",
+      "addCredit": "إضافة رصيد",
+      "creditSuccess": "تمت إضافة الرصيد",
+      "creditSuccessDesc": "تم تحديث رصيد واتساب بنجاح."
+    }
   },
   "common": {
     "welcome": "مرحبًا",
@@ -1554,7 +1638,8 @@
     "messages": "الرسائل",
     "smartRoom": "الغرفة الذكية",
     "staffPerformance": "أداء الموظفين",
-    "roomStatus": "حالة الغرف"
+    "roomStatus": "حالة الغرف",
+    "billingAddons": "الفواتير والإضافات"
   },
   "smartExtras": {
     "title": "الإضافات الذكية",
@@ -1812,7 +1897,8 @@
     },
     "referralInfo": "معلومات الإحالة",
     "referralStaff": "تمت الإحالة بواسطة",
-    "referralNotes": "ملاحظات"
+    "referralNotes": "ملاحظات",
+    "billingReports": "تقارير الفوترة"
   },
   "roomPrep": {
     "title": "تجهيز الغرفة والاحتفالات",

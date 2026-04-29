@@ -204,6 +204,7 @@ function DashboardSidebar() {
           {
             label: t("nav.group.system", "System"),
             items: [
+              { title: t("nav.billingAddons", "Billing & Add-ons"), icon: CreditCard, url: "/dashboard", view: "billing-addons", testId: "nav-billing-addons" },
               { title: t("common.settings"), icon: Settings, url: "/settings", view: undefined, testId: "nav-settings" },
             ],
           },

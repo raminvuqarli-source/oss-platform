@@ -466,7 +466,91 @@
       "allTypes": "Tous les types",
       "entries": "entrées"
     },
-    "payWithCard": "Payer par carte"
+    "payWithCard": "Payer par carte",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "popular": "Le plus populaire",
+    "history": {
+      "title": "Transactions récentes"
+    },
+    "addons": {
+      "title": "Abonnement et modules",
+      "subtitle": "Gérez vos modules actifs et achetez de nouveaux services"
+    },
+    "channex": {
+      "title": "Gestionnaire de canaux",
+      "desc": "Synchronisation OTA avec Booking.com, Airbnb, etc.",
+      "rooms": "Chambres connectées",
+      "monthlyFee": "Frais mensuels",
+      "contactUs": "Contactez-nous pour activer le Channel Manager."
+    },
+    "wa": {
+      "title": "Notifications WhatsApp",
+      "desc": "Envoyez des messages automatiques aux clients via WhatsApp",
+      "starter": "Starter",
+      "starterDesc": "Idéal pour les petits établissements",
+      "growth": "Croissance",
+      "growthDesc": "Pour les hôtels en croissance",
+      "pro": "Pro",
+      "proDesc": "Opérations à grand volume",
+      "messages": "messages",
+      "perThousand": " par 1 000",
+      "remainingMessages": "Messages restants",
+      "purchaseTitle": "Acheter un forfait WhatsApp",
+      "purchaseSubtitle": "Rechargez votre crédit de messages WhatsApp",
+      "buyNow": "Acheter",
+      "msgs": "msg",
+      "purchaseSuccess": "Forfait activé",
+      "purchaseSuccessDesc": "Vos messages WhatsApp ont été ajoutés.",
+      "purchaseError": "Impossible d'acheter le forfait. Réessayez."
+    },
+    "contact": {
+      "title": "Besoin d'un forfait personnalisé ?",
+      "desc": "Contactez notre équipe pour discuter de tarifs entreprise ou de l'activation Channex.",
+      "cta": "Contacter les ventes"
+    },
+    "report": {
+      "overview": "Aperçu des revenus",
+      "channex": "Rapport Channex",
+      "whatsapp": "Rapport WhatsApp",
+      "channexMonthly": "Channex mensuel",
+      "waAllTime": "WhatsApp total",
+      "last30d": "30 derniers jours",
+      "addonSales": "Ventes de modules",
+      "totalHotels": "Total hôtels",
+      "withAddons": "avec modules",
+      "revenueSummary": "Résumé des revenus",
+      "allTime": "total",
+      "totalMonthly": "Revenu mensuel total",
+      "channexTitle": "Rapport Channel Manager",
+      "channexDesc": "Hôtels avec intégration Channex active et frais mensuels",
+      "noChannex": "Aucun hôtel avec Channex activé",
+      "hotels": "hôtels",
+      "active": "actifs",
+      "location": "Localisation",
+      "rooms": "Chambres",
+      "monthlyFee": "Frais mensuels",
+      "channexUuid": "UUID Channex",
+      "hotel": "Hôtel",
+      "whatsappTitle": "Rapport WhatsApp",
+      "whatsappDesc": "Hôtels avec forfaits WhatsApp",
+      "noWhatsapp": "Aucun forfait WhatsApp acheté",
+      "totalRevenue": "Revenu total",
+      "status": "Statut",
+      "used": "Utilisés",
+      "totalSpent": "Total dépensé"
+    },
+    "admin": {
+      "credit": "Crédit",
+      "creditTitle": "Ajouter du crédit WhatsApp",
+      "creditDesc": "Ajouter manuellement du crédit de messages WhatsApp à cet hôtel",
+      "messagesCount": "Messages à ajouter",
+      "creditNoteLabel": "Note (optionnel)",
+      "creditNotePlaceholder": "Raison du crédit...",
+      "addCredit": "Ajouter un crédit",
+      "creditSuccess": "Crédit ajouté",
+      "creditSuccessDesc": "Solde WhatsApp mis à jour avec succès."
+    }
   },
   "common": {
     "welcome": "Bienvenue",
@@ -1554,7 +1638,8 @@
     "messages": "Messages",
     "smartRoom": "Chambre intelligente",
     "staffPerformance": "Performance du Personnel",
-    "roomStatus": "État des chambres"
+    "roomStatus": "État des chambres",
+    "billingAddons": "Facturation et modules"
   },
   "smartExtras": {
     "title": "Extras Intelligents",
@@ -1812,7 +1897,8 @@
     },
     "referralInfo": "Info parrainage",
     "referralStaff": "Recommandé par",
-    "referralNotes": "Notes"
+    "referralNotes": "Notes",
+    "billingReports": "Rapports de facturation"
   },
   "roomPrep": {
     "title": "Préparation de Chambre & Célébration",

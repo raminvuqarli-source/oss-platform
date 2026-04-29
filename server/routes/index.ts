@@ -33,6 +33,7 @@ import { registerFolioRoutes } from "./folio.routes";
 import { registerRestaurantRoutes } from "./restaurant.routes";
 import { registerMarketingRoutes } from "./marketing.routes";
 import { registerChannexWebhookRoutes } from "./channex-webhooks.routes";
+import { registerBillingAddonRoutes } from "./billing-addons.routes";
 import { initWebSocket } from "../websocket/index";
 import path from "path";
 
@@ -84,6 +85,7 @@ export async function registerRoutes(
   registerRestaurantRoutes(app);
   registerMarketingRoutes(app);
   registerChannexWebhookRoutes(app);
+  registerBillingAddonRoutes(app);
   initWebSocket(httpServer, app);
 
   return httpServer;

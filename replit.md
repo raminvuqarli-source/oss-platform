@@ -85,6 +85,18 @@ Preferred communication style: Simple, everyday language.
 - **New DB Tables**: `restaurant_cleaning_tasks`, `restaurant_staff_profiles`.
 - **WebSocket Events**: Real-time events for new orders, order status changes, waiter calls, and cleaning task updates.
 
+### Billing & Add-on Management
+- **Billing Logs Table**: `billing_logs` tracks every add-on purchase and payment event per hotel/tenant with `event_type`, `amount_usd`, `messages_added`, `package_name`, and `status`.
+- **Hotels WhatsApp Fields**: `is_whatsapp_enabled` and `whatsapp_balance` columns on `hotels` table control WhatsApp notification gating.
+- **Owner Dashboard — Billing & Add-ons View** (`view=billing-addons`): Shows current Channex and WhatsApp addon status, balance progress, and WhatsApp package purchase UI (500 msgs/$15, 1000 msgs/$25, 3000 msgs/$60). Recent billing history displayed. Nav item "Billing & Add-ons" added to owner sidebar under System group.
+- **WhatsApp Balance Guard**: `is_whatsapp_enabled` and `whatsapp_balance > 0` required before sending messages; balance decrements on each message via `decrementWhatsappBalance()`.
+- **OSS Super Admin — Billing Reports Tab**: New "Billing Reports" tab in OSS admin panel with 3 sub-views:
+  - **Revenue Overview**: Stats cards (Channex monthly, WhatsApp all-time, last 30d, total hotels) + revenue summary breakdown.
+  - **Channex Report**: Table of Channex-enabled hotels with room count and monthly fee; total monthly revenue badge.
+  - **WhatsApp Report**: Table of hotels with balance, messages used, total spent; manual credit dialog for admin top-ups.
+- **Backend Routes** (`server/routes/billing-addons.routes.ts`): `GET /api/billing/addons`, `POST /api/billing/whatsapp/purchase`, `POST /api/billing/whatsapp/toggle`, `GET /api/oss-admin/reports/channex`, `GET /api/oss-admin/reports/whatsapp`, `GET /api/oss-admin/reports/revenue`, `POST /api/oss-admin/hotels/:hotelId/whatsapp-credit`.
+- **i18n**: All 10 locale files updated with `billing.wa.*`, `billing.report.*`, `billing.admin.*`, `billing.addons.*`, `billing.channex.*`, `nav.billingAddons`, and `ossAdmin.billingReports` keys.
+
 ### Automated Systems
 - **Marketing Referral System**: `referral_source`, `referral_staff_id`, `referral_notes` on `owners` table; `referral_commissions` table tracks pending/paid commissions. Registration form captures referral source + optional staff referral code (validated on register). New `marketing_staff` role: OSS super admin creates marketing accounts from **Marketing** tab in admin panel, assigns referral codes; staff log in and land at `/marketing` — dedicated panel showing only their referred hotels, subscription/trial status, and hotel details. APIs: `POST|GET /api/oss-admin/marketing-users`, `PATCH /api/oss-admin/marketing-users/:id/referral-code`, `GET /api/marketing/me|my-hotels|my-commissions`.
 - **Multi-Property Business Entity Check**: Validates that new properties belong to the same legal business entity as the owner.

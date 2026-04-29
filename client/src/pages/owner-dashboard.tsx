@@ -5203,6 +5203,211 @@ function OwnerOverview({ analytics, analyticsLoading, allProperties }: {
   );
 }
 
+// ===================== BILLING ADDONS VIEW =====================
+function BillingAddonsView() {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+
+  const WHATSAPP_PACKAGES = [
+    { id: "wa_500", name: t("billing.wa.starter", "Starter"), messages: 500, priceUsd: 15, description: t("billing.wa.starterDesc", "Perfect for small properties") },
+    { id: "wa_1000", name: t("billing.wa.growth", "Growth"), messages: 1000, priceUsd: 25, description: t("billing.wa.growthDesc", "For growing hotels"), popular: true },
+    { id: "wa_3000", name: t("billing.wa.pro", "Pro"), messages: 3000, priceUsd: 60, description: t("billing.wa.proDesc", "High-volume operations") },
+  ];
+
+  const { data: addonData, isLoading } = useQuery<{
+    hotel: { id: string; name: string; isChannexEnabled: boolean; channexAddonPrice: number; channexRoomCount: number; isWhatsappEnabled: boolean; whatsappBalance: number };
+    packages: { id: string; name: string; messages: number; priceUsd: number }[];
+    logs: { id: string; eventType: string; description: string; amountUsd: string; messagesAdded: number; packageName: string; createdAt: string }[];
+  }>({ queryKey: ["/api/billing/addons"] });
+
+  const purchaseMutation = useMutation({
+    mutationFn: async (packageId: string) => {
+      const res = await apiRequest("POST", "/api/billing/whatsapp/purchase", { packageId });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/billing/addons"] });
+      toast({ title: t("billing.wa.purchaseSuccess", "Package Activated"), description: t("billing.wa.purchaseSuccessDesc", "Your WhatsApp messages have been added.") });
+    },
+    onError: () => {
+      toast({ title: t("common.error", "Error"), description: t("billing.wa.purchaseError", "Failed to purchase package. Please try again."), variant: "destructive" });
+    },
+  });
+
+  const hotel = addonData?.hotel;
+  const logs = addonData?.logs ?? [];
+
+  const balancePercent = hotel ? Math.min(100, ((hotel.whatsappBalance ?? 0) / 1000) * 100) : 0;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-4" data-testid="billing-addons-loading">
+        {[1, 2, 3].map((i) => <Skeleton key={i} className="h-32 w-full" />)}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 p-1" data-testid="billing-addons-view">
+      <div>
+        <h2 className="text-2xl font-bold">{t("billing.addons.title", "Subscription & Add-ons")}</h2>
+        <p className="text-muted-foreground mt-1">{t("billing.addons.subtitle", "Manage your active add-ons and purchase new services")}</p>
+      </div>
+
+      {/* Active Subscriptions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Channex Add-on */}
+        <Card data-testid="card-channex-addon">
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-orange-500/10">
+                  <Globe className="h-5 w-5 text-orange-500" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">{t("billing.channex.title", "Channel Manager")}</h3>
+                  <p className="text-sm text-muted-foreground">{t("billing.channex.desc", "OTA sync with Booking.com, Airbnb & more")}</p>
+                </div>
+              </div>
+              <Badge variant={hotel?.isChannexEnabled ? "default" : "secondary"} data-testid="badge-channex-status">
+                {hotel?.isChannexEnabled ? t("billing.active", "Active") : t("billing.inactive", "Inactive")}
+              </Badge>
+            </div>
+            {hotel?.isChannexEnabled && (
+              <div className="mt-4 pt-3 border-t space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t("billing.channex.rooms", "Connected Rooms")}</span>
+                  <span className="font-medium">{hotel.channexRoomCount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t("billing.channex.monthlyFee", "Monthly Fee")}</span>
+                  <span className="font-medium text-green-600">${hotel.channexAddonPrice}/mo</span>
+                </div>
+              </div>
+            )}
+            {!hotel?.isChannexEnabled && (
+              <p className="text-xs text-muted-foreground mt-3">{t("billing.channex.contactUs", "Contact us to activate Channel Manager for your property.")}</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* WhatsApp Add-on status */}
+        <Card data-testid="card-whatsapp-addon">
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-green-500/10">
+                  <MessageSquare className="h-5 w-5 text-green-500" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">{t("billing.wa.title", "WhatsApp Notifications")}</h3>
+                  <p className="text-sm text-muted-foreground">{t("billing.wa.desc", "Send automated guest messages via WhatsApp")}</p>
+                </div>
+              </div>
+              <Badge variant={hotel?.isWhatsappEnabled ? "default" : "secondary"} data-testid="badge-whatsapp-status">
+                {hotel?.isWhatsappEnabled ? t("billing.active", "Active") : t("billing.inactive", "Inactive")}
+              </Badge>
+            </div>
+            {hotel?.isWhatsappEnabled && (
+              <div className="mt-4 pt-3 border-t space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{t("billing.wa.remainingMessages", "Remaining Messages")}</span>
+                  <span className="font-semibold" data-testid="text-whatsapp-balance">{hotel.whatsappBalance ?? 0}</span>
+                </div>
+                <Progress value={balancePercent} className="h-2" data-testid="progress-whatsapp-balance" />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* WhatsApp Package Purchase */}
+      <div>
+        <h3 className="text-lg font-semibold mb-1">{t("billing.wa.purchaseTitle", "Purchase WhatsApp Package")}</h3>
+        <p className="text-sm text-muted-foreground mb-4">{t("billing.wa.purchaseSubtitle", "Top up your WhatsApp message balance")}</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {WHATSAPP_PACKAGES.map((pkg) => (
+            <Card key={pkg.id} className={`relative ${pkg.popular ? "border-primary ring-1 ring-primary" : ""}`} data-testid={`card-package-${pkg.id}`}>
+              {pkg.popular && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <Badge className="bg-primary text-primary-foreground text-xs px-2 py-0.5">{t("billing.popular", "Most Popular")}</Badge>
+                </div>
+              )}
+              <CardContent className="p-5 text-center space-y-3">
+                <div>
+                  <h4 className="font-bold text-base">{pkg.name}</h4>
+                  <p className="text-xs text-muted-foreground">{pkg.description}</p>
+                </div>
+                <div>
+                  <span className="text-3xl font-bold">${pkg.priceUsd}</span>
+                  <p className="text-sm text-muted-foreground mt-0.5">{pkg.messages.toLocaleString()} {t("billing.wa.messages", "messages")}</p>
+                  <p className="text-xs text-muted-foreground">${(pkg.priceUsd / pkg.messages * 1000).toFixed(1)}{t("billing.wa.perThousand", " per 1,000")}</p>
+                </div>
+                <Button
+                  className="w-full"
+                  variant={pkg.popular ? "default" : "outline"}
+                  onClick={() => purchaseMutation.mutate(pkg.id)}
+                  disabled={purchaseMutation.isPending}
+                  data-testid={`button-purchase-${pkg.id}`}
+                >
+                  {purchaseMutation.isPending ? t("common.loading", "Processing...") : t("billing.wa.buyNow", "Buy Now")}
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Recent billing history */}
+      {logs.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold mb-3">{t("billing.history.title", "Recent Transactions")}</h3>
+          <Card>
+            <CardContent className="p-0">
+              <div className="divide-y">
+                {logs.map((log) => (
+                  <div key={log.id} className="flex items-center justify-between p-4" data-testid={`billing-log-${log.id}`}>
+                    <div className="flex items-center gap-3">
+                      <div className="p-1.5 rounded bg-green-500/10">
+                        <MessageSquare className="h-3.5 w-3.5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{log.description}</p>
+                        <p className="text-xs text-muted-foreground">{new Date(log.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold">${parseFloat(log.amountUsd).toFixed(2)}</p>
+                      {log.messagesAdded! > 0 && (
+                        <p className="text-xs text-green-600">+{log.messagesAdded} {t("billing.wa.msgs", "msgs")}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      <Card className="bg-muted/30" data-testid="card-billing-contact">
+        <CardContent className="p-5 flex items-start gap-4">
+          <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+            <CreditCard className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h4 className="font-medium">{t("billing.contact.title", "Need a custom package?")}</h4>
+            <p className="text-sm text-muted-foreground mt-0.5">{t("billing.contact.desc", "Contact our team to discuss enterprise pricing, Channex activation, or custom integrations.")}</p>
+            <Button size="sm" variant="outline" className="mt-3" onClick={() => window.open("mailto:support@ossaiproapp.com")} data-testid="button-contact-billing">
+              {t("billing.contact.cta", "Contact Sales")}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export default function OwnerDashboard() {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -5281,6 +5486,8 @@ export default function OwnerDashboard() {
         return <GuestsOverviewView />;
       case "staff-management":
         return <StaffManagementView />;
+      case "billing-addons":
+        return <BillingAddonsView />;
       default:
         return (
           <OwnerOverview

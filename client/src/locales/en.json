@@ -478,7 +478,91 @@
     "splitNoticeTitle": "Payment will be split into instalments",
     "splitNoticeDesc": "Total {{total}} AZN exceeds the {{max}} AZN limit per transaction. It will be charged in {{count}} instalments of up to {{max}} AZN each.",
     "payFirstInstalment": "Pay 1st instalment",
-    "instalments": "parts"
+    "instalments": "parts",
+    "active": "Active",
+    "inactive": "Inactive",
+    "popular": "Most Popular",
+    "history": {
+      "title": "Recent Transactions"
+    },
+    "addons": {
+      "title": "Subscription & Add-ons",
+      "subtitle": "Manage your active add-ons and purchase new services"
+    },
+    "channex": {
+      "title": "Channel Manager",
+      "desc": "OTA sync with Booking.com, Airbnb & more",
+      "rooms": "Connected Rooms",
+      "monthlyFee": "Monthly Fee",
+      "contactUs": "Contact us to activate Channel Manager for your property."
+    },
+    "wa": {
+      "title": "WhatsApp Notifications",
+      "desc": "Send automated guest messages via WhatsApp",
+      "starter": "Starter",
+      "starterDesc": "Perfect for small properties",
+      "growth": "Growth",
+      "growthDesc": "For growing hotels",
+      "pro": "Pro",
+      "proDesc": "High-volume operations",
+      "messages": "messages",
+      "perThousand": " per 1,000",
+      "remainingMessages": "Remaining Messages",
+      "purchaseTitle": "Purchase WhatsApp Package",
+      "purchaseSubtitle": "Top up your WhatsApp message balance",
+      "buyNow": "Buy Now",
+      "msgs": "msgs",
+      "purchaseSuccess": "Package Activated",
+      "purchaseSuccessDesc": "Your WhatsApp messages have been added.",
+      "purchaseError": "Failed to purchase package. Please try again."
+    },
+    "contact": {
+      "title": "Need a custom package?",
+      "desc": "Contact our team to discuss enterprise pricing, Channex activation, or custom integrations.",
+      "cta": "Contact Sales"
+    },
+    "report": {
+      "overview": "Revenue Overview",
+      "channex": "Channex Report",
+      "whatsapp": "WhatsApp Report",
+      "channexMonthly": "Channex Monthly",
+      "waAllTime": "WhatsApp All-Time",
+      "last30d": "Last 30 Days",
+      "addonSales": "Add-on sales",
+      "totalHotels": "Total Hotels",
+      "withAddons": "with add-ons",
+      "revenueSummary": "Revenue Summary",
+      "allTime": "all-time",
+      "totalMonthly": "Total Monthly Revenue",
+      "channexTitle": "Channel Manager Report",
+      "channexDesc": "Hotels with active Channex integration and their monthly fees",
+      "noChannex": "No hotels with Channex enabled yet",
+      "hotels": "hotels",
+      "active": "active",
+      "location": "Location",
+      "rooms": "Rooms",
+      "monthlyFee": "Monthly Fee",
+      "channexUuid": "Channex UUID",
+      "hotel": "Hotel",
+      "whatsappTitle": "WhatsApp Report",
+      "whatsappDesc": "Hotels with WhatsApp packages — balance, usage, and revenue",
+      "noWhatsapp": "No WhatsApp packages purchased yet",
+      "totalRevenue": "Total Revenue",
+      "status": "Status",
+      "used": "Used",
+      "totalSpent": "Total Spent"
+    },
+    "admin": {
+      "credit": "Credit",
+      "creditTitle": "Add WhatsApp Credit",
+      "creditDesc": "Manually add WhatsApp message balance to this hotel",
+      "messagesCount": "Messages to Add",
+      "creditNoteLabel": "Note (optional)",
+      "creditNotePlaceholder": "Reason for credit...",
+      "addCredit": "Add Credit",
+      "creditSuccess": "Credit Added",
+      "creditSuccessDesc": "WhatsApp balance updated successfully."
+    }
   },
   "common": {
     "welcome": "Welcome",
@@ -1584,7 +1668,8 @@
     "temperature": "Temperature",
     "chat": "Chat",
     "activityLogs": "Activity Logs",
-    "units": "Units"
+    "units": "Units",
+    "billingAddons": "Billing & Add-ons"
   },
   "staffPerformance": {
     "title": "Staff Performance",
@@ -1892,6 +1977,7 @@
     },
     "founder": "Founder Panel",
     "board": "Board Panel",
+    "billingReports": "Billing Reports",
     "founderPanel": {
       "title": "Financial Overview",
       "subtitle": "Net revenue after all deductions",

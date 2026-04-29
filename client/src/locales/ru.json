@@ -473,7 +473,91 @@
     "splitNoticeTitle": "Платёж будет разбит на части",
     "splitNoticeDesc": "Сумма {{total}} AZN превышает лимит {{max}} AZN за транзакцию. Будет оплачено в {{count}} частях по {{max}} AZN.",
     "payFirstInstalment": "Оплатить 1-ю часть",
-    "instalments": "части"
+    "instalments": "части",
+    "active": "Активен",
+    "inactive": "Неактивен",
+    "popular": "Самый популярный",
+    "history": {
+      "title": "Последние транзакции"
+    },
+    "addons": {
+      "title": "Подписка и дополнения",
+      "subtitle": "Управляйте активными дополнениями и покупайте новые услуги"
+    },
+    "channex": {
+      "title": "Менеджер каналов",
+      "desc": "Синхронизация OTA с Booking.com, Airbnb и др.",
+      "rooms": "Подключённые номера",
+      "monthlyFee": "Ежемесячная плата",
+      "contactUs": "Свяжитесь с нами для активации Channel Manager."
+    },
+    "wa": {
+      "title": "WhatsApp уведомления",
+      "desc": "Отправляйте автоматические сообщения гостям через WhatsApp",
+      "starter": "Старт",
+      "starterDesc": "Для небольших объектов",
+      "growth": "Рост",
+      "growthDesc": "Для растущих отелей",
+      "pro": "Про",
+      "proDesc": "Высокий объём операций",
+      "messages": "сообщений",
+      "perThousand": " за 1000",
+      "remainingMessages": "Остаток сообщений",
+      "purchaseTitle": "Купить пакет WhatsApp",
+      "purchaseSubtitle": "Пополните баланс сообщений",
+      "buyNow": "Купить",
+      "msgs": "msg",
+      "purchaseSuccess": "Пакет активирован",
+      "purchaseSuccessDesc": "WhatsApp сообщения добавлены.",
+      "purchaseError": "Не удалось купить пакет. Попробуйте снова."
+    },
+    "contact": {
+      "title": "Нужен индивидуальный пакет?",
+      "desc": "Свяжитесь с нашей командой для обсуждения корпоративных цен или активации Channex.",
+      "cta": "Связаться с продажами"
+    },
+    "report": {
+      "overview": "Обзор доходов",
+      "channex": "Отчёт Channex",
+      "whatsapp": "Отчёт WhatsApp",
+      "channexMonthly": "Channex ежемесячно",
+      "waAllTime": "WhatsApp за всё время",
+      "last30d": "Последние 30 дней",
+      "addonSales": "Продажи дополнений",
+      "totalHotels": "Всего отелей",
+      "withAddons": "с дополнениями",
+      "revenueSummary": "Сводка доходов",
+      "allTime": "за всё время",
+      "totalMonthly": "Общий ежемесячный доход",
+      "channexTitle": "Отчёт менеджера каналов",
+      "channexDesc": "Отели с активной интеграцией Channex и ежемесячными платежами",
+      "noChannex": "Нет отелей с Channex",
+      "hotels": "отелей",
+      "active": "активных",
+      "location": "Местоположение",
+      "rooms": "Номера",
+      "monthlyFee": "Ежемесячная плата",
+      "channexUuid": "Channex UUID",
+      "hotel": "Отель",
+      "whatsappTitle": "Отчёт WhatsApp",
+      "whatsappDesc": "Отели с пакетами WhatsApp",
+      "noWhatsapp": "Пакетов WhatsApp пока нет",
+      "totalRevenue": "Общий доход",
+      "status": "Статус",
+      "used": "Использовано",
+      "totalSpent": "Итого потрачено"
+    },
+    "admin": {
+      "credit": "Кредит",
+      "creditTitle": "Добавить WhatsApp кредит",
+      "creditDesc": "Вручную пополнить баланс WhatsApp сообщений для этого отеля",
+      "messagesCount": "Количество сообщений",
+      "creditNoteLabel": "Примечание (необязательно)",
+      "creditNotePlaceholder": "Причина кредита...",
+      "addCredit": "Добавить кредит",
+      "creditSuccess": "Кредит добавлен",
+      "creditSuccessDesc": "Баланс WhatsApp обновлён."
+    }
   },
   "common": {
     "welcome": "Добро пожаловать",
@@ -1561,7 +1645,8 @@
     "messages": "Сообщения",
     "smartRoom": "Умный номер",
     "staffPerformance": "Производительность Персонала",
-    "roomStatus": "Статус номеров"
+    "roomStatus": "Статус номеров",
+    "billingAddons": "Счёт и дополнения"
   },
   "smartExtras": {
     "title": "Умные дополнения",
@@ -1819,7 +1904,8 @@
     "roleLabel": "Администратор OSS",
     "referralInfo": "Реферальная информация",
     "referralStaff": "Кто рекомендовал",
-    "referralNotes": "Заметки"
+    "referralNotes": "Заметки",
+    "billingReports": "Отчёты по счетам"
   },
   "roomPrep": {
     "title": "Подготовка номера и праздники",

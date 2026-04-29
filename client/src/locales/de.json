@@ -466,7 +466,91 @@
       "allTypes": "Alle Typen",
       "entries": "Einträge"
     },
-    "payWithCard": "Mit Karte bezahlen"
+    "payWithCard": "Mit Karte bezahlen",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "popular": "Am beliebtesten",
+    "history": {
+      "title": "Letzte Transaktionen"
+    },
+    "addons": {
+      "title": "Abonnement & Add-ons",
+      "subtitle": "Verwalten Sie Ihre Add-ons und kaufen Sie neue Dienste"
+    },
+    "channex": {
+      "title": "Channel-Manager",
+      "desc": "OTA-Synchronisation mit Booking.com, Airbnb usw.",
+      "rooms": "Verbundene Zimmer",
+      "monthlyFee": "Monatliche Gebühr",
+      "contactUs": "Kontaktieren Sie uns zur Aktivierung des Channel Managers."
+    },
+    "wa": {
+      "title": "WhatsApp-Benachrichtigungen",
+      "desc": "Senden Sie automatische Gästenachrichten über WhatsApp",
+      "starter": "Starter",
+      "starterDesc": "Perfekt für kleine Betriebe",
+      "growth": "Wachstum",
+      "growthDesc": "Für wachsende Hotels",
+      "pro": "Pro",
+      "proDesc": "Für großvolumige Betriebe",
+      "messages": "Nachrichten",
+      "perThousand": " pro 1.000",
+      "remainingMessages": "Verbleibende Nachrichten",
+      "purchaseTitle": "WhatsApp-Paket kaufen",
+      "purchaseSubtitle": "Laden Sie Ihr WhatsApp-Nachrichtenguthaben auf",
+      "buyNow": "Jetzt kaufen",
+      "msgs": "Msg",
+      "purchaseSuccess": "Paket aktiviert",
+      "purchaseSuccessDesc": "Ihre WhatsApp-Nachrichten wurden hinzugefügt.",
+      "purchaseError": "Paket konnte nicht gekauft werden. Bitte erneut versuchen."
+    },
+    "contact": {
+      "title": "Individuelles Paket benötigt?",
+      "desc": "Kontaktieren Sie unser Team für Enterprise-Preise oder Channex-Aktivierung.",
+      "cta": "Vertrieb kontaktieren"
+    },
+    "report": {
+      "overview": "Umsatzübersicht",
+      "channex": "Channex-Bericht",
+      "whatsapp": "WhatsApp-Bericht",
+      "channexMonthly": "Channex monatlich",
+      "waAllTime": "WhatsApp gesamt",
+      "last30d": "Letzte 30 Tage",
+      "addonSales": "Add-on-Umsatz",
+      "totalHotels": "Hotels gesamt",
+      "withAddons": "mit Add-ons",
+      "revenueSummary": "Umsatzzusammenfassung",
+      "allTime": "gesamt",
+      "totalMonthly": "Monatlicher Gesamtumsatz",
+      "channexTitle": "Channel-Manager-Bericht",
+      "channexDesc": "Hotels mit aktiver Channex-Integration und Monatsgebühren",
+      "noChannex": "Noch keine Hotels mit Channex",
+      "hotels": "Hotels",
+      "active": "aktive",
+      "location": "Standort",
+      "rooms": "Zimmer",
+      "monthlyFee": "Monatliche Gebühr",
+      "channexUuid": "Channex UUID",
+      "hotel": "Hotel",
+      "whatsappTitle": "WhatsApp-Bericht",
+      "whatsappDesc": "Hotels mit WhatsApp-Paketen",
+      "noWhatsapp": "Noch keine WhatsApp-Pakete gekauft",
+      "totalRevenue": "Gesamtumsatz",
+      "status": "Status",
+      "used": "Genutzt",
+      "totalSpent": "Gesamt ausgegeben"
+    },
+    "admin": {
+      "credit": "Guthaben",
+      "creditTitle": "WhatsApp-Guthaben hinzufügen",
+      "creditDesc": "Manuell WhatsApp-Nachrichtenguthaben für dieses Hotel hinzufügen",
+      "messagesCount": "Hinzuzufügende Nachrichten",
+      "creditNoteLabel": "Notiz (optional)",
+      "creditNotePlaceholder": "Grund für das Guthaben...",
+      "addCredit": "Guthaben hinzufügen",
+      "creditSuccess": "Guthaben hinzugefügt",
+      "creditSuccessDesc": "WhatsApp-Guthaben erfolgreich aktualisiert."
+    }
   },
   "common": {
     "welcome": "Willkommen",
@@ -1554,7 +1638,8 @@
     "messages": "Nachrichten",
     "smartRoom": "Smart-Zimmer",
     "staffPerformance": "Mitarbeitoleistung",
-    "roomStatus": "Zimmerstatus"
+    "roomStatus": "Zimmerstatus",
+    "billingAddons": "Abrechnung & Add-ons"
   },
   "smartExtras": {
     "title": "Smart Extras",
@@ -1812,7 +1897,8 @@
     },
     "referralInfo": "Empfehlungsinfo",
     "referralStaff": "Empfohlen von",
-    "referralNotes": "Notizen"
+    "referralNotes": "Notizen",
+    "billingReports": "Abrechnungsberichte"
   },
   "roomPrep": {
     "title": "Zimmervorbereitung & Feier",

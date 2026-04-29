@@ -232,6 +232,9 @@ import {
   type InsertRestaurantStaffProfile,
   deletedTrialAccounts,
   type DeletedTrialAccount,
+  billingLogs,
+  type BillingLog,
+  type InsertBillingLog,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -644,6 +647,16 @@ export interface IStorage {
   logDeletedTrialAccount(email: string, hotelName?: string | null, reason?: string): Promise<void>;
   isTrialEmailDeleted(email: string): Promise<boolean>;
   deleteOwnerAccount(ownerId: string): Promise<void>;
+
+  // Billing Logs
+  createBillingLog(data: InsertBillingLog): Promise<BillingLog>;
+  getBillingLogsByTenant(tenantId: string): Promise<BillingLog[]>;
+  getAllBillingLogs(): Promise<BillingLog[]>;
+
+  // Hotel billing fields
+  updateHotelBilling(hotelId: string, updates: { isWhatsappEnabled?: boolean; whatsappBalance?: number; isChannexEnabled?: boolean; channexRoomCount?: number; channexAddonPrice?: number }): Promise<Hotel | undefined>;
+  getAllHotelsAdmin(): Promise<Hotel[]>;
+  decrementWhatsappBalance(hotelId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3351,6 +3364,37 @@ export class DatabaseStorage implements IStorage {
     await db.delete(properties).where(eq(properties.ownerId, ownerId));
     // Owner record last
     await db.delete(owners).where(eq(owners.id, ownerId));
+  }
+
+  // ===================== BILLING LOGS =====================
+  async createBillingLog(data: InsertBillingLog): Promise<BillingLog> {
+    const [log] = await db.insert(billingLogs).values(data).returning();
+    return log;
+  }
+
+  async getBillingLogsByTenant(tenantId: string): Promise<BillingLog[]> {
+    return db.select().from(billingLogs)
+      .where(eq(billingLogs.tenantId, tenantId))
+      .orderBy(billingLogs.createdAt);
+  }
+
+  async getAllBillingLogs(): Promise<BillingLog[]> {
+    return db.select().from(billingLogs).orderBy(billingLogs.createdAt);
+  }
+
+  async updateHotelBilling(hotelId: string, updates: { isWhatsappEnabled?: boolean; whatsappBalance?: number; isChannexEnabled?: boolean; channexRoomCount?: number; channexAddonPrice?: number }): Promise<Hotel | undefined> {
+    const [hotel] = await db.update(hotels).set(updates).where(eq(hotels.id, hotelId)).returning();
+    return hotel;
+  }
+
+  async getAllHotelsAdmin(): Promise<Hotel[]> {
+    return db.select().from(hotels).orderBy(hotels.createdAt);
+  }
+
+  async decrementWhatsappBalance(hotelId: string): Promise<void> {
+    await db.update(hotels)
+      .set({ whatsappBalance: sql`GREATEST(0, ${hotels.whatsappBalance} - 1)` })
+      .where(eq(hotels.id, hotelId));
   }
 }
 

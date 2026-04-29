@@ -466,7 +466,91 @@
       "allTypes": "Alle typen",
       "entries": "vermeldingen"
     },
-    "payWithCard": "Betalen met kaart"
+    "payWithCard": "Betalen met kaart",
+    "active": "Actief",
+    "inactive": "Inactief",
+    "popular": "Meest populair",
+    "history": {
+      "title": "Recente transacties"
+    },
+    "addons": {
+      "title": "Abonnement en add-ons",
+      "subtitle": "Beheer uw actieve add-ons en koop nieuwe diensten"
+    },
+    "channex": {
+      "title": "Kanaalmanager",
+      "desc": "OTA-synchronisatie met Booking.com, Airbnb, enz.",
+      "rooms": "Verbonden kamers",
+      "monthlyFee": "Maandelijkse vergoeding",
+      "contactUs": "Neem contact met ons op om de Kanaalmanager te activeren."
+    },
+    "wa": {
+      "title": "WhatsApp-meldingen",
+      "desc": "Stuur automatische gastberichten via WhatsApp",
+      "starter": "Starter",
+      "starterDesc": "Ideaal voor kleine accommodaties",
+      "growth": "Groei",
+      "growthDesc": "Voor groeiende hotels",
+      "pro": "Pro",
+      "proDesc": "Bewerkingen met hoog volume",
+      "messages": "berichten",
+      "perThousand": " per 1.000",
+      "remainingMessages": "Resterende berichten",
+      "purchaseTitle": "WhatsApp-pakket kopen",
+      "purchaseSubtitle": "Laad uw WhatsApp-berichtensaldo op",
+      "buyNow": "Nu kopen",
+      "msgs": "ber.",
+      "purchaseSuccess": "Pakket geactiveerd",
+      "purchaseSuccessDesc": "Uw WhatsApp-berichten zijn toegevoegd.",
+      "purchaseError": "Pakket kon niet worden gekocht. Probeer het opnieuw."
+    },
+    "contact": {
+      "title": "Aangepast pakket nodig?",
+      "desc": "Neem contact op met ons team voor bedrijfstarieven of Channex-activering.",
+      "cta": "Verkoop contacteren"
+    },
+    "report": {
+      "overview": "Inkomstenoverzicht",
+      "channex": "Channex-rapport",
+      "whatsapp": "WhatsApp-rapport",
+      "channexMonthly": "Channex maandelijks",
+      "waAllTime": "WhatsApp totaal",
+      "last30d": "Laatste 30 dagen",
+      "addonSales": "Add-on verkopen",
+      "totalHotels": "Totaal hotels",
+      "withAddons": "met add-ons",
+      "revenueSummary": "Inkomstensamenvatting",
+      "allTime": "totaal",
+      "totalMonthly": "Totale maandelijkse inkomsten",
+      "channexTitle": "Kanaalmanager-rapport",
+      "channexDesc": "Hotels met actieve Channex-integratie en maandelijkse vergoedingen",
+      "noChannex": "Nog geen hotels met Channex",
+      "hotels": "hotels",
+      "active": "actief",
+      "location": "Locatie",
+      "rooms": "Kamers",
+      "monthlyFee": "Maandelijkse vergoeding",
+      "channexUuid": "Channex UUID",
+      "hotel": "Hotel",
+      "whatsappTitle": "WhatsApp-rapport",
+      "whatsappDesc": "Hotels met WhatsApp-pakketten",
+      "noWhatsapp": "Nog geen WhatsApp-pakketten gekocht",
+      "totalRevenue": "Totale inkomsten",
+      "status": "Status",
+      "used": "Gebruikt",
+      "totalSpent": "Totaal besteed"
+    },
+    "admin": {
+      "credit": "Krediet",
+      "creditTitle": "WhatsApp-krediet toevoegen",
+      "creditDesc": "Handmatig WhatsApp-berichtensaldo toevoegen aan dit hotel",
+      "messagesCount": "Toe te voegen berichten",
+      "creditNoteLabel": "Opmerking (optioneel)",
+      "creditNotePlaceholder": "Reden voor krediet...",
+      "addCredit": "Krediet toevoegen",
+      "creditSuccess": "Krediet toegevoegd",
+      "creditSuccessDesc": "WhatsApp-saldo succesvol bijgewerkt."
+    }
   },
   "common": {
     "welcome": "Welkom",
@@ -1554,7 +1638,8 @@
     "messages": "Berichten",
     "smartRoom": "Slimme kamer",
     "staffPerformance": "Personeelsperformance",
-    "roomStatus": "Kamerstatus"
+    "roomStatus": "Kamerstatus",
+    "billingAddons": "Facturering en add-ons"
   },
   "smartExtras": {
     "title": "Slimme Extra's",
@@ -1812,7 +1897,8 @@
     },
     "referralInfo": "Verwijzingsinfo",
     "referralStaff": "Doorverwezen door",
-    "referralNotes": "Notities"
+    "referralNotes": "Notities",
+    "billingReports": "Factureringsrapporten"
   },
   "roomPrep": {
     "title": "Kamervoorbereiding & Viering",

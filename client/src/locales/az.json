@@ -478,7 +478,91 @@
     "splitNoticeTitle": "Ödəniş hissələrə bölünəcək",
     "splitNoticeDesc": "Cəmi {{total}} AZN hər əməliyyat üçün {{max}} AZN limitini keçir. {{count}} hissəyə, maksimum {{max}} AZN olmaqla ödəniləcək.",
     "payFirstInstalment": "1-ci hissəni ödə",
-    "instalments": "hissə"
+    "instalments": "hissə",
+    "active": "Aktiv",
+    "inactive": "Qeyri-aktiv",
+    "popular": "Ən populyar",
+    "history": {
+      "title": "Son əməliyyatlar"
+    },
+    "addons": {
+      "title": "Abunəlik və əlavələr",
+      "subtitle": "Aktiv əlavələrinizi idarə edin və yeni xidmətlər alın"
+    },
+    "channex": {
+      "title": "Kanal Meneceri",
+      "desc": "Booking.com, Airbnb və s. ilə OTA sinxronizasiyası",
+      "rooms": "Qoşulmuş otaqlar",
+      "monthlyFee": "Aylıq ödəniş",
+      "contactUs": "Kanalı aktivləşdirmək üçün bizimlə əlaqə saxlayın."
+    },
+    "wa": {
+      "title": "WhatsApp Bildirişləri",
+      "desc": "WhatsApp vasitəsilə avtomatik qonaq mesajları göndərin",
+      "starter": "Başlanğıc",
+      "starterDesc": "Kiçik obyektlər üçün",
+      "growth": "Böyümə",
+      "growthDesc": "İnkişaf edən otellər üçün",
+      "pro": "Pro",
+      "proDesc": "Böyük həcmli əməliyyatlar",
+      "messages": "mesaj",
+      "perThousand": " hər 1000-ə",
+      "remainingMessages": "Qalan mesajlar",
+      "purchaseTitle": "WhatsApp Paketi alın",
+      "purchaseSubtitle": "WhatsApp mesaj balansınızı artırın",
+      "buyNow": "İndi al",
+      "msgs": "msg",
+      "purchaseSuccess": "Paket aktivləşdirildi",
+      "purchaseSuccessDesc": "WhatsApp mesajlarınız əlavə olundu.",
+      "purchaseError": "Paket alınmadı. Yenidən cəhd edin."
+    },
+    "contact": {
+      "title": "Fərdi paket lazımdır?",
+      "desc": "Korporativ qiymətlər, Channex aktivləşdirmə və ya fərdi inteqrasiyalar üçün komandamızla əlaqə saxlayın.",
+      "cta": "Satış ilə əlaqə"
+    },
+    "report": {
+      "overview": "Gəlir icmalı",
+      "channex": "Channex hesabatı",
+      "whatsapp": "WhatsApp hesabatı",
+      "channexMonthly": "Channex aylıq",
+      "waAllTime": "WhatsApp cəmi",
+      "last30d": "Son 30 gün",
+      "addonSales": "Əlavə satışları",
+      "totalHotels": "Ümumi otellər",
+      "withAddons": "əlavəli",
+      "revenueSummary": "Gəlir xülasəsi",
+      "allTime": "cəmi",
+      "totalMonthly": "Aylıq ümumi gəlir",
+      "channexTitle": "Kanal Meneceri Hesabatı",
+      "channexDesc": "Aktiv Channex inteqrasiyalı otellər və aylıq ödənişlər",
+      "noChannex": "Hələ Channex aktivləşdirilməyib",
+      "hotels": "otel",
+      "active": "aktiv",
+      "location": "Yer",
+      "rooms": "Otaqlar",
+      "monthlyFee": "Aylıq ödəniş",
+      "channexUuid": "Channex UUID",
+      "hotel": "Otel",
+      "whatsappTitle": "WhatsApp Hesabatı",
+      "whatsappDesc": "WhatsApp paketləri olan otellər",
+      "noWhatsapp": "Hələ WhatsApp paketi alınmayıb",
+      "totalRevenue": "Ümumi gəlir",
+      "status": "Status",
+      "used": "İstifadə edilmiş",
+      "totalSpent": "Ümumi xərclənmiş"
+    },
+    "admin": {
+      "credit": "Kredit",
+      "creditTitle": "WhatsApp Krediti əlavə et",
+      "creditDesc": "Bu otelə əl ilə WhatsApp mesaj balansı əlavə edin",
+      "messagesCount": "Əlavə ediləcək mesaj sayı",
+      "creditNoteLabel": "Qeyd (ixtiyari)",
+      "creditNotePlaceholder": "Kredit səbəbi...",
+      "addCredit": "Kredit əlavə et",
+      "creditSuccess": "Kredit əlavə edildi",
+      "creditSuccessDesc": "WhatsApp balansı uğurla yeniləndi."
+    }
   },
   "common": {
     "welcome": "Xoş gəldiniz",
@@ -1566,7 +1650,8 @@
     "services": "Xidmətlər",
     "messages": "Mesajlar",
     "smartRoom": "Ağıllı otaq",
-    "staffPerformance": "Heyət Performansı"
+    "staffPerformance": "Heyət Performansı",
+    "billingAddons": "Hesablama və Əlavələr"
   },
   "roomStatus": {
     "ready": "Hazır",
@@ -1954,7 +2039,8 @@
     },
     "referralInfo": "Referral məlumatı",
     "referralStaff": "Tövsiyə edən",
-    "referralNotes": "Qeydlər"
+    "referralNotes": "Qeydlər",
+    "billingReports": "Hesablama hesabatları"
   },
   "roomPrep": {
     "title": "Otaq Hazırlığı və Bayram",

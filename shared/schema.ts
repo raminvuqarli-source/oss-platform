@@ -324,6 +324,8 @@ export const hotels = pgTable("hotels", {
   channexAddonPrice: integer("channex_addon_price"),
   channexRoomCount: integer("channex_room_count"),
   totalMonthlySubscriptionFee: decimal("total_monthly_subscription_fee", { precision: 10, scale: 2 }),
+  isWhatsappEnabled: boolean("is_whatsapp_enabled").default(false),
+  whatsappBalance: integer("whatsapp_balance").default(0),
   ownerId: varchar("owner_id"),
   propertyId: varchar("property_id"),
   tenantId: varchar("tenant_id"),
@@ -2378,3 +2380,26 @@ export const deletedTrialAccounts = pgTable("deleted_trial_accounts", {
   reason: varchar("reason").default("trial_expired"),
 });
 export type DeletedTrialAccount = typeof deletedTrialAccounts.$inferSelect;
+
+// Billing logs — tracks every add-on purchase and payment event per hotel/tenant
+export type BillingEventType = "whatsapp_package" | "channex_addon" | "subscription_renewal" | "manual_credit";
+export const billingLogs = pgTable("billing_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull(),
+  hotelId: varchar("hotel_id"),
+  ownerId: varchar("owner_id"),
+  eventType: varchar("event_type").notNull(), // BillingEventType
+  description: text("description"),
+  amountUsd: decimal("amount_usd", { precision: 10, scale: 2 }).notNull().default("0"),
+  messagesAdded: integer("messages_added").default(0),
+  packageName: varchar("package_name"),
+  status: varchar("status").default("completed"), // completed | pending | failed
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_billing_logs_tenant_id").on(table.tenantId),
+  index("idx_billing_logs_hotel_id").on(table.hotelId),
+  index("idx_billing_logs_created_at").on(table.createdAt),
+]);
+export const insertBillingLogSchema = createInsertSchema(billingLogs).omit({ id: true, createdAt: true });
+export type InsertBillingLog = z.infer<typeof insertBillingLogSchema>;
+export type BillingLog = typeof billingLogs.$inferSelect;

@@ -466,7 +466,91 @@
       "allTypes": "همه انواع",
       "entries": "مورد"
     },
-    "payWithCard": "پرداخت با کارت"
+    "payWithCard": "پرداخت با کارت",
+    "active": "فعال",
+    "inactive": "غیرفعال",
+    "popular": "محبوب‌ترین",
+    "history": {
+      "title": "تراکنش‌های اخیر"
+    },
+    "addons": {
+      "title": "اشتراک و افزونه‌ها",
+      "subtitle": "افزونه‌های فعال را مدیریت کنید و خدمات جدید بخرید"
+    },
+    "channex": {
+      "title": "مدیر کانال",
+      "desc": "همگام‌سازی OTA با Booking.com، Airbnb و غیره",
+      "rooms": "اتاق‌های متصل",
+      "monthlyFee": "هزینه ماهانه",
+      "contactUs": "برای فعال‌سازی مدیر کانال با ما تماس بگیرید."
+    },
+    "wa": {
+      "title": "اعلان‌های واتساپ",
+      "desc": "ارسال پیام‌های خودکار به مهمانان از طریق واتساپ",
+      "starter": "استارتر",
+      "starterDesc": "ایده‌آل برای اقامتگاه‌های کوچک",
+      "growth": "رشد",
+      "growthDesc": "برای هتل‌های در حال رشد",
+      "pro": "حرفه‌ای",
+      "proDesc": "عملیات با حجم بالا",
+      "messages": "پیام",
+      "perThousand": " به ازای هر ۱۰۰۰",
+      "remainingMessages": "پیام‌های باقی‌مانده",
+      "purchaseTitle": "خرید بسته واتساپ",
+      "purchaseSubtitle": "موجودی پیام واتساپ خود را شارژ کنید",
+      "buyNow": "همین حالا بخرید",
+      "msgs": "پیام",
+      "purchaseSuccess": "بسته فعال شد",
+      "purchaseSuccessDesc": "پیام‌های واتساپ شما اضافه شد.",
+      "purchaseError": "خرید بسته ناموفق بود. دوباره امتحان کنید."
+    },
+    "contact": {
+      "title": "به بسته سفارشی نیاز دارید؟",
+      "desc": "با تیم ما برای قیمت‌گذاری سازمانی یا فعال‌سازی Channex تماس بگیرید.",
+      "cta": "تماس با فروش"
+    },
+    "report": {
+      "overview": "نمای کلی درآمد",
+      "channex": "گزارش Channex",
+      "whatsapp": "گزارش واتساپ",
+      "channexMonthly": "Channex ماهانه",
+      "waAllTime": "واتساپ کل",
+      "last30d": "۳۰ روز گذشته",
+      "addonSales": "فروش افزونه‌ها",
+      "totalHotels": "مجموع هتل‌ها",
+      "withAddons": "با افزونه",
+      "revenueSummary": "خلاصه درآمد",
+      "allTime": "کل",
+      "totalMonthly": "مجموع درآمد ماهانه",
+      "channexTitle": "گزارش مدیر کانال",
+      "channexDesc": "هتل‌های با یکپارچه‌سازی Channex فعال و هزینه‌های ماهانه",
+      "noChannex": "هنوز هیچ هتلی Channex ندارد",
+      "hotels": "هتل",
+      "active": "فعال",
+      "location": "مکان",
+      "rooms": "اتاق‌ها",
+      "monthlyFee": "هزینه ماهانه",
+      "channexUuid": "UUID Channex",
+      "hotel": "هتل",
+      "whatsappTitle": "گزارش واتساپ",
+      "whatsappDesc": "هتل‌های با بسته‌های واتساپ",
+      "noWhatsapp": "هنوز بسته واتساپ خریداری نشده",
+      "totalRevenue": "مجموع درآمد",
+      "status": "وضعیت",
+      "used": "استفاده‌شده",
+      "totalSpent": "مجموع هزینه"
+    },
+    "admin": {
+      "credit": "اعتبار",
+      "creditTitle": "افزودن اعتبار واتساپ",
+      "creditDesc": "اضافه کردن دستی موجودی پیام واتساپ به این هتل",
+      "messagesCount": "تعداد پیام برای افزودن",
+      "creditNoteLabel": "یادداشت (اختیاری)",
+      "creditNotePlaceholder": "دلیل اعتبار...",
+      "addCredit": "افزودن اعتبار",
+      "creditSuccess": "اعتبار اضافه شد",
+      "creditSuccessDesc": "موجودی واتساپ با موفقیت به‌روزرسانی شد."
+    }
   },
   "common": {
     "welcome": "خوش آمدید",
@@ -1554,7 +1638,8 @@
     "messages": "پیام‌ها",
     "smartRoom": "اتاق هوشمند",
     "staffPerformance": "عملکرد کارکنان",
-    "roomStatus": "وضعیت اتاق‌ها"
+    "roomStatus": "وضعیت اتاق‌ها",
+    "billingAddons": "صورتحساب و افزونه‌ها"
   },
   "smartExtras": {
     "title": "امکانات هوشمند",
@@ -1812,7 +1897,8 @@
     "roleLabel": "مدیر OSS",
     "referralInfo": "اطلاعات ارجاع",
     "referralStaff": "ارجاع‌دهنده",
-    "referralNotes": "یادداشت‌ها"
+    "referralNotes": "یادداشت‌ها",
+    "billingReports": "گزارش‌های صورتحساب"
   },
   "roomPrep": {
     "title": "آماده‌سازی اتاق و جشن",

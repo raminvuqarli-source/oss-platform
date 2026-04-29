@@ -14,6 +14,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogBody } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Progress } from "@/components/ui/progress";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { showErrorToast } from "@/lib/error-handler";
 import { useAuth } from "@/lib/auth-context";
@@ -255,6 +257,10 @@ export default function OssAdminDashboard() {
               <TrendingUp className="h-4 w-4" />
               {t("ossAdmin.marketing", "Marketing")}
             </TabsTrigger>
+            <TabsTrigger value="billing-reports" className="gap-2" data-testid="tab-billing-reports">
+              <CreditCard className="h-4 w-4" />
+              {t("ossAdmin.billingReports", "Billing Reports")}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-4">
@@ -466,6 +472,10 @@ export default function OssAdminDashboard() {
 
           <TabsContent value="marketing" className="space-y-4">
             <OssMarketingPanel />
+          </TabsContent>
+
+          <TabsContent value="billing-reports" className="space-y-4">
+            <OssBillingReportsPanel />
           </TabsContent>
 
         </Tabs>
@@ -2216,6 +2226,224 @@ function OssMarketingPanel() {
             <Button onClick={() => createMutation.mutate(form)} disabled={createMutation.isPending || !form.username || !form.password || !form.fullName} data-testid="button-confirm-create-marketing">
               {createMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               {t("common.create")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ===================== OSS BILLING REPORTS PANEL =====================
+function OssBillingReportsPanel() {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const [activeReport, setActiveReport] = useState<"overview" | "channex" | "whatsapp">("overview");
+  const [creditHotelId, setCreditHotelId] = useState<string | null>(null);
+  const [creditMessages, setCreditMessages] = useState<number>(500);
+  const [creditNote, setCreditNote] = useState<string>("");
+
+  const { data: revData, isLoading: revLoading } = useQuery<{
+    channexMonthlyRevenue: number; channexHotelCount: number;
+    whatsappTotalRevenue: number; whatsappActiveHotels: number;
+    totalMonthlyRevenue: number; allTimeAddonRevenue: number;
+    recentRevenue30d: number; totalHotels: number; activeHotels: number;
+  }>({ queryKey: ["/api/oss-admin/reports/revenue"] });
+
+  const { data: channexData, isLoading: channexLoading } = useQuery<{
+    hotels: { hotelId: string; hotelName: string; city: string; country: string; roomCount: number; monthlyFeeUsd: number; channexPropertyUuid: string }[];
+    totalMonthlyRevenue: number;
+  }>({ queryKey: ["/api/oss-admin/reports/channex"] });
+
+  const { data: whatsappData, isLoading: waLoading } = useQuery<{
+    hotels: { hotelId: string; hotelName: string; city: string; isWhatsappEnabled: boolean; currentBalance: number; totalMessagesPurchased: number; totalMessagesUsed: number; totalSpentUsd: number; purchaseCount: number }[];
+    totalRevenue: number;
+  }>({ queryKey: ["/api/oss-admin/reports/whatsapp"] });
+
+  const creditMutation = useMutation({
+    mutationFn: async ({ hotelId, messages, note }: { hotelId: string; messages: number; note: string }) => {
+      const res = await apiRequest("POST", `/api/oss-admin/hotels/${hotelId}/whatsapp-credit`, { messages, note });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/oss-admin/reports/whatsapp"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/oss-admin/reports/revenue"] });
+      toast({ title: t("billing.admin.creditSuccess", "Credit Added"), description: t("billing.admin.creditSuccessDesc", "WhatsApp balance updated successfully.") });
+      setCreditHotelId(null); setCreditMessages(500); setCreditNote("");
+    },
+    onError: () => { toast({ title: t("common.error", "Error"), variant: "destructive" }); },
+  });
+
+  const fmtUsd = (n: number) => `$${n.toFixed(2)}`;
+
+  return (
+    <div className="space-y-6" data-testid="billing-reports-panel">
+      <div className="flex gap-2 flex-wrap">
+        {(["overview", "channex", "whatsapp"] as const).map((tab) => (
+          <Button key={tab} size="sm" variant={activeReport === tab ? "default" : "outline"} onClick={() => setActiveReport(tab)} data-testid={`button-report-${tab}`}>
+            {tab === "overview" && <DollarSign className="h-3.5 w-3.5 mr-1.5" />}
+            {tab === "channex" && <Globe className="h-3.5 w-3.5 mr-1.5" />}
+            {tab === "whatsapp" && <MessageSquare className="h-3.5 w-3.5 mr-1.5" />}
+            {t(`billing.report.${tab}`, tab === "overview" ? "Revenue Overview" : tab === "channex" ? "Channex Report" : "WhatsApp Report")}
+          </Button>
+        ))}
+      </div>
+
+      {activeReport === "overview" && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {revLoading ? [1,2,3,4].map(i => <Skeleton key={i} className="h-28" />) : (<>
+              <Card data-testid="stat-channex-monthly"><CardContent className="p-5">
+                <p className="text-sm text-muted-foreground">{t("billing.report.channexMonthly", "Channex Monthly")}</p>
+                <p className="text-2xl font-bold mt-1">{fmtUsd(revData?.channexMonthlyRevenue ?? 0)}</p>
+                <p className="text-xs text-muted-foreground mt-1">{revData?.channexHotelCount ?? 0} {t("billing.report.hotels", "hotels")}</p>
+              </CardContent></Card>
+              <Card data-testid="stat-whatsapp-total"><CardContent className="p-5">
+                <p className="text-sm text-muted-foreground">{t("billing.report.waAllTime", "WhatsApp All-Time")}</p>
+                <p className="text-2xl font-bold mt-1">{fmtUsd(revData?.allTimeAddonRevenue ?? 0)}</p>
+                <p className="text-xs text-muted-foreground mt-1">{revData?.whatsappActiveHotels ?? 0} {t("billing.report.active", "active")}</p>
+              </CardContent></Card>
+              <Card data-testid="stat-recent-30d"><CardContent className="p-5">
+                <p className="text-sm text-muted-foreground">{t("billing.report.last30d", "Last 30 Days")}</p>
+                <p className="text-2xl font-bold mt-1">{fmtUsd(revData?.recentRevenue30d ?? 0)}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t("billing.report.addonSales", "Add-on sales")}</p>
+              </CardContent></Card>
+              <Card data-testid="stat-total-hotels"><CardContent className="p-5">
+                <p className="text-sm text-muted-foreground">{t("billing.report.totalHotels", "Total Hotels")}</p>
+                <p className="text-2xl font-bold mt-1">{revData?.totalHotels ?? 0}</p>
+                <p className="text-xs text-muted-foreground mt-1">{revData?.activeHotels ?? 0} {t("billing.report.withAddons", "with add-ons")}</p>
+              </CardContent></Card>
+            </>)}
+          </div>
+          <Card>
+            <CardHeader><CardTitle className="text-base">{t("billing.report.revenueSummary", "Revenue Summary")}</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
+                <div className="flex items-center gap-2"><Globe className="h-4 w-4 text-orange-500" /><span className="text-sm font-medium">{t("billing.channex.title", "Channel Manager")}</span></div>
+                <span className="font-bold text-green-600">{fmtUsd(revData?.channexMonthlyRevenue ?? 0)}/mo</span>
+              </div>
+              <div className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
+                <div className="flex items-center gap-2"><MessageSquare className="h-4 w-4 text-green-500" /><span className="text-sm font-medium">{t("billing.wa.title", "WhatsApp")}</span></div>
+                <span className="font-bold text-green-600">{fmtUsd(revData?.allTimeAddonRevenue ?? 0)} {t("billing.report.allTime", "all-time")}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 rounded-lg bg-primary/5 border border-primary/20">
+                <div className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-primary" /><span className="text-sm font-bold">{t("billing.report.totalMonthly", "Total Monthly Revenue")}</span></div>
+                <span className="font-bold text-primary text-lg">{fmtUsd((revData?.channexMonthlyRevenue ?? 0) + (revData?.recentRevenue30d ?? 0))}</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {activeReport === "channex" && (
+        <Card data-testid="channex-report-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Globe className="h-5 w-5 text-orange-500" />{t("billing.report.channexTitle", "Channel Manager Report")}</CardTitle>
+            <CardDescription>{t("billing.report.channexDesc", "Hotels with active Channex integration and their monthly fees")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {channexLoading ? <div className="space-y-2">{[1,2,3].map(i => <Skeleton key={i} className="h-10 w-full" />)}</div>
+            : !channexData?.hotels.length ? <p className="text-center text-muted-foreground py-8">{t("billing.report.noChannex", "No hotels with Channex enabled yet")}</p>
+            : (<>
+              <div className="mb-4 flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">{channexData.hotels.length} {t("billing.report.hotels", "hotels")}</p>
+                <Badge variant="secondary" data-testid="badge-channex-total">{t("billing.report.totalMonthly", "Total")} {fmtUsd(channexData.totalMonthlyRevenue)}/mo</Badge>
+              </div>
+              <Table>
+                <TableHeader><TableRow>
+                  <TableHead>{t("billing.report.hotel", "Hotel")}</TableHead>
+                  <TableHead>{t("billing.report.location", "Location")}</TableHead>
+                  <TableHead className="text-right">{t("billing.report.rooms", "Rooms")}</TableHead>
+                  <TableHead className="text-right">{t("billing.report.monthlyFee", "Monthly Fee")}</TableHead>
+                  <TableHead>{t("billing.report.channexUuid", "Channex UUID")}</TableHead>
+                </TableRow></TableHeader>
+                <TableBody>
+                  {channexData.hotels.map((h) => (
+                    <TableRow key={h.hotelId} data-testid={`channex-row-${h.hotelId}`}>
+                      <TableCell className="font-medium">{h.hotelName}</TableCell>
+                      <TableCell className="text-muted-foreground">{[h.city, h.country].filter(Boolean).join(", ")}</TableCell>
+                      <TableCell className="text-right">{h.roomCount}</TableCell>
+                      <TableCell className="text-right font-semibold text-green-600">{fmtUsd(h.monthlyFeeUsd)}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground font-mono truncate max-w-[120px]">{h.channexPropertyUuid || "—"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </>)}
+          </CardContent>
+        </Card>
+      )}
+
+      {activeReport === "whatsapp" && (
+        <Card data-testid="whatsapp-report-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><MessageSquare className="h-5 w-5 text-green-500" />{t("billing.report.whatsappTitle", "WhatsApp Report")}</CardTitle>
+            <CardDescription>{t("billing.report.whatsappDesc", "Hotels with WhatsApp packages — balance, usage, and revenue")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {waLoading ? <div className="space-y-2">{[1,2,3].map(i => <Skeleton key={i} className="h-10 w-full" />)}</div>
+            : !whatsappData?.hotels.length ? <p className="text-center text-muted-foreground py-8">{t("billing.report.noWhatsapp", "No WhatsApp packages purchased yet")}</p>
+            : (<>
+              <div className="mb-4 flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">{whatsappData.hotels.length} {t("billing.report.hotels", "hotels")}</p>
+                <Badge variant="secondary" data-testid="badge-wa-total">{t("billing.report.totalRevenue", "Total")} {fmtUsd(whatsappData.totalRevenue)}</Badge>
+              </div>
+              <Table>
+                <TableHeader><TableRow>
+                  <TableHead>{t("billing.report.hotel", "Hotel")}</TableHead>
+                  <TableHead>{t("billing.report.status", "Status")}</TableHead>
+                  <TableHead className="text-right">{t("billing.wa.remainingMessages", "Balance")}</TableHead>
+                  <TableHead className="text-right">{t("billing.report.used", "Used")}</TableHead>
+                  <TableHead className="text-right">{t("billing.report.totalSpent", "Spent")}</TableHead>
+                  <TableHead className="text-right">{t("billing.admin.credit", "Credit")}</TableHead>
+                </TableRow></TableHeader>
+                <TableBody>
+                  {whatsappData.hotels.map((h) => (
+                    <TableRow key={h.hotelId} data-testid={`wa-row-${h.hotelId}`}>
+                      <TableCell className="font-medium">{h.hotelName}</TableCell>
+                      <TableCell><Badge variant={h.isWhatsappEnabled ? "default" : "secondary"}>{h.isWhatsappEnabled ? t("billing.active", "Active") : t("billing.inactive", "Inactive")}</Badge></TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex flex-col items-end gap-1">
+                          <span className="font-semibold">{h.currentBalance}</span>
+                          <Progress value={Math.min(100, (h.currentBalance / Math.max(1, h.totalMessagesPurchased)) * 100)} className="h-1 w-16" />
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right text-muted-foreground">{h.totalMessagesUsed}</TableCell>
+                      <TableCell className="text-right font-semibold text-green-600">{fmtUsd(h.totalSpentUsd)}</TableCell>
+                      <TableCell className="text-right">
+                        <Button size="sm" variant="outline" onClick={() => setCreditHotelId(h.hotelId)} data-testid={`button-credit-${h.hotelId}`}>
+                          + {t("billing.admin.credit", "Credit")}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </>)}
+          </CardContent>
+        </Card>
+      )}
+
+      <Dialog open={!!creditHotelId} onOpenChange={(o) => !o && setCreditHotelId(null)}>
+        <DialogContent data-testid="dialog-whatsapp-credit">
+          <DialogHeader>
+            <DialogTitle>{t("billing.admin.creditTitle", "Add WhatsApp Credit")}</DialogTitle>
+            <DialogDescription>{t("billing.admin.creditDesc", "Manually add WhatsApp message balance to this hotel")}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1">
+              <Label>{t("billing.admin.messagesCount", "Messages to Add")}</Label>
+              <Input type="number" min={1} value={creditMessages} onChange={(e) => setCreditMessages(parseInt(e.target.value) || 0)} data-testid="input-credit-messages" />
+            </div>
+            <div className="space-y-1">
+              <Label>{t("billing.admin.creditNoteLabel", "Note (optional)")}</Label>
+              <Textarea value={creditNote} onChange={(e) => setCreditNote(e.target.value)} placeholder={t("billing.admin.creditNotePlaceholder", "Reason for credit...")} data-testid="input-credit-note" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreditHotelId(null)}>{t("common.cancel")}</Button>
+            <Button disabled={creditMutation.isPending || creditMessages <= 0} onClick={() => creditHotelId && creditMutation.mutate({ hotelId: creditHotelId, messages: creditMessages, note: creditNote })} data-testid="button-confirm-credit">
+              {creditMutation.isPending ? t("common.loading", "Saving...") : t("billing.admin.addCredit", "Add Credit")}
             </Button>
           </DialogFooter>
         </DialogContent>
