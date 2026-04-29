@@ -20,7 +20,7 @@ import {
   Cpu, Calculator, Play, Loader2, Crown, UserCog, ConciergeBell, User,
   SunMedium, Gauge, BrainCircuit, ArrowRight, Zap, Activity, LayoutDashboard,
   BedDouble, MessageCircle, TrendingUp, ChevronRight, Download, Monitor, Share, MoreHorizontal, ExternalLink,
-  Network,
+  Network, UtensilsCrossed, Wrench, Sparkles, Moon, Home,
 } from "lucide-react";
 import { X } from "lucide-react";
 import { SiApple, SiAndroid } from "react-icons/si";
@@ -90,6 +90,33 @@ const DEMO_ROLES = [
   { id: "reception", icon: ConciergeBell, colorClass: "text-emerald-500 dark:text-emerald-400", bgClass: "bg-emerald-500/10" },
   { id: "guest", icon: User, colorClass: "text-violet-500 dark:text-violet-400", bgClass: "bg-violet-500/10" },
 ] as const;
+
+const DEMO_INFO_ROLES = [
+  {
+    id: "housekeeping",
+    icon: Sparkles,
+    colorClass: "text-teal-500 dark:text-teal-400",
+    bgClass: "bg-teal-500/10",
+    title: "Housekeeping",
+    desc: "Live cleaning task board with room status updates, priority engine, and inspection flow. See how staff mark rooms clean in real-time.",
+  },
+  {
+    id: "kitchen",
+    icon: UtensilsCrossed,
+    colorClass: "text-orange-500 dark:text-orange-400",
+    bgClass: "bg-orange-500/10",
+    title: "Kitchen & Restaurant (KDS)",
+    desc: "Real-time Kitchen Display System with order queues, the waiter dashboard, and the ability to post charges directly to a guest's room folio.",
+  },
+  {
+    id: "maintenance",
+    icon: Wrench,
+    colorClass: "text-slate-500 dark:text-slate-400",
+    bgClass: "bg-slate-500/10",
+    title: "Maintenance",
+    desc: "Track repair requests and technical service tasks, assign technicians, set priority levels, and follow progress from open to resolved.",
+  },
+];
 
 const POPULAR_PLAN_CODE = "CORE_GROWTH";
 const BEST_VALUE_PLAN_CODE = "CORE_PRO";
@@ -403,7 +430,15 @@ export default function Welcome() {
                   { icon: CalendarCheck, titleKey: 'landing.featureDetails.bookingManagement', descKey: 'landing.featureDetails.bookingManagementDesc', tid: 'booking-management' },
                   { icon: BarChart3, titleKey: 'landing.featureDetails.financialAnalytics', descKey: 'landing.featureDetails.financialAnalyticsDesc', tid: 'financial-analytics' },
                   { icon: HeadphonesIcon, titleKey: 'landing.featureDetails.serviceRequests', descKey: 'landing.featureDetails.serviceRequestsDesc', tid: 'service-requests' },
+                  {
+                    icon: UtensilsCrossed,
+                    title: 'Restaurant & KDS (POS) System',
+                    desc: 'Guests order food from their room via phone. Color-coded real-time KDS keeps the kitchen on track. Waiters manage delivery through their own dashboard, and charges post directly to the guest\'s room folio.',
+                    tid: 'restaurant-kds',
+                  },
                 ].map((f) => {
+                  const title = (f as any).title;
+                  const desc  = (f as any).desc;
                   const FIcon = f.icon;
                   return (
                     <motion.div key={f.tid} variants={fadeUp}>
@@ -411,8 +446,8 @@ export default function Welcome() {
                         <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/15 group-hover:scale-110 transition-all duration-300">
                           <FIcon className="h-6 w-6 text-primary" />
                         </div>
-                        <h3 className="font-heading font-semibold text-base mb-2">{t(f.titleKey)}</h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed">{t(f.descKey)}</p>
+                        <h3 className="font-heading font-semibold text-base mb-2">{title || t((f as any).titleKey)}</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{desc || t((f as any).descKey)}</p>
                       </div>
                     </motion.div>
                   );
@@ -447,7 +482,21 @@ export default function Welcome() {
                   { icon: Cpu, titleKey: 'landing.whyOss.smartRoom', descKey: 'landing.whyOss.smartRoomDesc', iconColor: 'text-emerald-500', iconBg: 'bg-emerald-500/10', borderColor: 'hover:border-emerald-500/30', tid: 'smart-room' },
                   { icon: TrendingUp, titleKey: 'landing.whyOss.analytics', descKey: 'landing.whyOss.analyticsDesc', iconColor: 'text-violet-500', iconBg: 'bg-violet-500/10', borderColor: 'hover:border-violet-500/30', tid: 'analytics' },
                   { icon: Building2, titleKey: 'landing.whyOss.multiProperty', descKey: 'landing.whyOss.multiPropertyDesc', iconColor: 'text-amber-500', iconBg: 'bg-amber-500/10', borderColor: 'hover:border-amber-500/30', tid: 'multi-property' },
+                  {
+                    icon: BrainCircuit,
+                    title: 'AI Wake-Up & Dynamic Pricing',
+                    desc: 'A smart wake-up alarm that adapts to each guest\'s sleep patterns, paired with a dynamic pricing engine that automatically adjusts room rates based on real-time demand and occupancy — maximising revenue without manual effort.',
+                    iconColor: 'text-rose-500', iconBg: 'bg-rose-500/10', borderColor: 'hover:border-rose-500/30', tid: 'ai-dynamic',
+                  },
+                  {
+                    icon: Moon,
+                    title: 'Automated Night Audit',
+                    desc: 'A fully automated financial engine runs every night to post room charges, close the business day, and reconcile accounts using a double-entry General Ledger — zero manual intervention required.',
+                    iconColor: 'text-indigo-500', iconBg: 'bg-indigo-500/10', borderColor: 'hover:border-indigo-500/30', tid: 'night-audit',
+                  },
                 ].map((item) => {
+                  const staticTitle = (item as any).title;
+                  const staticDesc  = (item as any).desc;
                   const Icon = item.icon;
                   return (
                     <motion.div key={item.tid} variants={fadeUp}>
@@ -455,8 +504,8 @@ export default function Welcome() {
                         <div className={`w-12 h-12 rounded-xl ${item.iconBg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
                           <Icon className={`h-6 w-6 ${item.iconColor}`} />
                         </div>
-                        <h3 className="font-heading font-semibold text-lg mb-2">{t(item.titleKey)}</h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed">{t(item.descKey)}</p>
+                        <h3 className="font-heading font-semibold text-lg mb-2">{staticTitle || t((item as any).titleKey)}</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{staticDesc || t((item as any).descKey)}</p>
                       </div>
                     </motion.div>
                   );
@@ -759,7 +808,68 @@ export default function Welcome() {
                   </p>
                 </div>
 
-                <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+                <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-6">
+                  {/* Apartment Lite — static card */}
+                  <motion.div variants={fadeUp}>
+                    <Card
+                      className="relative cursor-pointer transition-all duration-300 hover:-translate-y-1 h-full border-border/40 hover:border-primary/20 hover:shadow-lg"
+                      onClick={() => navigateToRegister('APT_LITE')}
+                      data-testid="card-core-APT_LITE"
+                    >
+                      <CardContent className="p-7 space-y-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-teal-500/10">
+                            <Home className="h-5 w-5 text-teal-500" />
+                          </div>
+                          <div>
+                            <span className="font-bold text-lg">Apartment Lite</span>
+                            <p className="text-xs text-muted-foreground/70 mt-0.5">For individual apartment owners</p>
+                            <p className="text-xs text-muted-foreground mt-1">1 unit only</p>
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-4xl font-bold tracking-tight">$19</span>
+                          <span className="text-muted-foreground text-sm"> /month</span>
+                        </div>
+                        <ul className="space-y-2.5">
+                          {[
+                            'Simplified booking workflow',
+                            'Guest communication',
+                            'Online check-in',
+                            'Basic financial reports',
+                            'Service request tracking',
+                          ].map((feat) => (
+                            <li key={feat} className="flex items-center gap-2.5 text-sm">
+                              <CheckCircle className="h-4 w-4 text-green-500 dark:text-green-400 shrink-0" />
+                              <span>{feat}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <div className="border-t border-border/50 pt-5 space-y-3">
+                          <Button
+                            className="w-full rounded-xl"
+                            onClick={(e) => { e.stopPropagation(); navigateToRegister('APT_LITE'); }}
+                            data-testid="button-trial-core-APT_LITE"
+                          >
+                            {t('pricing.startFreeTrial')}
+                          </Button>
+                          <Button
+                            className="w-full rounded-xl"
+                            variant="outline"
+                            onClick={(e) => { e.stopPropagation(); navigateToRegister('APT_LITE'); }}
+                            data-testid="button-subscribe-core-APT_LITE"
+                          >
+                            {t('pricing.subscribeNow')}
+                          </Button>
+                        </div>
+                        <div className="space-y-1.5 text-xs text-muted-foreground">
+                          <p className="flex items-center gap-1.5"><CheckCircle className="h-3.5 w-3.5 text-green-500 shrink-0" />{t('pricing.trialCheckmark', { days: DEFAULT_TRIAL_DAYS })}</p>
+                          <p className="flex items-center gap-1.5"><CheckCircle className="h-3.5 w-3.5 text-green-500 shrink-0" />{t('pricing.noCreditCard')}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+
                   {corePlans.map((plan, idx) => {
                     const isPopular = plan.code === POPULAR_PLAN_CODE;
                     const isBestValue = plan.code === BEST_VALUE_PLAN_CODE;
@@ -1024,6 +1134,62 @@ export default function Welcome() {
                     </Card>
                   </motion.div>
                 )}
+              </div>
+
+              {/* WHATSAPP NOTIFICATIONS ADD-ON */}
+              <div className="space-y-6" data-testid="pricing-whatsapp">
+                <div className="text-center space-y-3">
+                  <Badge variant="secondary" className="text-xs rounded-full">{t('pricing.optionalAddon')}</Badge>
+                  <div className="flex items-center justify-center gap-2">
+                    <MessageCircle className="h-5 w-5 text-green-500" />
+                    <h3 className="font-heading text-2xl font-bold">WhatsApp Notifications</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                    Send automated booking confirmations, check-in reminders, and personalised service messages directly to your guests via WhatsApp — no coding required.
+                  </p>
+                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 border-green-300 dark:border-green-700 text-xs rounded-full">
+                    Pay-as-you-go packages
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
+                  {[
+                    { msgs: '500', price: '$15', az: '26 ₼', highlight: false },
+                    { msgs: '1,000', price: '$25', az: '43 ₼', highlight: true },
+                    { msgs: '3,000', price: '$60', az: '102 ₼', highlight: false },
+                  ].map((pkg) => (
+                    <Card
+                      key={pkg.msgs}
+                      className={`text-center transition-all duration-200 ${pkg.highlight ? 'border-green-500/40 shadow-lg shadow-green-500/10 bg-gradient-to-b from-green-500/5 to-transparent scale-105' : 'border-border/40 hover:border-green-500/20'}`}
+                      data-testid={`card-whatsapp-${pkg.msgs.replace(',', '')}`}
+                    >
+                      <CardContent className="p-6 space-y-3">
+                        {pkg.highlight && (
+                          <Badge className="bg-green-600 text-white text-xs mb-1">Best Value</Badge>
+                        )}
+                        <div className="flex items-center justify-center gap-1.5">
+                          <MessageCircle className="h-5 w-5 text-green-500" />
+                          <span className="text-2xl font-bold">{pkg.msgs}</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">messages</p>
+                        <div>
+                          <span className="text-3xl font-bold">{pkg.price}</span>
+                          <span className="text-xs text-muted-foreground ml-1">/ {pkg.az}</span>
+                        </div>
+                        <Button
+                          className="w-full rounded-xl mt-2"
+                          variant={pkg.highlight ? 'default' : 'outline'}
+                          onClick={() => navigateToRegister()}
+                          data-testid={`button-whatsapp-${pkg.msgs.replace(',', '')}`}
+                        >
+                          Get Started
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                <p className="text-center text-xs text-muted-foreground">
+                  Packages are top-up credits. Balance is consumed per message sent. No expiry date.
+                </p>
               </div>
 
               {/* PRICING CALCULATOR */}
@@ -1319,6 +1485,45 @@ export default function Welcome() {
                   );
                 })}
               </motion.div>
+
+              {/* Additional role showcase cards */}
+              <div className="mt-6 space-y-4">
+                <p className="text-center text-sm text-muted-foreground font-medium">More roles included in your subscription:</p>
+                <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {DEMO_INFO_ROLES.map((role) => {
+                    const Icon = role.icon;
+                    return (
+                      <motion.div key={role.id} variants={fadeUp}>
+                        <Card
+                          className="group cursor-pointer transition-all duration-300 border-border/40 hover:border-primary/20 hover:shadow-md hover:-translate-y-0.5 h-full"
+                          onClick={() => navigateToRegister()}
+                          data-testid={`card-demo-info-${role.id}`}
+                        >
+                          <CardContent className="p-5 space-y-3">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-xl ${role.bgClass} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                                <Icon className={`h-5 w-5 ${role.colorClass}`} />
+                              </div>
+                              <h3 className="font-heading font-semibold text-sm">{role.title}</h3>
+                            </div>
+                            <p className="text-xs text-muted-foreground leading-relaxed">{role.desc}</p>
+                            <Button
+                              className="w-full rounded-xl"
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => { e.stopPropagation(); navigateToRegister(); }}
+                              data-testid={`button-demo-info-${role.id}`}
+                            >
+                              Start Free Trial
+                              <ArrowRight className="ml-1.5 h-3 w-3" />
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    );
+                  })}
+                </motion.div>
+              </div>
             </div>
           </section>
         </AnimatedSection>

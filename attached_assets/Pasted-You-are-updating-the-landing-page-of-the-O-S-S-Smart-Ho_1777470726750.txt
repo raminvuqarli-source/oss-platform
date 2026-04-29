@@ -1,0 +1,14 @@
+You are updating the landing page of the O.S.S (Smart Hotel System) platform. I need you to base your work strictly on the existing website structure and content, but seamlessly integrate the new features and sections listed below into the current design:
+1. Enhance the "See It In Action" (Live Demo) Section: Currently, this section only has 4 role cards (Hotel Owner, Property Manager, Front Desk, Hotel Guest). Without breaking the design, add the following new user roles as demo cards:
+Housekeeping: Live cleaning tasks and room status checks.
+Kitchen & Restaurant (KDS): Kitchen Display System (KDS), waiter view, and order management.
+Maintenance: Tracking repair and technical service tasks.
+2. Add POS/Restaurant System to the "Features" Section: Add a new sub-section named "Restaurant & KDS (POS) System" to the existing features list. Briefly explain the ability for guests to order from their room via their phones, the color-coded real-time KDS for the kitchen, the waiter dashboard, and the ability to post restaurant charges directly to the guest's folio (Room Charge).
+3. Add the "Apartment Lite" Package to the "Pricing" Section: Introduce a new "Apartment Lite" package next to the "Core Platform" packages (Starter, Growth, Pro), ideally as the first column.
+Target Audience: Simplified workflow for individual apartment owners.
+Price: $19 / month.
+Limit: 1 apartment/unit only.
+4. Add WhatsApp Service to the "Optional Add-Ons" Section: Alongside the Channel Manager and Smart Room add-ons, create a new block for "WhatsApp Notifications". Mention that the platform offers WhatsApp message packages for sending automated confirmations and service messages to guests (Show an example package: 500 messages for $15).
+5. Highlight Automation and AI Capabilities: In a highly visible section (like "Why Choose O.S.S"), emphasize these two unique features to increase conversion:
+AI Wake-Up & Dynamic Pricing: A smart alarm that adapts to the guest's sleep patterns and automated room rates that adjust based on market demand/occupancy.
+Automated Night Audit: A financial system that runs automatically every night to reconcile accounts using a double-entry General Ledger.
