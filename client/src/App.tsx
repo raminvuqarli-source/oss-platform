@@ -41,6 +41,7 @@ const WaiterView = lazy(() => import("@/pages/waiter-view"));
 const RestaurantManager = lazy(() => import("@/pages/restaurant-manager"));
 const RestaurantCleaner = lazy(() => import("@/pages/restaurant-cleaner"));
 const MarketingDashboard = lazy(() => import("@/pages/marketing-dashboard"));
+const HousekeepingDashboard = lazy(() => import("@/pages/housekeeping-dashboard"));
 
 function PageLoader() {
   return (
@@ -107,8 +108,9 @@ function DashboardRouter() {
 
   switch (user.role) {
     case "reception":
-    case "staff":
       return <ReceptionDashboard />;
+    case "staff":
+      return <HousekeepingDashboard />;
     case "admin":
     case "property_manager":
       return <AdminDashboard />;

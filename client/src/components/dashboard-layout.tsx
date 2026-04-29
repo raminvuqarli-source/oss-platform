@@ -211,7 +211,6 @@ function DashboardSidebar() {
         ];
 
       case "reception":
-      case "staff":
         return [
           {
             label: t("nav.group.core", "Core"),
@@ -243,6 +242,31 @@ function DashboardSidebar() {
             label: t("nav.group.system", "System"),
             items: [
               { title: t("common.settings"), icon: Settings, url: "/settings", testId: "nav-settings" },
+            ],
+          },
+        ];
+
+      case "staff":
+        return [
+          {
+            label: t("nav.group.core", "Əsas"),
+            items: [
+              { title: t("nav.rooms", "Otaqlar"), icon: BedDouble, url: "/dashboard", testId: "nav-hk-rooms" },
+              { title: t("nav.calendar", "Təqvim"), icon: CalendarDays, url: "/dashboard?view=calendar", testId: "nav-hk-calendar" },
+            ],
+          },
+          {
+            label: t("nav.group.operations", "Əməliyyatlar"),
+            items: [
+              { title: t("nav.tasks", "Tapşırıqlar"), icon: ClipboardList, url: "/dashboard?view=tasks", testId: "nav-hk-tasks" },
+              { title: t("staffPerformance.myRating", "Reytinqim"), icon: Star, url: "/dashboard?view=rating", testId: "nav-hk-rating" },
+            ],
+          },
+          {
+            label: t("nav.group.communication", "Ünsiyyət"),
+            items: [
+              { title: t("nav.messages", "Mesajlar"), icon: MessageSquare, url: "/dashboard?view=messages", testId: "nav-hk-messages" },
+              { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-hk-notifications" },
             ],
           },
         ];
@@ -665,7 +689,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         return viewTitles[view] || t("common.dashboard");
       }
       if (user.role === "guest") return t("dashboard.guest.title");
-      if (user.role === "reception" || user.role === "staff") return t("dashboard.reception.title");
+      if (user.role === "staff") return "Housekeeping";
+      if (user.role === "reception") return t("dashboard.reception.title");
       if (user.role === "owner_admin") return t("common.dashboard");
       return t("dashboard.admin.title");
     }
