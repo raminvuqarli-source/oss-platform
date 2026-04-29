@@ -1180,52 +1180,44 @@ export default function Welcome() {
                     <MessageCircle className="h-5 w-5 text-green-500" />
                     <h3 className="font-heading text-2xl font-bold">WhatsApp Notifications</h3>
                   </div>
-                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                    Send automated booking confirmations, check-in reminders, and personalised service messages directly to your guests via WhatsApp — no coding required.
+                  <p className="text-sm text-muted-foreground max-w-lg mx-auto">
+                    Qonaqlarınızla birbaşa WhatsApp üzərindən əlaqə saxlayın — rezervasiya təsdiqi, gəliş xatırlatması, xidmət mesajları və daha çox.
                   </p>
-                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 border-green-300 dark:border-green-700 text-xs rounded-full">
-                    Pay-as-you-go packages
-                  </Badge>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
-                  {[
-                    { msgs: '500', price: '$15', az: '26 ₼', highlight: false },
-                    { msgs: '1,000', price: '$25', az: '43 ₼', highlight: true },
-                    { msgs: '3,000', price: '$60', az: '102 ₼', highlight: false },
-                  ].map((pkg) => (
-                    <Card
-                      key={pkg.msgs}
-                      className={`text-center transition-all duration-200 ${pkg.highlight ? 'border-green-500/40 shadow-lg shadow-green-500/10 bg-gradient-to-b from-green-500/5 to-transparent scale-105' : 'border-border/40 hover:border-green-500/20'}`}
-                      data-testid={`card-whatsapp-${pkg.msgs.replace(',', '')}`}
-                    >
-                      <CardContent className="p-6 space-y-3">
-                        {pkg.highlight && (
-                          <Badge className="bg-green-600 text-white text-xs mb-1">Best Value</Badge>
-                        )}
-                        <div className="flex items-center justify-center gap-1.5">
-                          <MessageCircle className="h-5 w-5 text-green-500" />
-                          <span className="text-2xl font-bold">{pkg.msgs}</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground">messages</p>
-                        <div>
-                          <span className="text-3xl font-bold">{pkg.price}</span>
-                          <span className="text-xs text-muted-foreground ml-1">/ {pkg.az}</span>
-                        </div>
-                        <Button
-                          className="w-full rounded-xl mt-2"
-                          variant={pkg.highlight ? 'default' : 'outline'}
-                          onClick={() => navigateToRegister()}
-                          data-testid={`button-whatsapp-${pkg.msgs.replace(',', '')}`}
-                        >
-                          Get Started
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
+
+                <div className="max-w-3xl mx-auto">
+                  <Card className="border-green-500/20 bg-gradient-to-br from-green-500/5 via-transparent to-transparent shadow-lg shadow-green-500/5">
+                    <CardContent className="p-8">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        {[
+                          { icon: '📨', title: 'Rezervasiya Təsdiqi', desc: 'Yeni sifariş gəldikdə qonağa avtomatik WhatsApp mesajı göndərilir.' },
+                          { icon: '🔔', title: 'Gəliş Xatırlatması', desc: 'Check-in gününə bir gün qalmış qonağa avtomatik xatırlatma göndərilir.' },
+                          { icon: '🛎️', title: 'Xidmət Bildirişi', desc: 'Otaq hazırlığı, sifariş statusu kimi bildirişlər anında çatdırılır.' },
+                          { icon: '✅', title: 'Çıxış Məlumatı', desc: 'Check-out proseduru və qiymətləndirmə sorğusu avtomatik göndərilir.' },
+                          { icon: '💬', title: 'Fərdi Mesajlar', desc: 'Hər hansı bir qonağa personallaşdırılmış WhatsApp mesajı göndərə bilərsiniz.' },
+                          { icon: '📊', title: 'Çatdırılma İzləmə', desc: 'Göndərilən hər mesajın çatdırılma statusu sistemdə qeydə alınır.' },
+                        ].map((item) => (
+                          <div key={item.title} className="flex gap-3 items-start">
+                            <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-lg flex-shrink-0">
+                              {item.icon}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-sm">{item.title}</p>
+                              <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{item.desc}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="mt-6 pt-5 border-t border-green-500/20 flex items-center justify-center gap-2">
+                        <MessageCircle className="h-4 w-4 text-green-500" />
+                        <p className="text-sm text-muted-foreground text-center">
+                          Bu xidmət isteğe bağlı əlavə kimi mövcuddur — hər plan üçün aktivləşdirilə bilər.
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
-                <p className="text-center text-xs text-muted-foreground">
-                  Packages are top-up credits. Balance is consumed per message sent. No expiry date.
-                </p>
               </div>
 
               {/* PRICING CALCULATOR */}
