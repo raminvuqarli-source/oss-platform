@@ -179,6 +179,7 @@ function DashboardSidebar() {
             label: t("nav.group.core", "Core"),
             items: [
               { title: t("common.dashboard"), icon: LayoutDashboard, url: "/dashboard", view: undefined, testId: "nav-dashboard" },
+              { title: t("nav.calendar", "Calendar"), icon: CalendarDays, url: "/dashboard", view: "calendar", testId: "nav-calendar" },
               { title: t("nav.properties", "Properties"), icon: Building2, url: "/dashboard", view: "properties", testId: "nav-properties" },
               { title: t("nav.guests", "Guests"), icon: UserCheck, url: "/dashboard", view: "guests-overview", testId: "nav-guests-overview" },
               { title: t("nav.staff", "Staff"), icon: Users, url: "/dashboard", view: "staff-management", testId: "nav-staff-management", restricted: !isFeatureEnabled("staff_management") },
