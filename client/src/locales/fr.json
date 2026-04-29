@@ -2566,7 +2566,16 @@
     "acknowledged": "Confirmé",
     "orderCount": "{{count}} en cuisson",
     "readyCount": "{{count}} prêt",
-    "itemCount": "{{count}} articles"
+    "itemCount": "{{count}} articles",
+    "revenue": {
+      "title": "Revenus du Restaurant",
+      "today": "Aujourd'hui",
+      "thisMonth": "Ce mois",
+      "orders": "commandes",
+      "cashPayment": "Paiement en espèces",
+      "roomCharge": "Sur la chambre",
+      "totalAllTime": "Revenu total du restaurant (depuis le début)"
+    }
   },
   "channex": {
     "newBookingReceived": "Nouvelle réservation reçue",

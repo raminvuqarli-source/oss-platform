@@ -2579,7 +2579,16 @@
     "acknowledged": "Принято",
     "orderCount": "{{count}} готовится",
     "readyCount": "{{count}} готово",
-    "itemCount": "{{count}} позиций"
+    "itemCount": "{{count}} позиций",
+    "revenue": {
+      "title": "Доходы ресторана",
+      "today": "Сегодня",
+      "thisMonth": "Этот месяц",
+      "orders": "заказов",
+      "cashPayment": "Наличная оплата",
+      "roomCharge": "На счёт номера",
+      "totalAllTime": "Общий доход ресторана (за всё время)"
+    }
   },
   "channex": {
     "newBookingReceived": "Новое бронирование получено",

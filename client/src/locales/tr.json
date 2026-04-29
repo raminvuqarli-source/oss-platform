@@ -2579,7 +2579,16 @@
     "acknowledged": "Onaylandı",
     "orderCount": "{{count}} pişiriliyor",
     "readyCount": "{{count}} hazır",
-    "itemCount": "{{count}} ürün"
+    "itemCount": "{{count}} ürün",
+    "revenue": {
+      "title": "Restoran Gelirleri",
+      "today": "Bugün",
+      "thisMonth": "Bu Ay",
+      "orders": "sipariş",
+      "cashPayment": "Nakit Ödeme",
+      "roomCharge": "Odaya Yansıt",
+      "totalAllTime": "Toplam restoran geliri (tüm zamanlar)"
+    }
   },
   "channex": {
     "newBookingReceived": "Yeni Rezervasyon Alındı",

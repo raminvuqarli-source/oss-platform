@@ -2566,7 +2566,16 @@
     "acknowledged": "تم الإقرار",
     "orderCount": "{{count}} قيد الطهي",
     "readyCount": "{{count}} جاهز",
-    "itemCount": "{{count}} عناصر"
+    "itemCount": "{{count}} عناصر",
+    "revenue": {
+      "title": "إيرادات المطعم",
+      "today": "اليوم",
+      "thisMonth": "هذا الشهر",
+      "orders": "طلبات",
+      "cashPayment": "دفع نقدي",
+      "roomCharge": "على حساب الغرفة",
+      "totalAllTime": "إجمالي إيرادات المطعم (كل الأوقات)"
+    }
   },
   "channex": {
     "newBookingReceived": "تم استلام حجز جديد",

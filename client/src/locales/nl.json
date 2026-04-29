@@ -2566,7 +2566,16 @@
     "acknowledged": "Bevestigd",
     "orderCount": "{{count}} wordt bereid",
     "readyCount": "{{count}} klaar",
-    "itemCount": "{{count}} artikelen"
+    "itemCount": "{{count}} artikelen",
+    "revenue": {
+      "title": "Restaurant Inkomsten",
+      "today": "Vandaag",
+      "thisMonth": "Deze Maand",
+      "orders": "bestellingen",
+      "cashPayment": "Contante betaling",
+      "roomCharge": "Op kamerrekening",
+      "totalAllTime": "Totale restaurantinkomsten (alle tijd)"
+    }
   },
   "channex": {
     "newBookingReceived": "Nieuwe boeking ontvangen",

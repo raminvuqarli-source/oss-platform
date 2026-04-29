@@ -4956,6 +4956,7 @@ function EscalationsView() {
 }
 
 function RestaurantRevenueCard() {
+  const { t } = useTranslation();
   const { data: analytics } = useQuery<any>({
     queryKey: ["/api/restaurant/analytics"],
     retry: false,
@@ -4970,33 +4971,33 @@ function RestaurantRevenueCard() {
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <UtensilsCrossed className="h-4 w-4 text-orange-500" />
-          Restoran Gəlirləri
+          {t("restaurant.revenue.title", "Restaurant Revenue")}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div>
-            <p className="text-xs text-muted-foreground">Bu gün</p>
+            <p className="text-xs text-muted-foreground">{t("restaurant.revenue.today", "Today")}</p>
             <p className="text-lg font-bold text-emerald-600" data-testid="text-restaurant-today">{fmt(analytics.today?.revenueCents ?? 0)}</p>
-            <p className="text-xs text-muted-foreground">{analytics.today?.orderCount ?? 0} sifariş</p>
+            <p className="text-xs text-muted-foreground">{analytics.today?.orderCount ?? 0} {t("restaurant.revenue.orders", "orders")}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Bu ay</p>
+            <p className="text-xs text-muted-foreground">{t("restaurant.revenue.thisMonth", "This Month")}</p>
             <p className="text-lg font-bold text-blue-600" data-testid="text-restaurant-month">{fmt(analytics.month?.revenueCents ?? 0)}</p>
-            <p className="text-xs text-muted-foreground">{analytics.month?.orderCount ?? 0} sifariş</p>
+            <p className="text-xs text-muted-foreground">{analytics.month?.orderCount ?? 0} {t("restaurant.revenue.orders", "orders")}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Nağd ödəniş</p>
+            <p className="text-xs text-muted-foreground">{t("restaurant.revenue.cashPayment", "Cash Payment")}</p>
             <p className="text-lg font-bold" data-testid="text-restaurant-cash">{fmt(analytics.byPaymentType?.cashCents ?? 0)}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Otaq hesabına</p>
+            <p className="text-xs text-muted-foreground">{t("restaurant.revenue.roomCharge", "Room Charge")}</p>
             <p className="text-lg font-bold text-purple-600" data-testid="text-restaurant-room">{fmt(analytics.byPaymentType?.roomChargeCents ?? 0)}</p>
           </div>
         </div>
         <div className="border-t pt-3 mt-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Ümumi restoran gəliri (bütün vaxt)</span>
+            <span className="text-muted-foreground">{t("restaurant.revenue.totalAllTime", "Total restaurant revenue (all time)")}</span>
             <span className="font-bold text-emerald-600" data-testid="text-restaurant-total">{fmt(analytics.totalAllTime ?? 0)}</span>
           </div>
         </div>

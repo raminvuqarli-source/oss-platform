@@ -2566,7 +2566,16 @@
     "acknowledged": "تأیید شد",
     "orderCount": "{{count}} در حال پخت",
     "readyCount": "{{count}} آماده",
-    "itemCount": "{{count}} مورد"
+    "itemCount": "{{count}} مورد",
+    "revenue": {
+      "title": "درآمد رستوران",
+      "today": "امروز",
+      "thisMonth": "این ماه",
+      "orders": "سفارش",
+      "cashPayment": "پرداخت نقدی",
+      "roomCharge": "به حساب اتاق",
+      "totalAllTime": "کل درآمد رستوران (همه زمان‌ها)"
+    }
   },
   "channex": {
     "newBookingReceived": "رزرو جدید دریافت شد",

@@ -2669,7 +2669,16 @@
     "acknowledged": "Acknowledged",
     "orderCount": "{{count}} cooking",
     "readyCount": "{{count}} ready",
-    "itemCount": "{{count}} items"
+    "itemCount": "{{count}} items",
+    "revenue": {
+      "title": "Restaurant Revenue",
+      "today": "Today",
+      "thisMonth": "This Month",
+      "orders": "orders",
+      "cashPayment": "Cash Payment",
+      "roomCharge": "Room Charge",
+      "totalAllTime": "Total restaurant revenue (all time)"
+    }
   },
   "channex": {
     "newBookingReceived": "New Booking Received",

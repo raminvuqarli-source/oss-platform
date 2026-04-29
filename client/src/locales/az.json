@@ -2646,7 +2646,16 @@
     "acknowledged": "Qəbul edildi",
     "orderCount": "{{count}} bişirilir",
     "readyCount": "{{count}} hazırdır",
-    "itemCount": "{{count}} məhsul"
+    "itemCount": "{{count}} məhsul",
+    "revenue": {
+      "title": "Restoran Gəlirləri",
+      "today": "Bu gün",
+      "thisMonth": "Bu ay",
+      "orders": "sifariş",
+      "cashPayment": "Nağd ödəniş",
+      "roomCharge": "Otaq hesabına",
+      "totalAllTime": "Ümumi restoran gəliri (bütün vaxt)"
+    }
   },
   "channex": {
     "newBookingReceived": "Yeni Rezervasiya Alındı",
