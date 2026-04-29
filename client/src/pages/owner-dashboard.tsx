@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearch } from "wouter";
 import { navigate } from "wouter/use-browser-location";
@@ -76,6 +76,8 @@ import {
   ImageIcon,
   X as XIcon,
   UtensilsCrossed,
+  Network,
+  ExternalLink,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SiWhatsapp } from "react-icons/si";
@@ -83,6 +85,8 @@ import { showErrorToast, isPlanLimitError } from "@/lib/error-handler";
 import { formatTimeAgo } from "@/lib/formatters";
 import { UpgradeModal } from "@/components/upgrade-modal";
 import { usePlanFeatures } from "@/hooks/use-plan-features";
+import { useChannexRealtime } from "@/hooks/use-channex-realtime";
+import type { ChannexBookingEvent } from "@/hooks/use-channex-realtime";
 import type { Property, Unit, Device, Subscription, StaffInvitation, ServiceRequest, ChatMessage, Escalation, EscalationReply } from "@shared/schema";
 import { unitCategoryTypes, unitCategoryLabels, staffRoleLabels, type UnitCategory, type StaffRole, expenseCategories, revenueCategories, type EscalationStatus } from "@shared/schema";
 import { Textarea } from "@/components/ui/textarea";
@@ -2680,24 +2684,362 @@ function TasksView() {
   );
 }
 
+// ─── CalendarView ─────────────────────────────────────────────────────────────
+interface CalendarBooking {
+  id: string;
+  guestName: string;
+  roomLabel: string;
+  checkIn: Date;
+  checkOut: Date;
+  price: number | null;
+  currency?: string;
+  source: "local" | "channex" | string;
+  status: string;
+  roomNumber?: string;
+  bookingSource?: string | null;
+  externalId?: string;
+}
+
+interface BookingDetailModalProps {
+  booking: CalendarBooking | null;
+  onClose: () => void;
+}
+
+function BookingDetailModal({ booking, onClose }: BookingDetailModalProps) {
+  const { t } = useTranslation();
+  if (!booking) return null;
+  const isChannex = booking.source === "channex";
+  const nights = Math.round((booking.checkOut.getTime() - booking.checkIn.getTime()) / 86400000);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-background border rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4 relative"
+        onClick={e => e.stopPropagation()}
+        data-testid="booking-detail-modal"
+      >
+        <button
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+          onClick={onClose}
+          data-testid="close-booking-modal"
+        >
+          <XIcon className="h-5 w-5" />
+        </button>
+
+        <div className="flex items-center gap-3">
+          {isChannex ? (
+            <div className="h-10 w-10 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center">
+              <Network className="h-5 w-5 text-orange-500" />
+            </div>
+          ) : (
+            <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+              <CalendarDays className="h-5 w-5 text-blue-500" />
+            </div>
+          )}
+          <div>
+            <p className="font-semibold text-base">{booking.guestName}</p>
+            <p className="text-xs text-muted-foreground">
+              {isChannex ? t("channex.bookingSource", "Channex / OTA") : (booking.bookingSource || t("calView.directBooking", "Direct"))}
+            </p>
+          </div>
+          {isChannex && (
+            <span className="ml-auto px-2 py-1 bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 text-xs rounded-full font-medium">
+              {t("channex.label", "Channex")}
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="p-3 bg-muted/50 rounded-lg">
+            <p className="text-xs text-muted-foreground mb-1">{t("calView.checkIn", "Check-in")}</p>
+            <p className="font-medium">{booking.checkIn.toLocaleDateString()}</p>
+          </div>
+          <div className="p-3 bg-muted/50 rounded-lg">
+            <p className="text-xs text-muted-foreground mb-1">{t("calView.checkOut", "Check-out")}</p>
+            <p className="font-medium">{booking.checkOut.toLocaleDateString()}</p>
+          </div>
+          <div className="p-3 bg-muted/50 rounded-lg">
+            <p className="text-xs text-muted-foreground mb-1">{t("calView.room", "Room")}</p>
+            <p className="font-medium">{booking.roomLabel}</p>
+          </div>
+          <div className="p-3 bg-muted/50 rounded-lg">
+            <p className="text-xs text-muted-foreground mb-1">{t("calView.nights", "Nights")}</p>
+            <p className="font-medium">{nights}</p>
+          </div>
+          {booking.price != null && (
+            <div className="col-span-2 p-3 bg-muted/50 rounded-lg">
+              <p className="text-xs text-muted-foreground mb-1">{t("calView.totalPrice", "Total Price")}</p>
+              <p className="font-semibold text-base">
+                {booking.currency || "USD"} {Number(booking.price).toFixed(2)}
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between pt-1">
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+            booking.status === "confirmed" || booking.status === "booked"
+              ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
+              : booking.status === "cancelled"
+              ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300"
+              : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300"
+          }`}>
+            {t(`calView.status.${booking.status}`, booking.status)}
+          </span>
+          {isChannex && (
+            <p className="text-xs text-muted-foreground">{t("channex.readOnly", "Read-only (Channex)")}</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CalendarView() {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const today = new Date();
-  const monthKeys = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+  const [currentYear, setCurrentYear] = useState(today.getFullYear());
+  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
+  const [selectedBooking, setSelectedBooking] = useState<CalendarBooking | null>(null);
+
+  const monthKeys = ["january","february","march","april","may","june","july","august","september","october","november","december"];
+  const dayKeys = ["sun","mon","tue","wed","thu","fri","sat"];
+
+  // ── Navigate month ────────────────────────────────────────────────────────
+  const prevMonth = () => {
+    if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(y => y - 1); }
+    else setCurrentMonth(m => m - 1);
+  };
+  const nextMonth = () => {
+    if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear(y => y + 1); }
+    else setCurrentMonth(m => m + 1);
+  };
+
+  // ── Fetch local bookings ──────────────────────────────────────────────────
+  const { data: localBookingsRaw = [] } = useQuery<any[]>({
+    queryKey: ["/api/bookings"],
+    staleTime: 60_000,
+  });
+
+  // ── Fetch channex / external bookings ─────────────────────────────────────
+  const { data: channexBookingsRaw = [] } = useQuery<any[]>({
+    queryKey: ["/api/calendar/bookings"],
+    staleTime: 30_000,
+  });
+
+  // ── Real-time hook ────────────────────────────────────────────────────────
+  useChannexRealtime({
+    onNewBooking: (ev: ChannexBookingEvent) => {
+      toast({
+        title: t("channex.newBookingReceived", "New Booking Received"),
+        description: `${ev.guestName} — ${ev.roomName || t("channex.unknownRoom", "Unknown Room")}`,
+        duration: 6000,
+      });
+    },
+  });
+
+  // ── Normalise to CalendarBooking ──────────────────────────────────────────
+  const allBookings = useMemo<CalendarBooking[]>(() => {
+    const local: CalendarBooking[] = (localBookingsRaw as any[]).map((b: any) => ({
+      id: b.id,
+      guestName: b.guestName || b.guestId || t("calView.guest", "Guest"),
+      roomLabel: b.roomNumber || b.roomType || t("calView.room", "Room"),
+      checkIn: new Date(b.checkInDate),
+      checkOut: new Date(b.checkOutDate),
+      price: b.totalPrice ?? null,
+      currency: b.currency || "USD",
+      source: "local",
+      status: b.status,
+      roomNumber: b.roomNumber,
+      bookingSource: b.bookingSource,
+    }));
+
+    const channex: CalendarBooking[] = (channexBookingsRaw as any[]).map((b: any) => ({
+      id: b.id,
+      guestName: b.guestName || t("channex.label", "Channex"),
+      roomLabel: b.roomName || t("calView.room", "Room"),
+      checkIn: new Date(b.checkinDate),
+      checkOut: new Date(b.checkoutDate),
+      price: b.price ?? null,
+      currency: "USD",
+      source: "channex",
+      status: b.status || "confirmed",
+      externalId: b.externalId,
+    }));
+
+    return [...local, ...channex].filter(bk =>
+      !isNaN(bk.checkIn.getTime()) && !isNaN(bk.checkOut.getTime())
+    );
+  }, [localBookingsRaw, channexBookingsRaw, t]);
+
+  // ── Build calendar grid ───────────────────────────────────────────────────
+  const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const cells: (number | null)[] = [
+    ...Array(firstDayOfMonth).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ];
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const getBookingsForDay = (day: number): CalendarBooking[] => {
+    const date = new Date(currentYear, currentMonth, day);
+    return allBookings.filter(bk => {
+      const ci = new Date(bk.checkIn);
+      const co = new Date(bk.checkOut);
+      ci.setHours(0,0,0,0);
+      co.setHours(0,0,0,0);
+      date.setHours(0,0,0,0);
+      return ci <= date && date < co;
+    });
+  };
+
+  const isToday = (day: number) =>
+    day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
+
+  const channexCount = allBookings.filter(b => b.source === "channex").length;
+  const localCount = allBookings.filter(b => b.source === "local").length;
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-semibold">{t('owner.calendar.title')}</h2>
-        <p className="text-sm text-muted-foreground">{t(`owner.months.${monthKeys[today.getMonth()]}`)} {today.getFullYear()}</p>
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold">{t("owner.calendar.title")}</h2>
+          <p className="text-sm text-muted-foreground">
+            {t(`owner.months.${monthKeys[currentMonth]}`, monthKeys[currentMonth])} {currentYear}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 mr-2">
+            <span className="inline-block w-3 h-3 rounded-full bg-blue-500" />
+            <span className="text-xs text-muted-foreground">{t("calView.local","Local")} ({localCount})</span>
+            <span className="inline-block w-3 h-3 rounded-full bg-orange-500 ml-2" />
+            <span className="text-xs text-muted-foreground">{t("calView.channex","Channex")} ({channexCount})</span>
+          </div>
+          <Button variant="outline" size="sm" onClick={prevMonth} data-testid="calendar-prev-month">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => { setCurrentMonth(today.getMonth()); setCurrentYear(today.getFullYear()); }}
+            data-testid="calendar-today"
+          >
+            {t("owner.calendar.today", "Today")}
+          </Button>
+          <Button variant="outline" size="sm" onClick={nextMonth} data-testid="calendar-next-month">
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
-      <Card>
-        <CardContent className="p-12 text-center">
-          <CalendarDays className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-          <p className="font-medium">{t('owner.calendar.title')}</p>
-          <p className="text-sm text-muted-foreground mt-1">{t('owner.calendarDescription', 'Booking calendar and availability will appear here')}</p>
+
+      {/* ── Grid ───────────────────────────────────────────────────────────── */}
+      <Card className="overflow-hidden">
+        <CardContent className="p-0">
+          {/* Day-of-week headers */}
+          <div className="grid grid-cols-7 border-b bg-muted/30">
+            {dayKeys.map(d => (
+              <div key={d} className="py-2 text-center text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                {t(`calView.days.${d}`, d.toUpperCase())}
+              </div>
+            ))}
+          </div>
+
+          {/* Day cells */}
+          <div className="grid grid-cols-7">
+            {cells.map((day, idx) => {
+              if (day === null) return (
+                <div
+                  key={`empty-${idx}`}
+                  className="min-h-[80px] border-b border-r bg-muted/10 last:border-r-0"
+                />
+              );
+              const dayBookings = getBookingsForDay(day);
+              const todayHighlight = isToday(day);
+              return (
+                <div
+                  key={`day-${day}`}
+                  className={`min-h-[80px] p-1.5 border-b border-r last:border-r-0 flex flex-col gap-1 ${
+                    todayHighlight ? "bg-blue-50 dark:bg-blue-950/30" : "hover:bg-muted/30"
+                  } transition-colors`}
+                  data-testid={`calendar-day-${day}`}
+                >
+                  <span className={`text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full ${
+                    todayHighlight
+                      ? "bg-blue-500 text-white"
+                      : "text-muted-foreground"
+                  }`}>
+                    {day}
+                  </span>
+                  {dayBookings.slice(0, 3).map(bk => (
+                    <button
+                      key={bk.id}
+                      className={`w-full text-left px-1.5 py-0.5 rounded text-xs font-medium truncate cursor-pointer ${
+                        bk.source === "channex"
+                          ? "bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-200 hover:bg-orange-200 dark:hover:bg-orange-900/60"
+                          : "bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/60"
+                      }`}
+                      onClick={() => setSelectedBooking(bk)}
+                      title={`${bk.guestName} — ${bk.roomLabel}`}
+                      data-testid={`booking-chip-${bk.id}`}
+                    >
+                      {bk.source === "channex" && <span className="mr-0.5">⬡</span>}
+                      {bk.guestName}
+                    </button>
+                  ))}
+                  {dayBookings.length > 3 && (
+                    <span className="text-xs text-muted-foreground pl-1">
+                      +{dayBookings.length - 3} {t("calView.more", "more")}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </CardContent>
       </Card>
+
+      {/* ── Summary strip ─────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">{t("calView.totalBookings","Total Bookings")}</p>
+            <p className="text-2xl font-bold mt-1">{allBookings.length}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">{t("calView.directBookings","Direct Bookings")}</p>
+            <p className="text-2xl font-bold mt-1 text-blue-600 dark:text-blue-400">{localCount}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">{t("calView.channexBookings","Channex Bookings")}</p>
+            <p className="text-2xl font-bold mt-1 text-orange-600 dark:text-orange-400">{channexCount}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">{t("calView.thisMonth","This Month")}</p>
+            <p className="text-2xl font-bold mt-1">
+              {allBookings.filter(b => {
+                const d = b.checkIn;
+                return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+              }).length}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* ── Booking detail modal ───────────────────────────────────────────── */}
+      {selectedBooking && (
+        <BookingDetailModal booking={selectedBooking} onClose={() => setSelectedBooking(null)} />
+      )}
     </div>
   );
 }

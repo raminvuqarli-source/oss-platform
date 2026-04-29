@@ -2670,5 +2670,44 @@
     "orderCount": "{{count}} cooking",
     "readyCount": "{{count}} ready",
     "itemCount": "{{count}} items"
+  },
+  "channex": {
+    "newBookingReceived": "New Booking Received",
+    "unknownRoom": "Unknown Room",
+    "bookingSource": "Channex / OTA",
+    "label": "Channex",
+    "readOnly": "Read-only (Channex)"
+  },
+  "calView": {
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "room": "Room",
+    "nights": "Nights",
+    "totalPrice": "Total Price",
+    "directBooking": "Direct",
+    "guest": "Guest",
+    "more": "more",
+    "totalBookings": "Total Bookings",
+    "directBookings": "Direct Bookings",
+    "channexBookings": "Channex Bookings",
+    "thisMonth": "This Month",
+    "local": "Local",
+    "channex": "Channex",
+    "days": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    },
+    "status": {
+      "confirmed": "Confirmed",
+      "booked": "Booked",
+      "cancelled": "Cancelled",
+      "checked_in": "Checked In",
+      "checked_out": "Checked Out"
+    }
   }
 }

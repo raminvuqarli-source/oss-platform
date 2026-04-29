@@ -2567,5 +2567,44 @@
     "orderCount": "{{count}} در حال پخت",
     "readyCount": "{{count}} آماده",
     "itemCount": "{{count}} مورد"
+  },
+  "channex": {
+    "newBookingReceived": "رزرو جدید دریافت شد",
+    "unknownRoom": "اتاق ناشناخته",
+    "bookingSource": "Channex / OTA",
+    "label": "Channex",
+    "readOnly": "فقط خواندنی (Channex)"
+  },
+  "calView": {
+    "checkIn": "ورود",
+    "checkOut": "خروج",
+    "room": "اتاق",
+    "nights": "شب",
+    "totalPrice": "قیمت کل",
+    "directBooking": "مستقیم",
+    "guest": "مهمان",
+    "more": "بیشتر",
+    "totalBookings": "کل رزروها",
+    "directBookings": "رزروهای مستقیم",
+    "channexBookings": "رزروهای Channex",
+    "thisMonth": "این ماه",
+    "local": "مستقیم",
+    "channex": "Channex",
+    "days": {
+      "sun": "یک",
+      "mon": "دو",
+      "tue": "سه",
+      "wed": "چه",
+      "thu": "پنج",
+      "fri": "جمع",
+      "sat": "شنب"
+    },
+    "status": {
+      "confirmed": "تأیید شد",
+      "booked": "رزرو شد",
+      "cancelled": "لغو شد",
+      "checked_in": "ورود",
+      "checked_out": "خروج"
+    }
   }
 }

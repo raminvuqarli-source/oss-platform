@@ -2567,5 +2567,44 @@
     "orderCount": "{{count}} in Zubereitung",
     "readyCount": "{{count}} fertig",
     "itemCount": "{{count}} Artikel"
+  },
+  "channex": {
+    "newBookingReceived": "Neue Buchung erhalten",
+    "unknownRoom": "Unbekanntes Zimmer",
+    "bookingSource": "Channex / OTA",
+    "label": "Channex",
+    "readOnly": "Schreibgeschützt (Channex)"
+  },
+  "calView": {
+    "checkIn": "Anreise",
+    "checkOut": "Abreise",
+    "room": "Zimmer",
+    "nights": "Nächte",
+    "totalPrice": "Gesamtpreis",
+    "directBooking": "Direkt",
+    "guest": "Gast",
+    "more": "mehr",
+    "totalBookings": "Buchungen gesamt",
+    "directBookings": "Direktbuchungen",
+    "channexBookings": "Channex-Buchungen",
+    "thisMonth": "Diesen Monat",
+    "local": "Direkt",
+    "channex": "Channex",
+    "days": {
+      "sun": "So",
+      "mon": "Mo",
+      "tue": "Di",
+      "wed": "Mi",
+      "thu": "Do",
+      "fri": "Fr",
+      "sat": "Sa"
+    },
+    "status": {
+      "confirmed": "Bestätigt",
+      "booked": "Gebucht",
+      "cancelled": "Storniert",
+      "checked_in": "Eingecheckt",
+      "checked_out": "Ausgecheckt"
+    }
   }
 }

@@ -2567,5 +2567,44 @@
     "orderCount": "{{count}} cocinando",
     "readyCount": "{{count}} listo",
     "itemCount": "{{count}} artículos"
+  },
+  "channex": {
+    "newBookingReceived": "Nueva reserva recibida",
+    "unknownRoom": "Habitación desconocida",
+    "bookingSource": "Channex / OTA",
+    "label": "Channex",
+    "readOnly": "Solo lectura (Channex)"
+  },
+  "calView": {
+    "checkIn": "Entrada",
+    "checkOut": "Salida",
+    "room": "Habitación",
+    "nights": "Noches",
+    "totalPrice": "Precio total",
+    "directBooking": "Directo",
+    "guest": "Huésped",
+    "more": "más",
+    "totalBookings": "Reservas totales",
+    "directBookings": "Reservas directas",
+    "channexBookings": "Reservas Channex",
+    "thisMonth": "Este mes",
+    "local": "Directo",
+    "channex": "Channex",
+    "days": {
+      "sun": "Dom",
+      "mon": "Lun",
+      "tue": "Mar",
+      "wed": "Mié",
+      "thu": "Jue",
+      "fri": "Vie",
+      "sat": "Sáb"
+    },
+    "status": {
+      "confirmed": "Confirmado",
+      "booked": "Reservado",
+      "cancelled": "Cancelado",
+      "checked_in": "Registrado",
+      "checked_out": "Salida registrada"
+    }
   }
 }

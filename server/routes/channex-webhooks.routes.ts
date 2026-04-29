@@ -4,6 +4,7 @@ import { storage } from "../storage";
 import { db } from "../db";
 import { otaIntegrations, hotels } from "../../shared/schema";
 import { eq, and } from "drizzle-orm";
+import { broadcastToTenant } from "../websocket/index";
 
 const webhookLog = logger.child({ module: "channex-webhook" });
 
@@ -173,6 +174,51 @@ async function handleBookingCreated(payload: ChannexBookingPayload) {
   });
 
   webhookLog.info({ savedId: saved.id, guestName, hotelId }, "Channex booking saved to DB");
+
+  // ── Real-time push: notify connected dashboard clients ─────────────────────
+  if (tenantId) {
+    broadcastToTenant(tenantId, {
+      type: "channex_new_booking",
+      booking: {
+        id: saved.id,
+        guestName,
+        checkinDate: payload.checkin_date ?? "",
+        checkoutDate: payload.checkout_date ?? "",
+        roomName,
+        price: totalPrice,
+        source: "channex",
+        externalId: payload.id,
+        status: "confirmed",
+        createdAt: new Date().toISOString(),
+      },
+    });
+    webhookLog.info({ tenantId, savedId: saved.id }, "Channex WS event broadcast sent");
+  }
+
+  // ── Notification: create DB record for bell counter ────────────────────────
+  if (hotelId) {
+    try {
+      const hotel = await storage.getHotel(hotelId);
+      if (hotel?.ownerId) {
+        const staffUsers = await storage.getUsersByHotel(hotelId, tenantId ?? hotel.ownerId!);
+        const alertableUsers = staffUsers.filter(u =>
+          ["owner_admin", "admin", "reception"].includes(u.role ?? "")
+        );
+        for (const u of alertableUsers) {
+          await storage.createNotification({
+            userId: u.id,
+            title: "New Booking Received",
+            message: `${guestName} via Channex — ${payload.checkin_date} → ${payload.checkout_date} (${roomName})`,
+            type: "booking",
+            read: false,
+            actionUrl: "/dashboard?view=calendar",
+          }).catch(() => {});
+        }
+      }
+    } catch (e) {
+      webhookLog.warn({ err: e }, "Failed to create Channex booking notification");
+    }
+  }
 
   console.log("─── Channex: booking.created → SAVED ───────────────────────");
   console.log(`  Internal ID   : ${saved.id}`);

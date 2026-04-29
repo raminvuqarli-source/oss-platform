@@ -2580,5 +2580,44 @@
     "orderCount": "{{count}} готовится",
     "readyCount": "{{count}} готово",
     "itemCount": "{{count}} позиций"
+  },
+  "channex": {
+    "newBookingReceived": "Новое бронирование получено",
+    "unknownRoom": "Неизвестный номер",
+    "bookingSource": "Channex / OTA",
+    "label": "Channex",
+    "readOnly": "Только чтение (Channex)"
+  },
+  "calView": {
+    "checkIn": "Заезд",
+    "checkOut": "Выезд",
+    "room": "Номер",
+    "nights": "Ночи",
+    "totalPrice": "Итого",
+    "directBooking": "Прямое",
+    "guest": "Гость",
+    "more": "ещё",
+    "totalBookings": "Всего бронирований",
+    "directBookings": "Прямые бронирования",
+    "channexBookings": "Бронирования Channex",
+    "thisMonth": "В этом месяце",
+    "local": "Прямые",
+    "channex": "Channex",
+    "days": {
+      "sun": "Вс",
+      "mon": "Пн",
+      "tue": "Вт",
+      "wed": "Ср",
+      "thu": "Чт",
+      "fri": "Пт",
+      "sat": "Сб"
+    },
+    "status": {
+      "confirmed": "Подтверждено",
+      "booked": "Забронировано",
+      "cancelled": "Отменено",
+      "checked_in": "Заехал",
+      "checked_out": "Выехал"
+    }
   }
 }

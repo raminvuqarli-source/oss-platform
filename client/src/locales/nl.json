@@ -2567,5 +2567,44 @@
     "orderCount": "{{count}} wordt bereid",
     "readyCount": "{{count}} klaar",
     "itemCount": "{{count}} artikelen"
+  },
+  "channex": {
+    "newBookingReceived": "Nieuwe boeking ontvangen",
+    "unknownRoom": "Onbekende kamer",
+    "bookingSource": "Channex / OTA",
+    "label": "Channex",
+    "readOnly": "Alleen lezen (Channex)"
+  },
+  "calView": {
+    "checkIn": "Inchecken",
+    "checkOut": "Uitchecken",
+    "room": "Kamer",
+    "nights": "Nachten",
+    "totalPrice": "Totaalprijs",
+    "directBooking": "Direct",
+    "guest": "Gast",
+    "more": "meer",
+    "totalBookings": "Totaal boekingen",
+    "directBookings": "Directe boekingen",
+    "channexBookings": "Channex boekingen",
+    "thisMonth": "Deze maand",
+    "local": "Direct",
+    "channex": "Channex",
+    "days": {
+      "sun": "Zo",
+      "mon": "Ma",
+      "tue": "Di",
+      "wed": "Wo",
+      "thu": "Do",
+      "fri": "Vr",
+      "sat": "Za"
+    },
+    "status": {
+      "confirmed": "Bevestigd",
+      "booked": "Geboekt",
+      "cancelled": "Geannuleerd",
+      "checked_in": "Ingecheckt",
+      "checked_out": "Uitgecheckt"
+    }
   }
 }

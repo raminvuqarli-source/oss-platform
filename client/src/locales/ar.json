@@ -2567,5 +2567,44 @@
     "orderCount": "{{count}} قيد الطهي",
     "readyCount": "{{count}} جاهز",
     "itemCount": "{{count}} عناصر"
+  },
+  "channex": {
+    "newBookingReceived": "تم استلام حجز جديد",
+    "unknownRoom": "غرفة غير معروفة",
+    "bookingSource": "Channex / OTA",
+    "label": "Channex",
+    "readOnly": "للقراءة فقط (Channex)"
+  },
+  "calView": {
+    "checkIn": "تسجيل الدخول",
+    "checkOut": "تسجيل الخروج",
+    "room": "الغرفة",
+    "nights": "الليالي",
+    "totalPrice": "السعر الإجمالي",
+    "directBooking": "مباشر",
+    "guest": "ضيف",
+    "more": "المزيد",
+    "totalBookings": "إجمالي الحجوزات",
+    "directBookings": "الحجوزات المباشرة",
+    "channexBookings": "حجوزات Channex",
+    "thisMonth": "هذا الشهر",
+    "local": "محلي",
+    "channex": "Channex",
+    "days": {
+      "sun": "أحد",
+      "mon": "إثن",
+      "tue": "ثلا",
+      "wed": "أرب",
+      "thu": "خمي",
+      "fri": "جمع",
+      "sat": "سبت"
+    },
+    "status": {
+      "confirmed": "مؤكد",
+      "booked": "محجوز",
+      "cancelled": "ملغي",
+      "checked_in": "تسجيل الدخول",
+      "checked_out": "تسجيل الخروج"
+    }
   }
 }

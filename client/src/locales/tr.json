@@ -2580,5 +2580,44 @@
     "orderCount": "{{count}} pişiriliyor",
     "readyCount": "{{count}} hazır",
     "itemCount": "{{count}} ürün"
+  },
+  "channex": {
+    "newBookingReceived": "Yeni Rezervasyon Alındı",
+    "unknownRoom": "Bilinmeyen Oda",
+    "bookingSource": "Channex / OTA",
+    "label": "Channex",
+    "readOnly": "Salt okunur (Channex)"
+  },
+  "calView": {
+    "checkIn": "Giriş",
+    "checkOut": "Çıkış",
+    "room": "Oda",
+    "nights": "Gece",
+    "totalPrice": "Toplam Fiyat",
+    "directBooking": "Doğrudan",
+    "guest": "Misafir",
+    "more": "daha",
+    "totalBookings": "Toplam Rezervasyonlar",
+    "directBookings": "Doğrudan Rezervasyonlar",
+    "channexBookings": "Channex Rezervasyonları",
+    "thisMonth": "Bu Ay",
+    "local": "Yerel",
+    "channex": "Channex",
+    "days": {
+      "sun": "Paz",
+      "mon": "Pzt",
+      "tue": "Sal",
+      "wed": "Çar",
+      "thu": "Per",
+      "fri": "Cum",
+      "sat": "Cmt"
+    },
+    "status": {
+      "confirmed": "Onaylandı",
+      "booked": "Rezerve Edildi",
+      "cancelled": "İptal Edildi",
+      "checked_in": "Giriş Yapıldı",
+      "checked_out": "Çıkış Yapıldı"
+    }
   }
 }

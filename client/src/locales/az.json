@@ -2647,5 +2647,44 @@
     "orderCount": "{{count}} bişirilir",
     "readyCount": "{{count}} hazırdır",
     "itemCount": "{{count}} məhsul"
+  },
+  "channex": {
+    "newBookingReceived": "Yeni Rezervasiya Alındı",
+    "unknownRoom": "Naməlum Otaq",
+    "bookingSource": "Channex / OTA",
+    "label": "Channex",
+    "readOnly": "Yalnız oxumaq (Channex)"
+  },
+  "calView": {
+    "checkIn": "Giriş",
+    "checkOut": "Çıxış",
+    "room": "Otaq",
+    "nights": "Gecə",
+    "totalPrice": "Ümumi Məbləğ",
+    "directBooking": "Birbaşa",
+    "guest": "Qonaq",
+    "more": "daha",
+    "totalBookings": "Ümumi Rezervasiyalar",
+    "directBookings": "Birbaşa Rezervasiyalar",
+    "channexBookings": "Channex Rezervasiyaları",
+    "thisMonth": "Bu Ay",
+    "local": "Yerli",
+    "channex": "Channex",
+    "days": {
+      "sun": "Bz",
+      "mon": "Be",
+      "tue": "Ça",
+      "wed": "Çə",
+      "thu": "Cü",
+      "fri": "Cü",
+      "sat": "Şə"
+    },
+    "status": {
+      "confirmed": "Təsdiqləndi",
+      "booked": "Rezerv edildi",
+      "cancelled": "Ləğv edildi",
+      "checked_in": "Giriş edildi",
+      "checked_out": "Çıxış edildi"
+    }
   }
 }

@@ -92,6 +92,7 @@ Preferred communication style: Simple, everyday language.
 - **Automated Database Backup**: Daily `pg_dump` backups with retention and monitoring.
 - **Production Monitoring & Error Tracking**: Centralized alert tracking with admin email notifications.
 - **Billing Email Notification System**: Sends transactional emails for payment and subscription events.
+- **Real-Time Calendar View**: Owner Dashboard CalendarView (`/dashboard?view=calendar`) shows a full month grid with local bookings (blue chips) and Channex OTA bookings (orange chips). Booking detail modal with read-only Channex fields. WebSocket push (`channex_new_booking` event) triggers toast and auto-refresh on new Channex bookings. Hook: `client/src/hooks/use-channex-realtime.ts`. Full i18n for all 12 locale files (`calView.*`, `channex.*` keys).
 
 ## External Dependencies
 
