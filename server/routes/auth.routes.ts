@@ -67,6 +67,8 @@ const hotelRegistrationSchema = z.object({
     expectedSmartRoomCount: z.coerce.number().optional(),
     billingCurrency: z.string().optional(),
     billingContactEmail: z.string().email().optional().or(z.literal("")),
+    isChannexEnabled: z.boolean().optional().default(false),
+    channexPropertyUuid: z.string().optional(),
   }),
   // Marketing referral fields
   referral: z.object({
@@ -992,6 +994,8 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
         expectedSmartRoomCount: hotelData.expectedSmartRoomCount || null,
         billingCurrency: hotelData.billingCurrency || null,
         billingContactEmail: hotelData.billingContactEmail || null,
+        isChannexEnabled: hotelData.isChannexEnabled || false,
+        channexPropertyUuid: hotelData.channexPropertyUuid || null,
         ownerId: owner.id,
         propertyId: property.id,
       });

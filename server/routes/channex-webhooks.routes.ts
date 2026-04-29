@@ -65,6 +65,7 @@ async function resolveProperty(channexPropertyId: string): Promise<{
   hotelId: string | null;
   tenantId: string | null;
   internalPropertyId: string | null;
+  isChannexEnabled: boolean;
 }> {
   // Look up an active Channex OTA integration where api_secret stores the
   // Channex property UUID (the hotel owner sets this when configuring the channel).
@@ -88,21 +89,22 @@ async function resolveProperty(channexPropertyId: string): Promise<{
       { channexPropertyId },
       "No active Channex OTA integration found for this property_id — booking saved without internal mapping"
     );
-    return { hotelId: null, tenantId: null, internalPropertyId: null };
+    return { hotelId: null, tenantId: null, internalPropertyId: null, isChannexEnabled: true };
   }
 
   const { propertyId, tenantId } = integrations[0];
 
   // Resolve hotelId: the hotels table stores the propertyId it belongs to
   const hotelRows = await db
-    .select({ id: hotels.id })
+    .select({ id: hotels.id, isChannexEnabled: hotels.isChannexEnabled })
     .from(hotels)
     .where(eq(hotels.propertyId, propertyId))
     .limit(1);
 
   const hotelId = hotelRows[0]?.id ?? null;
+  const isChannexEnabled = hotelRows[0]?.isChannexEnabled ?? true; // default true when unmapped
 
-  return { hotelId, tenantId: tenantId ?? null, internalPropertyId: propertyId };
+  return { hotelId, tenantId: tenantId ?? null, internalPropertyId: propertyId, isChannexEnabled };
 }
 
 // ─── Event handlers ───────────────────────────────────────────────────────────
@@ -133,7 +135,16 @@ async function handleBookingCreated(payload: ChannexBookingPayload) {
   );
 
   // ── Resolve internal property mapping ─────────────────────────────────────
-  const { hotelId, tenantId } = await resolveProperty(payload.property_id);
+  const { hotelId, tenantId, isChannexEnabled } = await resolveProperty(payload.property_id);
+
+  // ── Safety gate: only process if channex integration is active ───────────
+  if (hotelId && !isChannexEnabled) {
+    webhookLog.warn(
+      { channexBookingId: payload.id, hotelId },
+      "Channex integration is disabled for this property — ignoring webhook"
+    );
+    return;
+  }
 
   // ── Duplicate guard: skip if already saved ────────────────────────────────
   // Use hotelId if resolved, otherwise fall back to the "unmapped" sentinel

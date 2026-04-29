@@ -106,6 +106,7 @@ Preferred communication style: Simple, everyday language.
 ### Integrations
 - **Resend**: Transactional email services.
 - **Epoint.az**: Local payment gateway integration for Azerbaijan.
+- **Channex.io**: Channel manager integration. Webhook at `POST /api/webhooks/channex` handles `booking.created/modified/cancelled`. `is_channex_enabled` flag on hotels table gates webhook processing. Channex add-on available on all plans (Starter $20/mo, Growth $30/mo, Pro $2/room/mo).
 - **OpenAI**: AI-powered chat responses.
 
 ### Job Queue

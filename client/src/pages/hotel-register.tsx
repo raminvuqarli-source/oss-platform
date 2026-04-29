@@ -11,7 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { showErrorToast } from "@/lib/error-handler";
 import { useAuth } from "@/lib/auth-context";
-import { Building2, User, Mail, MapPin, Lock, ArrowLeft, Home, Star, Sparkles, Globe, Megaphone } from "lucide-react";
+import { Building2, User, Mail, MapPin, Lock, ArrowLeft, Home, Star, Sparkles, Globe, Megaphone, Network } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { Link } from "wouter";
 import { InternationalPhoneInput } from "@/components/phone-input";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -34,6 +35,14 @@ export default function HotelRegister() {
     const params = new URLSearchParams(window.location.search);
     return params.get('plan') || 'CORE_STARTER';
   }, []);
+
+  const channexPreSelected = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('channex') === '1';
+  }, []);
+
+  const [channexEnabled, setChannexEnabled] = useState(channexPreSelected);
+  const [channexUuid, setChannexUuid] = useState("");
 
   const [form, setForm] = useState({
     hotelName: "",
@@ -70,6 +79,8 @@ export default function HotelRegister() {
           email: data.hotelEmail,
           totalRooms: parseInt(data.totalRooms) || 1,
           starRating: data.starRating || undefined,
+          isChannexEnabled: channexEnabled,
+          channexPropertyUuid: channexUuid.trim() || undefined,
         },
       };
       if (data.referralSource) {
@@ -285,6 +296,50 @@ export default function HotelRegister() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+            </div>
+
+            {/* Channel Manager Section */}
+            <div className="border-t pt-6 space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Network className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-lg">Channel Manager (Channex)</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Sync your rooms with Booking.com, Airbnb, and Expedia automatically.
+              </p>
+
+              <div className="rounded-xl border border-border/60 bg-muted/30 p-4 space-y-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium">Activate Channel Manager Integration</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">📈 50% more bookings on average</p>
+                  </div>
+                  <Switch
+                    id="channex-enabled"
+                    checked={channexEnabled}
+                    onCheckedChange={setChannexEnabled}
+                    data-testid="switch-register-channex"
+                  />
+                </div>
+
+                {channexEnabled && (
+                  <div className="space-y-2">
+                    <Label htmlFor="channexUuid">
+                      Channex Property UUID <span className="text-muted-foreground font-normal">(optional — you can add this later in Settings)</span>
+                    </Label>
+                    <Input
+                      id="channexUuid"
+                      placeholder="e.g. 070a5be1-503a-466f-b3fb-005b352cb256"
+                      value={channexUuid}
+                      onChange={(e) => setChannexUuid(e.target.value)}
+                      data-testid="input-channex-uuid"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Find your Property UUID in your Channex dashboard → Properties → your property → UUID.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 

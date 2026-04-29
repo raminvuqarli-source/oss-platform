@@ -20,6 +20,7 @@ import {
   Cpu, Calculator, Play, Loader2, Crown, UserCog, ConciergeBell, User,
   SunMedium, Gauge, BrainCircuit, ArrowRight, Zap, Activity, LayoutDashboard,
   BedDouble, MessageCircle, TrendingUp, ChevronRight, Download, Monitor, Share, MoreHorizontal, ExternalLink,
+  Network,
 } from "lucide-react";
 import { X } from "lucide-react";
 import { SiApple, SiAndroid } from "react-icons/si";
@@ -126,6 +127,7 @@ export default function Welcome() {
   const [selectedSmartIdx, setSelectedSmartIdx] = useState(1);
   const [selectedCorePlanIdx, setSelectedCorePlanIdx] = useState(1);
   const [smartEnabled, setSmartEnabled] = useState(false);
+  const [channexEnabled, setChannexEnabled] = useState(false);
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [showIOSSteps, setShowIOSSteps] = useState(false);
@@ -203,14 +205,24 @@ export default function Welcome() {
   const corePrice = selectedCore?.priceMonthlyUSD || 0;
   const smartUnitPrice = selectedSmart?.priceMonthlyUSD || 0;
   const smartCost = smartEnabled ? smartUnitPrice * roomCount : 0;
+
+  const channexAddonPrice = useMemo(() => {
+    if (!channexEnabled) return 0;
+    const code = selectedCore?.code;
+    if (code === "CORE_PRO") return 2 * roomCount;
+    if (code === "CORE_GROWTH") return 30;
+    return 20; // CORE_STARTER default
+  }, [channexEnabled, selectedCore?.code, roomCount]);
+
   const monthlyTotal = useMemo(
-    () => corePrice + (smartEnabled ? smartUnitPrice * roomCount : 0),
-    [corePrice, smartUnitPrice, roomCount, smartEnabled],
+    () => corePrice + (smartEnabled ? smartUnitPrice * roomCount : 0) + channexAddonPrice,
+    [corePrice, smartUnitPrice, roomCount, smartEnabled, channexAddonPrice],
   );
 
   const navigateToRegister = (planCode?: string) => {
     const params = new URLSearchParams();
     if (smartEnabled) params.set('smart', '1');
+    if (channexEnabled) params.set('channex', '1');
     if (planCode) params.set('plan', planCode);
     else if (selectedCore?.code) params.set('plan', selectedCore.code);
     setLocation(`/register-hotel${params.toString() ? '?' + params.toString() : ''}`);
@@ -939,6 +951,69 @@ export default function Welcome() {
                 )}
               </div>
 
+              {/* CHANNEL MANAGER ADD-ON */}
+              <div className="space-y-6" data-testid="pricing-channex">
+                <div className="text-center space-y-3">
+                  <Badge variant="secondary" className="text-xs rounded-full">{t('pricing.optionalAddon')}</Badge>
+                  <div className="flex items-center justify-center gap-2">
+                    <Network className="h-5 w-5 text-primary" />
+                    <h3 className="font-heading text-2xl font-bold">Channel Manager</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                    Sync with Booking.com, Airbnb, and Expedia in real-time.
+                  </p>
+                  <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 text-xs rounded-full">
+                    📈 50% more bookings on average
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-center gap-3">
+                  <Switch
+                    id="channex-toggle"
+                    checked={channexEnabled}
+                    onCheckedChange={setChannexEnabled}
+                    data-testid="switch-channex-toggle"
+                  />
+                  <label htmlFor="channex-toggle" className="text-sm font-medium cursor-pointer">
+                    Activate Channel Manager Integration
+                  </label>
+                </div>
+
+                {channexEnabled && (
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+                    <Card className="max-w-lg mx-auto border-primary/30 bg-primary/5">
+                      <CardContent className="p-6 space-y-3">
+                        <div className="flex items-center gap-2 text-sm font-semibold">
+                          <Network className="h-4 w-4 text-primary" />
+                          Channel Manager — Pricing
+                        </div>
+                        <ul className="space-y-2 text-sm text-muted-foreground">
+                          <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500 shrink-0" />Two-way sync with Booking.com, Airbnb &amp; Expedia</li>
+                          <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500 shrink-0" />Automatic availability &amp; rate updates</li>
+                          <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500 shrink-0" />Bookings imported directly into your dashboard</li>
+                          <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500 shrink-0" />No double-bookings, ever</li>
+                        </ul>
+                        <div className="border-t border-border/50 pt-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Add-on price</span>
+                            <span className="font-bold text-primary text-lg">
+                              +${channexAddonPrice}
+                              {selectedCore?.code === "CORE_PRO" ? <span className="text-xs font-normal text-muted-foreground"> ({roomCount} rooms × $2)</span> : ""}
+                              /mo
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {selectedCore?.code === "CORE_STARTER" && "Starter plan: up to 20 rooms — $20 flat/month"}
+                            {selectedCore?.code === "CORE_GROWTH" && "Growth plan: up to 30 rooms — $30 flat/month"}
+                            {selectedCore?.code === "CORE_PRO" && "Pro plan: $2.00/room/month"}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+              </div>
+
               {/* PRICING CALCULATOR */}
               <AnimatedSection>
                 <div className="max-w-2xl mx-auto" data-testid="pricing-calculator">
@@ -979,6 +1054,21 @@ export default function Welcome() {
                             checked={smartEnabled}
                             onCheckedChange={setSmartEnabled}
                             data-testid="switch-calc-smart-toggle"
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between gap-4 flex-wrap">
+                          <div>
+                            <label className="text-sm font-medium flex items-center gap-1.5">
+                              <Network className="h-4 w-4 text-primary" />
+                              Channel Manager
+                            </label>
+                            <p className="text-xs text-muted-foreground mt-0.5">Booking.com, Airbnb, Expedia</p>
+                          </div>
+                          <Switch
+                            checked={channexEnabled}
+                            onCheckedChange={setChannexEnabled}
+                            data-testid="switch-calc-channex-toggle"
                           />
                         </div>
 
@@ -1044,6 +1134,16 @@ export default function Welcome() {
                               {selectedSmart?.displayName || "—"} x {roomCount} {roomCount !== 1 ? t('pricing.rooms') : t('pricing.room')}
                             </span>
                             <span className="font-medium">${smartCost.toLocaleString()}</span>
+                          </div>
+                        )}
+                        {channexEnabled && (
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground flex items-center gap-1.5">
+                              <Network className="h-3.5 w-3.5" />
+                              Channel Manager
+                              {selectedCore?.code === "CORE_PRO" && <span className="text-xs">({roomCount} rooms)</span>}
+                            </span>
+                            <span className="font-medium">+${channexAddonPrice.toLocaleString()}</span>
                           </div>
                         )}
                         <div className="flex items-center justify-between pt-3 border-t border-border/50">
