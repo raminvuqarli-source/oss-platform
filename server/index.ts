@@ -97,6 +97,91 @@ async function runMigrations(): Promise<void> {
   }
 }
 
+async function runSafetyPatches(): Promise<void> {
+  startupLog.info("Running safety schema patches...");
+  const client = await pool.connect();
+  try {
+    // Patch hotels table: add any missing columns
+    await client.query(`ALTER TABLE hotels ADD COLUMN IF NOT EXISTS is_channex_enabled boolean NOT NULL DEFAULT false`);
+    await client.query(`ALTER TABLE hotels ADD COLUMN IF NOT EXISTS channex_property_uuid text`);
+    await client.query(`ALTER TABLE hotels ADD COLUMN IF NOT EXISTS channex_addon_price integer`);
+    await client.query(`ALTER TABLE hotels ADD COLUMN IF NOT EXISTS channex_room_count integer`);
+    await client.query(`ALTER TABLE hotels ADD COLUMN IF NOT EXISTS total_monthly_subscription_fee decimal(10,2)`);
+    await client.query(`ALTER TABLE hotels ADD COLUMN IF NOT EXISTS is_whatsapp_enabled boolean NOT NULL DEFAULT false`);
+    await client.query(`ALTER TABLE hotels ADD COLUMN IF NOT EXISTS whatsapp_balance integer NOT NULL DEFAULT 0`);
+
+    // Patch users table: add any missing columns
+    await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_code varchar`);
+
+    // Create billing_logs table if missing
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS billing_logs (
+        id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id varchar,
+        hotel_id varchar,
+        owner_id varchar,
+        event_type varchar NOT NULL,
+        description text,
+        amount_usd integer NOT NULL DEFAULT 0,
+        messages_added integer NOT NULL DEFAULT 0,
+        package_name varchar,
+        status varchar NOT NULL DEFAULT 'completed',
+        created_at timestamp DEFAULT now()
+      )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_billing_logs_hotel_id ON billing_logs (hotel_id)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_billing_logs_tenant_id ON billing_logs (tenant_id)`);
+
+    // Create restaurant tables if missing
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS restaurant_cleaning_tasks (
+        id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id varchar NOT NULL,
+        property_id varchar NOT NULL,
+        description text NOT NULL,
+        location varchar,
+        assigned_to_id varchar,
+        created_by_id varchar,
+        status varchar NOT NULL DEFAULT 'pending',
+        completed_at timestamp,
+        photo_url text,
+        created_at timestamp DEFAULT now()
+      )
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS restaurant_staff_profiles (
+        id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id varchar NOT NULL,
+        property_id varchar NOT NULL,
+        salary_amount varchar DEFAULT '0',
+        tax_rate varchar DEFAULT '0',
+        tables_assigned text,
+        notes text,
+        updated_at timestamp DEFAULT now()
+      )
+    `);
+    await client.query(`CREATE UNIQUE INDEX IF NOT EXISTS idx_restaurant_staff_profiles_user_property ON restaurant_staff_profiles (user_id, property_id)`);
+
+    // Create deleted_trial_accounts table if missing
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS deleted_trial_accounts (
+        id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+        email text NOT NULL,
+        username text NOT NULL,
+        full_name text,
+        deleted_at timestamp DEFAULT now(),
+        reason text
+      )
+    `);
+
+    startupLog.info("Safety schema patches completed");
+  } catch (err: any) {
+    startupLog.error({ err: err.message }, "Safety patch error (non-fatal)");
+  } finally {
+    client.release();
+  }
+}
+
 let isShuttingDown = false;
 
 async function gracefulShutdown(signal: string): Promise<void> {
@@ -180,6 +265,7 @@ async function gracefulShutdown(signal: string): Promise<void> {
   }
 
   await runMigrations();
+  await runSafetyPatches();
 
   await registerRoutes(httpServer, app);
   startupLog.info("All routes registered");

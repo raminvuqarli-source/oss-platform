@@ -373,15 +373,26 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
         const propertyId = existingOwner.propertyId;
 
         if (ownerId) {
-          const ownerRecord = await storage.getOwner(ownerId);
-          if (!ownerRecord) {
-            logger.info("Demo owner record missing, re-seeding");
-            await seedDemoData();
+          try {
+            const ownerRecord = await storage.getOwner(ownerId);
+            if (!ownerRecord) {
+              logger.info("Demo owner record missing, re-seeding");
+              await seedDemoData();
+            }
+          } catch (ownerErr: any) {
+            logger.error({ err: ownerErr?.message, step: "getOwner" }, "Demo login step failed");
+            throw ownerErr;
           }
         }
 
         if (hotelId) {
-          const hotelRecord = await storage.getHotel(hotelId);
+          let hotelRecord: any;
+          try {
+            hotelRecord = await storage.getHotel(hotelId);
+          } catch (hotelErr: any) {
+            logger.error({ err: hotelErr?.message, step: "getHotel", hotelId }, "Demo login step failed");
+            throw hotelErr;
+          }
           if (!hotelRecord) {
             logger.info("Demo hotel record missing, re-seeding");
             const owner = ownerId ? await storage.getOwner(ownerId) : null;
@@ -739,8 +750,8 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
         res.setHeader("Cache-Control", "no-store");
         res.json(userWithoutPassword);
       });
-    } catch (error) {
-      logger.error({ err: error }, "Demo login error");
+    } catch (error: any) {
+      logger.error({ err: error?.message, stack: error?.stack, code: error?.code, detail: error?.detail }, "Demo login error");
       res.status(500).json({ message: "Demo login failed" });
     }
   });
