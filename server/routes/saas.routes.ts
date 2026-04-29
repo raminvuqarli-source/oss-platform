@@ -622,7 +622,19 @@ export function registerSaasRoutes(app: Express): void {
       
       const billing = await storage.getBillingInfo(user.ownerId);
       const sub = await storage.getSubscriptionByOwner(user.ownerId);
-      res.json({ billing, subscription: sub });
+      let hotelChannex: { isChannexEnabled: boolean; channexRoomCount: number | null; channexAddonPrice: number | null; totalMonthlySubscriptionFee: string | null } | null = null;
+      if (user.hotelId) {
+        const hotel = await storage.getHotel(user.hotelId);
+        if (hotel) {
+          hotelChannex = {
+            isChannexEnabled: hotel.isChannexEnabled ?? false,
+            channexRoomCount: hotel.channexRoomCount ?? null,
+            channexAddonPrice: hotel.channexAddonPrice ?? null,
+            totalMonthlySubscriptionFee: hotel.totalMonthlySubscriptionFee ?? null,
+          };
+        }
+      }
+      res.json({ billing, subscription: sub, hotelChannex });
     } catch (error) {
       logger.error({ err: error }, "Failed to get billing info");
       res.status(500).json({ message: "Failed to get billing info" });

@@ -128,6 +128,7 @@ export default function Welcome() {
   const [selectedCorePlanIdx, setSelectedCorePlanIdx] = useState(1);
   const [smartEnabled, setSmartEnabled] = useState(false);
   const [channexEnabled, setChannexEnabled] = useState(false);
+  const [channexRoomCount, setChannexRoomCount] = useState(25);
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [showIOSSteps, setShowIOSSteps] = useState(false);
@@ -209,10 +210,10 @@ export default function Welcome() {
   const channexAddonPrice = useMemo(() => {
     if (!channexEnabled) return 0;
     const code = selectedCore?.code;
-    if (code === "CORE_PRO") return 2 * roomCount;
+    if (code === "CORE_PRO") return Math.max(50, 2 * channexRoomCount);
     if (code === "CORE_GROWTH") return 30;
     return 20; // CORE_STARTER default
-  }, [channexEnabled, selectedCore?.code, roomCount]);
+  }, [channexEnabled, selectedCore?.code, channexRoomCount]);
 
   const monthlyTotal = useMemo(
     () => corePrice + (smartEnabled ? smartUnitPrice * roomCount : 0) + channexAddonPrice,
@@ -222,7 +223,12 @@ export default function Welcome() {
   const navigateToRegister = (planCode?: string) => {
     const params = new URLSearchParams();
     if (smartEnabled) params.set('smart', '1');
-    if (channexEnabled) params.set('channex', '1');
+    if (channexEnabled) {
+      params.set('channex', '1');
+      if (selectedCore?.code === 'CORE_PRO' || planCode === 'CORE_PRO') {
+        params.set('channexRooms', String(channexRoomCount));
+      }
+    }
     if (planCode) params.set('plan', planCode);
     else if (selectedCore?.code) params.set('plan', selectedCore.code);
     setLocation(`/register-hotel${params.toString() ? '?' + params.toString() : ''}`);
@@ -998,14 +1004,20 @@ export default function Welcome() {
                             <span className="text-sm text-muted-foreground">{t('pricing.channexAddonPriceLabel')}</span>
                             <span className="font-bold text-primary text-lg">
                               +${channexAddonPrice}
-                              {selectedCore?.code === "CORE_PRO" ? <span className="text-xs font-normal text-muted-foreground"> {t('pricing.channexCalcRooms', { count: roomCount })}</span> : ""}
+                              {selectedCore?.code === "CORE_PRO" ? <span className="text-xs font-normal text-muted-foreground"> {t('pricing.channexCalcRooms', { count: channexRoomCount })}</span> : ""}
                               /mo
                             </span>
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">
                             {selectedCore?.code === "CORE_STARTER" && t('pricing.channexStarterNote')}
                             {selectedCore?.code === "CORE_GROWTH" && t('pricing.channexGrowthNote')}
-                            {selectedCore?.code === "CORE_PRO" && t('pricing.channexProNote')}
+                            {selectedCore?.code === "CORE_PRO" && (
+                              <>
+                                {t('pricing.channexProNote')}
+                                {" · "}
+                                {t('pricing.channexMinNote', 'min. $50/mo')}
+                              </>
+                            )}
                           </p>
                         </div>
                       </CardContent>
@@ -1071,6 +1083,48 @@ export default function Welcome() {
                             data-testid="switch-calc-channex-toggle"
                           />
                         </div>
+
+                        {channexEnabled && selectedCore?.code === "CORE_PRO" && (
+                          <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
+                            <div className="flex items-center justify-between gap-4 flex-wrap">
+                              <div>
+                                <label className="text-sm font-medium">{t('pricing.channexRoomCountLabel', 'Number of Rooms (Channel Manager)')}</label>
+                                <p className="text-xs text-muted-foreground mt-0.5">{t('pricing.channexRoomCountSub', '$2.00/room · minimum $50/mo')}</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg" onClick={() => setChannexRoomCount((c) => Math.max(1, c - 1))} data-testid="button-channex-rooms-minus">
+                                  <Minus className="h-4 w-4" />
+                                </Button>
+                                <input
+                                  type="number"
+                                  min={1}
+                                  max={999}
+                                  value={channexRoomCount}
+                                  onChange={(e) => {
+                                    const v = parseInt(e.target.value, 10);
+                                    if (!isNaN(v) && v >= 1 && v <= 999) setChannexRoomCount(v);
+                                  }}
+                                  className="w-16 text-center text-lg font-semibold bg-transparent border border-border rounded-lg py-1 focus:outline-none focus:ring-2 focus:ring-primary"
+                                  data-testid="input-channex-room-count"
+                                />
+                                <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg" onClick={() => setChannexRoomCount((c) => Math.min(999, c + 1))} data-testid="button-channex-rooms-plus">
+                                  <Plus className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/40 pt-2">
+                              <span>{t('pricing.channexBreakdown', 'Base $199 + $2.00/room for Channel Manager')}</span>
+                              <span className="font-semibold text-primary">
+                                = ${(corePrice + channexAddonPrice).toLocaleString()}/mo
+                              </span>
+                            </div>
+                            {channexRoomCount < 25 && (
+                              <p className="text-xs text-amber-600 dark:text-amber-400">
+                                {t('pricing.channexMinNote', 'Minimum add-on is $50/mo (covers administrative overhead)')}
+                              </p>
+                            )}
+                          </div>
+                        )}
 
                         {smartEnabled && (
                           <>
@@ -1141,7 +1195,7 @@ export default function Welcome() {
                             <span className="text-muted-foreground flex items-center gap-1.5">
                               <Network className="h-3.5 w-3.5" />
                               {t('pricing.channexCalcLabel')}
-                              {selectedCore?.code === "CORE_PRO" && <span className="text-xs">{t('pricing.channexCalcRooms', { count: roomCount })}</span>}
+                              {selectedCore?.code === "CORE_PRO" && <span className="text-xs">{t('pricing.channexCalcRooms', { count: channexRoomCount })}</span>}
                             </span>
                             <span className="font-medium">+${channexAddonPrice.toLocaleString()}</span>
                           </div>

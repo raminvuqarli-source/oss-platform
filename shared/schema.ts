@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp, jsonb, real, index, uniqueIndex, date } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, boolean, timestamp, jsonb, real, index, uniqueIndex, date, decimal } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -322,6 +322,8 @@ export const hotels = pgTable("hotels", {
   isChannexEnabled: boolean("is_channex_enabled").default(false),
   channexPropertyUuid: text("channex_property_uuid"),
   channexAddonPrice: integer("channex_addon_price"),
+  channexRoomCount: integer("channex_room_count"),
+  totalMonthlySubscriptionFee: decimal("total_monthly_subscription_fee", { precision: 10, scale: 2 }),
   ownerId: varchar("owner_id"),
   propertyId: varchar("property_id"),
   tenantId: varchar("tenant_id"),

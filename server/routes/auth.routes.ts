@@ -69,6 +69,8 @@ const hotelRegistrationSchema = z.object({
     billingContactEmail: z.string().email().optional().or(z.literal("")),
     isChannexEnabled: z.boolean().optional().default(false),
     channexPropertyUuid: z.string().optional(),
+    channexRoomCount: z.coerce.number().int().positive().optional(),
+    totalMonthlySubscriptionFee: z.coerce.number().nonnegative().optional(),
   }),
   // Marketing referral fields
   referral: z.object({
@@ -996,6 +998,16 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
         billingContactEmail: hotelData.billingContactEmail || null,
         isChannexEnabled: hotelData.isChannexEnabled || false,
         channexPropertyUuid: hotelData.channexPropertyUuid || null,
+        channexRoomCount: hotelData.channexRoomCount || null,
+        channexAddonPrice: (() => {
+          if (!hotelData.isChannexEnabled) return null;
+          if (resolvedPlanCode === "CORE_PRO") return Math.max(50, 2 * (hotelData.channexRoomCount || 25));
+          if (resolvedPlanCode === "CORE_GROWTH") return 30;
+          return 20;
+        })(),
+        totalMonthlySubscriptionFee: hotelData.totalMonthlySubscriptionFee
+          ? String(hotelData.totalMonthlySubscriptionFee)
+          : null,
         ownerId: owner.id,
         propertyId: property.id,
       });

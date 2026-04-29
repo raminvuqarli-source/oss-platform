@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { showErrorToast } from "@/lib/error-handler";
 import { useAuth } from "@/lib/auth-context";
-import { Building2, User, Mail, MapPin, Lock, ArrowLeft, Home, Star, Sparkles, Globe, Megaphone, Network } from "lucide-react";
+import { Building2, User, Mail, MapPin, Lock, ArrowLeft, Home, Star, Sparkles, Globe, Megaphone, Network, Minus, Plus } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Link } from "wouter";
 import { InternationalPhoneInput } from "@/components/phone-input";
@@ -41,8 +41,27 @@ export default function HotelRegister() {
     return params.get('channex') === '1';
   }, []);
 
+  const channexPreRooms = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    const v = parseInt(params.get('channexRooms') || '25', 10);
+    return isNaN(v) || v < 1 ? 25 : v;
+  }, []);
+
+  const isProPlan = selectedPlanCode === 'CORE_PRO';
+
   const [channexEnabled, setChannexEnabled] = useState(channexPreSelected);
   const [channexUuid, setChannexUuid] = useState("");
+  const [channexRoomCount, setChannexRoomCount] = useState(channexPreRooms);
+
+  const channexAddonPrice = useMemo(() => {
+    if (!channexEnabled) return 0;
+    if (isProPlan) return Math.max(50, 2 * channexRoomCount);
+    if (selectedPlanCode === 'CORE_GROWTH') return 30;
+    return 20;
+  }, [channexEnabled, isProPlan, selectedPlanCode, channexRoomCount]);
+
+  const PLAN_BASE_PRICES: Record<string, number> = { CORE_STARTER: 79, CORE_GROWTH: 129, CORE_PRO: 199 };
+  const totalMonthlyFee = (PLAN_BASE_PRICES[selectedPlanCode] || 79) + channexAddonPrice;
 
   const [form, setForm] = useState({
     hotelName: "",
@@ -81,6 +100,8 @@ export default function HotelRegister() {
           starRating: data.starRating || undefined,
           isChannexEnabled: channexEnabled,
           channexPropertyUuid: channexUuid.trim() || undefined,
+          channexRoomCount: channexEnabled && isProPlan ? channexRoomCount : undefined,
+          totalMonthlySubscriptionFee: totalMonthlyFee,
         },
       };
       if (data.referralSource) {
@@ -324,20 +345,60 @@ export default function HotelRegister() {
                 </div>
 
                 {channexEnabled && (
-                  <div className="space-y-2">
-                    <Label htmlFor="channexUuid">
-                      {t('hotel.channexUuidLabel')} <span className="text-muted-foreground font-normal">{t('hotel.channexUuidOptional')}</span>
-                    </Label>
-                    <Input
-                      id="channexUuid"
-                      placeholder={t('hotel.channexUuidPlaceholder')}
-                      value={channexUuid}
-                      onChange={(e) => setChannexUuid(e.target.value)}
-                      data-testid="input-channex-uuid"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      {t('hotel.channexUuidHint')}
-                    </p>
+                  <div className="space-y-3">
+                    {isProPlan && (
+                      <div className="space-y-2">
+                        <Label htmlFor="channexRoomCount">
+                          {t('pricing.channexRoomCountLabel', 'Number of Rooms (Channel Manager)')}
+                        </Label>
+                        <p className="text-xs text-muted-foreground">{t('pricing.channexRoomCountSub', '$2.00/room · minimum $50/mo')}</p>
+                        <div className="flex items-center gap-2">
+                          <Button type="button" size="icon" variant="outline" className="h-8 w-8 rounded-lg" onClick={() => setChannexRoomCount((c) => Math.max(1, c - 1))} data-testid="button-reg-channex-minus">
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                          <input
+                            id="channexRoomCount"
+                            type="number"
+                            min={1}
+                            max={999}
+                            value={channexRoomCount}
+                            onChange={(e) => {
+                              const v = parseInt(e.target.value, 10);
+                              if (!isNaN(v) && v >= 1 && v <= 999) setChannexRoomCount(v);
+                            }}
+                            className="w-20 text-center text-lg font-semibold bg-transparent border border-border rounded-lg py-1 focus:outline-none focus:ring-2 focus:ring-primary"
+                            data-testid="input-reg-channex-room-count"
+                          />
+                          <Button type="button" size="icon" variant="outline" className="h-8 w-8 rounded-lg" onClick={() => setChannexRoomCount((c) => Math.min(999, c + 1))} data-testid="button-reg-channex-plus">
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between text-sm bg-muted/50 rounded-lg p-3">
+                          <span className="text-muted-foreground">{t('pricing.channexBreakdown', 'Base $199 + $2.00/room')}</span>
+                          <span className="font-semibold text-primary">= ${totalMonthlyFee}/mo</span>
+                        </div>
+                        {channexRoomCount < 25 && (
+                          <p className="text-xs text-amber-600 dark:text-amber-400">
+                            {t('pricing.channexMinNote', 'Minimum add-on is $50/mo')}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    <div className="space-y-2">
+                      <Label htmlFor="channexUuid">
+                        {t('hotel.channexUuidLabel')} <span className="text-muted-foreground font-normal">{t('hotel.channexUuidOptional')}</span>
+                      </Label>
+                      <Input
+                        id="channexUuid"
+                        placeholder={t('hotel.channexUuidPlaceholder')}
+                        value={channexUuid}
+                        onChange={(e) => setChannexUuid(e.target.value)}
+                        data-testid="input-channex-uuid"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {t('hotel.channexUuidHint')}
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>

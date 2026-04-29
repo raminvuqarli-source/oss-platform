@@ -52,6 +52,7 @@ import {
   X,
   ExternalLink,
   RefreshCw,
+  Network,
 } from "lucide-react";
 import type { Subscription, PlanCode } from "@shared/schema";
 import type { FeatureAccess, BusinessFeature } from "@shared/planFeatures";
@@ -631,6 +632,55 @@ export function BillingSection() {
               </CardContent>
             </Card>
           </>
+        )}
+      </div>
+
+      {/* ===== CHANNEL MANAGER (CHANNEX) STATUS ===== */}
+      <div className="space-y-4" data-testid="billing-channex-addon">
+        <div className="flex items-center gap-3 flex-wrap">
+          <Network className="h-5 w-5 text-primary" />
+          <span className="font-semibold text-lg">{t('pricing.channexAddon', 'Channel Manager')}</span>
+          <Badge variant="secondary" className="text-xs">{t('pricing.optionalAddon')}</Badge>
+        </div>
+        <p className="text-sm text-muted-foreground">{t('pricing.channexAddonDesc', 'Sync with Booking.com, Airbnb, and Expedia in real-time.')}</p>
+
+        {billingData?.hotelChannex?.isChannexEnabled ? (
+          <Card className="border-primary/30 bg-primary/5" data-testid="card-channex-active">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+                <CheckCircle className="h-4 w-4" />
+                {t('billing.channexActive', 'Channel Manager Active')}
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                {billingData.hotelChannex.channexAddonPrice != null && (
+                  <div>
+                    <p className="text-muted-foreground text-xs">{t('pricing.channexAddonPriceLabel', 'Add-on Price')}</p>
+                    <p className="font-semibold">${billingData.hotelChannex.channexAddonPrice}/mo</p>
+                  </div>
+                )}
+                {billingData.hotelChannex.channexRoomCount != null && (
+                  <div>
+                    <p className="text-muted-foreground text-xs">{t('billing.channexRoomCount', 'Room Count')}</p>
+                    <p className="font-semibold">{billingData.hotelChannex.channexRoomCount} {t('pricing.rooms', 'rooms')}</p>
+                  </div>
+                )}
+                {billingData.hotelChannex.totalMonthlySubscriptionFee != null && (
+                  <div className="col-span-2">
+                    <p className="text-muted-foreground text-xs">{t('billing.totalMonthlyFee', 'Total Monthly Fee')}</p>
+                    <p className="font-bold text-primary text-lg">${parseFloat(billingData.hotelChannex.totalMonthlySubscriptionFee).toFixed(2)}/mo</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="border-dashed" data-testid="card-channex-inactive">
+            <CardContent className="p-4">
+              <p className="text-sm text-muted-foreground">
+                {t('billing.channexInactive', 'Channel Manager is not active. Contact support or upgrade your plan to enable OTA sync.')}
+              </p>
+            </CardContent>
+          </Card>
         )}
       </div>
 
