@@ -172,6 +172,7 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
     "/api/epoint/status",
     "/api/health",
     "/api/ai-chat",
+    "/api/webhooks/channex",
   ];
 
   const SUBSCRIPTION_EXEMPT_PATHS = [
