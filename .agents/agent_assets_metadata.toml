@@ -6,3 +6,9 @@ id = "MguDmq4sYTLyI-QLZAtVs"
 uri = "file://oss-project-full.zip"
 type = "unspecified"
 title = "OSS Smart Hotel — FULL Production ZIP (DB + Source)"
+
+[[outputs]]
+id = "AR6P-uejvyoYZgLye9POK"
+uri = "file://OSS_Training_Guide.docx"
+type = "word_document"
+title = "O.S.S Smart Hotel System — Complete Training Guide"

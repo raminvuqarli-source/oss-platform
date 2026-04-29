@@ -50,6 +50,7 @@
     "cookie-signature": "^1.2.2",
     "cors": "^2.8.6",
     "date-fns": "^4.1.0",
+    "docx": "^9.6.1",
     "drizzle-orm": "^0.39.3",
     "drizzle-zod": "^0.7.0",
     "express": "^5.2.1",
