@@ -172,7 +172,7 @@ function AnimatedSection({ children, className = "", delay = 0 }: { children: Re
     <motion.div
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
+      viewport={{ once: true, amount: 0.01 }}
       transition={{ duration: 0.7, ease: "easeOut", delay }}
       className={className}
     >
@@ -458,7 +458,7 @@ export default function Welcome() {
                 <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.1]">{t('landing.everythingYouNeed')}</h2>
                 <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t('landing.everythingYouNeedDesc')}</p>
               </div>
-              <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {[
                   { icon: Shield, titleKey: 'landing.featureDetails.secureAccess', descKey: 'landing.featureDetails.secureAccessDesc', tid: 'secure-access' },
                   { icon: Lightbulb, titleKey: 'landing.featureDetails.smartControls', descKey: 'landing.featureDetails.smartControlsDesc', tid: 'smart-controls' },
@@ -512,7 +512,7 @@ export default function Welcome() {
                   {t('landing.whyOss.subtitle')}
                 </p>
               </div>
-              <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {[
                   { icon: LayoutDashboard, titleKey: 'landing.whyOss.allInOne', descKey: 'landing.whyOss.allInOneDesc', iconColor: 'text-blue-500', iconBg: 'bg-blue-500/10', borderColor: 'hover:border-blue-500/30', tid: 'all-in-one' },
                   { icon: Cpu, titleKey: 'landing.whyOss.smartRoom', descKey: 'landing.whyOss.smartRoomDesc', iconColor: 'text-emerald-500', iconBg: 'bg-emerald-500/10', borderColor: 'hover:border-emerald-500/30', tid: 'smart-room' },
@@ -720,7 +720,7 @@ export default function Welcome() {
                   {t('landing.howItWorks.subtitle')}
                 </p>
               </div>
-              <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+              <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
                 {[
                   { step: 1, icon: Building2, titleKey: 'landing.howItWorks.step1Title', descKey: 'landing.howItWorks.step1Desc', color: 'text-blue-500 dark:text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
                   { step: 2, icon: Users, titleKey: 'landing.howItWorks.step2Title', descKey: 'landing.howItWorks.step2Desc', color: 'text-emerald-500 dark:text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
@@ -765,7 +765,7 @@ export default function Welcome() {
                 </p>
               </div>
 
-              <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+              <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
                 {[
                   { value: "50+", label: t('landing.stats.hotels'), icon: Building2 },
                   { value: "12", label: t('landing.stats.countries'), icon: Globe },
@@ -844,7 +844,7 @@ export default function Welcome() {
                   </p>
                 </div>
 
-                <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-6">
+                <motion.div key={`core-grid-${corePlans.length > 0 ? 'ready' : 'loading'}`} variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-6">
                   {/* Apartment Lite — static card */}
                   <motion.div variants={fadeUp}>
                     <Card
@@ -1463,7 +1463,7 @@ export default function Welcome() {
                 </p>
               </div>
 
-              <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 {DEMO_ROLES.map((role) => {
                   const Icon = role.icon;
                   const isLoading = demoLoading === role.id;
@@ -1517,7 +1517,7 @@ export default function Welcome() {
               {/* Additional demo role cards */}
               <div className="mt-6 space-y-4">
                 <p className="text-center text-sm text-muted-foreground font-medium">More roles included in your subscription:</p>
-                <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {DEMO_INFO_ROLES.map((role) => {
                     const Icon = role.icon;
                     return (
@@ -1563,7 +1563,7 @@ export default function Welcome() {
                   </div>
                   <div className="flex-1 h-px bg-border/50" />
                 </div>
-                <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {RESTAURANT_DEMO_ROLES.map((role) => {
                     const Icon = role.icon;
                     return (
