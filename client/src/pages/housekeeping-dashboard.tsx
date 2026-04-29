@@ -3,7 +3,6 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useSearch } from "wouter";
 import { useTranslation } from "react-i18next";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { DashboardLayout } from "@/components/dashboard-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -463,43 +462,35 @@ export default function HousekeepingDashboard() {
     window.dispatchEvent(new PopStateEvent("popstate"));
   };
 
-  const pageTitle = VIEWS.find(v => v.id === currentView)?.label ?? "Housekeeping";
-
   return (
-    <DashboardLayout>
-      <div className="space-y-5">
-        <div className="flex items-center gap-2 mb-1">
-          <h1 className="text-xl font-bold font-heading">Housekeeping — {pageTitle}</h1>
-        </div>
-
-        <div className="flex gap-1.5 flex-wrap" data-testid="hk-view-tabs">
-          {VIEWS.map(v => {
-            const Icon = v.icon;
-            const active = currentView === v.id;
-            return (
-              <Button
-                key={v.id}
-                variant={active ? "default" : "outline"}
-                size="sm"
-                className="rounded-xl gap-1.5"
-                onClick={() => setView(v.id)}
-                data-testid={`hk-tab-${v.id}`}
-              >
-                <Icon className="h-3.5 w-3.5" />
-                {v.label}
-              </Button>
-            );
-          })}
-        </div>
-
-        <div data-testid={`hk-view-content-${currentView}`}>
-          {currentView === "rooms"    && <RoomsView />}
-          {currentView === "tasks"    && <HousekeepingView />}
-          {currentView === "rating"   && <StaffMyPerformance />}
-          {currentView === "calendar" && <HkCalendarView />}
-          {currentView === "messages" && <HkMessagesView />}
-        </div>
+    <div className="space-y-5">
+      <div className="flex gap-1.5 flex-wrap" data-testid="hk-view-tabs">
+        {VIEWS.map(v => {
+          const Icon = v.icon;
+          const active = currentView === v.id;
+          return (
+            <Button
+              key={v.id}
+              variant={active ? "default" : "outline"}
+              size="sm"
+              className="rounded-xl gap-1.5"
+              onClick={() => setView(v.id)}
+              data-testid={`hk-tab-${v.id}`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {v.label}
+            </Button>
+          );
+        })}
       </div>
-    </DashboardLayout>
+
+      <div data-testid={`hk-view-content-${currentView}`}>
+        {currentView === "rooms"    && <RoomsView />}
+        {currentView === "tasks"    && <HousekeepingView />}
+        {currentView === "rating"   && <StaffMyPerformance />}
+        {currentView === "calendar" && <HkCalendarView />}
+        {currentView === "messages" && <HkMessagesView />}
+      </div>
+    </div>
   );
 }
