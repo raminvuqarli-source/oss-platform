@@ -395,13 +395,14 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
           }
         }
 
-        if (propertyId) {
-          const properties = await storage.getPropertiesByOwner(ownerId || "");
+        // Always check by ownerId (not propertyId) so re-seed works even after cleanup sets propertyId=null
+        if (ownerId) {
+          const properties = await storage.getPropertiesByOwner(ownerId);
           if (properties.length === 0) {
             logger.info("Demo property missing, re-creating");
             const prop = await storage.createProperty({
               name: "Grand Riviera Resort & Spa",
-              ownerId: ownerId || "",
+              ownerId: ownerId,
               type: "resort",
               address: "123 Oceanview Boulevard, Miami Beach, FL 33139",
               phone: "+14155550101",
@@ -410,9 +411,39 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
               city: "Miami Beach",
               timezone: "America/New_York",
             });
-            logger.info({ propertyId: prop.id }, "Recreated demo property");
+            // Assign fresh propertyId to all demo users under this owner
+            await pool.query(
+              `UPDATE users SET property_id = $1 WHERE owner_id = $2`,
+              [prop.id, ownerId]
+            );
+            // Create demo rooms in the new property
+            const roomTypes = [
+              { unitNumber: "101", unitCategory: "accommodation", unitType: "standard", status: "available", floor: 1, pricePerNight: 15000, capacity: 2 },
+              { unitNumber: "102", unitCategory: "accommodation", unitType: "standard", status: "available", floor: 1, pricePerNight: 15000, capacity: 2 },
+              { unitNumber: "201", unitCategory: "accommodation", unitType: "deluxe", status: "available", floor: 2, pricePerNight: 25000, capacity: 3 },
+              { unitNumber: "202", unitCategory: "accommodation", unitType: "deluxe", status: "occupied", floor: 2, pricePerNight: 25000, capacity: 3 },
+              { unitNumber: "301", unitCategory: "accommodation", unitType: "suite", status: "available", floor: 3, pricePerNight: 45000, capacity: 4 },
+              { unitNumber: "302", unitCategory: "accommodation", unitType: "presidential_suite", status: "maintenance", floor: 3, pricePerNight: 75000, capacity: 4 },
+            ];
+            for (const room of roomTypes) {
+              await storage.createUnit({
+                propertyId: prop.id,
+                ownerId,
+                unitNumber: room.unitNumber,
+                unitCategory: room.unitCategory,
+                unitType: room.unitType,
+                status: room.status,
+                floor: room.floor,
+                pricePerNight: room.pricePerNight,
+                capacity: room.capacity,
+                amenities: ["wifi", "tv", "minibar", "safe"],
+              });
+            }
+            logger.info({ propertyId: prop.id, rooms: roomTypes.length }, "Recreated demo property with rooms");
           } else {
-            const units = await storage.getUnitsByProperty(propertyId);
+            // Property exists — check if rooms are present
+            const activePropertyId = properties[0].id;
+            const units = await storage.getUnitsByProperty(activePropertyId);
             if (units.length === 0) {
               logger.info("Demo units missing, re-creating rooms");
               const roomTypes = [
@@ -425,8 +456,8 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
               ];
               for (const room of roomTypes) {
                 await storage.createUnit({
-                  propertyId,
-                  ownerId: ownerId || "",
+                  propertyId: activePropertyId,
+                  ownerId,
                   unitNumber: room.unitNumber,
                   unitCategory: room.unitCategory,
                   unitType: room.unitType,
@@ -537,6 +568,99 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
             `DELETE FROM bookings WHERE guest_id IN (${ph()})`,
             validIds
           );
+
+          // Clean up extra staff users created during previous demo sessions
+          if (existingOwner?.ownerId) {
+            const demoUsernames = Object.values(DEMO_ROLE_MAP);
+            const usernamesPh = demoUsernames.map((_: string, i: number) => `$${i + 2}`).join(", ");
+            await client.query(
+              `DELETE FROM users WHERE owner_id = $1 AND username NOT IN (${usernamesPh})`,
+              [existingOwner.ownerId, ...demoUsernames]
+            );
+          }
+
+          // Clean up extra properties created during previous demo sessions
+          // Strategy: keep the OLDEST property (the original seed), delete all others
+          if (existingOwner?.ownerId) {
+            const demoOwnerId = existingOwner.ownerId;
+
+            // Find the oldest property (original demo property)
+            const oldestPropResult = await client.query(
+              `SELECT id FROM properties WHERE owner_id = $1 ORDER BY created_at ASC LIMIT 1`,
+              [demoOwnerId]
+            );
+            const originalPropId: string | null = oldestPropResult.rows[0]?.id ?? null;
+
+            // Find all extra (non-original) properties
+            const extraPropsResult = originalPropId
+              ? await client.query(
+                  `SELECT id FROM properties WHERE owner_id = $1 AND id != $2`,
+                  [demoOwnerId, originalPropId]
+                )
+              : await client.query(
+                  `SELECT id FROM properties WHERE owner_id = $1`,
+                  [demoOwnerId]
+                );
+            const extraPropIds: string[] = extraPropsResult.rows.map((r: any) => r.id);
+
+            if (extraPropIds.length > 0) {
+              const epph = extraPropIds.map((_: any, i: number) => `$${i + 1}`).join(", ");
+              // Delete POS / restaurant data for extra properties
+              try {
+                await client.query(`DELETE FROM pos_order_items WHERE order_id IN (SELECT id FROM pos_orders WHERE property_id IN (${epph}))`, extraPropIds);
+                await client.query(`DELETE FROM pos_orders WHERE property_id IN (${epph})`, extraPropIds);
+                await client.query(`DELETE FROM pos_menu_items WHERE property_id IN (${epph})`, extraPropIds);
+                await client.query(`DELETE FROM pos_menu_categories WHERE property_id IN (${epph})`, extraPropIds);
+                await client.query(`DELETE FROM waiter_calls WHERE property_id IN (${epph})`, extraPropIds);
+                await client.query(`DELETE FROM restaurant_cleaning_tasks WHERE property_id IN (${epph})`, extraPropIds);
+                await client.query(`DELETE FROM restaurant_staff_profiles WHERE property_id IN (${epph})`, extraPropIds);
+              } catch (_posErr) { /* tables may not exist yet on older deployments */ }
+              await client.query(`DELETE FROM bookings WHERE property_id IN (${epph})`, extraPropIds);
+              await client.query(`DELETE FROM units WHERE property_id IN (${epph})`, extraPropIds);
+              // Point any staff reassigned to extra properties back to original
+              if (originalPropId) {
+                const updateEpph = extraPropIds.map((_: any, i: number) => `$${i + 3}`).join(", ");
+                await client.query(
+                  `UPDATE users SET property_id = $1 WHERE owner_id = $2 AND property_id IN (${updateEpph})`,
+                  [originalPropId, demoOwnerId, ...extraPropIds]
+                );
+              }
+              await client.query(`DELETE FROM properties WHERE id IN (${epph})`, extraPropIds);
+              logger.info({ count: extraPropIds.length }, "Cleaned up extra demo properties");
+            }
+
+            // Reset the original property name/address back to demo defaults
+            if (originalPropId) {
+              await client.query(
+                `UPDATE properties SET name = $1, address = $2, type = $3 WHERE id = $4`,
+                ["Grand Riviera Resort & Spa", "123 Oceanview Boulevard, Miami Beach, FL 33139", "resort", originalPropId]
+              );
+              // Also ensure all demo users point to the original property
+              await client.query(
+                `UPDATE users SET property_id = $1 WHERE owner_id = $2 AND (property_id IS NULL OR property_id != $1)`,
+                [originalPropId, demoOwnerId]
+              );
+              // Reset rooms: wipe all bookings + units for original property, then recreate fresh 6
+              await client.query(`DELETE FROM bookings WHERE property_id = $1`, [originalPropId]);
+              await client.query(`DELETE FROM units WHERE property_id = $1`, [originalPropId]);
+              const demoRooms = [
+                ["101", "accommodation", "standard",           "available",   1, 15000, 2],
+                ["102", "accommodation", "standard",           "available",   1, 15000, 2],
+                ["201", "accommodation", "deluxe",             "available",   2, 25000, 3],
+                ["202", "accommodation", "deluxe",             "occupied",    2, 25000, 3],
+                ["301", "accommodation", "suite",              "available",   3, 45000, 4],
+                ["302", "accommodation", "presidential_suite", "maintenance", 3, 75000, 4],
+              ];
+              for (const [un, uc, ut, st, fl, ppn, cap] of demoRooms) {
+                await client.query(
+                  `INSERT INTO units (id, property_id, owner_id, unit_number, unit_category, unit_type, status, floor, price_per_night, capacity, amenities)
+                   VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, ARRAY['wifi','tv','minibar','safe'])`,
+                  [originalPropId, demoOwnerId, un, uc, ut, st, fl, ppn, cap]
+                );
+              }
+              logger.info({ propertyId: originalPropId }, "Reset demo property name and rooms");
+            }
+          }
 
           await client.query("COMMIT");
           logger.info({ userCount: validIds.length }, "Cleaned up previous demo data");
