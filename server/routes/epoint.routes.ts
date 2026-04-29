@@ -4,6 +4,7 @@ import { env } from "../config/env";
 import { type PlanType, type PlanCode, PLAN_TYPE_TO_CODE } from "@shared/schema";
 import { applyPlanFeatures, PLAN_CODE_FEATURES, SMART_PLAN_PRICING } from "@shared/planFeatures";
 import { authenticateRequest, requireAuth, requireRole } from "../middleware";
+import { WHATSAPP_PACKAGES } from "./billing-addons.routes";
 import crypto from "crypto";
 import { logger } from "../utils/logger";
 import { enqueuePaymentRetry } from "../workers/paymentRetryWorker";
@@ -289,6 +290,70 @@ async function processBookingPayment(order: any, callbackData: any, paymentStatu
   });
   await storage.updateBooking(bookingId, { paymentStatus: "paid" } as any);
   await storage.autoCheckinIfReady(bookingId);
+}
+
+async function processWhatsappPayment(order: any, callbackData: any, paymentStatus: string): Promise<void> {
+  const orderId = order.id;
+
+  if (paymentStatus !== "success") {
+    await storage.updatePaymentOrder(orderId, {
+      status: "rejected",
+      adminNote: `Epoint WhatsApp payment failed: ${callbackData.code || "unknown"}`,
+      reviewedAt: new Date(),
+    });
+    logger.info({ orderId }, "WhatsApp payment failed");
+    return;
+  }
+
+  // Parse package metadata from customerNote
+  let meta: { packageId: string; hotelId: string; tenantId: string } | null = null;
+  try {
+    if (order.customerNote) meta = JSON.parse(order.customerNote);
+  } catch { /* ignore */ }
+
+  if (!meta?.packageId || !meta?.hotelId) {
+    logger.error({ orderId, customerNote: order.customerNote }, "WhatsApp payment missing metadata");
+    await storage.updatePaymentOrder(orderId, { status: "rejected", adminNote: "Missing WhatsApp package metadata" });
+    return;
+  }
+
+  const pkg = WHATSAPP_PACKAGES.find((p) => p.id === meta!.packageId);
+  if (!pkg) {
+    logger.error({ packageId: meta.packageId }, "WhatsApp payment unknown packageId");
+    await storage.updatePaymentOrder(orderId, { status: "rejected", adminNote: `Unknown package: ${meta.packageId}` });
+    return;
+  }
+
+  const hotel = await storage.getHotel(meta.hotelId);
+  if (!hotel) {
+    logger.error({ hotelId: meta.hotelId }, "WhatsApp payment hotel not found");
+    await storage.updatePaymentOrder(orderId, { status: "rejected", adminNote: `Hotel not found: ${meta.hotelId}` });
+    return;
+  }
+
+  const newBalance = (hotel.whatsappBalance ?? 0) + pkg.messages;
+  await storage.updateHotelBilling(meta.hotelId, { isWhatsappEnabled: true, whatsappBalance: newBalance });
+
+  await storage.updatePaymentOrder(orderId, {
+    status: "approved",
+    adminNote: `WhatsApp package ${pkg.name} approved via Epoint. Transaction: ${callbackData.transaction || ""}`,
+    transferReference: callbackData.transaction || order.transferReference,
+    reviewedAt: new Date(),
+  });
+
+  await storage.createBillingLog({
+    tenantId: meta.tenantId || meta.hotelId,
+    hotelId: meta.hotelId,
+    ownerId: order.ownerId,
+    eventType: "whatsapp_package",
+    description: `Purchased WhatsApp ${pkg.name} package — ${pkg.messages} messages (Epoint)`,
+    amountUsd: String(pkg.priceUsd),
+    messagesAdded: pkg.messages,
+    packageName: pkg.name,
+    status: "completed",
+  });
+
+  logger.info({ orderId, hotelId: meta.hotelId, pkg: pkg.name, newBalance }, "WhatsApp payment processed successfully");
 }
 
 export function registerEpointRoutes(app: Express): void {
@@ -756,6 +821,92 @@ export function registerEpointRoutes(app: Express): void {
     }
   });
 
+  // ============== WHATSAPP PACKAGE — EPOINT ORDER ==============
+  app.post("/api/billing/whatsapp/epoint-order", requireAuth, async (req, res) => {
+    try {
+      const privateKey = env.EPOINT_PRIVATE_KEY;
+      const publicKey = env.EPOINT_PUBLIC_KEY;
+      const merchantId = env.EPOINT_MERCHANT_ID;
+      const baseUrl = env.BASE_URL;
+
+      if (!privateKey || !publicKey) {
+        return res.status(503).json({ message: "Epoint payment is not configured." });
+      }
+
+      const user = (req as any).user;
+      if (!user?.tenantId) return res.status(403).json({ message: "No tenant" });
+      if (!["owner_admin", "admin", "property_manager"].includes(user.role)) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const { packageId } = req.body;
+      const pkg = WHATSAPP_PACKAGES.find((p) => p.id === packageId);
+      if (!pkg) return res.status(400).json({ message: "Invalid package" });
+
+      const hotels = await storage.getAllHotels(user.tenantId);
+      const hotel = hotels[0];
+      if (!hotel) return res.status(404).json({ message: "Hotel not found" });
+
+      const amountAZN = pkg.priceAZN;
+      const amountCents = Math.round(amountAZN * 100);
+
+      const order = await storage.createPaymentOrder({
+        ownerId: user.ownerId ?? user.id,
+        tenantId: user.tenantId,
+        planType: "whatsapp_package" as any,
+        orderType: "whatsapp_package",
+        amount: amountCents,
+        currency: "AZN",
+        status: "pending",
+        paymentMethodId: null,
+        customerNote: JSON.stringify({ packageId, hotelId: hotel.id, tenantId: user.tenantId }),
+        transferReference: null,
+      } as any);
+
+      const epointData = {
+        public_key: publicKey,
+        merchant_id: merchantId,
+        amount: amountAZN.toFixed(2),
+        currency: "AZN",
+        language: "az",
+        order_id: order.id,
+        description: `OSS WhatsApp ${pkg.name} (${pkg.messages} msg)`,
+        success_redirect_url: `${baseUrl}/dashboard?view=billing-addons&payment=success&orderId=${order.id}`,
+        error_redirect_url: `${baseUrl}/dashboard?view=billing-addons&payment=declined&orderId=${order.id}`,
+        callback_url: `${baseUrl}/api/epoint/webhook`,
+      };
+
+      logger.info({ orderId: order.id, pkg: pkg.name, amount: amountAZN }, "Creating Epoint WhatsApp order");
+
+      const { data, signature } = signData(privateKey, epointData);
+      const requestBody = new URLSearchParams({ data, signature }).toString();
+
+      const epointRes = await fetch(EPOINT_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: requestBody,
+      });
+
+      const epointResponse = await epointRes.json() as any;
+
+      if (epointResponse.status !== "success" || !epointResponse.redirect_url) {
+        const errorReason = epointResponse.message || epointResponse.error || epointResponse.status || "Unknown error";
+        logger.error({ errorReason, response: epointResponse }, "Epoint WhatsApp order creation failed");
+        await storage.updatePaymentOrder(order.id, { status: "rejected", adminNote: `Epoint API error: ${errorReason}` });
+        return res.status(502).json({ message: `Payment gateway error: ${errorReason}` });
+      }
+
+      await storage.updatePaymentOrder(order.id, {
+        transferReference: epointResponse.transaction || null,
+      });
+
+      return res.json({ paymentUrl: epointResponse.redirect_url, orderId: order.id });
+    } catch (error: any) {
+      logger.error({ err: error }, "Create Epoint WhatsApp order error");
+      res.status(500).json({ message: `Failed to create payment: ${error?.message || "Unknown error"}` });
+    }
+  });
+
   app.post("/api/epoint/webhook", async (req, res) => {
     try {
       const privateKey = env.EPOINT_PRIVATE_KEY;
@@ -799,6 +950,8 @@ export function registerEpointRoutes(app: Express): void {
 
       if ((order as any).orderType === "booking") {
         await processBookingPayment(order, callbackData, paymentStatus);
+      } else if ((order as any).orderType === "whatsapp_package") {
+        await processWhatsappPayment(order, callbackData, paymentStatus);
       } else {
         await processEpointPayment(order, callbackData, paymentStatus);
       }
@@ -848,6 +1001,8 @@ export function registerEpointRoutes(app: Express): void {
       if (statusResponse.status === "success") {
         if ((order as any).orderType === "booking") {
           await processBookingPayment(order, statusResponse, "success");
+        } else if ((order as any).orderType === "whatsapp_package") {
+          await processWhatsappPayment(order, statusResponse, "success");
         } else {
           await processEpointPayment(order, statusResponse, "success");
         }

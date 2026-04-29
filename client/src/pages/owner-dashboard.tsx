@@ -5209,9 +5209,9 @@ function BillingAddonsView() {
   const { toast } = useToast();
 
   const WHATSAPP_PACKAGES = [
-    { id: "wa_500", name: t("billing.wa.starter", "Starter"), messages: 500, priceUsd: 15, description: t("billing.wa.starterDesc", "Perfect for small properties") },
-    { id: "wa_1000", name: t("billing.wa.growth", "Growth"), messages: 1000, priceUsd: 25, description: t("billing.wa.growthDesc", "For growing hotels"), popular: true },
-    { id: "wa_3000", name: t("billing.wa.pro", "Pro"), messages: 3000, priceUsd: 60, description: t("billing.wa.proDesc", "High-volume operations") },
+    { id: "wa_500", name: t("billing.wa.starter", "Starter"), messages: 500, priceUsd: 15, priceAZN: 26, description: t("billing.wa.starterDesc", "Perfect for small properties") },
+    { id: "wa_1000", name: t("billing.wa.growth", "Growth"), messages: 1000, priceUsd: 25, priceAZN: 43, description: t("billing.wa.growthDesc", "For growing hotels"), popular: true },
+    { id: "wa_3000", name: t("billing.wa.pro", "Pro"), messages: 3000, priceUsd: 60, priceAZN: 102, description: t("billing.wa.proDesc", "High-volume operations") },
   ];
 
   const { data: addonData, isLoading } = useQuery<{
@@ -5220,14 +5220,31 @@ function BillingAddonsView() {
     logs: { id: string; eventType: string; description: string; amountUsd: string; messagesAdded: number; packageName: string; createdAt: string }[];
   }>({ queryKey: ["/api/billing/addons"] });
 
+  // Handle return from Epoint payment page
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const payment = params.get("payment");
+    if (payment === "success") {
+      toast({ title: t("billing.wa.purchaseSuccess", "Package Activated"), description: t("billing.wa.purchaseSuccessDesc", "Your WhatsApp messages have been added.") });
+      queryClient.invalidateQueries({ queryKey: ["/api/billing/addons"] });
+      window.history.replaceState({}, "", window.location.pathname + "?view=billing-addons");
+    } else if (payment === "declined") {
+      toast({ title: t("common.error", "Payment Declined"), description: t("billing.wa.purchaseError", "Payment was not completed. Please try again."), variant: "destructive" });
+      window.history.replaceState({}, "", window.location.pathname + "?view=billing-addons");
+    }
+  }, []);
+
   const purchaseMutation = useMutation({
     mutationFn: async (packageId: string) => {
-      const res = await apiRequest("POST", "/api/billing/whatsapp/purchase", { packageId });
+      const res = await apiRequest("POST", "/api/billing/whatsapp/epoint-order", { packageId });
       return res.json();
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/billing/addons"] });
-      toast({ title: t("billing.wa.purchaseSuccess", "Package Activated"), description: t("billing.wa.purchaseSuccessDesc", "Your WhatsApp messages have been added.") });
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+      } else {
+        toast({ title: t("common.error", "Error"), description: t("billing.wa.purchaseError", "Failed to create payment. Please try again."), variant: "destructive" });
+      }
     },
     onError: () => {
       toast({ title: t("common.error", "Error"), description: t("billing.wa.purchaseError", "Failed to purchase package. Please try again."), variant: "destructive" });
@@ -5339,9 +5356,9 @@ function BillingAddonsView() {
                   <p className="text-xs text-muted-foreground">{pkg.description}</p>
                 </div>
                 <div>
-                  <span className="text-3xl font-bold">${pkg.priceUsd}</span>
+                  <span className="text-3xl font-bold">{pkg.priceAZN} ₼</span>
+                  <p className="text-xs text-muted-foreground">(≈ ${pkg.priceUsd})</p>
                   <p className="text-sm text-muted-foreground mt-0.5">{pkg.messages.toLocaleString()} {t("billing.wa.messages", "messages")}</p>
-                  <p className="text-xs text-muted-foreground">${(pkg.priceUsd / pkg.messages * 1000).toFixed(1)}{t("billing.wa.perThousand", " per 1,000")}</p>
                 </div>
                 <Button
                   className="w-full"

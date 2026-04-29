@@ -4,9 +4,9 @@ import { storage } from "../storage";
 
 // WhatsApp package definitions
 export const WHATSAPP_PACKAGES = [
-  { id: "wa_500", name: "Starter", messages: 500, priceUsd: 15 },
-  { id: "wa_1000", name: "Growth", messages: 1000, priceUsd: 25 },
-  { id: "wa_3000", name: "Pro", messages: 3000, priceUsd: 60 },
+  { id: "wa_500", name: "Starter", messages: 500, priceUsd: 15, priceAZN: 26 },
+  { id: "wa_1000", name: "Growth", messages: 1000, priceUsd: 25, priceAZN: 43 },
+  { id: "wa_3000", name: "Pro", messages: 3000, priceUsd: 60, priceAZN: 102 },
 ];
 
 export function registerBillingAddonRoutes(app: Express) {
