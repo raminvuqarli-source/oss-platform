@@ -2781,5 +2781,22 @@
       "checked_in": "Giriş edildi",
       "checked_out": "Çıxış edildi"
     }
+  },
+  "broadcast": {
+    "tab": "Yayım",
+    "infoTitle": "Bütün Qonaqlara Yayım",
+    "infoDesc": "Bu mesaj oteldəki bütün qonaqlara eyni anda göndəriləcək. Hər qonaq mesajı öz çatında görəcək.",
+    "recipients": "Alıcılar",
+    "guests": "qonaq",
+    "noGuests": "Hal-hazırda aktiv qonaq yoxdur.",
+    "composeTitle": "Mesaj Yaz",
+    "placeholder": "Bütün qonaqlara göndəriləcək mesajınızı yazın...",
+    "chars": "simvol",
+    "sendBtn": "Bütün Qonaqlara Göndər",
+    "successTitle": "Mesaj göndərildi",
+    "successDesc": "{{count}} qonaq mesajı aldı.",
+    "confirmTitle": "Yayım göndərilsin?",
+    "confirmDesc": "Bu mesaj {{count}} qonağa göndəriləcək. Davam etmək istəyirsiniz?",
+    "confirmSend": "Göndər"
   }
 }

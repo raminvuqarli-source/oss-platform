@@ -2701,5 +2701,22 @@
       "checked_in": "Ingecheckt",
       "checked_out": "Uitgecheckt"
     }
+  },
+  "broadcast": {
+    "tab": "Uitzending",
+    "infoTitle": "Bericht aan alle gasten",
+    "infoDesc": "Dit bericht wordt tegelijkertijd naar alle gasten van het hotel gestuurd.",
+    "recipients": "Ontvangers",
+    "guests": "gast(en)",
+    "noGuests": "Er zijn momenteel geen actieve gasten.",
+    "composeTitle": "Bericht opstellen",
+    "placeholder": "Schrijf uw bericht voor alle gasten...",
+    "chars": "tekens",
+    "sendBtn": "Stuur naar alle gasten",
+    "successTitle": "Bericht verzonden",
+    "successDesc": "{{count}} gast(en) heeft uw bericht ontvangen.",
+    "confirmTitle": "Uitzending versturen?",
+    "confirmDesc": "Dit bericht wordt naar {{count}} gast(en) gestuurd.",
+    "confirmSend": "Versturen"
   }
 }

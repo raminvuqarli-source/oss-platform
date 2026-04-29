@@ -2804,5 +2804,22 @@
       "checked_in": "Checked In",
       "checked_out": "Checked Out"
     }
+  },
+  "broadcast": {
+    "tab": "Broadcast",
+    "infoTitle": "Broadcast to All Guests",
+    "infoDesc": "This message will be sent to all guests in the hotel simultaneously. Each guest will see it in their own chat.",
+    "recipients": "Recipients",
+    "guests": "guest(s)",
+    "noGuests": "No active guests at the moment.",
+    "composeTitle": "Compose Message",
+    "placeholder": "Write your message for all guests...",
+    "chars": "characters",
+    "sendBtn": "Send to All Guests",
+    "successTitle": "Message Sent",
+    "successDesc": "{{count}} guest(s) received your message.",
+    "confirmTitle": "Send Broadcast?",
+    "confirmDesc": "This message will be sent to {{count}} guest(s). Do you want to continue?",
+    "confirmSend": "Send"
   }
 }

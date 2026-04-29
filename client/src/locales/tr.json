@@ -2714,5 +2714,22 @@
       "checked_in": "Giriş Yapıldı",
       "checked_out": "Çıkış Yapıldı"
     }
+  },
+  "broadcast": {
+    "tab": "Yayın",
+    "infoTitle": "Tüm Misafirlere Yayın",
+    "infoDesc": "Bu mesaj oteldeki tüm misafirlere aynı anda gönderilecektir.",
+    "recipients": "Alıcılar",
+    "guests": "misafir",
+    "noGuests": "Şu anda aktif misafir bulunmamaktadır.",
+    "composeTitle": "Mesaj Yaz",
+    "placeholder": "Tüm misafirlere gönderilecek mesajınızı yazın...",
+    "chars": "karakter",
+    "sendBtn": "Tüm Misafirlere Gönder",
+    "successTitle": "Mesaj Gönderildi",
+    "successDesc": "{{count}} misafir mesajınızı aldı.",
+    "confirmTitle": "Yayın gönderilsin mi?",
+    "confirmDesc": "Bu mesaj {{count}} misafire gönderilecektir. Devam etmek istiyor musunuz?",
+    "confirmSend": "Gönder"
   }
 }

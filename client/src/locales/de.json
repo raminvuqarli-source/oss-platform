@@ -2701,5 +2701,22 @@
       "checked_in": "Eingecheckt",
       "checked_out": "Ausgecheckt"
     }
+  },
+  "broadcast": {
+    "tab": "Rundschreiben",
+    "infoTitle": "Nachricht an alle Gäste",
+    "infoDesc": "Diese Nachricht wird gleichzeitig an alle Gäste des Hotels gesendet.",
+    "recipients": "Empfänger",
+    "guests": "Gast/Gäste",
+    "noGuests": "Derzeit keine aktiven Gäste.",
+    "composeTitle": "Nachricht verfassen",
+    "placeholder": "Schreiben Sie Ihre Nachricht für alle Gäste...",
+    "chars": "Zeichen",
+    "sendBtn": "An alle Gäste senden",
+    "successTitle": "Nachricht gesendet",
+    "successDesc": "{{count}} Gast/Gäste hat/haben Ihre Nachricht erhalten.",
+    "confirmTitle": "Rundschreiben senden?",
+    "confirmDesc": "Diese Nachricht wird an {{count}} Gast/Gäste gesendet.",
+    "confirmSend": "Senden"
   }
 }

@@ -159,6 +159,58 @@ export function registerChatRoutes(app: Express): void {
     }
   });
 
+  // Reception/Admin: Broadcast a message to ALL current guests
+  app.post("/api/chat/broadcast", requireRole("reception", "admin", "owner_admin", "property_manager"), async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user?.hotelId) {
+        return res.status(400).json({ message: "No hotel assigned" });
+      }
+      const { message } = req.body;
+      if (!message || typeof message !== "string" || message.trim().length === 0) {
+        return res.status(400).json({ message: "Message is required" });
+      }
+      const trimmed = message.trim();
+      const tenantId = req.tenantId || user.tenantId || null;
+      const guests = await storage.getGuestUsers(user.hotelId, tenantId ?? "");
+      if (guests.length === 0) {
+        return res.json({ count: 0, guestNames: [] });
+      }
+      const staffName = user.fullName || "Staff";
+      const shortMsg = trimmed.length > 50 ? trimmed.substring(0, 50) + "..." : trimmed;
+      const results: string[] = [];
+      for (const guest of guests) {
+        await storage.createChatMessage({
+          hotelId: user.hotelId,
+          guestId: guest.id,
+          senderId: user.id,
+          senderRole: user.role,
+          message: trimmed,
+          tenantId,
+        });
+        await storage.createNotification({
+          userId: guest.id,
+          tenantId,
+          title: `New message from ${staffName}`,
+          message: shortMsg,
+          type: "chat",
+          actionUrl: "/guest/chat",
+        });
+        results.push(guest.fullName || guest.username);
+      }
+      sendPushNotification({
+        userIds: guests.map(g => String(g.id)),
+        title: `New message from ${staffName}`,
+        message: shortMsg,
+        data: { type: "chat" },
+      }).catch(err => logger.error({ err }, "OneSignal broadcast push error"));
+      res.json({ count: guests.length, guestNames: results });
+    } catch (error) {
+      logger.error({ err: error }, "Error broadcasting message to guests");
+      res.status(500).json({ message: "Failed to broadcast message" });
+    }
+  });
+
   // Reception/Admin: Get list of guests with chats
   app.get("/api/chat/guests", requireRole("reception", "admin", "owner_admin", "property_manager"), async (req, res) => {
     try {

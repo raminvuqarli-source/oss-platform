@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { UnitStatusBadge, getUnitStatusLabel, getUnitStatusColor } from "@/components/unit-status-badge";
@@ -78,6 +79,7 @@ import {
   UtensilsCrossed,
   Network,
   ExternalLink,
+  Radio,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SiWhatsapp } from "react-icons/si";
@@ -3074,6 +3076,9 @@ function MessagesView() {
   const [chatMessage, setChatMessage] = useState("");
   const [selectedDmStaffId, setSelectedDmStaffId] = useState<string | null>(urlStaffId);
   const [dmMessage, setDmMessage] = useState("");
+  const [broadcastMessage, setBroadcastMessage] = useState("");
+  const [broadcastConfirmOpen, setBroadcastConfirmOpen] = useState(false);
+  const [broadcastResult, setBroadcastResult] = useState<{ count: number; guestNames: string[] } | null>(null);
   const chatScrollRef = useRef<HTMLDivElement>(null);
   const dmScrollRef = useRef<HTMLDivElement>(null);
   const chatInputRef = useRef<HTMLInputElement>(null);
@@ -3101,6 +3106,31 @@ function MessagesView() {
 
   const { data: staffUsers } = useQuery<Array<Omit<import("@shared/schema").User, "password">>>({
     queryKey: ["/api/users/staff"],
+  });
+
+  const { data: allGuests } = useQuery<Array<Omit<import("@shared/schema").User, "password">>>({
+    queryKey: ["/api/users/guests"],
+  });
+
+  const broadcastMutation = useMutation({
+    mutationFn: async (message: string) => {
+      const res = await apiRequest("POST", "/api/chat/broadcast", { message });
+      return res.json() as Promise<{ count: number; guestNames: string[] }>;
+    },
+    onSuccess: (data) => {
+      setBroadcastResult(data);
+      setBroadcastMessage("");
+      setBroadcastConfirmOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/chat/guests"] });
+      toast({
+        title: t('broadcast.successTitle', 'Message Sent'),
+        description: t('broadcast.successDesc', '{{count}} guest(s) received your message.', { count: data.count }),
+      });
+    },
+    onError: (error: Error) => {
+      setBroadcastConfirmOpen(false);
+      showErrorToast(toast, error);
+    },
   });
 
   const { data: dmMessages, isLoading: dmMessagesLoading } = useQuery<ChatMessage[]>({
@@ -3229,6 +3259,10 @@ function MessagesView() {
             {dmConversations && dmConversations.length > 0 && (
               <Badge variant="secondary" className="ml-0.5 text-[10px] px-1.5">{dmConversations.length}</Badge>
             )}
+          </TabsTrigger>
+          <TabsTrigger value="broadcast" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3" data-testid="tab-broadcast">
+            <Radio className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+            <span className="truncate">{t('broadcast.tab', 'Yayım')}</span>
           </TabsTrigger>
         </TabsList>
 
@@ -3670,6 +3704,121 @@ function MessagesView() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* BROADCAST TAB */}
+        <TabsContent value="broadcast" className="mt-4">
+          <div className="space-y-4">
+            {/* Info card */}
+            <Card className="border-primary/20 bg-primary/5">
+              <CardContent className="p-5 flex gap-3 items-start">
+                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <Radio className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">{t('broadcast.infoTitle', 'Bütün Qonaqlara Yayım')}</p>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    {t('broadcast.infoDesc', 'Bu mesaj oteldəki bütün qonaqlara eyni anda göndəriləcək. Hər qonaq mesajı öz çatında görəcək.')}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Guest list preview */}
+            <Card className="border-border/40">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">{t('broadcast.recipients', 'Alıcılar')}</span>
+                  <Badge variant="secondary" className="ml-auto text-xs">{allGuests?.length ?? 0} {t('broadcast.guests', 'qonaq')}</Badge>
+                </div>
+                {!allGuests || allGuests.length === 0 ? (
+                  <p className="text-xs text-muted-foreground text-center py-4">{t('broadcast.noGuests', 'Hal-hazırda aktiv qonaq yoxdur.')}</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {allGuests.map(g => (
+                      <div key={g.id} className="flex items-center gap-1.5 bg-muted/50 rounded-full px-2.5 py-1">
+                        <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
+                          <span className="text-[10px] font-semibold text-primary">{(g.fullName || g.username)[0].toUpperCase()}</span>
+                        </div>
+                        <span className="text-xs">{g.fullName || g.username}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Compose card */}
+            <Card className="border-border/40">
+              <CardContent className="p-5 space-y-4">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">{t('broadcast.composeTitle', 'Mesaj Yaz')}</span>
+                </div>
+                <Textarea
+                  placeholder={t('broadcast.placeholder', 'Bütün qonaqlara göndəriləcək mesajınızı yazın...')}
+                  value={broadcastMessage}
+                  onChange={e => { setBroadcastMessage(e.target.value); setBroadcastResult(null); }}
+                  rows={4}
+                  className="resize-none"
+                  data-testid="input-broadcast-message"
+                />
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs text-muted-foreground">{broadcastMessage.length} {t('broadcast.chars', 'simvol')}</span>
+                  <Button
+                    disabled={!broadcastMessage.trim() || !allGuests?.length || broadcastMutation.isPending}
+                    onClick={() => setBroadcastConfirmOpen(true)}
+                    className="gap-2"
+                    data-testid="btn-broadcast-send"
+                  >
+                    <Radio className="h-4 w-4" />
+                    {t('broadcast.sendBtn', 'Bütün Qonaqlara Göndər')}
+                    {allGuests?.length ? <Badge variant="secondary" className="ml-1 text-xs">{allGuests.length}</Badge> : null}
+                  </Button>
+                </div>
+
+                {/* Success result */}
+                {broadcastResult && (
+                  <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-green-700 dark:text-green-300">
+                        {t('broadcast.successTitle', 'Mesaj göndərildi')} ({broadcastResult.count} {t('broadcast.guests', 'qonaq')})
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{broadcastResult.guestNames.join(', ')}</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Confirm dialog */}
+          <AlertDialog open={broadcastConfirmOpen} onOpenChange={setBroadcastConfirmOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t('broadcast.confirmTitle', 'Yayım göndərilsin?')}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t('broadcast.confirmDesc', 'Bu mesaj {{count}} qonağa göndəriləcək. Davam etmək istəyirsiniz?', { count: allGuests?.length ?? 0 })}
+                  <div className="mt-3 p-3 rounded-lg bg-muted text-sm italic text-muted-foreground">
+                    "{broadcastMessage}"
+                  </div>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t('common.cancel', 'Ləğv et')}</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => broadcastMutation.mutate(broadcastMessage)}
+                  disabled={broadcastMutation.isPending}
+                  data-testid="btn-broadcast-confirm"
+                >
+                  {broadcastMutation.isPending ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
+                  {t('broadcast.confirmSend', 'Göndər')}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </TabsContent>
       </Tabs>
     </div>

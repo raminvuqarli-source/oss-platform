@@ -2701,5 +2701,22 @@
       "checked_in": "Arrivé",
       "checked_out": "Parti"
     }
+  },
+  "broadcast": {
+    "tab": "Diffusion",
+    "infoTitle": "Message à tous les clients",
+    "infoDesc": "Ce message sera envoyé simultanément à tous les clients de l'hôtel.",
+    "recipients": "Destinataires",
+    "guests": "client(s)",
+    "noGuests": "Aucun client actif pour le moment.",
+    "composeTitle": "Rédiger un message",
+    "placeholder": "Écrivez votre message pour tous les clients...",
+    "chars": "caractères",
+    "sendBtn": "Envoyer à tous les clients",
+    "successTitle": "Message envoyé",
+    "successDesc": "{{count}} client(s) a reçu votre message.",
+    "confirmTitle": "Envoyer la diffusion ?",
+    "confirmDesc": "Ce message sera envoyé à {{count}} client(s).",
+    "confirmSend": "Envoyer"
   }
 }

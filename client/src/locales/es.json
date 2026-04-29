@@ -2701,5 +2701,22 @@
       "checked_in": "Registrado",
       "checked_out": "Salida registrada"
     }
+  },
+  "broadcast": {
+    "tab": "Difusión",
+    "infoTitle": "Mensaje a todos los huéspedes",
+    "infoDesc": "Este mensaje se enviará a todos los huéspedes del hotel simultáneamente.",
+    "recipients": "Destinatarios",
+    "guests": "huésped(es)",
+    "noGuests": "No hay huéspedes activos.",
+    "composeTitle": "Redactar mensaje",
+    "placeholder": "Escriba su mensaje para todos los huéspedes...",
+    "chars": "caracteres",
+    "sendBtn": "Enviar a todos los huéspedes",
+    "successTitle": "Mensaje enviado",
+    "successDesc": "{{count}} huésped(es) recibió su mensaje.",
+    "confirmTitle": "¿Enviar difusión?",
+    "confirmDesc": "Este mensaje se enviará a {{count}} huésped(es).",
+    "confirmSend": "Enviar"
   }
 }
