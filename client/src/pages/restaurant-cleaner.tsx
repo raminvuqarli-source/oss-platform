@@ -2,16 +2,18 @@ import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/lib/auth-context";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, CheckSquare, Clock, MapPin, Camera, CheckCircle2, Loader2 } from "lucide-react";
+import { Sparkles, CheckSquare, Clock, MapPin, Camera, CheckCircle2, Loader2, MessageSquare } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { StaffDmChat } from "@/components/staff-dm-chat";
 
 type CleaningTask = {
   id: string;
@@ -93,7 +95,7 @@ export default function RestaurantCleaner() {
   return (
     <>
       <Helmet><title>Temizlik İşçisi | O.S.S</title></Helmet>
-      <div className="min-h-screen bg-background p-4 max-w-2xl mx-auto space-y-5">
+      <div className="space-y-5" data-testid="cleaner-dashboard">
         {/* Header */}
         <div className="flex items-center gap-3">
           <div className="p-2 bg-emerald-600 rounded-lg">
@@ -106,7 +108,7 @@ export default function RestaurantCleaner() {
           <div className="ml-auto">
             {pending.length > 0 && (
               <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 animate-pulse">
-                {pending.length} tapşırıq gözləyir
+                {pending.length} tapşırıq
               </Badge>
             )}
           </div>
@@ -128,82 +130,106 @@ export default function RestaurantCleaner() {
           </CardContent></Card>
         </div>
 
-        {/* Active Tasks */}
-        <div>
-          <h2 className="font-semibold mb-3">Aktiv tapşırıqlar</h2>
-          {isLoading ? (
-            <div className="space-y-3">{[1,2].map(i=><div key={i} className="h-24 bg-muted rounded-xl animate-pulse" />)}</div>
-          ) : pending.length === 0 ? (
-            <div className="flex flex-col items-center py-12 text-muted-foreground">
-              <CheckCircle2 className="h-12 w-12 mb-3 opacity-30" />
-              <p className="font-medium">Aktiv tapşırıq yoxdur</p>
-              <p className="text-sm">Yeni tapşırıqlar burada görünəcək</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {pending.map(task => (
-                <Card key={task.id} className="border-2 border-amber-200 dark:border-amber-800" data-testid={`card-task-${task.id}`}>
-                  <CardContent className="pt-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <p className="font-medium">{task.description}</p>
-                        <div className="flex flex-wrap gap-2 mt-1 text-xs text-muted-foreground">
-                          {task.location && (
-                            <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{task.location}</span>
-                          )}
-                          <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{formatDistanceToNow(new Date(task.createdAt), { addSuffix: true })}</span>
-                        </div>
-                      </div>
-                      <span className={`text-xs font-semibold px-2 py-1 rounded-full shrink-0 ${statusColor[task.status]}`}>
-                        {statusLabel[task.status]}
-                      </span>
-                    </div>
+        <Tabs defaultValue="tasks">
+          <TabsList className="flex flex-wrap h-auto gap-1">
+            <TabsTrigger value="tasks" data-testid="tab-cleaner-tasks">
+              <Sparkles className="h-4 w-4 mr-1" />
+              Tapşırıqlar
+              {pending.length > 0 && <Badge variant="destructive" className="ml-1.5 text-xs">{pending.length}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="messages" data-testid="tab-cleaner-messages">
+              <MessageSquare className="h-4 w-4 mr-1" />
+              Mesajlar
+            </TabsTrigger>
+          </TabsList>
 
-                    <div className="flex gap-2 mt-3">
-                      {task.status === "pending" && (
-                        <Button size="sm" variant="outline" className="flex-1"
-                          onClick={() => updateTask.mutate({ id: task.id, data: { status: "in_progress" } })}
-                          data-testid={`button-start-task-${task.id}`}>
-                          🔄 Başlat
-                        </Button>
-                      )}
-                      <Button
-                        size="sm"
-                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
-                        onClick={() => { setShowPhotoDialog(task); setPhotoUrl(""); }}
-                        data-testid={`button-complete-task-${task.id}`}
-                      >
-                        <Camera className="h-4 w-4 mr-1.5" />
-                        ✅ HAZIRDIR
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Completed Tasks */}
-        {done.length > 0 && (
-          <div>
-            <h2 className="font-semibold mb-3 text-muted-foreground">Tamamlanmış tapşırıqlar</h2>
-            <div className="space-y-2">
-              {done.map(task => (
-                <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg opacity-60" data-testid={`row-done-task-${task.id}`}>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium line-through">{task.description}</p>
-                    {task.location && <p className="text-xs text-muted-foreground">{task.location}</p>}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {task.photoUrl && <img src={task.photoUrl} alt="şəkil" className="h-8 w-8 rounded object-cover" />}
-                    <Badge className="bg-emerald-100 text-emerald-800 text-xs">✓ Hazır</Badge>
-                  </div>
+          <TabsContent value="tasks" className="mt-4 space-y-4">
+            {/* Active Tasks */}
+            <div>
+              <h2 className="font-semibold mb-3">Aktiv tapşırıqlar</h2>
+              {isLoading ? (
+                <div className="space-y-3">{[1,2].map(i=><div key={i} className="h-24 bg-muted rounded-xl animate-pulse" />)}</div>
+              ) : pending.length === 0 ? (
+                <div className="flex flex-col items-center py-12 text-muted-foreground">
+                  <CheckCircle2 className="h-12 w-12 mb-3 opacity-30" />
+                  <p className="font-medium">Aktiv tapşırıq yoxdur</p>
+                  <p className="text-sm">Yeni tapşırıqlar burada görünəcək</p>
                 </div>
-              ))}
+              ) : (
+                <div className="space-y-3">
+                  {pending.map(task => (
+                    <Card key={task.id} className="border-2 border-amber-200 dark:border-amber-800" data-testid={`card-task-${task.id}`}>
+                      <CardContent className="pt-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1">
+                            <p className="font-medium">{task.description}</p>
+                            <div className="flex flex-wrap gap-2 mt-1 text-xs text-muted-foreground">
+                              {task.location && (
+                                <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{task.location}</span>
+                              )}
+                              <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{formatDistanceToNow(new Date(task.createdAt), { addSuffix: true })}</span>
+                            </div>
+                          </div>
+                          <span className={`text-xs font-semibold px-2 py-1 rounded-full shrink-0 ${statusColor[task.status]}`}>
+                            {statusLabel[task.status]}
+                          </span>
+                        </div>
+
+                        <div className="flex gap-2 mt-3">
+                          {task.status === "pending" && (
+                            <Button size="sm" variant="outline" className="flex-1"
+                              onClick={() => updateTask.mutate({ id: task.id, data: { status: "in_progress" } })}
+                              data-testid={`button-start-task-${task.id}`}>
+                              🔄 Başlat
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+                            onClick={() => { setShowPhotoDialog(task); setPhotoUrl(""); }}
+                            data-testid={`button-complete-task-${task.id}`}
+                          >
+                            <Camera className="h-4 w-4 mr-1.5" />
+                            ✅ HAZIRDIR
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-        )}
+
+            {/* Completed Tasks */}
+            {done.length > 0 && (
+              <div>
+                <h2 className="font-semibold mb-3 text-muted-foreground">Tamamlanmış tapşırıqlar</h2>
+                <div className="space-y-2">
+                  {done.map(task => (
+                    <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg opacity-60" data-testid={`row-done-task-${task.id}`}>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium line-through">{task.description}</p>
+                        {task.location && <p className="text-xs text-muted-foreground">{task.location}</p>}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {task.photoUrl && <img src={task.photoUrl} alt="şəkil" className="h-8 w-8 rounded object-cover" />}
+                        <Badge className="bg-emerald-100 text-emerald-800 text-xs">✓ Hazır</Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="messages" className="mt-4">
+            <StaffDmChat
+              peerRoles={["restaurant_manager", "admin", "owner_admin", "property_manager", "waiter", "kitchen_staff", "restaurant_cashier"]}
+              panelLabel="Əkip"
+              emptyLabel="Əkip üzvü tapılmadı"
+            />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Complete with photo dialog */}

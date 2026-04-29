@@ -394,7 +394,7 @@ export function registerRestaurantRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/restaurant/cleaning-tasks", requireRestaurantRole(...MANAGER_ROLES), async (req, res) => {
+  app.post("/api/restaurant/cleaning-tasks", requireRestaurantRole(...MANAGER_ROLES, "restaurant_cashier"), async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
       if (!user?.propertyId) return res.status(400).json({ message: "No property linked" });

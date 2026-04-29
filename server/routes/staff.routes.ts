@@ -85,11 +85,11 @@ export function registerStaffRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/users/staff", requireRole("admin", "reception", "owner_admin", "property_manager"), async (req, res) => {
+  app.get("/api/users/staff", requireRole("admin", "reception", "owner_admin", "property_manager", "restaurant_manager", "kitchen_staff", "waiter", "restaurant_cleaner", "restaurant_cashier"), async (req, res) => {
     const currentUser = await storage.getUser(req.session.userId!);
     const allStaff: any[] = [];
     const seenIds = new Set<string>();
-    const staffRoles = ["reception", "admin", "staff", "property_manager"];
+    const staffRoles = ["reception", "admin", "staff", "property_manager", "restaurant_manager", "kitchen_staff", "waiter", "restaurant_cleaner", "restaurant_cashier"];
 
     const addStaffUsers = (users: any[]) => {
       for (const u of users) {
@@ -101,22 +101,26 @@ export function registerStaffRoutes(app: Express): void {
       }
     };
 
-    if (currentUser?.hotelId) {
-      const hotelUsers = await storage.getUsersByHotel(currentUser.hotelId, req.tenantId!);
-      addStaffUsers(hotelUsers);
+    if (currentUser?.propertyId) {
+      const propUsers = await storage.getUsersByProperty(currentUser.propertyId);
+      addStaffUsers(propUsers);
+    } else if (currentUser?.hotelId) {
+      if (req.tenantId) {
+        const hotelUsers = await storage.getUsersByHotel(currentUser.hotelId, req.tenantId);
+        addStaffUsers(hotelUsers);
+      }
     }
 
     if (currentUser?.role === "owner_admin" && currentUser.ownerId) {
       const ownerProperties = await storage.getPropertiesByOwner(currentUser.ownerId);
       for (const prop of ownerProperties) {
-        const hotel = await storage.getHotelByPropertyId(prop.id);
-        if (hotel) {
-          const hotelUsers = await storage.getUsersByHotel(hotel.id, req.tenantId!);
-          addStaffUsers(hotelUsers);
-        }
+        const propUsers = await storage.getUsersByProperty(prop.id);
+        addStaffUsers(propUsers);
       }
-      const ownerUsers = await storage.getUsersByOwner(currentUser.ownerId, req.tenantId!);
-      addStaffUsers(ownerUsers);
+      if (req.tenantId) {
+        const ownerUsers = await storage.getUsersByOwner(currentUser.ownerId, req.tenantId);
+        addStaffUsers(ownerUsers);
+      }
     }
 
     res.json(allStaff);

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearch } from "wouter";
 import { useTranslation } from "react-i18next";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -28,6 +28,8 @@ import {
   Send,
   Loader2,
   Calendar,
+  CheckCircle,
+  RefreshCw,
 } from "lucide-react";
 
 interface RoomUnit {
@@ -59,10 +61,22 @@ const ROOM_STATUS_COLORS: Record<string, string> = {
 
 function RoomsView() {
   const { t } = useTranslation();
+  const { toast } = useToast();
+  const qc = useQueryClient();
 
   const { data: units, isLoading } = useQuery<RoomUnit[]>({
     queryKey: ["/api/units/status"],
     refetchInterval: 15000,
+  });
+
+  const updateStatus = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      apiRequest("PATCH", `/api/units/${id}/status`, { status }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/units/status"] });
+      toast({ title: "Otaq statusu yeniləndi" });
+    },
+    onError: () => toast({ title: "Xəta baş verdi", variant: "destructive" }),
   });
 
   if (isLoading) {
@@ -119,7 +133,7 @@ function RoomsView() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {units.map(unit => (
-          <Card key={unit.id} className="overflow-visible" data-testid={`hk-room-${unit.unitNumber}`}>
+          <Card key={unit.id} className={`overflow-visible ${unit.status === "dirty" ? "border-2 border-yellow-300 dark:border-yellow-700" : unit.status === "cleaning" ? "border-2 border-blue-300 dark:border-blue-700" : ""}`} data-testid={`hk-room-${unit.unitNumber}`}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
@@ -147,6 +161,34 @@ function RoomsView() {
                    unit.floor < 0 ? `B${Math.abs(unit.floor)}` :
                    `${unit.floor}. ${t('roomStatus.floor', 'mərtəbə')}`}
                 </p>
+              )}
+              {/* Action buttons for cleanable rooms */}
+              {(unit.status === "dirty" || unit.status === "cleaning") && (
+                <div className="flex gap-2 mt-3">
+                  {unit.status === "dirty" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1 text-xs"
+                      onClick={() => updateStatus.mutate({ id: unit.id, status: "cleaning" })}
+                      disabled={updateStatus.isPending}
+                      data-testid={`hk-btn-start-${unit.id}`}
+                    >
+                      <RefreshCw className="h-3.5 w-3.5 mr-1" />
+                      Temizlənir
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    className="flex-1 text-xs bg-green-600 hover:bg-green-700 text-white font-bold"
+                    onClick={() => updateStatus.mutate({ id: unit.id, status: "ready" })}
+                    disabled={updateStatus.isPending}
+                    data-testid={`hk-btn-ready-${unit.id}`}
+                  >
+                    <CheckCircle className="h-3.5 w-3.5 mr-1" />
+                    ✅ HAZIRDIR
+                  </Button>
+                </div>
               )}
             </CardContent>
           </Card>

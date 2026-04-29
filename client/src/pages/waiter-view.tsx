@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
-import { Bell, Package, CheckCircle2, Clock, Utensils } from "lucide-react";
+import { Bell, Package, CheckCircle2, Clock, Utensils, MessageSquare } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { StaffDmChat } from "@/components/staff-dm-chat";
 
 type PosOrder = {
   id: string;
@@ -96,7 +97,7 @@ export default function WaiterView() {
       <Helmet>
         <title>{t('restaurant.waiter', 'Waiter')} | O.S.S</title>
       </Helmet>
-      <div className="p-4 max-w-3xl mx-auto space-y-4">
+      <div className="space-y-4" data-testid="waiter-dashboard">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-primary rounded-lg">
             <Utensils className="h-5 w-5 text-primary-foreground" />
@@ -121,14 +122,20 @@ export default function WaiterView() {
         </div>
 
         <Tabs defaultValue="orders">
-          <TabsList className="w-full" data-testid="tabs-waiter">
-            <TabsTrigger value="orders" className="flex-1" data-testid="tab-orders">
+          <TabsList className="flex flex-wrap h-auto gap-1" data-testid="tabs-waiter">
+            <TabsTrigger value="orders" data-testid="tab-orders">
               <Package className="h-4 w-4 mr-1" />
-              {t('restaurant.placeOrder', 'Orders')}
+              Sifarişlər
+              {readyOrders.length > 0 && <Badge variant="destructive" className="ml-1.5 text-xs">{readyOrders.length}</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="calls" className="flex-1" data-testid="tab-calls">
+            <TabsTrigger value="calls" data-testid="tab-calls">
               <Bell className="h-4 w-4 mr-1" />
-              {t('restaurant.callWaiter')} {pendingCalls.length > 0 && `(${pendingCalls.length})`}
+              {t('restaurant.callWaiter')}
+              {pendingCalls.length > 0 && <Badge variant="destructive" className="ml-1.5 text-xs">{pendingCalls.length}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="messages" data-testid="tab-waiter-messages">
+              <MessageSquare className="h-4 w-4 mr-1" />
+              Mesajlar
             </TabsTrigger>
           </TabsList>
 
@@ -170,7 +177,7 @@ export default function WaiterView() {
                       data-testid={`button-deliver-${order.id}`}
                     >
                       <CheckCircle2 className="h-5 w-5 mr-2" />
-                      ✅ HAZIRDIR — Çatdırıldı
+                      ✅ TƏHVİL VERİLDİ
                     </Button>
                   </CardContent>
                 </Card>
@@ -179,7 +186,7 @@ export default function WaiterView() {
 
             {/* All active orders list */}
             <div className="mt-4">
-              <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-2">{t('restaurant.restaurantLabel')}</h2>
+              <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-2">Bütün aktiv sifarişlər</h2>
               {orders.filter(o => o.kitchenStatus !== "delivered").map(order => (
                 <div key={order.id} className="flex items-center justify-between p-3 rounded-lg border mb-2" data-testid={`row-order-${order.id}`}>
                   <div>
@@ -231,6 +238,14 @@ export default function WaiterView() {
                 </Card>
               ))
             )}
+          </TabsContent>
+
+          <TabsContent value="messages" className="mt-3">
+            <StaffDmChat
+              peerRoles={["restaurant_manager", "admin", "owner_admin", "property_manager", "kitchen_staff", "restaurant_cashier"]}
+              panelLabel="Əkip"
+              emptyLabel="Ekip üzvü tapılmadı"
+            />
           </TabsContent>
         </Tabs>
       </div>

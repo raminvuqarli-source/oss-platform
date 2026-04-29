@@ -212,7 +212,7 @@ export function registerChatRoutes(app: Express): void {
 
   // ============== INTERNAL CHAT ROUTES (Owner ↔ Staff) ==============
 
-  app.get("/api/chat/internal", requireRole("reception", "admin", "owner_admin", "property_manager", "staff"), async (req, res) => {
+  app.get("/api/chat/internal", requireRole("reception", "admin", "owner_admin", "property_manager", "staff", "restaurant_manager", "kitchen_staff", "waiter", "restaurant_cleaner", "restaurant_cashier"), async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
       let hotelIds: string[] = [];
@@ -239,7 +239,7 @@ export function registerChatRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/chat/internal", requireRole("reception", "admin", "owner_admin", "property_manager", "staff"), async (req, res) => {
+  app.post("/api/chat/internal", requireRole("reception", "admin", "owner_admin", "property_manager", "staff", "restaurant_manager", "kitchen_staff", "waiter", "restaurant_cleaner", "restaurant_cashier"), async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
       if (!user?.hotelId && !(user?.role === "owner_admin")) {
@@ -275,7 +275,7 @@ export function registerChatRoutes(app: Express): void {
     return `dm_${[userId1, userId2].sort().join("_")}`;
   }
 
-  const STAFF_ROLES = ["reception", "admin", "owner_admin", "property_manager", "staff"];
+  const STAFF_ROLES = ["reception", "admin", "owner_admin", "property_manager", "staff", "restaurant_manager", "kitchen_staff", "waiter", "restaurant_cleaner", "restaurant_cashier"];
 
   async function resolveHotelIds(user: any): Promise<string[]> {
     const hotelIds: string[] = [];
@@ -309,7 +309,7 @@ export function registerChatRoutes(app: Express): void {
     return { valid: false, error: "Staff member not found in your organization" };
   }
 
-  app.get("/api/chat/staff-dm/conversations", requireRole("reception", "admin", "owner_admin", "property_manager", "staff"), async (req, res) => {
+  app.get("/api/chat/staff-dm/conversations", requireRole("reception", "admin", "owner_admin", "property_manager", "staff", "restaurant_manager", "kitchen_staff", "waiter", "restaurant_cleaner", "restaurant_cashier"), async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
       if (!user) return res.status(401).json({ message: "Unauthorized" });
@@ -332,7 +332,7 @@ export function registerChatRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/chat/staff-dm/:staffId", requireRole("reception", "admin", "owner_admin", "property_manager", "staff"), async (req, res) => {
+  app.get("/api/chat/staff-dm/:staffId", requireRole("reception", "admin", "owner_admin", "property_manager", "staff", "restaurant_manager", "kitchen_staff", "waiter", "restaurant_cleaner", "restaurant_cashier"), async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
       if (!user) return res.status(401).json({ message: "Unauthorized" });
@@ -352,7 +352,7 @@ export function registerChatRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/chat/staff-dm/:staffId", requireRole("reception", "admin", "owner_admin", "property_manager", "staff"), async (req, res) => {
+  app.post("/api/chat/staff-dm/:staffId", requireRole("reception", "admin", "owner_admin", "property_manager", "staff", "restaurant_manager", "kitchen_staff", "waiter", "restaurant_cleaner", "restaurant_cashier"), async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
       if (!user) return res.status(401).json({ message: "Unauthorized" });

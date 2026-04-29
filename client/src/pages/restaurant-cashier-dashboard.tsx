@@ -13,8 +13,13 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Wallet, CreditCard, Banknote, BedDouble, CheckCircle2,
   Clock, ShoppingBag, Printer, Building2, AlertCircle,
-  Utensils, TrendingUp, TableProperties, RefreshCw
+  Utensils, TrendingUp, TableProperties, RefreshCw,
+  MessageSquare, ClipboardList, Plus, MapPin, Users
 } from "lucide-react";
+import { StaffDmChat } from "@/components/staff-dm-chat";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { formatDistanceToNow } from "date-fns";
 
 type PosOrder = {
@@ -46,11 +51,16 @@ const SETTLEMENT_COLORS: Record<string, string> = {
   room_charge: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
 };
 
+type CleaningStaff = { id: string; fullName: string; role: string };
+
 export default function RestaurantCashierDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [settleDialog, setSettleDialog] = useState<PosOrder | null>(null);
   const [settleType, setSettleType] = useState("cash");
+  const [taskDesc, setTaskDesc] = useState("");
+  const [taskLocation, setTaskLocation] = useState("");
+  const [taskAssignee, setTaskAssignee] = useState<string>("__none__");
 
   const { data: orders = [], isLoading: ordersLoading } = useQuery<PosOrder[]>({
     queryKey: ["/api/restaurant/orders"],
@@ -60,6 +70,24 @@ export default function RestaurantCashierDashboard() {
   const { data: analytics } = useQuery<Analytics>({
     queryKey: ["/api/restaurant/analytics"],
     refetchInterval: 30000,
+  });
+
+  const { data: staffUsers = [] } = useQuery<CleaningStaff[]>({
+    queryKey: ["/api/users/staff"],
+  });
+  const cleaners = staffUsers.filter(u => u.role === "restaurant_cleaner");
+
+  const createTask = useMutation({
+    mutationFn: ({ description, location, assignedToId }: { description: string; location: string; assignedToId?: string }) =>
+      apiRequest("POST", "/api/restaurant/cleaning-tasks", { description, location, assignedToId: assignedToId || null }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/restaurant/cleaning-tasks"] });
+      setTaskDesc("");
+      setTaskLocation("");
+      setTaskAssignee("__none__");
+      toast({ title: "Tapşırıq göndərildi" });
+    },
+    onError: () => toast({ title: "Xəta baş verdi", variant: "destructive" }),
   });
 
   const settleOrder = useMutation({
@@ -163,6 +191,14 @@ export default function RestaurantCashierDashboard() {
             <TabsTrigger value="history" data-testid="tab-cashier-history">
               <TrendingUp className="h-4 w-4 mr-1.5" />
               Tarixçə
+            </TabsTrigger>
+            <TabsTrigger value="tasks" data-testid="tab-cashier-tasks">
+              <ClipboardList className="h-4 w-4 mr-1.5" />
+              Tapşırıq Ver
+            </TabsTrigger>
+            <TabsTrigger value="messages" data-testid="tab-cashier-messages">
+              <MessageSquare className="h-4 w-4 mr-1.5" />
+              Mesajlar
             </TabsTrigger>
           </TabsList>
 
@@ -332,6 +368,82 @@ export default function RestaurantCashierDashboard() {
                 </Card>
               ))
             )}
+          </TabsContent>
+
+          {/* TASK CREATION */}
+          <TabsContent value="tasks" className="mt-4">
+            <Card>
+              <CardContent className="p-5 space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <ClipboardList className="h-4 w-4 text-primary" />
+                  <h3 className="font-semibold">Temizlik Tapşırığı Yarat</h3>
+                </div>
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="task-desc">Tapşırıq təsviri *</Label>
+                    <Textarea
+                      id="task-desc"
+                      placeholder="Məs: Masa 5-in yanındakı döşəməni silin..."
+                      value={taskDesc}
+                      onChange={e => setTaskDesc(e.target.value)}
+                      className="resize-none"
+                      rows={2}
+                      data-testid="input-task-desc"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="task-location">Yer (istəyə görə)</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="task-location"
+                        placeholder="Məs: Restoran salonunun solunda"
+                        value={taskLocation}
+                        onChange={e => setTaskLocation(e.target.value)}
+                        className="pl-9"
+                        data-testid="input-task-location"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Təyin et (istəyə görə)</Label>
+                    <Select value={taskAssignee} onValueChange={setTaskAssignee}>
+                      <SelectTrigger data-testid="select-task-assignee">
+                        <SelectValue placeholder="Temizlik işçisi seçin..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">Heç kim (ümumi)</SelectItem>
+                        {cleaners.map(c => (
+                          <SelectItem key={c.id} value={c.id}>{c.fullName}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    className="w-full"
+                    disabled={!taskDesc.trim() || createTask.isPending}
+                    onClick={() => createTask.mutate({
+                      description: taskDesc.trim(),
+                      location: taskLocation.trim(),
+                      assignedToId: taskAssignee === "__none__" ? undefined : taskAssignee,
+                    })}
+                    data-testid="btn-create-task"
+                  >
+                    {createTask.isPending ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                    Tapşırığı Göndər
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* MESSAGES */}
+          <TabsContent value="messages" className="mt-4">
+            <StaffDmChat
+              peerRoles={["restaurant_manager", "admin", "owner_admin", "property_manager", "waiter", "kitchen_staff", "restaurant_cleaner"]}
+              panelLabel="Əkip Mesajları"
+              emptyLabel="Əkip üzvü tapılmadı"
+            />
           </TabsContent>
         </Tabs>
       </div>
