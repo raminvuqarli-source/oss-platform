@@ -41,6 +41,11 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express,
 ): Promise<Server> {
+  app.get("/api/download/training-guide", (req, res) => {
+    const filePath = path.resolve("OSS_Training_Guide.docx");
+    res.download(filePath, "OSS_Training_Guide.docx");
+  });
+
   app.get("/api/download/user-manual", (req, res) => {
     const lang = (req.query.lang as string) || "en";
     if (lang === "fa") {
