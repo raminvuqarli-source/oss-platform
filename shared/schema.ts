@@ -345,7 +345,7 @@ export type InsertHotel = z.infer<typeof insertHotelSchema>;
 export type Hotel = typeof hotels.$inferSelect;
 
 // User roles - updated for multi-tenant
-export type UserRole = "guest" | "reception" | "admin" | "oss_super_admin" | "owner_admin" | "property_manager" | "staff" | "marketing_staff" | "kitchen_staff" | "waiter" | "restaurant_manager" | "restaurant_cleaner";
+export type UserRole = "guest" | "reception" | "admin" | "oss_super_admin" | "owner_admin" | "property_manager" | "staff" | "marketing_staff" | "kitchen_staff" | "waiter" | "restaurant_manager" | "restaurant_cleaner" | "restaurant_cashier";
 
 // Supported languages
 export type LanguageCode = "en" | "az" | "ar" | "tr" | "de" | "es" | "nl";

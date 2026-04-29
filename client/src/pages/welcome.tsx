@@ -21,6 +21,7 @@ import {
   SunMedium, Gauge, BrainCircuit, ArrowRight, Zap, Activity, LayoutDashboard,
   BedDouble, MessageCircle, TrendingUp, ChevronRight, Download, Monitor, Share, MoreHorizontal, ExternalLink,
   Network, UtensilsCrossed, Wrench, Sparkles, Moon, Home,
+  ChefHat, Utensils, Wallet, Receipt,
 } from "lucide-react";
 import { X } from "lucide-react";
 import { SiApple, SiAndroid } from "react-icons/si";
@@ -101,20 +102,55 @@ const DEMO_INFO_ROLES = [
     desc: "Live cleaning task board with room status updates, priority engine, and inspection flow. See how staff mark rooms clean in real-time.",
   },
   {
-    id: "kitchen",
-    icon: UtensilsCrossed,
-    colorClass: "text-orange-500 dark:text-orange-400",
-    bgClass: "bg-orange-500/10",
-    title: "Kitchen & Restaurant (KDS)",
-    desc: "Real-time Kitchen Display System with order queues, the waiter dashboard, and the ability to post charges directly to a guest's room folio.",
-  },
-  {
     id: "maintenance",
     icon: Wrench,
     colorClass: "text-slate-500 dark:text-slate-400",
     bgClass: "bg-slate-500/10",
     title: "Maintenance",
     desc: "Track repair requests and technical service tasks, assign technicians, set priority levels, and follow progress from open to resolved.",
+  },
+];
+
+const RESTAURANT_DEMO_ROLES = [
+  {
+    id: "restaurant_manager",
+    icon: UtensilsCrossed,
+    colorClass: "text-orange-500 dark:text-orange-400",
+    bgClass: "bg-orange-500/10",
+    title: "Restoran Meneceri",
+    desc: "Qarsonları, mətbəxi, sifarişləri, maliyyəni, təmizlik ekipini və bütün restoran işçilərini idarə edir. Performans izlənməsi daxildir.",
+  },
+  {
+    id: "kitchen",
+    icon: ChefHat,
+    colorClass: "text-red-500 dark:text-red-400",
+    bgClass: "bg-red-500/10",
+    title: "Mətbəx (KDS)",
+    desc: "Real-vaxt Mətbəx Ekranı — masa nömrəsi ilə sifarişlər, qarson və menecerə mesaj, təmizlik ekipinə tapşırıq vermək imkanı.",
+  },
+  {
+    id: "waiter",
+    icon: Utensils,
+    colorClass: "text-amber-500 dark:text-amber-400",
+    bgClass: "bg-amber-500/10",
+    title: "Qarson",
+    desc: "Qonaqla məsajlaşma, sifarişi çatdırdıqda TƏHVİL VERİLDİ düyməsi, mətbəxə və menecerə tapşırıq göndərmək.",
+  },
+  {
+    id: "restaurant_cleaner",
+    icon: Sparkles,
+    colorClass: "text-cyan-500 dark:text-cyan-400",
+    bgClass: "bg-cyan-500/10",
+    title: "Restoran Təmizlikçisi",
+    desc: "Meneterdən, qarsondan, mətbəxdən tapşırıq qəbul edir. Tamamlandıqda HAZIRDIR düyməsi ilə şəkil göndərir.",
+  },
+  {
+    id: "restaurant_cashier",
+    icon: Wallet,
+    colorClass: "text-green-500 dark:text-green-400",
+    bgClass: "bg-green-500/10",
+    title: "Restoran Kassası",
+    desc: "Bütün masaların açıq hesablarını izləyir, hesabı çap edir, nağd/kart/otaq hesabı ilə ödəniş qəbul edir, hotel maliyyə zəncirinə daxil edir.",
   },
 ];
 
@@ -1489,7 +1525,7 @@ export default function Welcome() {
               {/* Additional demo role cards */}
               <div className="mt-6 space-y-4">
                 <p className="text-center text-sm text-muted-foreground font-medium">More roles included in your subscription:</p>
-                <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {DEMO_INFO_ROLES.map((role) => {
                     const Icon = role.icon;
                     return (
@@ -1513,6 +1549,52 @@ export default function Welcome() {
                               size="sm"
                               onClick={(e) => { e.stopPropagation(); handleDemoLogin(role.id); }}
                               data-testid={`button-demo-info-${role.id}`}
+                            >
+                              {role.title} kimi kəşf edin
+                              <ArrowRight className="ml-1.5 h-3 w-3" />
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    );
+                  })}
+                </motion.div>
+              </div>
+
+              {/* Restaurant Ecosystem — 5 separate demo roles */}
+              <div className="mt-8 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-border/50" />
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20">
+                    <UtensilsCrossed className="h-3.5 w-3.5 text-orange-500" />
+                    <span className="text-xs font-semibold text-orange-600 dark:text-orange-400">Restoran Ekosistemi</span>
+                  </div>
+                  <div className="flex-1 h-px bg-border/50" />
+                </div>
+                <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {RESTAURANT_DEMO_ROLES.map((role) => {
+                    const Icon = role.icon;
+                    return (
+                      <motion.div key={role.id} variants={fadeUp}>
+                        <Card
+                          className="group cursor-pointer transition-all duration-300 border-border/40 hover:border-orange-500/20 hover:shadow-md hover:-translate-y-0.5 h-full"
+                          onClick={() => handleDemoLogin(role.id)}
+                          data-testid={`card-demo-restaurant-${role.id}`}
+                        >
+                          <CardContent className="p-5 space-y-3">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-xl ${role.bgClass} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                                <Icon className={`h-5 w-5 ${role.colorClass}`} />
+                              </div>
+                              <h3 className="font-heading font-semibold text-sm">{role.title}</h3>
+                            </div>
+                            <p className="text-xs text-muted-foreground leading-relaxed">{role.desc}</p>
+                            <Button
+                              className="w-full rounded-xl"
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => { e.stopPropagation(); handleDemoLogin(role.id); }}
+                              data-testid={`button-demo-restaurant-${role.id}`}
                             >
                               {role.title} kimi kəşf edin
                               <ArrowRight className="ml-1.5 h-3 w-3" />

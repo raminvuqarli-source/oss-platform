@@ -70,13 +70,15 @@ Preferred communication style: Simple, everyday language.
 - **Public Endpoints**: `POST /api/ai-chat` and `POST /api/ai-chat/lead` are whitelisted.
 
 ### Smart Restaurant Ecosystem
-- **Roles**: `restaurant_manager`, `kitchen_staff`, `waiter`, `restaurant_cleaner` — each with their own dashboard and sidebar navigation.
+- **Roles**: `restaurant_manager`, `kitchen_staff`, `waiter`, `restaurant_cleaner`, `restaurant_cashier` — each with their own dashboard and sidebar navigation.
 - **Kitchen Display System**: Real-time KDS with WebSocket push; prominent "HAZIRDIR" button broadcasts readiness to all staff.
 - **Waiter View**: Manages order delivery with prominent "HAZIRDIR — Çatdırıldı" button; waiter call acknowledgement.
 - **Restaurant Manager Dashboard**: 8-tab panel: Sifarişlər, Hesablaşma, Otaqlar (room billing), Menyu, Qarsonlar (waiter profiles), Temizlik (cleaning tasks), Heyat (staff), Maliyyə (finance breakdown).
 - **Waiter Profile Management**: Manager can set salary, tax rate, and table assignments per waiter via edit modal.
 - **Cleaning Task System**: Manager creates tasks with location/assignment; cleaners mark done with optional photo upload.
 - **Restaurant Cleaner Dashboard** (`/restaurant/cleaner`): Shows assigned tasks, mark in-progress/done, photo upload to prove completion.
+- **Restaurant Cashier Dashboard** (`/restaurant/cashier`): Tables & open bills view, settle by cash/card/room-charge, print receipt, history tab, and today's revenue stats. Demo user: `demo_restaurant_cashier` (Omar Faruk).
+- **Landing Page — Restaurant Ecosystem Section**: 5 separate clickable demo cards (Manager, Kitchen/KDS, Waiter, Cleaner, Cashier) with individual demo-login buttons, grouped under an "Restoran Ekosistemi" header in the demo section.
 - **Room Orders View**: Manager sees all rooms with pending restaurant bills, grouped by room, with settle button.
 - **Restaurant Finance Tab**: Today/month revenue, all-time totals, breakdown by payment type (cash/card/room charge), order status distribution.
 - **Hotel Owner/Manager Finance Integration**: `RestaurantRevenueCard` in owner dashboard performance tab showing restaurant revenue metrics.

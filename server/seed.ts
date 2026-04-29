@@ -28,6 +28,10 @@ export async function ensureDemoUser(role: string) {
     housekeeping: { username: "demo_housekeeping", password: "hk123!", fullName: "Nina Torres", email: "nina@grandriviera.com", phone: "+14155550104", dbRole: "staff" },
     kitchen: { username: "demo_kitchen", password: "kitchen123!", fullName: "Carlos Mendez", email: "carlos@grandriviera.com", phone: "+14155550105", dbRole: "kitchen_staff" },
     maintenance: { username: "demo_maintenance", password: "maint123!", fullName: "Dave Park", email: "dave@grandriviera.com", phone: "+14155550106", dbRole: "staff" },
+    restaurant_manager: { username: "demo_restaurant_manager", password: "restmgr123!", fullName: "Sofia Reyes", email: "sofia@grandriviera.com", phone: "+14155550107", dbRole: "restaurant_manager" },
+    waiter: { username: "demo_waiter", password: "waiter123!", fullName: "Luca Bianchi", email: "luca@grandriviera.com", phone: "+14155550108", dbRole: "waiter" },
+    restaurant_cleaner: { username: "demo_restaurant_cleaner", password: "restclean123!", fullName: "Ana Lima", email: "ana@grandriviera.com", phone: "+14155550109", dbRole: "restaurant_cleaner" },
+    restaurant_cashier: { username: "demo_restaurant_cashier", password: "cashier123!", fullName: "Omar Faruk", email: "omar@grandriviera.com", phone: "+14155550110", dbRole: "restaurant_cashier" },
   };
 
   const def = userDefs[role];
@@ -166,6 +170,58 @@ export async function seedDemoData() {
     email: "dave@grandriviera.com",
     phone: "+14155550106",
     role: "staff",
+    hotelId: hotel.id,
+    ownerId: owner.id,
+    propertyId: property.id,
+  });
+
+  const restMgrPassword = await bcrypt.hash("restmgr123!", BCRYPT_ROUNDS);
+  await storage.createUser({
+    username: "demo_restaurant_manager",
+    password: restMgrPassword,
+    fullName: "Sofia Reyes",
+    email: "sofia@grandriviera.com",
+    phone: "+14155550107",
+    role: "restaurant_manager",
+    hotelId: hotel.id,
+    ownerId: owner.id,
+    propertyId: property.id,
+  });
+
+  const waiterPassword = await bcrypt.hash("waiter123!", BCRYPT_ROUNDS);
+  await storage.createUser({
+    username: "demo_waiter",
+    password: waiterPassword,
+    fullName: "Luca Bianchi",
+    email: "luca@grandriviera.com",
+    phone: "+14155550108",
+    role: "waiter",
+    hotelId: hotel.id,
+    ownerId: owner.id,
+    propertyId: property.id,
+  });
+
+  const restCleanerPassword = await bcrypt.hash("restclean123!", BCRYPT_ROUNDS);
+  await storage.createUser({
+    username: "demo_restaurant_cleaner",
+    password: restCleanerPassword,
+    fullName: "Ana Lima",
+    email: "ana@grandriviera.com",
+    phone: "+14155550109",
+    role: "restaurant_cleaner",
+    hotelId: hotel.id,
+    ownerId: owner.id,
+    propertyId: property.id,
+  });
+
+  const cashierPassword = await bcrypt.hash("cashier123!", BCRYPT_ROUNDS);
+  await storage.createUser({
+    username: "demo_restaurant_cashier",
+    password: cashierPassword,
+    fullName: "Omar Faruk",
+    email: "omar@grandriviera.com",
+    phone: "+14155550110",
+    role: "restaurant_cashier",
     hotelId: hotel.id,
     ownerId: owner.id,
     propertyId: property.id,

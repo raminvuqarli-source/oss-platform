@@ -345,6 +345,10 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
     housekeeping: "demo_housekeeping",
     kitchen: "demo_kitchen",
     maintenance: "demo_maintenance",
+    restaurant_manager: "demo_restaurant_manager",
+    waiter: "demo_waiter",
+    restaurant_cleaner: "demo_restaurant_cleaner",
+    restaurant_cashier: "demo_restaurant_cashier",
   };
 
   app.post("/api/auth/demo-login", authRateLimiter, async (req, res) => {

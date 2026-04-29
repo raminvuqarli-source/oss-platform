@@ -385,6 +385,23 @@ function DashboardSidebar() {
           },
         ];
 
+      case "restaurant_cashier":
+        return [
+          {
+            label: "Kassa",
+            items: [
+              { title: "Masalar & Hesablar", icon: Wallet, url: "/restaurant/cashier", testId: "nav-cashier-tables" },
+            ],
+          },
+          {
+            label: t("nav.group.system", "System"),
+            items: [
+              { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-cashier-notifications" },
+              { title: t("common.settings"), icon: Settings, url: "/settings", testId: "nav-settings" },
+            ],
+          },
+        ];
+
       default:
         return [
           {
@@ -425,6 +442,8 @@ function DashboardSidebar() {
         return <Utensils className="h-3 w-3" />;
       case "restaurant_cleaner":
         return <Sparkles className="h-3 w-3" />;
+      case "restaurant_cashier":
+        return <Wallet className="h-3 w-3" />;
       default:
         return <User className="h-3 w-3" />;
     }
