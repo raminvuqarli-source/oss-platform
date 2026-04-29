@@ -1868,7 +1868,11 @@ function PropertiesView({
 
 function GuestsOverviewView() {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
+  const [broadcastMsg, setBroadcastMsg] = useState("");
+  const [broadcastConfirm, setBroadcastConfirm] = useState(false);
+  const [broadcastDone, setBroadcastDone] = useState<{ count: number; guestNames: string[] } | null>(null);
 
   const { data: guests, isLoading } = useQuery<any[]>({
     queryKey: ["/api/users/guests"],
@@ -1876,6 +1880,27 @@ function GuestsOverviewView() {
 
   const { data: bookings } = useQuery<any[]>({
     queryKey: ["/api/bookings"],
+  });
+
+  const broadcastMutation = useMutation({
+    mutationFn: async (message: string) => {
+      const res = await apiRequest("POST", "/api/chat/broadcast", { message });
+      return res.json() as Promise<{ count: number; guestNames: string[] }>;
+    },
+    onSuccess: (data) => {
+      setBroadcastDone(data);
+      setBroadcastMsg("");
+      setBroadcastConfirm(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/chat/guests"] });
+      toast({
+        title: t('broadcast.successTitle', 'Mesaj göndərildi'),
+        description: t('broadcast.successDesc', '{{count}} qonaq mesajı aldı.', { count: data.count }),
+      });
+    },
+    onError: (error: Error) => {
+      setBroadcastConfirm(false);
+      showErrorToast(toast, error);
+    },
   });
 
   const filteredGuests = guests?.filter(g => {
@@ -1947,6 +1972,83 @@ function GuestsOverviewView() {
           </CardContent>
         </Card>
       </div>
+
+      {/* BROADCAST PANEL */}
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-transparent to-transparent">
+        <CardContent className="p-5 space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Radio className="h-4 w-4 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm">{t('broadcast.infoTitle', 'Bütün Qonaqlara Yayım')}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {t('broadcast.infoDesc', 'Bu mesaj oteldəki bütün qonaqlara eyni anda göndəriləcək.')}
+              </p>
+            </div>
+            <Badge variant="secondary" className="shrink-0 text-xs">
+              {guests?.length ?? 0} {t('broadcast.guests', 'qonaq')}
+            </Badge>
+          </div>
+
+          <div className="flex gap-2">
+            <Textarea
+              placeholder={t('broadcast.placeholder', 'Bütün qonaqlara göndəriləcək mesajınızı yazın...')}
+              value={broadcastMsg}
+              onChange={e => { setBroadcastMsg(e.target.value); setBroadcastDone(null); }}
+              rows={2}
+              className="resize-none flex-1"
+              data-testid="input-guests-broadcast"
+            />
+            <Button
+              className="self-end gap-1.5 shrink-0"
+              disabled={!broadcastMsg.trim() || !guests?.length || broadcastMutation.isPending}
+              onClick={() => setBroadcastConfirm(true)}
+              data-testid="btn-guests-broadcast"
+            >
+              {broadcastMutation.isPending
+                ? <RefreshCw className="h-4 w-4 animate-spin" />
+                : <Radio className="h-4 w-4" />}
+              {t('broadcast.sendBtn', 'Göndər')}
+            </Button>
+          </div>
+
+          {broadcastDone && (
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+              <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+              <p className="text-sm text-green-700 dark:text-green-300">
+                {t('broadcast.successTitle', 'Mesaj göndərildi')} — {broadcastDone.count} {t('broadcast.guests', 'qonaq')}: {broadcastDone.guestNames.join(', ')}
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Confirm dialog */}
+      <AlertDialog open={broadcastConfirm} onOpenChange={setBroadcastConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('broadcast.confirmTitle', 'Yayım göndərilsin?')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('broadcast.confirmDesc', 'Bu mesaj {{count}} qonağa göndəriləcək.', { count: guests?.length ?? 0 })}
+              <div className="mt-3 p-3 rounded-lg bg-muted text-sm italic text-muted-foreground">
+                "{broadcastMsg}"
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel', 'Ləğv et')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => broadcastMutation.mutate(broadcastMsg)}
+              disabled={broadcastMutation.isPending}
+              data-testid="btn-guests-broadcast-confirm"
+            >
+              {broadcastMutation.isPending && <RefreshCw className="h-4 w-4 animate-spin mr-2" />}
+              {t('broadcast.confirmSend', 'Göndər')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="flex items-center gap-3 flex-wrap">
         <Input
