@@ -1491,20 +1491,30 @@ export default function Welcome() {
                             className="w-full rounded-xl"
                             variant="outline"
                             disabled={!!demoLoading}
-                            onClick={(e) => { e.stopPropagation(); handleDemoLogin(role.id); }}
+                            asChild
                             data-testid={`button-demo-${role.id}`}
                           >
-                            {isLoading ? (
-                              <>
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                {t('landing.demoEntering')}
-                              </>
-                            ) : (
-                              <>
-                                {t('landing.demoExplore', { role: t(roleNameKey) })}
-                                <ArrowRight className="ml-2 h-3.5 w-3.5" />
-                              </>
-                            )}
+                            <a
+                              href={`/demo?role=${role.id}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                                e.preventDefault();
+                                if (!demoLoading) handleDemoLogin(role.id);
+                              }}
+                            >
+                              {isLoading ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  {t('landing.demoEntering')}
+                                </>
+                              ) : (
+                                <>
+                                  {t('landing.demoExplore', { role: t(roleNameKey) })}
+                                  <ArrowRight className="ml-2 h-3.5 w-3.5" />
+                                </>
+                              )}
+                            </a>
                           </Button>
                         </CardContent>
                       </Card>
@@ -1540,11 +1550,21 @@ export default function Welcome() {
                               className="w-full rounded-xl"
                               variant="outline"
                               size="sm"
-                              onClick={(e) => { e.stopPropagation(); handleDemoLogin(role.id); }}
+                              asChild
                               data-testid={`button-demo-info-${role.id}`}
                             >
-                              {t('landing.demo.exploreAs', { role: roleTitle })}
-                              <ArrowRight className="ml-1.5 h-3 w-3" />
+                              <a
+                                href={`/demo?role=${role.id}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                                  e.preventDefault();
+                                  handleDemoLogin(role.id);
+                                }}
+                              >
+                                {t('landing.demo.exploreAs', { role: roleTitle })}
+                                <ArrowRight className="ml-1.5 h-3 w-3" />
+                              </a>
                             </Button>
                           </CardContent>
                         </Card>
@@ -1588,11 +1608,21 @@ export default function Welcome() {
                               className="w-full rounded-xl"
                               variant="outline"
                               size="sm"
-                              onClick={(e) => { e.stopPropagation(); handleDemoLogin(role.id); }}
+                              asChild
                               data-testid={`button-demo-restaurant-${role.id}`}
                             >
-                              {t('landing.demo.exploreAs', { role: roleTitle })}
-                              <ArrowRight className="ml-1.5 h-3 w-3" />
+                              <a
+                                href={`/demo?role=${role.id}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                                  e.preventDefault();
+                                  handleDemoLogin(role.id);
+                                }}
+                              >
+                                {t('landing.demo.exploreAs', { role: roleTitle })}
+                                <ArrowRight className="ml-1.5 h-3 w-3" />
+                              </a>
                             </Button>
                           </CardContent>
                         </Card>

@@ -43,6 +43,7 @@ const RestaurantCleaner = lazy(() => import("@/pages/restaurant-cleaner"));
 const MarketingDashboard = lazy(() => import("@/pages/marketing-dashboard"));
 const HousekeepingDashboard = lazy(() => import("@/pages/housekeeping-dashboard"));
 const RestaurantCashier = lazy(() => import("@/pages/restaurant-cashier-dashboard"));
+const DemoLogin = lazy(() => import("@/pages/demo-login"));
 
 function PageLoader() {
   return (
@@ -192,6 +193,7 @@ const JoinTeam = lazy(() => import("@/pages/join-team"));
 const publicRoutes = [
   { path: "/", component: Welcome },
   { path: "/login", component: Login },
+  { path: "/demo", component: DemoLogin },
   { path: "/forgot-password", component: ForgotPassword },
   { path: "/reset-password", component: ResetPassword },
   { path: "/register", component: Register },
