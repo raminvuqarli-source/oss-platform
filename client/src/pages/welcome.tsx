@@ -254,7 +254,7 @@ export default function Welcome() {
       const { _demoToken: _t, ...user } = data;
       queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== "/api/auth/me" });
       queryClient.setQueryData(["/api/auth/me"], user);
-      setLocation("/dashboard");
+      setLocation(`/demo?role=${role}`);
     } catch (error) {
       toast({
         title: "Demo login failed",

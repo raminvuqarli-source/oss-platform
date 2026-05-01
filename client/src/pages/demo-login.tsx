@@ -1,14 +1,20 @@
-import { useEffect, useRef } from "react";
-import { useLocation, useSearch } from "wouter";
+import { useEffect, useRef, useState } from "react";
+import { useSearch } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest, setDemoToken } from "@/lib/queryClient";
+import { DashboardLayout } from "@/components/dashboard-layout";
+import DashboardRouter from "@/pages/dashboard-router";
 import { Building2, Loader2 } from "lucide-react";
+import { useLocation } from "wouter";
+
+type State = "loading" | "ready" | "error";
 
 export default function DemoLogin() {
   const [, setLocation] = useLocation();
   const search = useSearch();
   const queryClient = useQueryClient();
   const ran = useRef(false);
+  const [state, setState] = useState<State>("loading");
 
   useEffect(() => {
     if (ran.current) return;
@@ -31,22 +37,41 @@ export default function DemoLogin() {
         const { _demoToken: _t, ...user } = data;
         queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== "/api/auth/me" });
         queryClient.setQueryData(["/api/auth/me"], user);
-        setLocation("/dashboard");
+        setState("ready");
       })
       .catch(() => {
-        setLocation("/?demo_error=1");
+        setState("error");
+        setTimeout(() => setLocation("/?demo_error=1"), 1500);
       });
   }, [search, setLocation, queryClient]);
 
+  if (state === "loading") {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background">
+        <div className="flex aspect-square size-14 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg">
+          <Building2 className="size-7" />
+        </div>
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span className="text-sm font-medium">Loading demo…</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (state === "error") {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background">
+        <div className="flex items-center gap-2 text-destructive">
+          <span className="text-sm font-medium">Demo login failed. Redirecting…</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background">
-      <div className="flex aspect-square size-14 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg">
-        <Building2 className="size-7" />
-      </div>
-      <div className="flex items-center gap-2 text-muted-foreground">
-        <Loader2 className="h-5 w-5 animate-spin" />
-        <span className="text-sm font-medium">Loading demo…</span>
-      </div>
-    </div>
+    <DashboardLayout>
+      <DashboardRouter />
+    </DashboardLayout>
   );
 }
