@@ -498,11 +498,11 @@ function DashboardSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a
-                href="/dashboard"
+                href="/"
                 onClick={(e) => {
                   if (e.ctrlKey || e.metaKey || e.shiftKey) return;
                   e.preventDefault();
-                  navigate("/dashboard");
+                  navigate("/");
                   if (isMobile) setOpenMobile(false);
                 }}
               >
