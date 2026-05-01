@@ -478,14 +478,14 @@ function DashboardSidebar() {
     return location === item.url;
   };
 
+  const getItemHref = (item: MenuItem) => {
+    if (item.url.includes("?view=")) return item.url;
+    if ("view" in item && item.view !== undefined) return `/dashboard?view=${item.view}`;
+    return item.url;
+  };
+
   const handleNavClick = (item: MenuItem) => {
-    if (item.url.includes("?view=")) {
-      navigate(item.url);
-    } else if ("view" in item && item.view !== undefined) {
-      navigate(`/dashboard?view=${item.view}`);
-    } else {
-      navigate(item.url);
-    }
+    navigate(getItemHref(item));
     if (isMobile) {
       setOpenMobile(false);
     }
@@ -496,21 +496,24 @@ function DashboardSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              className="cursor-pointer"
-              onClick={() => {
-                navigate("/dashboard");
-                if (isMobile) setOpenMobile(false);
-              }}
-            >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <Building2 className="size-4" />
-              </div>
-              <div className="flex flex-col gap-0.5 leading-none">
-                <span className="font-semibold">O.S.S</span>
-                <span className="text-xs text-muted-foreground">{t("nav.smartHotel", "Smart Hotel")}</span>
-              </div>
+            <SidebarMenuButton size="lg" asChild>
+              <a
+                href="/dashboard"
+                onClick={(e) => {
+                  if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                  e.preventDefault();
+                  navigate("/dashboard");
+                  if (isMobile) setOpenMobile(false);
+                }}
+              >
+                <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                  <Building2 className="size-4" />
+                </div>
+                <div className="flex flex-col gap-0.5 leading-none">
+                  <span className="font-semibold">O.S.S</span>
+                  <span className="text-xs text-muted-foreground">{t("nav.smartHotel", "Smart Hotel")}</span>
+                </div>
+              </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -550,17 +553,25 @@ function DashboardSidebar() {
                     ) : (
                       <SidebarMenuButton
                         isActive={isItemActive(item)}
-                        className="cursor-pointer"
                         data-testid={item.testId}
-                        onClick={() => handleNavClick(item)}
+                        asChild
                       >
-                        <item.icon className="size-4" />
-                        <span>{item.title}</span>
-                        {item.badge !== undefined && item.badge > 0 && (
-                          <Badge variant="default" className="ml-auto text-xs">
-                            {item.badge}
-                          </Badge>
-                        )}
+                        <a
+                          href={getItemHref(item)}
+                          onClick={(e) => {
+                            if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                            e.preventDefault();
+                            handleNavClick(item);
+                          }}
+                        >
+                          <item.icon className="size-4" />
+                          <span>{item.title}</span>
+                          {item.badge !== undefined && item.badge > 0 && (
+                            <Badge variant="default" className="ml-auto text-xs">
+                              {item.badge}
+                            </Badge>
+                          )}
+                        </a>
                       </SidebarMenuButton>
                     )}
                   </SidebarMenuItem>

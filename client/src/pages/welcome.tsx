@@ -326,13 +326,17 @@ export default function Welcome() {
         <div className="flex items-center gap-1.5">
           <LanguageSwitcher />
           <ThemeToggle />
-          <Button variant="ghost" size="sm" onClick={() => setLocation("/login")} data-testid="button-header-login">
-            {t('auth.signIn')}
+          <Button variant="ghost" size="sm" asChild data-testid="button-header-login">
+            <a href="/login" onClick={(e) => { if (e.ctrlKey || e.metaKey || e.shiftKey) return; e.preventDefault(); setLocation("/login"); }}>
+              {t('auth.signIn')}
+            </a>
           </Button>
-          <Button size="sm" onClick={() => navigateToRegister()} data-testid="button-header-trial">
-            <span className="hidden sm:inline">{t('pricing.startFreeTrial')}</span>
-            <span className="sm:hidden">Trial</span>
-            <ArrowRight className="ml-1 h-3.5 w-3.5" />
+          <Button size="sm" asChild data-testid="button-header-trial">
+            <a href="/register-hotel" onClick={(e) => { if (e.ctrlKey || e.metaKey || e.shiftKey) return; e.preventDefault(); navigateToRegister(); }}>
+              <span className="hidden sm:inline">{t('pricing.startFreeTrial')}</span>
+              <span className="sm:hidden">Trial</span>
+              <ArrowRight className="ml-1 h-3.5 w-3.5" />
+            </a>
           </Button>
         </div>
       </header>
@@ -374,9 +378,11 @@ export default function Welcome() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-                <Button size="lg" onClick={() => navigateToRegister()} className="rounded-xl shadow-md shadow-primary/15" data-testid="button-start-trial">
-                  {t('landing.ctaManage')}
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                <Button size="lg" asChild className="rounded-xl shadow-md shadow-primary/15" data-testid="button-start-trial">
+                  <a href="/register-hotel" onClick={(e) => { if (e.ctrlKey || e.metaKey || e.shiftKey) return; e.preventDefault(); navigateToRegister(); }}>
+                    {t('landing.ctaManage')}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </a>
                 </Button>
                 <Button size="lg" variant="outline" onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })} className="rounded-xl" data-testid="button-hero-demo">
                   <Play className="mr-2 h-4 w-4" />
@@ -1610,12 +1616,16 @@ export default function Welcome() {
               <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.1]">{t('landing.readyToTransform')}</h2>
               <p className="text-lg text-muted-foreground max-w-xl mx-auto">{t('landing.readyToTransformDesc')}</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" onClick={() => navigateToRegister()} className="rounded-xl shadow-lg shadow-primary/20" data-testid="button-cta-register">
-                  {t('landing.registerYourHotel')}
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                <Button size="lg" asChild className="rounded-xl shadow-lg shadow-primary/20" data-testid="button-cta-register">
+                  <a href="/register-hotel" onClick={(e) => { if (e.ctrlKey || e.metaKey || e.shiftKey) return; e.preventDefault(); navigateToRegister(); }}>
+                    {t('landing.registerYourHotel')}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </a>
                 </Button>
-                <Button size="lg" variant="outline" onClick={() => setLocation("/login")} className="rounded-xl" data-testid="button-cta-login">
-                  {t('auth.signIn')}
+                <Button size="lg" variant="outline" asChild className="rounded-xl" data-testid="button-cta-login">
+                  <a href="/login" onClick={(e) => { if (e.ctrlKey || e.metaKey || e.shiftKey) return; e.preventDefault(); setLocation("/login"); }}>
+                    {t('auth.signIn')}
+                  </a>
                 </Button>
               </div>
               <p className="text-sm text-muted-foreground/70">
