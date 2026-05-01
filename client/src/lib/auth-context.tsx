@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient, getQueryFn } from "./queryClient";
+import { apiRequest, queryClient, getQueryFn, clearDemoToken } from "./queryClient";
 import type { User, UserRole } from "@shared/schema";
 import { initOneSignal, loginOneSignal, logoutOneSignal, setOneSignalTags, requestNotificationPermission } from "./onesignal";
 
@@ -116,6 +116,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await apiRequest("POST", "/api/auth/logout", {});
     },
     onSuccess: () => {
+      clearDemoToken();
       logoutOneSignal();
       setAuthUser(null);
       queryClient.setQueryData(["/api/auth/me"], null);

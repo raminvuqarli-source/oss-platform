@@ -26,7 +26,7 @@ import {
 import { X } from "lucide-react";
 import { SiApple, SiAndroid } from "react-icons/si";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient, setDemoToken } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { PlanCode } from "@shared/schema";
 import type { FeatureAccess, BusinessFeature } from "@shared/planFeatures";
@@ -248,8 +248,12 @@ export default function Welcome() {
     try {
       const response = await apiRequest("POST", "/api/auth/demo-login", { role });
       const data = await response.json();
+      if (data._demoToken) {
+        setDemoToken(data._demoToken);
+      }
+      const { _demoToken: _t, ...user } = data;
       queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== "/api/auth/me" });
-      queryClient.setQueryData(["/api/auth/me"], data);
+      queryClient.setQueryData(["/api/auth/me"], user);
       setLocation("/dashboard");
     } catch (error) {
       toast({

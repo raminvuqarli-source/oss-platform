@@ -17,6 +17,7 @@ import crypto from "crypto";
 import { applyPlanFeatures, PLAN_CODE_FEATURES } from "@shared/planFeatures";
 import { PLAN_TYPE_TO_CODE, type PlanType } from "@shared/schema";
 import { logger } from "../utils/logger";
+import { createDemoToken } from "../demoTokenStore";
 
 const PgStore = connectPgSimple(session);
 
@@ -747,6 +748,8 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
       req.session.demoSessionTenantId = demoSessionTenantId;
       req.session.touch();
 
+      const demoToken = createDemoToken(user.id, user.role, demoSessionTenantId);
+
       req.session.save((err) => {
         if (err) {
           logger.error({ err }, "Session save error during demo login");
@@ -755,7 +758,7 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
         logger.debug({ userId: user.id, role: user.role }, "Session saved after demo login");
         const { password: _pw, ...userWithoutPassword } = user;
         res.setHeader("Cache-Control", "no-store");
-        res.json(userWithoutPassword);
+        res.json({ ...userWithoutPassword, _demoToken: demoToken });
       });
     } catch (error: any) {
       logger.error({ err: error?.message, stack: error?.stack, code: error?.code, detail: error?.detail }, "Demo login error");

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, setDemoToken } from "@/lib/queryClient";
 import { Building2, Loader2 } from "lucide-react";
 
 export default function DemoLogin() {
@@ -25,8 +25,12 @@ export default function DemoLogin() {
     apiRequest("POST", "/api/auth/demo-login", { role })
       .then((res) => res.json())
       .then((data) => {
+        if (data._demoToken) {
+          setDemoToken(data._demoToken);
+        }
+        const { _demoToken: _t, ...user } = data;
         queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== "/api/auth/me" });
-        queryClient.setQueryData(["/api/auth/me"], data);
+        queryClient.setQueryData(["/api/auth/me"], user);
         setLocation("/dashboard");
       })
       .catch(() => {

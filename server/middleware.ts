@@ -4,6 +4,7 @@ import type { User, PlanType, Subscription } from "@shared/schema";
 import { type BusinessFeature, type SmartFeature, type SmartPlanType, hasSmartFeature } from "@shared/planFeatures";
 import { resolveOwnerIdFromUser, resolveUserFeatures } from "./utils/planResolver";
 import { logger } from "./utils/logger";
+import { resolveDemoToken } from "./demoTokenStore";
 
 const mwLogger = logger.child({ module: "middleware" });
 
@@ -17,6 +18,17 @@ declare global {
 }
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
+  const demoToken = req.headers["x-demo-token"] as string | undefined;
+  if (demoToken) {
+    const tokenData = resolveDemoToken(demoToken);
+    if (tokenData) {
+      req.session.userId = tokenData.userId;
+      req.session.role = tokenData.role;
+      req.session.demoSessionTenantId = tokenData.demoSessionTenantId;
+      return next();
+    }
+  }
+
   if (!req.session.userId) {
     return res.status(401).json({ message: "Unauthorized" });
   }
@@ -24,6 +36,17 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
 }
 
 export function authenticateRequest(req: Request, res: Response, next: NextFunction) {
+  const demoToken = req.headers["x-demo-token"] as string | undefined;
+  if (demoToken) {
+    const tokenData = resolveDemoToken(demoToken);
+    if (tokenData) {
+      req.session.userId = tokenData.userId;
+      req.session.role = tokenData.role;
+      req.session.demoSessionTenantId = tokenData.demoSessionTenantId;
+      return next();
+    }
+  }
+
   if (req.session.userId) {
     return next();
   }
