@@ -148,7 +148,9 @@
       "financialAnalytics": "Financiële Analyses",
       "financialAnalyticsDesc": "Omzet-, kosten-, salaris- en winstregistratie",
       "serviceRequests": "Serviceverzoeken",
-      "serviceRequestsDesc": "Gastverzoeken naadloos afgehandeld en bijgehouden"
+      "serviceRequestsDesc": "Gastverzoeken naadloos afgehandeld en bijgehouden",
+      "restaurantKds": "Restaurant & KDS (POS) systeem",
+      "restaurantKdsDesc": "Gasten bestellen eten vanuit hun kamer. Een kleurgecodeerde KDS houdt de keuken bij. Obers beheren de levering en kosten worden op de kamerrekening gezet."
     },
     "copyright": "O.S.S — Smart Hotel System. Alle rechten voorbehouden.",
     "howItWorks": {
@@ -230,6 +232,58 @@
       "bullet3": "Bedien slimme kamers en IoT-apparaten op afstand",
       "bullet4": "Volg omzet en prestatieanalyses in realtime",
       "bullet5": "Beheer personeelstaken en serviceverzoeken moeiteloos"
+    },
+    "demo": {
+      "housekeeping": {
+        "title": "Housekeeping",
+        "desc": "Live schoonmaaktakenpaneel met kamerstatusupdates, prioriteitsengine en inspectieflow."
+      },
+      "maintenance": {
+        "title": "Onderhoud",
+        "desc": "Volg reparatieverzoeken en technische servicetaken, wijs technici toe en stel prioriteitsniveaus in."
+      },
+      "exploreAs": "Verkennen als {{role}}",
+      "roles": {
+        "restaurantManager": {
+          "title": "Restaurantmanager",
+          "desc": "Beheert obers, keuken, bestellingen, financiën, schoonmaakploeg en al het restaurantpersoneel. Inclusief prestatiebeheer."
+        },
+        "kitchen": {
+          "title": "Keuken (KDS)",
+          "desc": "Real-time keukenweergave — bestellingen met tafelnummers, berichten aan obers en managers, taken toewijzen aan het schoonmaakteam."
+        },
+        "waiter": {
+          "title": "Ober",
+          "desc": "Gastenberichten, GELEVERD-knop bij bezorging van bestelling, taken sturen naar keuken en manager."
+        },
+        "restaurantCleaner": {
+          "title": "Restaurantreiniger",
+          "desc": "Ontvangt taken van manager, ober en keuken. Stuurt een foto met de KLAAR-knop wanneer klaar."
+        },
+        "restaurantCashier": {
+          "title": "Restaurantkas",
+          "desc": "Bijhouden van alle open tafelfacturen, afdrukken van bonnen, accepteren van betaling via contant/kaart/kamerrekening."
+        }
+      },
+      "moreRolesIncluded": "Meer rollen inbegrepen in uw abonnement:"
+    },
+    "restaurantEcosystem": "Restaurant Ecosysteem",
+    "whatsapp": {
+      "title": "WhatsApp-meldingen",
+      "subtitle": "Communiceer rechtstreeks via WhatsApp met uw gasten — boekingsbevestiging, aankomstherinnering, serviceberichten en meer.",
+      "f1Title": "Boekingsbevestiging",
+      "f1Desc": "Bij een nieuwe boeking wordt automatisch een WhatsApp-bericht naar de gast gestuurd.",
+      "f2Title": "Aankomstherinnering",
+      "f2Desc": "Een automatische herinnering wordt één dag voor de check-in datum naar de gast gestuurd.",
+      "f3Title": "Servicemelding",
+      "f3Desc": "Meldingen zoals kamergereedheid en bestelstatus worden onmiddellijk bezorgd.",
+      "f4Title": "Uitcheckinformatie",
+      "f4Desc": "Uitcheckprocedure en beoordelingsverzoek worden automatisch verzonden.",
+      "f5Title": "Persoonlijke berichten",
+      "f5Desc": "U kunt gepersonaliseerde WhatsApp-berichten sturen naar elke gast.",
+      "f6Title": "Bezorging volgen",
+      "f6Desc": "De bezorgstatus van elk verzonden bericht wordt in het systeem vastgelegd.",
+      "footerNote": "Deze service is beschikbaar als optionele add-on — kan worden geactiveerd voor elk abonnement."
     }
   },
   "pricing": {

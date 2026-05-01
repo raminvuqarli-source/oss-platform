@@ -148,7 +148,9 @@
       "financialAnalytics": "Financial Analytics",
       "financialAnalyticsDesc": "Revenue, expenses, payroll, and profit tracking",
       "serviceRequests": "Service Requests",
-      "serviceRequestsDesc": "Guest requests handled and tracked seamlessly"
+      "serviceRequestsDesc": "Guest requests handled and tracked seamlessly",
+      "restaurantKds": "Restaurant & KDS (POS) System",
+      "restaurantKdsDesc": "Guests order food from their room via phone. Color-coded real-time KDS keeps the kitchen on track. Waiters manage delivery through their own dashboard, and charges post directly to the guest's room folio."
     },
     "copyright": "O.S.S — Smart Hotel System. All rights reserved.",
     "howItWorks": {
@@ -230,6 +232,58 @@
       "bullet3": "Control smart rooms and IoT devices remotely",
       "bullet4": "Track revenue and performance analytics in real time",
       "bullet5": "Manage staff tasks and service requests effortlessly"
+    },
+    "demo": {
+      "housekeeping": {
+        "title": "Housekeeping",
+        "desc": "Live cleaning task board with room status updates, priority engine, and inspection flow. See how staff mark rooms clean in real-time."
+      },
+      "maintenance": {
+        "title": "Maintenance",
+        "desc": "Track repair requests and technical service tasks, assign technicians, set priority levels, and follow progress from open to resolved."
+      },
+      "exploreAs": "Explore as {{role}}",
+      "roles": {
+        "restaurantManager": {
+          "title": "Restaurant Manager",
+          "desc": "Manages waiters, kitchen, orders, finances, cleaning crew and all restaurant staff. Includes performance tracking."
+        },
+        "kitchen": {
+          "title": "Kitchen (KDS)",
+          "desc": "Real-time Kitchen Display — orders with table numbers, messaging waiters and managers, assigning tasks to the cleaning crew."
+        },
+        "waiter": {
+          "title": "Waiter",
+          "desc": "Guest messaging, DELIVERED button when order is delivered, sending tasks to the kitchen and manager."
+        },
+        "restaurantCleaner": {
+          "title": "Restaurant Cleaner",
+          "desc": "Receives tasks from manager, waiter, and kitchen. Sends a photo with the READY button when done."
+        },
+        "restaurantCashier": {
+          "title": "Restaurant Cashier",
+          "desc": "Tracks all open table bills, prints receipts, accepts payment by cash/card/room charge, and integrates with hotel finance."
+        }
+      },
+      "moreRolesIncluded": "More roles included in your subscription:"
+    },
+    "restaurantEcosystem": "Restaurant Ecosystem",
+    "whatsapp": {
+      "title": "WhatsApp Notifications",
+      "subtitle": "Communicate with your guests directly via WhatsApp — booking confirmation, arrival reminders, service messages and more.",
+      "f1Title": "Booking Confirmation",
+      "f1Desc": "An automatic WhatsApp message is sent to the guest when a new reservation is made.",
+      "f2Title": "Arrival Reminder",
+      "f2Desc": "An automatic reminder is sent to the guest one day before their check-in date.",
+      "f3Title": "Service Notification",
+      "f3Desc": "Notifications like room readiness and order status are delivered instantly.",
+      "f4Title": "Checkout Info",
+      "f4Desc": "Checkout procedure and rating request are sent automatically.",
+      "f5Title": "Personal Messages",
+      "f5Desc": "You can send personalized WhatsApp messages to any guest.",
+      "f6Title": "Delivery Tracking",
+      "f6Desc": "The delivery status of every sent message is recorded in the system.",
+      "footerNote": "This service is available as an optional add-on — can be activated for any plan."
     }
   },
   "pricing": {

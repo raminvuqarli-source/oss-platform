@@ -148,7 +148,9 @@
       "financialAnalytics": "Analíticas Financieras",
       "financialAnalyticsDesc": "Seguimiento de ingresos, gastos, nóminas y beneficios",
       "serviceRequests": "Solicitudes de Servicio",
-      "serviceRequestsDesc": "Solicitudes de huéspedes gestionadas y rastreadas sin problemas"
+      "serviceRequestsDesc": "Solicitudes de huéspedes gestionadas y rastreadas sin problemas",
+      "restaurantKds": "Sistema de Restaurante y KDS (POS)",
+      "restaurantKdsDesc": "Los huéspedes piden comida desde su habitación. Un KDS en tiempo real gestiona la cocina. Los camareros gestionan la entrega y los cargos se añaden a la cuenta de la habitación."
     },
     "copyright": "O.S.S — Smart Hotel System. Todos los derechos reservados.",
     "howItWorks": {
@@ -230,6 +232,58 @@
       "bullet3": "Controle habitaciones inteligentes y dispositivos IoT de forma remota",
       "bullet4": "Rastree ingresos y análisis de rendimiento en tiempo real",
       "bullet5": "Gestione tareas del personal y solicitudes de servicio sin esfuerzo"
+    },
+    "demo": {
+      "housekeeping": {
+        "title": "Limpieza",
+        "desc": "Panel de tareas de limpieza en vivo con actualizaciones de estado de habitaciones, motor de prioridad y flujo de inspección."
+      },
+      "maintenance": {
+        "title": "Mantenimiento",
+        "desc": "Realice un seguimiento de las solicitudes de reparación y tareas de servicio técnico, asigne técnicos y establezca niveles de prioridad."
+      },
+      "exploreAs": "Explorar como {{role}}",
+      "roles": {
+        "restaurantManager": {
+          "title": "Gerente de Restaurante",
+          "desc": "Gestiona camareros, cocina, pedidos, finanzas, equipo de limpieza y todo el personal del restaurante. Incluye seguimiento del rendimiento."
+        },
+        "kitchen": {
+          "title": "Cocina (KDS)",
+          "desc": "Pantalla de cocina en tiempo real — pedidos con números de mesa, mensajes a camareros y gerentes, asignación de tareas al equipo de limpieza."
+        },
+        "waiter": {
+          "title": "Camarero",
+          "desc": "Mensajería con huéspedes, botón ENTREGADO al entregar el pedido, envío de tareas a la cocina y al gerente."
+        },
+        "restaurantCleaner": {
+          "title": "Limpiador de Restaurante",
+          "desc": "Recibe tareas del gerente, camarero y cocina. Envía una foto con el botón LISTO cuando termina."
+        },
+        "restaurantCashier": {
+          "title": "Cajero de Restaurante",
+          "desc": "Realiza un seguimiento de todas las facturas abiertas de la mesa, imprime recibos, acepta pago en efectivo/tarjeta/cargo a la habitación."
+        }
+      },
+      "moreRolesIncluded": "Más roles incluidos en tu suscripción:"
+    },
+    "restaurantEcosystem": "Ecosistema de Restaurante",
+    "whatsapp": {
+      "title": "Notificaciones de WhatsApp",
+      "subtitle": "Comuníquese con sus huéspedes directamente a través de WhatsApp: confirmación de reserva, recordatorios de llegada, mensajes de servicio y más.",
+      "f1Title": "Confirmación de reserva",
+      "f1Desc": "Se envía un mensaje de WhatsApp automático al huésped cuando se realiza una nueva reserva.",
+      "f2Title": "Recordatorio de llegada",
+      "f2Desc": "Se envía un recordatorio automático al huésped un día antes de la fecha de entrada.",
+      "f3Title": "Notificación de servicio",
+      "f3Desc": "Las notificaciones como la preparación de la habitación y el estado del pedido se entregan de inmediato.",
+      "f4Title": "Información de salida",
+      "f4Desc": "El procedimiento de salida y la solicitud de valoración se envían automáticamente.",
+      "f5Title": "Mensajes personales",
+      "f5Desc": "Puede enviar mensajes de WhatsApp personalizados a cualquier huésped.",
+      "f6Title": "Seguimiento de entrega",
+      "f6Desc": "El estado de entrega de cada mensaje enviado se registra en el sistema.",
+      "footerNote": "Este servicio está disponible como complemento opcional — puede activarse para cualquier plan."
     }
   },
   "pricing": {

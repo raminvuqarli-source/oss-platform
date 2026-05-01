@@ -148,7 +148,9 @@
       "financialAnalytics": "Finanzanalysen",
       "financialAnalyticsDesc": "Umsatz-, Ausgaben-, Gehalts- und Gewinnverfolgung",
       "serviceRequests": "Serviceanfragen",
-      "serviceRequestsDesc": "Gästeanfragen nahtlos bearbeitet und verfolgt"
+      "serviceRequestsDesc": "Gästeanfragen nahtlos bearbeitet und verfolgt",
+      "restaurantKds": "Restaurant & KDS (POS) System",
+      "restaurantKdsDesc": "Gäste bestellen Essen aus dem Zimmer. Ein farbcodiertes Echtzeit-KDS verwaltet die Küche. Kellner verwalten die Lieferung, Gebühren werden auf das Zimmerkonto gebucht."
     },
     "copyright": "O.S.S — Smart Hotel System. Alle Rechte vorbehalten.",
     "howItWorks": {
@@ -230,6 +232,58 @@
       "bullet3": "Smart Rooms und IoT-Geräte fernsteuern",
       "bullet4": "Umsatz und Leistungsanalysen in Echtzeit verfolgen",
       "bullet5": "Personalaufgaben und Serviceanfragen mühelos verwalten"
+    },
+    "demo": {
+      "housekeeping": {
+        "title": "Housekeeping",
+        "desc": "Live-Reinigungsaufgaben mit Zimmerstatusaktualisierungen, Prioritätsmodul und Inspektionsablauf. Sehen Sie, wie das Personal Zimmer in Echtzeit sauber meldet."
+      },
+      "maintenance": {
+        "title": "Wartung",
+        "desc": "Verfolgen Sie Reparaturanfragen und technische Aufgaben, weisen Sie Techniker zu und verfolgen Sie den Fortschritt."
+      },
+      "exploreAs": "Als {{role}} erkunden",
+      "roles": {
+        "restaurantManager": {
+          "title": "Restaurantmanager",
+          "desc": "Verwaltet Kellner, Küche, Bestellungen, Finanzen, Reinigungsteam und alle Restaurantmitarbeiter. Enthält Leistungsverfolgung."
+        },
+        "kitchen": {
+          "title": "Küche (KDS)",
+          "desc": "Echtzeit-Küchenanzeige — Bestellungen mit Tischnummern, Nachrichten an Kellner und Manager, Aufgaben für Reinigungsteam."
+        },
+        "waiter": {
+          "title": "Kellner",
+          "desc": "Gästenachrichten, GELIEFERT-Schaltfläche bei der Bestellübergabe, Aufgaben an Küche und Manager senden."
+        },
+        "restaurantCleaner": {
+          "title": "Restaurantreiniger",
+          "desc": "Erhält Aufgaben vom Manager, Kellner und der Küche. Sendet bei Erledigung ein Foto mit der FERTIG-Taste."
+        },
+        "restaurantCashier": {
+          "title": "Restaurantkassierer",
+          "desc": "Verfolgt alle offenen Tischrechnungen, druckt Quittungen, akzeptiert Zahlung per Bargeld/Karte/Zimmerkonto."
+        }
+      },
+      "moreRolesIncluded": "Weitere Rollen in Ihrem Abonnement enthalten:"
+    },
+    "restaurantEcosystem": "Restaurant-Ökosystem",
+    "whatsapp": {
+      "title": "WhatsApp-Benachrichtigungen",
+      "subtitle": "Kommunizieren Sie direkt über WhatsApp mit Ihren Gästen — Buchungsbestätigung, Ankunftserinnerungen, Servicenachrichten und mehr.",
+      "f1Title": "Buchungsbestätigung",
+      "f1Desc": "Bei einer neuen Buchung wird dem Gast automatisch eine WhatsApp-Nachricht gesendet.",
+      "f2Title": "Ankunftserinnerung",
+      "f2Desc": "Am Tag vor dem Check-in wird dem Gast eine automatische Erinnerung geschickt.",
+      "f3Title": "Dienstbenachrichtigung",
+      "f3Desc": "Benachrichtigungen wie Zimmerbereitschaft und Bestellstatus werden sofort zugestellt.",
+      "f4Title": "Abreiseinformation",
+      "f4Desc": "Abreiseverfahren und Bewertungsanfrage werden automatisch gesendet.",
+      "f5Title": "Persönliche Nachrichten",
+      "f5Desc": "Sie können jedem Gast personalisierte WhatsApp-Nachrichten senden.",
+      "f6Title": "Lieferverfolgung",
+      "f6Desc": "Der Lieferstatus jeder gesendeten Nachricht wird im System erfasst.",
+      "footerNote": "Dieser Dienst ist als optionales Add-on verfügbar — kann für jeden Plan aktiviert werden."
     }
   },
   "pricing": {

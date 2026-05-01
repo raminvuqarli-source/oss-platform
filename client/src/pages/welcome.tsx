@@ -98,16 +98,16 @@ const DEMO_INFO_ROLES = [
     icon: Sparkles,
     colorClass: "text-teal-500 dark:text-teal-400",
     bgClass: "bg-teal-500/10",
-    title: "Housekeeping",
-    desc: "Live cleaning task board with room status updates, priority engine, and inspection flow. See how staff mark rooms clean in real-time.",
+    titleKey: "landing.demo.housekeeping.title",
+    descKey: "landing.demo.housekeeping.desc",
   },
   {
     id: "maintenance",
     icon: Wrench,
     colorClass: "text-slate-500 dark:text-slate-400",
     bgClass: "bg-slate-500/10",
-    title: "Maintenance",
-    desc: "Track repair requests and technical service tasks, assign technicians, set priority levels, and follow progress from open to resolved.",
+    titleKey: "landing.demo.maintenance.title",
+    descKey: "landing.demo.maintenance.desc",
   },
 ];
 
@@ -117,40 +117,40 @@ const RESTAURANT_DEMO_ROLES = [
     icon: UtensilsCrossed,
     colorClass: "text-orange-500 dark:text-orange-400",
     bgClass: "bg-orange-500/10",
-    title: "Restoran Meneceri",
-    desc: "Qarsonları, mətbəxi, sifarişləri, maliyyəni, təmizlik ekipini və bütün restoran işçilərini idarə edir. Performans izlənməsi daxildir.",
+    titleKey: "landing.demo.roles.restaurantManager.title",
+    descKey: "landing.demo.roles.restaurantManager.desc",
   },
   {
     id: "kitchen",
     icon: ChefHat,
     colorClass: "text-red-500 dark:text-red-400",
     bgClass: "bg-red-500/10",
-    title: "Mətbəx (KDS)",
-    desc: "Real-vaxt Mətbəx Ekranı — masa nömrəsi ilə sifarişlər, qarson və menecerə mesaj, təmizlik ekipinə tapşırıq vermək imkanı.",
+    titleKey: "landing.demo.roles.kitchen.title",
+    descKey: "landing.demo.roles.kitchen.desc",
   },
   {
     id: "waiter",
     icon: Utensils,
     colorClass: "text-amber-500 dark:text-amber-400",
     bgClass: "bg-amber-500/10",
-    title: "Qarson",
-    desc: "Qonaqla məsajlaşma, sifarişi çatdırdıqda TƏHVİL VERİLDİ düyməsi, mətbəxə və menecerə tapşırıq göndərmək.",
+    titleKey: "landing.demo.roles.waiter.title",
+    descKey: "landing.demo.roles.waiter.desc",
   },
   {
     id: "restaurant_cleaner",
     icon: Sparkles,
     colorClass: "text-cyan-500 dark:text-cyan-400",
     bgClass: "bg-cyan-500/10",
-    title: "Restoran Təmizlikçisi",
-    desc: "Meneterdən, qarsondan, mətbəxdən tapşırıq qəbul edir. Tamamlandıqda HAZIRDIR düyməsi ilə şəkil göndərir.",
+    titleKey: "landing.demo.roles.restaurantCleaner.title",
+    descKey: "landing.demo.roles.restaurantCleaner.desc",
   },
   {
     id: "restaurant_cashier",
     icon: Wallet,
     colorClass: "text-green-500 dark:text-green-400",
     bgClass: "bg-green-500/10",
-    title: "Restoran Kassası",
-    desc: "Bütün masaların açıq hesablarını izləyir, hesabı çap edir, nağd/kart/otaq hesabı ilə ödəniş qəbul edir, hotel maliyyə zəncirinə daxil edir.",
+    titleKey: "landing.demo.roles.restaurantCashier.title",
+    descKey: "landing.demo.roles.restaurantCashier.desc",
   },
 ];
 
@@ -466,15 +466,8 @@ export default function Welcome() {
                   { icon: CalendarCheck, titleKey: 'landing.featureDetails.bookingManagement', descKey: 'landing.featureDetails.bookingManagementDesc', tid: 'booking-management' },
                   { icon: BarChart3, titleKey: 'landing.featureDetails.financialAnalytics', descKey: 'landing.featureDetails.financialAnalyticsDesc', tid: 'financial-analytics' },
                   { icon: HeadphonesIcon, titleKey: 'landing.featureDetails.serviceRequests', descKey: 'landing.featureDetails.serviceRequestsDesc', tid: 'service-requests' },
-                  {
-                    icon: UtensilsCrossed,
-                    title: 'Restaurant & KDS (POS) System',
-                    desc: 'Guests order food from their room via phone. Color-coded real-time KDS keeps the kitchen on track. Waiters manage delivery through their own dashboard, and charges post directly to the guest\'s room folio.',
-                    tid: 'restaurant-kds',
-                  },
+                  { icon: UtensilsCrossed, titleKey: 'landing.featureDetails.restaurantKds', descKey: 'landing.featureDetails.restaurantKdsDesc', tid: 'restaurant-kds' },
                 ].map((f) => {
-                  const title = (f as any).title;
-                  const desc  = (f as any).desc;
                   const FIcon = f.icon;
                   return (
                     <motion.div key={f.tid} variants={fadeUp}>
@@ -482,8 +475,8 @@ export default function Welcome() {
                         <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/15 group-hover:scale-110 transition-all duration-300">
                           <FIcon className="h-6 w-6 text-primary" />
                         </div>
-                        <h3 className="font-heading font-semibold text-base mb-2">{title || t((f as any).titleKey)}</h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed">{desc || t((f as any).descKey)}</p>
+                        <h3 className="font-heading font-semibold text-base mb-2">{t((f as any).titleKey)}</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{t((f as any).descKey)}</p>
                       </div>
                     </motion.div>
                   );
@@ -830,6 +823,54 @@ export default function Welcome() {
                 </Badge>
               </div>
 
+              {/* WHATSAPP NOTIFICATIONS ADD-ON — shown above CORE plans */}
+              <div className="space-y-6" data-testid="pricing-whatsapp">
+                <div className="text-center space-y-3">
+                  <Badge variant="secondary" className="text-xs rounded-full">{t('pricing.optionalAddon')}</Badge>
+                  <div className="flex items-center justify-center gap-2">
+                    <MessageCircle className="h-5 w-5 text-green-500" />
+                    <h3 className="font-heading text-2xl font-bold">{t('landing.whatsapp.title', 'WhatsApp Notifications')}</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground max-w-lg mx-auto">
+                    {t('landing.whatsapp.subtitle')}
+                  </p>
+                </div>
+
+                <div className="max-w-3xl mx-auto">
+                  <Card className="border-green-500/20 bg-gradient-to-br from-green-500/5 via-transparent to-transparent shadow-lg shadow-green-500/5">
+                    <CardContent className="p-8">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        {[
+                          { icon: '📨', titleKey: 'landing.whatsapp.f1Title', descKey: 'landing.whatsapp.f1Desc' },
+                          { icon: '🔔', titleKey: 'landing.whatsapp.f2Title', descKey: 'landing.whatsapp.f2Desc' },
+                          { icon: '🛎️', titleKey: 'landing.whatsapp.f3Title', descKey: 'landing.whatsapp.f3Desc' },
+                          { icon: '✅', titleKey: 'landing.whatsapp.f4Title', descKey: 'landing.whatsapp.f4Desc' },
+                          { icon: '💬', titleKey: 'landing.whatsapp.f5Title', descKey: 'landing.whatsapp.f5Desc' },
+                          { icon: '📊', titleKey: 'landing.whatsapp.f6Title', descKey: 'landing.whatsapp.f6Desc' },
+                        ].map((item) => (
+                          <div key={item.titleKey} className="flex gap-3 items-start">
+                            <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-lg flex-shrink-0">
+                              {item.icon}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-sm">{t(item.titleKey)}</p>
+                              <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{t(item.descKey)}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="mt-6 pt-5 border-t border-green-500/20 flex items-center justify-center gap-2">
+                        <MessageCircle className="h-4 w-4 text-green-500" />
+                        <p className="text-sm text-muted-foreground text-center">
+                          {t('landing.whatsapp.footerNote')}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
               <div className="space-y-8" data-testid="pricing-core">
                 <div className="text-center space-y-2">
                   <div className="flex items-center justify-center gap-2">
@@ -1172,54 +1213,6 @@ export default function Welcome() {
                 )}
               </div>
 
-              {/* WHATSAPP NOTIFICATIONS ADD-ON */}
-              <div className="space-y-6" data-testid="pricing-whatsapp">
-                <div className="text-center space-y-3">
-                  <Badge variant="secondary" className="text-xs rounded-full">{t('pricing.optionalAddon')}</Badge>
-                  <div className="flex items-center justify-center gap-2">
-                    <MessageCircle className="h-5 w-5 text-green-500" />
-                    <h3 className="font-heading text-2xl font-bold">WhatsApp Notifications</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground max-w-lg mx-auto">
-                    Qonaqlarınızla birbaşa WhatsApp üzərindən əlaqə saxlayın — rezervasiya təsdiqi, gəliş xatırlatması, xidmət mesajları və daha çox.
-                  </p>
-                </div>
-
-                <div className="max-w-3xl mx-auto">
-                  <Card className="border-green-500/20 bg-gradient-to-br from-green-500/5 via-transparent to-transparent shadow-lg shadow-green-500/5">
-                    <CardContent className="p-8">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        {[
-                          { icon: '📨', title: 'Rezervasiya Təsdiqi', desc: 'Yeni sifariş gəldikdə qonağa avtomatik WhatsApp mesajı göndərilir.' },
-                          { icon: '🔔', title: 'Gəliş Xatırlatması', desc: 'Check-in gününə bir gün qalmış qonağa avtomatik xatırlatma göndərilir.' },
-                          { icon: '🛎️', title: 'Xidmət Bildirişi', desc: 'Otaq hazırlığı, sifariş statusu kimi bildirişlər anında çatdırılır.' },
-                          { icon: '✅', title: 'Çıxış Məlumatı', desc: 'Check-out proseduru və qiymətləndirmə sorğusu avtomatik göndərilir.' },
-                          { icon: '💬', title: 'Fərdi Mesajlar', desc: 'Hər hansı bir qonağa personallaşdırılmış WhatsApp mesajı göndərə bilərsiniz.' },
-                          { icon: '📊', title: 'Çatdırılma İzləmə', desc: 'Göndərilən hər mesajın çatdırılma statusu sistemdə qeydə alınır.' },
-                        ].map((item) => (
-                          <div key={item.title} className="flex gap-3 items-start">
-                            <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-lg flex-shrink-0">
-                              {item.icon}
-                            </div>
-                            <div>
-                              <p className="font-semibold text-sm">{item.title}</p>
-                              <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{item.desc}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="mt-6 pt-5 border-t border-green-500/20 flex items-center justify-center gap-2">
-                        <MessageCircle className="h-4 w-4 text-green-500" />
-                        <p className="text-sm text-muted-foreground text-center">
-                          Bu xidmət isteğe bağlı əlavə kimi mövcuddur — hər plan üçün aktivləşdirilə bilər.
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-
               {/* PRICING CALCULATOR */}
               <AnimatedSection>
                 <div className="max-w-2xl mx-auto" data-testid="pricing-calculator">
@@ -1516,10 +1509,12 @@ export default function Welcome() {
 
               {/* Additional demo role cards */}
               <div className="mt-6 space-y-4">
-                <p className="text-center text-sm text-muted-foreground font-medium">More roles included in your subscription:</p>
+                <p className="text-center text-sm text-muted-foreground font-medium">{t('landing.demo.moreRolesIncluded', 'More roles included in your subscription:')}</p>
                 <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {DEMO_INFO_ROLES.map((role) => {
                     const Icon = role.icon;
+                    const roleTitle = t(role.titleKey);
+                    const roleDesc = t(role.descKey);
                     return (
                       <motion.div key={role.id} variants={fadeUp}>
                         <Card
@@ -1532,9 +1527,9 @@ export default function Welcome() {
                               <div className={`w-10 h-10 rounded-xl ${role.bgClass} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                                 <Icon className={`h-5 w-5 ${role.colorClass}`} />
                               </div>
-                              <h3 className="font-heading font-semibold text-sm">{role.title}</h3>
+                              <h3 className="font-heading font-semibold text-sm">{roleTitle}</h3>
                             </div>
-                            <p className="text-xs text-muted-foreground leading-relaxed">{role.desc}</p>
+                            <p className="text-xs text-muted-foreground leading-relaxed">{roleDesc}</p>
                             <Button
                               className="w-full rounded-xl"
                               variant="outline"
@@ -1542,7 +1537,7 @@ export default function Welcome() {
                               onClick={(e) => { e.stopPropagation(); handleDemoLogin(role.id); }}
                               data-testid={`button-demo-info-${role.id}`}
                             >
-                              {role.title} kimi kəşf edin
+                              {t('landing.demo.exploreAs', { role: roleTitle })}
                               <ArrowRight className="ml-1.5 h-3 w-3" />
                             </Button>
                           </CardContent>
@@ -1559,13 +1554,15 @@ export default function Welcome() {
                   <div className="flex-1 h-px bg-border/50" />
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20">
                     <UtensilsCrossed className="h-3.5 w-3.5 text-orange-500" />
-                    <span className="text-xs font-semibold text-orange-600 dark:text-orange-400">Restoran Ekosistemi</span>
+                    <span className="text-xs font-semibold text-orange-600 dark:text-orange-400">{t('landing.restaurantEcosystem', 'Restaurant Ecosystem')}</span>
                   </div>
                   <div className="flex-1 h-px bg-border/50" />
                 </div>
                 <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {RESTAURANT_DEMO_ROLES.map((role) => {
                     const Icon = role.icon;
+                    const roleTitle = t(role.titleKey);
+                    const roleDesc = t(role.descKey);
                     return (
                       <motion.div key={role.id} variants={fadeUp}>
                         <Card
@@ -1578,9 +1575,9 @@ export default function Welcome() {
                               <div className={`w-10 h-10 rounded-xl ${role.bgClass} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                                 <Icon className={`h-5 w-5 ${role.colorClass}`} />
                               </div>
-                              <h3 className="font-heading font-semibold text-sm">{role.title}</h3>
+                              <h3 className="font-heading font-semibold text-sm">{roleTitle}</h3>
                             </div>
-                            <p className="text-xs text-muted-foreground leading-relaxed">{role.desc}</p>
+                            <p className="text-xs text-muted-foreground leading-relaxed">{roleDesc}</p>
                             <Button
                               className="w-full rounded-xl"
                               variant="outline"
@@ -1588,7 +1585,7 @@ export default function Welcome() {
                               onClick={(e) => { e.stopPropagation(); handleDemoLogin(role.id); }}
                               data-testid={`button-demo-restaurant-${role.id}`}
                             >
-                              {role.title} kimi kəşf edin
+                              {t('landing.demo.exploreAs', { role: roleTitle })}
                               <ArrowRight className="ml-1.5 h-3 w-3" />
                             </Button>
                           </CardContent>

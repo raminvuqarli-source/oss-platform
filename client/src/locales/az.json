@@ -148,7 +148,9 @@
       "financialAnalytics": "Maliyyə Analitikası",
       "financialAnalyticsDesc": "Gəlir, xərclər, əmək haqqı və mənfəət izləmə",
       "serviceRequests": "Xidmət Sorğuları",
-      "serviceRequestsDesc": "Qonaq sorğuları rahat şəkildə idarə edilir və izlənilir"
+      "serviceRequestsDesc": "Qonaq sorğuları rahat şəkildə idarə edilir və izlənilir",
+      "restaurantKds": "Restoran & KDS (POS) Sistemi",
+      "restaurantKdsDesc": "Qonaqlar otaqdan sifariş verir. Rəngli KDS mətbəxi real vaxtda izləyir. Qarsonlar öz panellərindən çatdırmanı idarə edir. Ödəniş avtomatik otaq hesabına əlavə edilir."
     },
     "copyright": "O.S.S — Ağıllı Otel Sistemi. Bütün hüquqlar qorunur.",
     "howItWorks": {
@@ -230,6 +232,58 @@
       "bullet3": "Ağıllı otaqları və IoT cihazlarını uzaqdan idarə edin",
       "bullet4": "Gəlir və performans analitikasını real vaxtda izləyin",
       "bullet5": "Heyət tapşırıqlarını və xidmət sorğularını asanlıqla idarə edin"
+    },
+    "demo": {
+      "housekeeping": {
+        "title": "Ev Təmizliyi",
+        "desc": "Canlı təmizlik tapşırıqları, otaq statusu yeniləmələri, prioritet mühərriki və yoxlama axışı. Heyətin otaqları necə real vaxtda təmiz etdiyini görün."
+      },
+      "maintenance": {
+        "title": "Texniki Xidmət",
+        "desc": "Təmir sorğularını və texniki xidmət tapşırıqlarını izləyin, texnikləri təyin edin, prioritetləri müəyyənləşdirin."
+      },
+      "exploreAs": "{{role}} kimi kəşf edin",
+      "roles": {
+        "restaurantManager": {
+          "title": "Restoran Meneceri",
+          "desc": "Qarsonları, mətbəxi, sifarişləri, maliyyəni, təmizlik ekipini və bütün restoran işçilərini idarə edir. Performans izlənməsi daxildir."
+        },
+        "kitchen": {
+          "title": "Mətbəx (KDS)",
+          "desc": "Real-vaxt Mətbəx Ekranı — masa nömrəsi ilə sifarişlər, qarson və menecerə mesaj, təmizlik ekipinə tapşırıq vermək imkanı."
+        },
+        "waiter": {
+          "title": "Qarson",
+          "desc": "Qonaqla məsajlaşma, sifarişi çatdırdıqda TƏHVİL VERİLDİ düyməsi, mətbəxə və menecerə tapşırıq göndərmək."
+        },
+        "restaurantCleaner": {
+          "title": "Restoran Təmizlikçisi",
+          "desc": "Meneterdən, qarsondan, mətbəxdən tapşırıq qəbul edir. Tamamlandıqda HAZIRDIR düyməsi ilə şəkil göndərir."
+        },
+        "restaurantCashier": {
+          "title": "Restoran Kassası",
+          "desc": "Bütün masaların açıq hesablarını izləyir, hesabı çap edir, nağd/kart/otaq hesabı ilə ödəniş qəbul edir, hotel maliyyə zəncirinə daxil edir."
+        }
+      },
+      "moreRolesIncluded": "Abunəliyinizə daxil olan əlavə rollar:"
+    },
+    "restaurantEcosystem": "Restoran Ekosistemi",
+    "whatsapp": {
+      "title": "WhatsApp Bildirişləri",
+      "subtitle": "Qonaqlarınızla birbaşa WhatsApp üzərindən əlaqə saxlayın — rezervasiya təsdiqi, gəliş xatırlatması, xidmət mesajları və daha çox.",
+      "f1Title": "Rezervasiya Təsdiqi",
+      "f1Desc": "Yeni rezervasiya gəldikdə qonağa avtomatik WhatsApp mesajı göndərilir.",
+      "f2Title": "Gəliş Xatırlatması",
+      "f2Desc": "Check-in gününə bir gün qalmış qonağa avtomatik xatırlatma göndərilir.",
+      "f3Title": "Xidmət Bildirişi",
+      "f3Desc": "Otaq hazırlığı, sifariş statusu kimi bildirişlər anında çatdırılır.",
+      "f4Title": "Çıxış Məlumatı",
+      "f4Desc": "Check-out proseduru və qiymətləndirmə sorğusu avtomatik göndərilir.",
+      "f5Title": "Fərdi Mesajlar",
+      "f5Desc": "Hər hansı bir qonağa personallaşdırılmış WhatsApp mesajı göndərə bilərsiniz.",
+      "f6Title": "Çatdırılma İzləmə",
+      "f6Desc": "Göndərilən hər mesajın çatdırılma statusu sistemdə qeydə alınır.",
+      "footerNote": "Bu xidmət isteğe bağlı əlavə kimi mövcuddur — hər plan üçün aktivləşdirilə bilər."
     }
   },
   "pricing": {
