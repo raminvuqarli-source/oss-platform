@@ -74,9 +74,9 @@ function RoomsView() {
       apiRequest("PATCH", `/api/units/${id}/status`, { status }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["/api/units/status"] });
-      toast({ title: "Otaq statusu yeniləndi" });
+      toast({ title: t("hkDash.statusUpdated", "Room status updated") });
     },
-    onError: () => toast({ title: "Xəta baş verdi", variant: "destructive" }),
+    onError: () => toast({ title: t("hkDash.error", "An error occurred"), variant: "destructive" }),
   });
 
   if (isLoading) {
@@ -175,7 +175,7 @@ function RoomsView() {
                       data-testid={`hk-btn-start-${unit.id}`}
                     >
                       <RefreshCw className="h-3.5 w-3.5 mr-1" />
-                      Temizlənir
+                      {t("hkDash.startCleaning", "Cleaning")}
                     </Button>
                   )}
                   <Button
@@ -186,7 +186,7 @@ function RoomsView() {
                     data-testid={`hk-btn-ready-${unit.id}`}
                   >
                     <CheckCircle className="h-3.5 w-3.5 mr-1" />
-                    ✅ HAZIRDIR
+                    {t("hkDash.markReady", "READY")}
                   </Button>
                 </div>
               )}
@@ -483,11 +483,11 @@ function HkMessagesView() {
 }
 
 const VIEWS = [
-  { id: "rooms",    label: "Otaqlar",     icon: BedDouble },
-  { id: "tasks",    label: "Tapşırıqlar", icon: ClipboardList },
-  { id: "rating",   label: "Reytinqim",   icon: Star },
-  { id: "calendar", label: "Təqvim",      icon: CalendarDays },
-  { id: "messages", label: "Mesajlar",    icon: MessageSquare },
+  { id: "rooms",    labelKey: "hkDash.rooms",    icon: BedDouble },
+  { id: "tasks",    labelKey: "hkDash.tasks",    icon: ClipboardList },
+  { id: "rating",   labelKey: "hkDash.rating",   icon: Star },
+  { id: "calendar", labelKey: "hkDash.calendar", icon: CalendarDays },
+  { id: "messages", labelKey: "hkDash.messages", icon: MessageSquare },
 ];
 
 export default function HousekeepingDashboard() {
@@ -520,7 +520,7 @@ export default function HousekeepingDashboard() {
               data-testid={`hk-tab-${v.id}`}
             >
               <Icon className="h-3.5 w-3.5" />
-              {v.label}
+              {t(v.labelKey)}
             </Button>
           );
         })}

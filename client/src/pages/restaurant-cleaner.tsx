@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/lib/auth-context";
@@ -31,14 +32,11 @@ const statusColor: Record<string, string> = {
   in_progress: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
   done: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200",
 };
-const statusLabel: Record<string, string> = {
-  pending: "Gözləyir",
-  in_progress: "Davam edir",
-  done: "Tamamlandı",
-};
+// statusLabel now uses t() inline
 
 export default function RestaurantCleaner() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -59,9 +57,9 @@ export default function RestaurantCleaner() {
       queryClient.invalidateQueries({ queryKey: ["/api/restaurant/cleaning-tasks"] });
       setShowPhotoDialog(null);
       setPhotoUrl("");
-      toast({ title: "Tapşırıq yeniləndi" });
+      toast({ title: t("rcl.taskUpdated") });
     },
-    onError: () => toast({ title: "Xəta baş verdi", variant: "destructive" }),
+    onError: () => toast({ title: t("errors.somethingWentWrong"), variant: "destructive" }),
   });
 
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -94,7 +92,7 @@ export default function RestaurantCleaner() {
 
   return (
     <>
-      <Helmet><title>Temizlik İşçisi | O.S.S</title></Helmet>
+      <Helmet><title>{t("rcl.pageTitle")} | O.S.S</title></Helmet>
       <div className="space-y-5" data-testid="cleaner-dashboard">
         {/* Header */}
         <div className="flex items-center gap-3">
@@ -102,13 +100,13 @@ export default function RestaurantCleaner() {
             <Sparkles className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Temizlik Paneli</h1>
-            <p className="text-sm text-muted-foreground">{user?.fullName} — Restoran temizlik işçisi</p>
+            <h1 className="text-xl font-bold">{t("rcl.pageTitle")}</h1>
+            <p className="text-sm text-muted-foreground">{user?.fullName} — {t("rcl.subtitle")}</p>
           </div>
           <div className="ml-auto">
             {pending.length > 0 && (
               <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 animate-pulse">
-                {pending.length} tapşırıq
+                {t("rcl.pendingBadge", { count: pending.length })}
               </Badge>
             )}
           </div>
@@ -118,15 +116,15 @@ export default function RestaurantCleaner() {
         <div className="grid grid-cols-3 gap-3">
           <Card><CardContent className="pt-4 text-center">
             <p className="text-2xl font-bold text-amber-600">{tasks.filter(t=>t.status==="pending").length}</p>
-            <p className="text-xs text-muted-foreground mt-1">Gözləyir</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("rcl.statPending")}</p>
           </CardContent></Card>
           <Card><CardContent className="pt-4 text-center">
             <p className="text-2xl font-bold text-blue-600">{tasks.filter(t=>t.status==="in_progress").length}</p>
-            <p className="text-xs text-muted-foreground mt-1">Davam edir</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("rcl.statInProgress")}</p>
           </CardContent></Card>
           <Card><CardContent className="pt-4 text-center">
             <p className="text-2xl font-bold text-emerald-600">{done.length}</p>
-            <p className="text-xs text-muted-foreground mt-1">Tamamlandı</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("rcl.statDone")}</p>
           </CardContent></Card>
         </div>
 
@@ -134,26 +132,26 @@ export default function RestaurantCleaner() {
           <TabsList className="flex flex-wrap h-auto gap-1">
             <TabsTrigger value="tasks" data-testid="tab-cleaner-tasks">
               <Sparkles className="h-4 w-4 mr-1" />
-              Tapşırıqlar
+              {t("rcl.tabTasks")}
               {pending.length > 0 && <Badge variant="destructive" className="ml-1.5 text-xs">{pending.length}</Badge>}
             </TabsTrigger>
             <TabsTrigger value="messages" data-testid="tab-cleaner-messages">
               <MessageSquare className="h-4 w-4 mr-1" />
-              Mesajlar
+              {t("rcl.tabMessages")}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="tasks" className="mt-4 space-y-4">
             {/* Active Tasks */}
             <div>
-              <h2 className="font-semibold mb-3">Aktiv tapşırıqlar</h2>
+              <h2 className="font-semibold mb-3">{t("rcl.activeTasks")}</h2>
               {isLoading ? (
                 <div className="space-y-3">{[1,2].map(i=><div key={i} className="h-24 bg-muted rounded-xl animate-pulse" />)}</div>
               ) : pending.length === 0 ? (
                 <div className="flex flex-col items-center py-12 text-muted-foreground">
                   <CheckCircle2 className="h-12 w-12 mb-3 opacity-30" />
-                  <p className="font-medium">Aktiv tapşırıq yoxdur</p>
-                  <p className="text-sm">Yeni tapşırıqlar burada görünəcək</p>
+                  <p className="font-medium">{t("rcl.noActiveTasks")}</p>
+                  <p className="text-sm">{t("rcl.newTasksWillAppear")}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -171,7 +169,7 @@ export default function RestaurantCleaner() {
                             </div>
                           </div>
                           <span className={`text-xs font-semibold px-2 py-1 rounded-full shrink-0 ${statusColor[task.status]}`}>
-                            {statusLabel[task.status]}
+                            {task.status === "pending" ? t("rcl.statusPending") : task.status === "in_progress" ? t("rcl.statusInProgress") : t("rcl.statusDone")}
                           </span>
                         </div>
 
@@ -180,7 +178,7 @@ export default function RestaurantCleaner() {
                             <Button size="sm" variant="outline" className="flex-1"
                               onClick={() => updateTask.mutate({ id: task.id, data: { status: "in_progress" } })}
                               data-testid={`button-start-task-${task.id}`}>
-                              🔄 Başlat
+                              🔄 {t("rcl.startBtn")}
                             </Button>
                           )}
                           <Button
@@ -190,7 +188,7 @@ export default function RestaurantCleaner() {
                             data-testid={`button-complete-task-${task.id}`}
                           >
                             <Camera className="h-4 w-4 mr-1.5" />
-                            ✅ HAZIRDIR
+                            {t("rcl.readyBtn")}
                           </Button>
                         </div>
                       </CardContent>
@@ -203,7 +201,7 @@ export default function RestaurantCleaner() {
             {/* Completed Tasks */}
             {done.length > 0 && (
               <div>
-                <h2 className="font-semibold mb-3 text-muted-foreground">Tamamlanmış tapşırıqlar</h2>
+                <h2 className="font-semibold mb-3 text-muted-foreground">{t("rcl.completedTasks")}</h2>
                 <div className="space-y-2">
                   {done.map(task => (
                     <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg opacity-60" data-testid={`row-done-task-${task.id}`}>
@@ -213,7 +211,7 @@ export default function RestaurantCleaner() {
                       </div>
                       <div className="flex items-center gap-2">
                         {task.photoUrl && <img src={task.photoUrl} alt="şəkil" className="h-8 w-8 rounded object-cover" />}
-                        <Badge className="bg-emerald-100 text-emerald-800 text-xs">✓ Hazır</Badge>
+                        <Badge className="bg-emerald-100 text-emerald-800 text-xs">✓ {t("rcl.doneLabel")}</Badge>
                       </div>
                     </div>
                   ))}
@@ -225,8 +223,8 @@ export default function RestaurantCleaner() {
           <TabsContent value="messages" className="mt-4">
             <StaffDmChat
               peerRoles={["restaurant_manager", "admin", "owner_admin", "property_manager", "waiter", "kitchen_staff", "restaurant_cashier"]}
-              panelLabel="Əkip"
-              emptyLabel="Əkip üzvü tapılmadı"
+              panelLabel={t("rcl.teamMessages")}
+              emptyLabel={t("rcl.noTeamMembers")}
             />
           </TabsContent>
         </Tabs>
@@ -237,34 +235,34 @@ export default function RestaurantCleaner() {
         <DialogContent data-testid="dialog-complete-task">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Camera className="h-5 w-5" />Tapşırığı tamamla
+              <Camera className="h-5 w-5" />{t("rcl.dialogTitle")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <p className="text-sm text-muted-foreground">{showPhotoDialog?.description}</p>
             <div className="space-y-2">
-              <Label>Şəkil əlavə et (istəyə görə)</Label>
+              <Label>{t("rcl.addPhoto")}</Label>
               <div className="flex items-center gap-3">
                 <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} disabled={uploading} data-testid="button-upload-photo">
                   {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Camera className="h-4 w-4 mr-1" />}
-                  {uploading ? "Yüklənir..." : "Şəkil seç"}
+                  {uploading ? t("rcl.uploading") : t("rcl.choosePhoto")}
                 </Button>
                 <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileUpload} />
-                {photoUrl && <span className="text-xs text-emerald-600">✓ Şəkil seçildi</span>}
+                {photoUrl && <span className="text-xs text-emerald-600">✓ {t("rcl.photoSelected")}</span>}
               </div>
               {photoUrl && (
                 <img src={photoUrl} alt="Seçilmiş şəkil" className="h-40 w-full object-cover rounded-lg border" />
               )}
               {!photoUrl && (
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">və ya URL daxil edin</Label>
+                  <Label className="text-xs text-muted-foreground">{t("rcl.orEnterUrl")}</Label>
                   <Input placeholder="https://..." value={photoUrl} onChange={e => setPhotoUrl(e.target.value)} data-testid="input-photo-url" />
                 </div>
               )}
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPhotoDialog(null)}>Ləğv et</Button>
+            <Button variant="outline" onClick={() => setShowPhotoDialog(null)}>{t("rcl.cancel")}</Button>
             <Button
               className="bg-emerald-600 hover:bg-emerald-700 text-white"
               onClick={() => showPhotoDialog && updateTask.mutate({ id: showPhotoDialog.id, data: { status: "done", photoUrl: photoUrl || null } })}
@@ -272,7 +270,7 @@ export default function RestaurantCleaner() {
               data-testid="button-confirm-complete"
             >
               {updateTask.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <CheckSquare className="h-4 w-4 mr-1" />}
-              Tamamla
+              {t("rcl.confirmComplete")}
             </Button>
           </DialogFooter>
         </DialogContent>

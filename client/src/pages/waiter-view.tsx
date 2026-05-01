@@ -125,7 +125,7 @@ export default function WaiterView() {
           <TabsList className="flex flex-wrap h-auto gap-1" data-testid="tabs-waiter">
             <TabsTrigger value="orders" data-testid="tab-orders">
               <Package className="h-4 w-4 mr-1" />
-              Sifarişlər
+              {t("restaurant.tabOrders")}
               {readyOrders.length > 0 && <Badge variant="destructive" className="ml-1.5 text-xs">{readyOrders.length}</Badge>}
             </TabsTrigger>
             <TabsTrigger value="calls" data-testid="tab-calls">
@@ -135,7 +135,7 @@ export default function WaiterView() {
             </TabsTrigger>
             <TabsTrigger value="messages" data-testid="tab-waiter-messages">
               <MessageSquare className="h-4 w-4 mr-1" />
-              Mesajlar
+              {t("restaurant.tabMessages")}
             </TabsTrigger>
           </TabsList>
 
@@ -177,7 +177,7 @@ export default function WaiterView() {
                       data-testid={`button-deliver-${order.id}`}
                     >
                       <CheckCircle2 className="h-5 w-5 mr-2" />
-                      ✅ TƏHVİL VERİLDİ
+                      {t("restaurant.delivered")}
                     </Button>
                   </CardContent>
                 </Card>
@@ -186,7 +186,7 @@ export default function WaiterView() {
 
             {/* All active orders list */}
             <div className="mt-4">
-              <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-2">Bütün aktiv sifarişlər</h2>
+              <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-2">{t("restaurant.allActiveOrders")}</h2>
               {orders.filter(o => o.kitchenStatus !== "delivered").map(order => (
                 <div key={order.id} className="flex items-center justify-between p-3 rounded-lg border mb-2" data-testid={`row-order-${order.id}`}>
                   <div>
@@ -243,8 +243,8 @@ export default function WaiterView() {
           <TabsContent value="messages" className="mt-3">
             <StaffDmChat
               peerRoles={["restaurant_manager", "admin", "owner_admin", "property_manager", "kitchen_staff", "restaurant_cashier"]}
-              panelLabel="Əkip"
-              emptyLabel="Ekip üzvü tapılmadı"
+              panelLabel={t("restaurant.teamLabel")}
+              emptyLabel={t("restaurant.noTeamMembers")}
             />
           </TabsContent>
         </Tabs>

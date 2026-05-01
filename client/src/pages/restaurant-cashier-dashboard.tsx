@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,6 +55,7 @@ const SETTLEMENT_COLORS: Record<string, string> = {
 type CleaningStaff = { id: string; fullName: string; role: string };
 
 export default function RestaurantCashierDashboard() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [settleDialog, setSettleDialog] = useState<PosOrder | null>(null);
@@ -85,9 +87,9 @@ export default function RestaurantCashierDashboard() {
       setTaskDesc("");
       setTaskLocation("");
       setTaskAssignee("__none__");
-      toast({ title: "Tapşırıq göndərildi" });
+      toast({ title: t("cashier.taskSent") });
     },
-    onError: () => toast({ title: "Xəta baş verdi", variant: "destructive" }),
+    onError: () => toast({ title: t("errors.somethingWentWrong"), variant: "destructive" }),
   });
 
   const settleOrder = useMutation({
@@ -97,9 +99,9 @@ export default function RestaurantCashierDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/restaurant/orders"] });
       queryClient.invalidateQueries({ queryKey: ["/api/restaurant/analytics"] });
       setSettleDialog(null);
-      toast({ title: "Hesab uğurla bağlandı" });
+      toast({ title: t("cashier.confirmed") });
     },
-    onError: () => toast({ title: "Xəta baş verdi", variant: "destructive" }),
+    onError: () => toast({ title: t("errors.somethingWentWrong"), variant: "destructive" }),
   });
 
   const pendingOrders = orders.filter(o => o.settlementStatus === "pending");
@@ -107,7 +109,7 @@ export default function RestaurantCashierDashboard() {
 
   const groupedByTable: Record<string, PosOrder[]> = {};
   pendingOrders.forEach(o => {
-    const key = o.tableNumber ? `Masa ${o.tableNumber}` : o.roomNumber ? `Otaq ${o.roomNumber}` : "Göstərilməyib";
+    const key = o.tableNumber ? `${t("cashier.table")} ${o.tableNumber}` : o.roomNumber ? `${t("cashier.room")} ${o.roomNumber}` : t("cashier.unknown");
     if (!groupedByTable[key]) groupedByTable[key] = [];
     groupedByTable[key].push(o);
   });
@@ -142,32 +144,32 @@ export default function RestaurantCashierDashboard() {
 
   return (
     <>
-      <Helmet><title>Restoran Kassası | O.S.S</title></Helmet>
+      <Helmet><title>{t("cashier.settleTitle")} | O.S.S</title></Helmet>
 
       <div className="space-y-5" data-testid="cashier-dashboard">
         {/* Stats Row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <Card data-testid="stat-today-revenue">
             <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground">Bu günün gəliri</p>
+              <p className="text-xs text-muted-foreground">{t("cashier.todayRevenue")}</p>
               <p className="text-2xl font-bold text-green-600 mt-1">{fmt(analytics?.today.revenueCents ?? 0)}</p>
             </CardContent>
           </Card>
           <Card data-testid="stat-today-orders">
             <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground">Bu günün sifarişi</p>
+              <p className="text-xs text-muted-foreground">{t("cashier.todayOrders")}</p>
               <p className="text-2xl font-bold mt-1">{analytics?.today.orderCount ?? 0}</p>
             </CardContent>
           </Card>
           <Card data-testid="stat-pending-settlement">
             <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground">Ödəniş gözləyir</p>
+              <p className="text-xs text-muted-foreground">{t("cashier.pendingPayment")}</p>
               <p className="text-2xl font-bold text-rose-600 mt-1">{pendingOrders.length}</p>
             </CardContent>
           </Card>
           <Card data-testid="stat-cash-revenue">
             <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground">Nağd / Kart</p>
+              <p className="text-xs text-muted-foreground">{t("cashier.cashCard")}</p>
               <p className="text-sm font-bold mt-1">
                 {fmt(analytics?.byPaymentType?.cashCents ?? 0)} / {fmt(analytics?.byPaymentType?.cardCents ?? 0)}
               </p>
@@ -179,26 +181,26 @@ export default function RestaurantCashierDashboard() {
           <TabsList className="flex flex-wrap h-auto gap-1">
             <TabsTrigger value="pending" data-testid="tab-cashier-pending">
               <AlertCircle className="h-4 w-4 mr-1.5" />
-              Gözləyən Hesablar
+              {t("cashier.tabPending")}
               {pendingOrders.length > 0 && (
                 <Badge variant="destructive" className="ml-1.5 text-xs">{pendingOrders.length}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="tables" data-testid="tab-cashier-tables">
               <TableProperties className="h-4 w-4 mr-1.5" />
-              Masalar
+              {t("cashier.tabTables")}
             </TabsTrigger>
             <TabsTrigger value="history" data-testid="tab-cashier-history">
               <TrendingUp className="h-4 w-4 mr-1.5" />
-              Tarixçə
+              {t("cashier.tabHistory")}
             </TabsTrigger>
             <TabsTrigger value="tasks" data-testid="tab-cashier-tasks">
               <ClipboardList className="h-4 w-4 mr-1.5" />
-              Tapşırıq Ver
+              {t("cashier.tabTasks")}
             </TabsTrigger>
             <TabsTrigger value="messages" data-testid="tab-cashier-messages">
               <MessageSquare className="h-4 w-4 mr-1.5" />
-              Mesajlar
+              {t("cashier.tabMessages")}
             </TabsTrigger>
           </TabsList>
 
@@ -212,7 +214,7 @@ export default function RestaurantCashierDashboard() {
               <Card>
                 <CardContent className="p-10 text-center text-muted-foreground">
                   <CheckCircle2 className="h-10 w-10 mx-auto mb-3 text-green-500 opacity-70" />
-                  <p className="font-medium">Bütün hesablar ödənilib</p>
+                  <p className="font-medium">{t("cashier.allPaid")}</p>
                 </CardContent>
               </Card>
             ) : (
@@ -225,12 +227,12 @@ export default function RestaurantCashierDashboard() {
                           <div className="flex items-center gap-2 flex-wrap">
                             {order.tableNumber && (
                               <Badge variant="outline" className="font-bold">
-                                <Utensils className="h-3 w-3 mr-1" />Masa {order.tableNumber}
+                                <Utensils className="h-3 w-3 mr-1" />{t("cashier.table")} {order.tableNumber}
                               </Badge>
                             )}
                             {order.roomNumber && (
                               <Badge variant="outline">
-                                <BedDouble className="h-3 w-3 mr-1" />Otaq {order.roomNumber}
+                                <BedDouble className="h-3 w-3 mr-1" />{t("cashier.room")} {order.roomNumber}
                               </Badge>
                             )}
                             {order.guestName && <span className="text-sm text-muted-foreground">{order.guestName}</span>}
@@ -258,14 +260,14 @@ export default function RestaurantCashierDashboard() {
                               onClick={() => handlePrint(order)}
                               data-testid={`btn-print-${order.id}`}
                             >
-                              <Printer className="h-3.5 w-3.5 mr-1" />Çap
+                              <Printer className="h-3.5 w-3.5 mr-1" />{t("cashier.print")}
                             </Button>
                             <Button
                               size="sm"
                               onClick={() => { setSettleDialog(order); setSettleType("cash"); }}
                               data-testid={`btn-settle-${order.id}`}
                             >
-                              <Wallet className="h-3.5 w-3.5 mr-1" />Ödə
+                              <Wallet className="h-3.5 w-3.5 mr-1" />{t("cashier.pay")}
                             </Button>
                           </div>
                         </div>
@@ -283,7 +285,7 @@ export default function RestaurantCashierDashboard() {
               <Card>
                 <CardContent className="p-10 text-center text-muted-foreground">
                   <TableProperties className="h-10 w-10 mx-auto mb-3 opacity-40" />
-                  <p>Aktiv masa yoxdur</p>
+                  <p>{t("cashier.noActiveTables")}</p>
                 </CardContent>
               </Card>
             ) : (
@@ -299,7 +301,7 @@ export default function RestaurantCashierDashboard() {
                             {tableLabel}
                           </span>
                           <Badge className="bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300">
-                            {tableOrders.length} sifariş
+                            {tableOrders.length} {t("cashier.ordersCount")}
                           </Badge>
                         </CardTitle>
                       </CardHeader>
@@ -316,11 +318,11 @@ export default function RestaurantCashierDashboard() {
                           <span className="font-bold text-lg">{fmt(total)}</span>
                           <div className="flex gap-2">
                             <Button size="sm" variant="outline" onClick={() => tableOrders.forEach(o => handlePrint(o))} data-testid={`btn-table-print-${tableLabel}`}>
-                              <Printer className="h-3.5 w-3.5 mr-1" />Çap
+                              <Printer className="h-3.5 w-3.5 mr-1" />{t("cashier.print")}
                             </Button>
                             {tableOrders.map(o => (
                               <Button key={o.id} size="sm" onClick={() => { setSettleDialog(o); setSettleType("cash"); }} data-testid={`btn-table-settle-${o.id}`}>
-                                <Wallet className="h-3.5 w-3.5 mr-1" />Ödə
+                                <Wallet className="h-3.5 w-3.5 mr-1" />{t("cashier.pay")}
                               </Button>
                             ))}
                           </div>
@@ -341,7 +343,7 @@ export default function RestaurantCashierDashboard() {
               <Card>
                 <CardContent className="p-8 text-center text-muted-foreground">
                   <ShoppingBag className="h-8 w-8 mx-auto mb-2 opacity-40" />
-                  <p>Tarixçə yoxdur</p>
+                  <p>{t("cashier.noHistory")}</p>
                 </CardContent>
               </Card>
             ) : (
@@ -350,18 +352,18 @@ export default function RestaurantCashierDashboard() {
                   <CardContent className="p-4 flex items-center justify-between gap-3">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        {order.tableNumber && <Badge variant="outline" className="text-xs">Masa {order.tableNumber}</Badge>}
-                        {order.roomNumber && <Badge variant="outline" className="text-xs">Otaq {order.roomNumber}</Badge>}
-                        {order.paymentType === "cash" && <Badge className="text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"><Banknote className="h-3 w-3 mr-1" />Nağd</Badge>}
-                        {order.paymentType === "card" && <Badge className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"><CreditCard className="h-3 w-3 mr-1" />Kart</Badge>}
-                        {order.paymentType === "room_charge" && <Badge className="text-xs bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"><BedDouble className="h-3 w-3 mr-1" />Otaq hesabı</Badge>}
+                        {order.tableNumber && <Badge variant="outline" className="text-xs">{t("cashier.table")} {order.tableNumber}</Badge>}
+                        {order.roomNumber && <Badge variant="outline" className="text-xs">{t("cashier.room")} {order.roomNumber}</Badge>}
+                        {order.paymentType === "cash" && <Badge className="text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"><Banknote className="h-3 w-3 mr-1" />{t("cashier.paidCash")}</Badge>}
+                        {order.paymentType === "card" && <Badge className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"><CreditCard className="h-3 w-3 mr-1" />{t("cashier.paidCard")}</Badge>}
+                        {order.paymentType === "room_charge" && <Badge className="text-xs bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"><BedDouble className="h-3 w-3 mr-1" />{t("cashier.paidRoom")}</Badge>}
                       </div>
                       <p className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}</p>
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-lg">{fmt(order.totalCents)}</p>
                       <Badge className="text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />Ödənilib
+                        <CheckCircle2 className="h-3 w-3 mr-1" />{t("cashier.settled")}
                       </Badge>
                     </div>
                   </CardContent>
@@ -376,14 +378,14 @@ export default function RestaurantCashierDashboard() {
               <CardContent className="p-5 space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                   <ClipboardList className="h-4 w-4 text-primary" />
-                  <h3 className="font-semibold">Temizlik Tapşırığı Yarat</h3>
+                  <h3 className="font-semibold">{t("cashier.cleaningTaskTitle")}</h3>
                 </div>
                 <div className="space-y-3">
                   <div className="space-y-1.5">
-                    <Label htmlFor="task-desc">Tapşırıq təsviri *</Label>
+                    <Label htmlFor="task-desc">{t("cashier.taskDesc")}</Label>
                     <Textarea
                       id="task-desc"
-                      placeholder="Məs: Masa 5-in yanındakı döşəməni silin..."
+                      placeholder={t("cashier.taskDescPlaceholder")}
                       value={taskDesc}
                       onChange={e => setTaskDesc(e.target.value)}
                       className="resize-none"
@@ -392,7 +394,7 @@ export default function RestaurantCashierDashboard() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="task-location">Yer (istəyə görə)</Label>
+                    <Label htmlFor="task-location">{t("cashier.location")}</Label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -406,13 +408,13 @@ export default function RestaurantCashierDashboard() {
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Təyin et (istəyə görə)</Label>
+                    <Label>{t("cashier.assignTo")}</Label>
                     <Select value={taskAssignee} onValueChange={setTaskAssignee}>
                       <SelectTrigger data-testid="select-task-assignee">
                         <SelectValue placeholder="Temizlik işçisi seçin..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="__none__">Heç kim (ümumi)</SelectItem>
+                        <SelectItem value="__none__">{t("cashier.noCleaner")}</SelectItem>
                         {cleaners.map(c => (
                           <SelectItem key={c.id} value={c.id}>{c.fullName}</SelectItem>
                         ))}
@@ -430,7 +432,7 @@ export default function RestaurantCashierDashboard() {
                     data-testid="btn-create-task"
                   >
                     {createTask.isPending ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-                    Tapşırığı Göndər
+                    {t("cashier.sendTask")}
                   </Button>
                 </div>
               </CardContent>
@@ -441,8 +443,8 @@ export default function RestaurantCashierDashboard() {
           <TabsContent value="messages" className="mt-4">
             <StaffDmChat
               peerRoles={["restaurant_manager", "admin", "owner_admin", "property_manager", "waiter", "kitchen_staff", "restaurant_cleaner"]}
-              panelLabel="Əkip Mesajları"
-              emptyLabel="Əkip üzvü tapılmadı"
+              panelLabel={t("cashier.teamMessages")}
+              emptyLabel={t("cashier.noTeam")}
             />
           </TabsContent>
         </Tabs>
@@ -453,41 +455,41 @@ export default function RestaurantCashierDashboard() {
         <Dialog open onOpenChange={() => setSettleDialog(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Hesabı Bağla</DialogTitle>
+              <DialogTitle>{t("cashier.settleTitle")}</DialogTitle>
               <DialogDescription>
-                {settleDialog.tableNumber ? `Masa ${settleDialog.tableNumber}` : settleDialog.roomNumber ? `Otaq ${settleDialog.roomNumber}` : ""} — <strong>{fmt(settleDialog.totalCents)}</strong>
+                {settleDialog.tableNumber ? `${t("cashier.table")} ${settleDialog.tableNumber}` : settleDialog.roomNumber ? `${t("cashier.room")} ${settleDialog.roomNumber}` : ""} — <strong>{fmt(settleDialog.totalCents)}</strong>
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-2">
               <div className="space-y-2">
-                <p className="text-sm font-medium">Ödəniş növü</p>
+                <p className="text-sm font-medium">{t("cashier.paymentType")}</p>
                 <Select value={settleType} onValueChange={setSettleType}>
                   <SelectTrigger data-testid="select-payment-type">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="cash"><div className="flex items-center gap-2"><Banknote className="h-4 w-4" />Nağd</div></SelectItem>
-                    <SelectItem value="card"><div className="flex items-center gap-2"><CreditCard className="h-4 w-4" />Kart</div></SelectItem>
-                    <SelectItem value="room_charge"><div className="flex items-center gap-2"><BedDouble className="h-4 w-4" />Otaq hesabına əlavə et</div></SelectItem>
+                    <SelectItem value="cash"><div className="flex items-center gap-2"><Banknote className="h-4 w-4" />{t("cashier.cash")}</div></SelectItem>
+                    <SelectItem value="card"><div className="flex items-center gap-2"><CreditCard className="h-4 w-4" />{t("cashier.card")}</div></SelectItem>
+                    <SelectItem value="room_charge"><div className="flex items-center gap-2"><BedDouble className="h-4 w-4" />{t("cashier.roomCharge")}</div></SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               {settleType === "room_charge" && (
                 <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 text-sm text-blue-700 dark:text-blue-300 flex items-start gap-2">
                   <Building2 className="h-4 w-4 mt-0.5 shrink-0" />
-                  <p>Bu məbləğ qonağın otaq hesabına əlavə ediləcək və hotel maliyyə hesabatında görünəcək.</p>
+                  <p>{t("cashier.roomChargeNote")}</p>
                 </div>
               )}
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setSettleDialog(null)}>Ləğv et</Button>
+              <Button variant="outline" onClick={() => setSettleDialog(null)}>{t("rm.cancel")}</Button>
               <Button
                 onClick={() => settleOrder.mutate({ id: settleDialog.id, paymentType: settleType })}
                 disabled={settleOrder.isPending}
                 data-testid="btn-confirm-settle"
               >
                 {settleOrder.isPending ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
-                Təsdiqlə — {fmt(settleDialog.totalCents)}
+                {t("cashier.confirmBtn")} — {fmt(settleDialog.totalCents)}
               </Button>
             </DialogFooter>
           </DialogContent>
