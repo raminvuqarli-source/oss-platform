@@ -1,13 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { useSearch } from "wouter";
+import { useSearch, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest, setDemoToken } from "@/lib/queryClient";
-import { DashboardLayout } from "@/components/dashboard-layout";
-import { DashboardRouter } from "@/components/dashboard-router";
 import { Building2, Loader2 } from "lucide-react";
-import { useLocation } from "wouter";
 
-type State = "loading" | "ready" | "error";
+type State = "loading" | "error";
 
 export default function DemoLogin() {
   const [, setLocation] = useLocation();
@@ -37,27 +34,13 @@ export default function DemoLogin() {
         const { _demoToken: _t, ...user } = data;
         queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== "/api/auth/me" });
         queryClient.setQueryData(["/api/auth/me"], user);
-        setState("ready");
+        setLocation("/dashboard");
       })
       .catch(() => {
         setState("error");
         setTimeout(() => setLocation("/?demo_error=1"), 1500);
       });
   }, [search, setLocation, queryClient]);
-
-  if (state === "loading") {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background">
-        <div className="flex aspect-square size-14 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg">
-          <Building2 className="size-7" />
-        </div>
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          <span className="text-sm font-medium">Loading demo…</span>
-        </div>
-      </div>
-    );
-  }
 
   if (state === "error") {
     return (
@@ -70,8 +53,14 @@ export default function DemoLogin() {
   }
 
   return (
-    <DashboardLayout>
-      <DashboardRouter />
-    </DashboardLayout>
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background">
+      <div className="flex aspect-square size-14 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg">
+        <Building2 className="size-7" />
+      </div>
+      <div className="flex items-center gap-2 text-muted-foreground">
+        <Loader2 className="h-5 w-5 animate-spin" />
+        <span className="text-sm font-medium">Loading demo…</span>
+      </div>
+    </div>
   );
 }
