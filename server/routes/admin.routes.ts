@@ -3,7 +3,7 @@ import { storage } from "../storage";
 import { asString } from "../utils/request";
 import { requireAuth, requireRole } from "../middleware";
 import { hashPassword } from "../services/auth.service";
-import { insertContractSchema, insertBoardReportSchema } from "@shared/schema";
+import { insertContractSchema, insertBoardReportSchema, PLAN_TYPE_TO_CODE } from "@shared/schema";
 import { z } from "zod";
 import { logger } from "../utils/logger";
 import { calculateSaasMetrics, calculateMrrTrend } from "../services/saasMetricsService";
@@ -402,7 +402,7 @@ export function registerAdminRoutes(app: Express): void {
       const owner = await storage.getOwner(ownerId);
       if (!owner) return res.status(404).json({ message: "Owner not found" });
 
-      const { PLAN_CODE_FEATURES, PLAN_TYPE_TO_CODE, applyPlanFeatures } = await import("@shared/planFeatures");
+      const { PLAN_CODE_FEATURES, applyPlanFeatures } = await import("@shared/planFeatures");
       const validPlanCodes = Object.keys(PLAN_CODE_FEATURES);
       const resolvedPlanCode = validPlanCodes.includes(planCode) ? planCode : "CORE_PRO";
 
