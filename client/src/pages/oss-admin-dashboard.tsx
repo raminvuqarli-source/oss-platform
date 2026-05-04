@@ -1505,6 +1505,9 @@ function OssSubscriptionsPanel() {
 
   const [pendingPlanCode, setPendingPlanCode] = useState<Record<string, string>>({});
 
+  const [activatingOwnerId, setActivatingOwnerId] = useState<string | null>(null);
+  const [pendingActivatePlan, setPendingActivatePlan] = useState<Record<string, string>>({});
+
   const extendTrialMutation = useMutation({
     mutationFn: async ({ subscriptionId, days }: { subscriptionId: string; days: number }) => {
       const planCode = pendingPlanCode[subscriptionId] || undefined;
@@ -1519,6 +1522,22 @@ function OssSubscriptionsPanel() {
     onError: () => {
       toast({ title: t("common.error", "Error"), description: t("ossAdmin.trialExtendFailed", "Failed to extend trial"), variant: "destructive" });
       setExtendingId(null);
+    },
+  });
+
+  const activateTrialMutation = useMutation({
+    mutationFn: async ({ ownerId, days, planCode }: { ownerId: string; days: number; planCode: string }) => {
+      const res = await apiRequest("POST", `/api/oss-admin/owners/${ownerId}/activate-trial`, { days, planCode });
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: t("ossAdmin.trialActivated", "Subscription activated"), description: t("ossAdmin.trialActivatedDesc", "Trial subscription has been activated.") });
+      refetch();
+      setActivatingOwnerId(null);
+    },
+    onError: () => {
+      toast({ title: t("common.error", "Error"), description: t("ossAdmin.activateFailed", "Failed to activate subscription"), variant: "destructive" });
+      setActivatingOwnerId(null);
     },
   });
 
@@ -1629,9 +1648,55 @@ function OssSubscriptionsPanel() {
                           </span>
                         </div>
                       </div>
-                      {sub.subscriptionId && (
-                        <div className="flex gap-2 flex-shrink-0">
-                          {isExtending ? (
+                      <div className="flex gap-2 flex-shrink-0">
+                        {/* No subscription — show Activate button */}
+                        {!sub.subscriptionId && (
+                          activatingOwnerId === sub.ownerId ? (
+                            <div className="flex flex-col gap-2 items-end">
+                              <Select
+                                value={pendingActivatePlan[sub.ownerId] || "CORE_PRO"}
+                                onValueChange={(v) => setPendingActivatePlan(p => ({ ...p, [sub.ownerId]: v }))}
+                              >
+                                <SelectTrigger className="h-8 w-36 text-xs" data-testid={`select-activate-plan-${sub.ownerId}`}>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="CORE_STARTER">Starter</SelectItem>
+                                  <SelectItem value="CORE_GROWTH">Growth</SelectItem>
+                                  <SelectItem value="CORE_PRO">Pro</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <div className="flex gap-1">
+                                {[14, 30, 60, 90].map((d) => (
+                                  <Button
+                                    key={d}
+                                    size="sm"
+                                    variant="outline"
+                                    data-testid={`btn-activate-${d}-${sub.ownerId}`}
+                                    disabled={activateTrialMutation.isPending}
+                                    onClick={() => activateTrialMutation.mutate({ ownerId: sub.ownerId, days: d, planCode: pendingActivatePlan[sub.ownerId] || "CORE_PRO" })}
+                                  >
+                                    +{d}d
+                                  </Button>
+                                ))}
+                                <Button size="sm" variant="ghost" onClick={() => setActivatingOwnerId(null)}>✕</Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="default"
+                              className="bg-green-600 hover:bg-green-700 text-white"
+                              data-testid={`btn-activate-trial-${sub.ownerId}`}
+                              onClick={() => setActivatingOwnerId(sub.ownerId)}
+                            >
+                              {t("ossAdmin.activateTrial", "Activate")}
+                            </Button>
+                          )
+                        )}
+                        {/* Has subscription — show Extend Trial button */}
+                        {sub.subscriptionId && (
+                          isExtending ? (
                             <div className="flex flex-col gap-2 items-end">
                               <div className="flex items-center gap-1">
                                 <Select
@@ -1673,9 +1738,9 @@ function OssSubscriptionsPanel() {
                             >
                               {t("ossAdmin.extendTrial", "Extend Trial")}
                             </Button>
-                          )}
-                        </div>
-                      )}
+                          )
+                        )}
+                      </div>
                     </div>
                   </div>
                 );

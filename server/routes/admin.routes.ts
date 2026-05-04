@@ -392,6 +392,64 @@ export function registerAdminRoutes(app: Express): void {
     }
   });
 
+  // OSS Admin: Activate trial for an owner who has no active subscription
+  app.post("/api/oss-admin/owners/:ownerId/activate-trial", requireRole("oss_super_admin"), async (req, res) => {
+    try {
+      const ownerId = asString(req.params.ownerId);
+      const days = typeof req.body.days === "number" ? req.body.days : 30;
+      const planCode = req.body.planCode || "CORE_PRO";
+
+      const owner = await storage.getOwner(ownerId);
+      if (!owner) return res.status(404).json({ message: "Owner not found" });
+
+      const { PLAN_CODE_FEATURES, PLAN_TYPE_TO_CODE, applyPlanFeatures } = await import("@shared/planFeatures");
+      const validPlanCodes = Object.keys(PLAN_CODE_FEATURES);
+      const resolvedPlanCode = validPlanCodes.includes(planCode) ? planCode : "CORE_PRO";
+
+      const planTypeEntry = Object.entries(PLAN_TYPE_TO_CODE).find(([, v]) => v === resolvedPlanCode);
+      const resolvedPlanType = (planTypeEntry?.[0] || "pro") as any;
+      const planDefaults = applyPlanFeatures(resolvedPlanType);
+
+      const trialEndsAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+
+      // Use raw DB query to find any subscription for this owner (even inactive)
+      const { db } = await import("../db");
+      const { subscriptions: subTable } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      const existingSubs = await db.select().from(subTable).where(eq(subTable.ownerId, ownerId)).limit(1);
+
+      if (existingSubs.length > 0) {
+        const existing = existingSubs[0];
+        await storage.updateSubscription(existing.id, {
+          planCode: resolvedPlanCode,
+          planType: resolvedPlanType,
+          status: "trial",
+          isActive: true,
+          trialEndsAt,
+          ...planDefaults,
+        } as any);
+        logger.info({ ownerId, planCode: resolvedPlanCode, days }, "OSS admin activated existing subscription");
+        return res.json({ message: "Subscription activated", planCode: resolvedPlanCode });
+      }
+
+      // No subscription at all — create one
+      await storage.createSubscription({
+        ownerId,
+        planType: resolvedPlanType,
+        planCode: resolvedPlanCode,
+        ...planDefaults,
+        trialEndsAt,
+        isActive: true,
+        status: "trial",
+      } as any);
+      logger.info({ ownerId, planCode: resolvedPlanCode, days }, "OSS admin created new trial subscription");
+      res.json({ message: "Trial subscription created", planCode: resolvedPlanCode });
+    } catch (error) {
+      logger.error({ err: error }, "Error activating trial");
+      res.status(500).json({ message: "Failed to activate trial" });
+    }
+  });
+
   // OSS Admin: Update customer status (suspend/delete/activate)
   app.patch("/api/oss-admin/customers/:ownerId/status", requireRole("oss_super_admin"), async (req, res) => {
     try {
