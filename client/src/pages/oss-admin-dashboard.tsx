@@ -1503,13 +1503,16 @@ function OssSubscriptionsPanel() {
     queryKey: ["/api/oss-admin/subscriptions"],
   });
 
+  const [pendingPlanCode, setPendingPlanCode] = useState<Record<string, string>>({});
+
   const extendTrialMutation = useMutation({
     mutationFn: async ({ subscriptionId, days }: { subscriptionId: string; days: number }) => {
-      const res = await apiRequest("POST", `/api/oss-admin/subscriptions/${subscriptionId}/extend-trial`, { days });
+      const planCode = pendingPlanCode[subscriptionId] || undefined;
+      const res = await apiRequest("POST", `/api/oss-admin/subscriptions/${subscriptionId}/extend-trial`, { days, planCode });
       return res.json();
     },
     onSuccess: (_data, { days }) => {
-      toast({ title: t("ossAdmin.trialExtended", "Trial extended"), description: t("ossAdmin.trialExtendedDesc", `Trial extended by ${days} days.`) });
+      toast({ title: t("ossAdmin.trialExtended", "Trial extended"), description: `Trial extended by ${days} days.` });
       refetch();
       setExtendingId(null);
     },
@@ -1629,20 +1632,37 @@ function OssSubscriptionsPanel() {
                       {sub.subscriptionId && (
                         <div className="flex gap-2 flex-shrink-0">
                           {isExtending ? (
-                            <div className="flex gap-1">
-                              {[14, 30, 60, 90].map((d) => (
-                                <Button
-                                  key={d}
-                                  size="sm"
-                                  variant="outline"
-                                  data-testid={`btn-extend-${d}-${sub.subscriptionId}`}
-                                  disabled={extendTrialMutation.isPending}
-                                  onClick={() => extendTrialMutation.mutate({ subscriptionId: sub.subscriptionId!, days: d })}
+                            <div className="flex flex-col gap-2 items-end">
+                              <div className="flex items-center gap-1">
+                                <Select
+                                  value={pendingPlanCode[sub.subscriptionId] || sub.planType || "CORE_STARTER"}
+                                  onValueChange={(v) => setPendingPlanCode(p => ({ ...p, [sub.subscriptionId!]: v }))}
                                 >
-                                  +{d}d
-                                </Button>
-                              ))}
-                              <Button size="sm" variant="ghost" onClick={() => setExtendingId(null)}>✕</Button>
+                                  <SelectTrigger className="h-8 w-36 text-xs" data-testid={`select-plan-${sub.subscriptionId}`}>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="CORE_STARTER">Starter</SelectItem>
+                                    <SelectItem value="CORE_GROWTH">Growth</SelectItem>
+                                    <SelectItem value="CORE_PRO">Pro</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="flex gap-1">
+                                {[14, 30, 60, 90].map((d) => (
+                                  <Button
+                                    key={d}
+                                    size="sm"
+                                    variant="outline"
+                                    data-testid={`btn-extend-${d}-${sub.subscriptionId}`}
+                                    disabled={extendTrialMutation.isPending}
+                                    onClick={() => extendTrialMutation.mutate({ subscriptionId: sub.subscriptionId!, days: d })}
+                                  >
+                                    +{d}d
+                                  </Button>
+                                ))}
+                                <Button size="sm" variant="ghost" onClick={() => setExtendingId(null)}>✕</Button>
+                              </div>
                             </div>
                           ) : (
                             <Button

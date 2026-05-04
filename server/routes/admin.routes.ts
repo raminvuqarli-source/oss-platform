@@ -360,26 +360,32 @@ export function registerAdminRoutes(app: Express): void {
     }
   });
 
-  // OSS Admin: Extend trial for a subscription
+  // OSS Admin: Extend trial for a subscription (and optionally update plan code)
   app.post("/api/oss-admin/subscriptions/:subscriptionId/extend-trial", requireRole("oss_super_admin"), async (req, res) => {
     try {
       const subscriptionId = asString(req.params.subscriptionId);
       const days = typeof req.body.days === "number" ? req.body.days : 30;
+      const newPlanCode = req.body.planCode || null;
 
-      const { db: database } = await import("../db");
-      const { sql: rawSql } = await import("drizzle-orm");
+      const { PLAN_CODE_FEATURES, PLAN_TYPE_TO_CODE } = await import("@shared/planFeatures");
+      const validPlanCodes = Object.keys(PLAN_CODE_FEATURES);
 
-      await database.execute(rawSql`
-        UPDATE subscriptions
-        SET
-          trial_ends_at = NOW() + (${days} || ' days')::interval,
-          status = 'trial',
-          is_active = true
-        WHERE id = ${subscriptionId}
-      `);
+      const trialEndsAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+      const updateData: Record<string, unknown> = {
+        trialEndsAt,
+        status: "trial",
+        isActive: true,
+      };
 
-      logger.info({ subscriptionId, days }, "Trial extended by OSS admin");
-      res.json({ message: `Trial extended by ${days} days` });
+      if (newPlanCode && validPlanCodes.includes(newPlanCode)) {
+        updateData.planCode = newPlanCode;
+        const planTypeEntry = Object.entries(PLAN_TYPE_TO_CODE).find(([, v]) => v === newPlanCode);
+        if (planTypeEntry) updateData.planType = planTypeEntry[0];
+      }
+
+      await storage.updateSubscription(subscriptionId, updateData as any);
+      logger.info({ subscriptionId, days, newPlanCode }, "Trial extended by OSS admin");
+      res.json({ message: `Trial extended by ${days} days`, planCode: newPlanCode });
     } catch (error) {
       logger.error({ err: error }, "Error extending trial");
       res.status(500).json({ message: "Failed to extend trial" });

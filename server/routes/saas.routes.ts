@@ -512,6 +512,36 @@ export function registerSaasRoutes(app: Express): void {
     }
   });
 
+  app.post("/api/onboarding/plan", authenticateRequest, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user?.ownerId) return res.status(400).json({ message: "No owner account" });
+
+      const { planCode } = req.body;
+      const validPlanCodes = Object.keys(PLAN_CODE_FEATURES);
+      if (!planCode || !validPlanCodes.includes(planCode)) {
+        return res.status(400).json({ message: "Invalid plan code" });
+      }
+
+      const sub = await storage.getSubscriptionByOwner(user.ownerId);
+      if (!sub) return res.status(404).json({ message: "No subscription found" });
+
+      const planTypeEntry = Object.entries(PLAN_TYPE_TO_CODE).find(([, v]) => v === planCode);
+      const resolvedPlanType = planTypeEntry ? planTypeEntry[0] : "starter";
+
+      await storage.updateSubscription(sub.id, {
+        planCode,
+        planType: resolvedPlanType as any,
+      } as any);
+
+      logger.info({ ownerId: user.ownerId, planCode }, "Plan selected during onboarding");
+      res.json({ planCode });
+    } catch (error) {
+      logger.error({ err: error }, "Onboarding plan selection error");
+      res.status(500).json({ message: "Failed to save plan selection" });
+    }
+  });
+
   app.post("/api/onboarding/financial", authenticateRequest, async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);

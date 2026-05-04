@@ -19,7 +19,7 @@ import {
   Building2, BedDouble, Users, CheckCircle,
   ChevronRight, ChevronLeft, Plus, Trash2, Loader2,
   MapPin, Globe, Clock, Sparkles, UserPlus, Mail,
-  DollarSign, Percent, Zap, Brush, Receipt,
+  DollarSign, Percent, Zap, Brush, Receipt, Crown, Rocket, Star,
 } from "lucide-react";
 import type { OnboardingProgress, Property } from "@shared/schema";
 
@@ -82,6 +82,7 @@ export default function OnboardingWizard() {
   const [additionalExpensesMonthly, setAdditionalExpensesMonthly] = useState("");
 
   const [createdPropertyId, setCreatedPropertyId] = useState<string | null>(null);
+  const [selectedPlanCode, setSelectedPlanCode] = useState<"CORE_STARTER" | "CORE_GROWTH" | "CORE_PRO">("CORE_PRO");
 
   const { data: onboardingData, isLoading: loadingOnboarding } = useQuery<OnboardingProgress & {
     savedData?: {
@@ -164,6 +165,7 @@ export default function OnboardingWizard() {
         });
         const data = await res.json();
         if (data.propertyId) setCreatedPropertyId(data.propertyId);
+        await apiRequest("POST", "/api/onboarding/plan", { planCode: selectedPlanCode });
         await updateProgressMutation.mutateAsync({
           currentStep: 2,
           propertyCompleted: true,
@@ -346,6 +348,46 @@ export default function OnboardingWizard() {
 
       <main className="flex-1 max-w-4xl mx-auto w-full p-4 md:p-6">
         {currentStep === 1 && (
+          <>
+          <div className="mb-4 space-y-3" data-testid="plan-selection">
+            <div>
+              <h3 className="text-base font-semibold">{t("onboarding.plan.title", "Abunəlik Planı Seçin")}</h3>
+              <p className="text-sm text-muted-foreground">{t("onboarding.plan.desc", "Trial müddətindən sonra ödənişli plana keçəcəksiniz")}</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {([
+                { code: "CORE_STARTER", label: "Starter", price: "$79/ay", icon: Star, features: ["1 əmlak", "20 otaq", "5 işçi"], color: "border-border" },
+                { code: "CORE_GROWTH", label: "Growth", price: "$129/ay", icon: Rocket, features: ["3 əmlak", "30 otaq/əmlak", "20 işçi", "Analitika"], color: "border-blue-500" },
+                { code: "CORE_PRO", label: "Pro", price: "$199/ay", icon: Crown, features: ["Limitsiz əmlak", "Limitsiz otaq", "Limitsiz işçi", "Tam analitika"], color: "border-primary", badge: "Tövsiyə" },
+              ] as const).map(({ code, label, price, icon: Icon, features, color, badge }) => (
+                <button
+                  key={code}
+                  type="button"
+                  data-testid={`plan-card-${code}`}
+                  onClick={() => setSelectedPlanCode(code)}
+                  className={`text-left rounded-lg border-2 p-3 transition-all ${selectedPlanCode === code ? `${color} bg-primary/5 shadow-sm` : "border-border hover:border-muted-foreground/50"}`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-1.5">
+                      <Icon className={`h-4 w-4 ${selectedPlanCode === code ? "text-primary" : "text-muted-foreground"}`} />
+                      <span className="font-semibold text-sm">{label}</span>
+                    </div>
+                    {badge && <Badge className="bg-primary text-primary-foreground text-xs px-1.5 py-0">{badge}</Badge>}
+                  </div>
+                  <p className="text-xs font-medium text-primary mb-2">{price}</p>
+                  <ul className="space-y-0.5">
+                    {features.map(f => (
+                      <li key={f} className="text-xs text-muted-foreground flex items-center gap-1">
+                        <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  {selectedPlanCode === code && <p className="mt-2 text-xs font-medium text-primary">{t("onboarding.plan.selected", "Seçildi")}</p>}
+                </button>
+              ))}
+            </div>
+          </div>
           <Card data-testid="step-property-info">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -424,6 +466,7 @@ export default function OnboardingWizard() {
               </div>
             </CardContent>
           </Card>
+          </>
         )}
 
         {currentStep === 2 && (
