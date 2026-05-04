@@ -61,6 +61,8 @@ export interface SubscriptionRow {
   companyName: string;
   email: string;
   planType: string;
+  status: string | null;
   isActive: boolean;
+  trialEndsAt: string | null;
   createdAt: string | null;
 }

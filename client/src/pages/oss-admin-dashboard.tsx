@@ -1494,11 +1494,29 @@ function OssCustomersPanel() {
 
 function OssSubscriptionsPanel() {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [planFilter, setPlanFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [extendingId, setExtendingId] = useState<string | null>(null);
 
-  const { data: subscriptions, isLoading } = useQuery<SubscriptionRow[]>({
+  const { data: subscriptions, isLoading, refetch } = useQuery<SubscriptionRow[]>({
     queryKey: ["/api/oss-admin/subscriptions"],
+  });
+
+  const extendTrialMutation = useMutation({
+    mutationFn: async ({ subscriptionId, days }: { subscriptionId: string; days: number }) => {
+      const res = await apiRequest("POST", `/api/oss-admin/subscriptions/${subscriptionId}/extend-trial`, { days });
+      return res.json();
+    },
+    onSuccess: (_data, { days }) => {
+      toast({ title: t("ossAdmin.trialExtended", "Trial extended"), description: t("ossAdmin.trialExtendedDesc", `Trial extended by ${days} days.`) });
+      refetch();
+      setExtendingId(null);
+    },
+    onError: () => {
+      toast({ title: t("common.error", "Error"), description: t("ossAdmin.trialExtendFailed", "Failed to extend trial"), variant: "destructive" });
+      setExtendingId(null);
+    },
   });
 
   const PLAN_COLORS: Record<string, string> = {
@@ -1567,39 +1585,81 @@ function OssSubscriptionsPanel() {
             </div>
           ) : (
             <div className="divide-y">
-              {filteredSubscriptions.map((sub) => (
-                <div
-                  key={sub.subscriptionId}
-                  className="p-4"
-                  data-testid={`subscription-row-${sub.subscriptionId}`}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0 space-y-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-medium">{sub.companyName}</span>
-                        <Badge className={PLAN_COLORS[sub.planType] || "bg-secondary text-secondary-foreground"}>
-                          {sub.planType?.replace("_", " ").toUpperCase() || "N/A"}
-                        </Badge>
-                        {sub.isActive ? (
-                          <Badge className="bg-green-600 text-white">{t("ossAdmin.active", "Active")}</Badge>
-                        ) : (
-                          <Badge className="bg-red-600 text-white">{t("ossAdmin.inactive", "Inactive")}</Badge>
-                        )}
+              {filteredSubscriptions.map((sub) => {
+                const trialExpired = sub.trialEndsAt && new Date(sub.trialEndsAt) < new Date();
+                const isExtending = extendingId === sub.subscriptionId;
+                return (
+                  <div
+                    key={sub.subscriptionId}
+                    className="p-4"
+                    data-testid={`subscription-row-${sub.subscriptionId}`}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium">{sub.companyName}</span>
+                          <Badge className={PLAN_COLORS[sub.planType] || "bg-secondary text-secondary-foreground"}>
+                            {sub.planType?.replace("_", " ").toUpperCase() || "N/A"}
+                          </Badge>
+                          {sub.isActive && !trialExpired ? (
+                            <Badge className="bg-green-600 text-white">{t("ossAdmin.active", "Active")}</Badge>
+                          ) : trialExpired ? (
+                            <Badge className="bg-orange-500 text-white">{t("ossAdmin.trialExpired", "Trial Expired")}</Badge>
+                          ) : (
+                            <Badge className="bg-red-600 text-white">{t("ossAdmin.inactive", "Inactive")}</Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
+                          <span className="flex items-center gap-1">
+                            <Mail className="h-3 w-3" />
+                            {sub.email}
+                          </span>
+                          {sub.trialEndsAt && (
+                            <span className={`flex items-center gap-1 ${trialExpired ? "text-orange-500 font-medium" : ""}`}>
+                              <Calendar className="h-3 w-3" />
+                              {t("ossAdmin.trialEnds", "Trial ends")}: {formatDate(sub.trialEndsAt)}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {t("ossAdmin.created", "Created")}: {formatDate(sub.createdAt)}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
-                        <span className="flex items-center gap-1">
-                          <Mail className="h-3 w-3" />
-                          {sub.email}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {t("ossAdmin.created", "Created")}: {formatDate(sub.createdAt)}
-                        </span>
-                      </div>
+                      {sub.subscriptionId && (
+                        <div className="flex gap-2 flex-shrink-0">
+                          {isExtending ? (
+                            <div className="flex gap-1">
+                              {[14, 30, 60, 90].map((d) => (
+                                <Button
+                                  key={d}
+                                  size="sm"
+                                  variant="outline"
+                                  data-testid={`btn-extend-${d}-${sub.subscriptionId}`}
+                                  disabled={extendTrialMutation.isPending}
+                                  onClick={() => extendTrialMutation.mutate({ subscriptionId: sub.subscriptionId!, days: d })}
+                                >
+                                  +{d}d
+                                </Button>
+                              ))}
+                              <Button size="sm" variant="ghost" onClick={() => setExtendingId(null)}>✕</Button>
+                            </div>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              data-testid={`btn-extend-trial-${sub.subscriptionId}`}
+                              onClick={() => setExtendingId(sub.subscriptionId!)}
+                            >
+                              {t("ossAdmin.extendTrial", "Extend Trial")}
+                            </Button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </ScrollArea>

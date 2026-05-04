@@ -333,7 +333,9 @@ export function registerAdminRoutes(app: Express): void {
             companyName: owner.companyName || owner.name,
             email: owner.email,
             planType: subscription?.planType || null,
+            status: (subscription as any)?.status || null,
             isActive: subscription?.isActive || false,
+            trialEndsAt: subscription?.trialEndsAt || null,
             createdAt: subscription?.createdAt || owner.createdAt,
           };
         })
@@ -355,6 +357,32 @@ export function registerAdminRoutes(app: Express): void {
     } catch (error) {
       logger.error({ err: error }, "Error fetching subscriptions");
       res.status(500).json({ message: "Failed to fetch subscriptions" });
+    }
+  });
+
+  // OSS Admin: Extend trial for a subscription
+  app.post("/api/oss-admin/subscriptions/:subscriptionId/extend-trial", requireRole("oss_super_admin"), async (req, res) => {
+    try {
+      const subscriptionId = asString(req.params.subscriptionId);
+      const days = typeof req.body.days === "number" ? req.body.days : 30;
+
+      const { db: database } = await import("../db");
+      const { sql: rawSql } = await import("drizzle-orm");
+
+      await database.execute(rawSql`
+        UPDATE subscriptions
+        SET
+          trial_ends_at = NOW() + (${days} || ' days')::interval,
+          status = 'trial',
+          is_active = true
+        WHERE id = ${subscriptionId}
+      `);
+
+      logger.info({ subscriptionId, days }, "Trial extended by OSS admin");
+      res.json({ message: `Trial extended by ${days} days` });
+    } catch (error) {
+      logger.error({ err: error }, "Error extending trial");
+      res.status(500).json({ message: "Failed to extend trial" });
     }
   });
 
