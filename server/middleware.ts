@@ -256,9 +256,40 @@ export function requireActiveSubscription(req: Request, res: Response, next: Nex
 
     const sub = await storage.getSubscriptionByOwner(ownerId);
     if (!sub) {
+      // Check if any subscription exists (even inactive) before auto-creating
+      const anySub = await storage.getAnySubscriptionByOwner(ownerId);
+      if (!anySub) {
+        // No subscription ever created — auto-provision a 14-day trial so new hotels work immediately
+        try {
+          const { applyPlanFeatures } = await import("@shared/planFeatures");
+          const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+          const planDefaults = applyPlanFeatures("pro");
+          await storage.createSubscription({
+            ownerId,
+            planType: "trial",
+            planCode: "CORE_PRO",
+            ...planDefaults,
+            trialEndsAt,
+            isActive: true,
+            status: "trial",
+          } as any);
+          mwLogger.info({ ownerId }, "Auto-provisioned 14-day trial subscription");
+          return next();
+        } catch (e) {
+          mwLogger.error({ ownerId, err: e }, "Failed to auto-provision trial");
+          return res.status(402).json({
+            error: "SUBSCRIPTION_REQUIRED",
+            message: "No active subscription found. Please subscribe to continue.",
+          });
+        }
+      }
+      // Has a subscription record but it's inactive — show appropriate error
+      const anyStatus = (anySub as any).status || "expired";
       return res.status(402).json({
-        error: "SUBSCRIPTION_REQUIRED",
-        message: "No active subscription found. Please subscribe to continue.",
+        error: anyStatus === "suspended" ? "SUBSCRIPTION_SUSPENDED" : "SUBSCRIPTION_EXPIRED",
+        message: anyStatus === "suspended"
+          ? "Your subscription has been suspended due to failed payments. Please update your payment method."
+          : "Your trial has expired. Please contact us to renew your subscription.",
       });
     }
 

@@ -5459,14 +5459,15 @@ function BillingAddonsView() {
   const { t } = useTranslation();
   const { toast } = useToast();
 
-  const WHATSAPP_PACKAGES = [
-    { id: "wa_500", name: t("billing.wa.starter", "Starter"), messages: 500, priceUsd: 15, priceAZN: 26, description: t("billing.wa.starterDesc", "Perfect for small properties") },
-    { id: "wa_1000", name: t("billing.wa.growth", "Growth"), messages: 1000, priceUsd: 25, priceAZN: 43, description: t("billing.wa.growthDesc", "For growing hotels"), popular: true },
-    { id: "wa_3000", name: t("billing.wa.pro", "Pro"), messages: 3000, priceUsd: 60, priceAZN: 102, description: t("billing.wa.proDesc", "High-volume operations") },
+  const ALL_WHATSAPP_PACKAGES = [
+    { id: "wa_500", name: t("billing.wa.starter", "Starter"), messages: 500, priceUsd: 15, priceAZN: 26, description: t("billing.wa.starterDesc", "Perfect for small properties"), planCode: "CORE_STARTER" },
+    { id: "wa_1000", name: t("billing.wa.growth", "Growth"), messages: 1000, priceUsd: 25, priceAZN: 43, description: t("billing.wa.growthDesc", "For growing hotels"), planCode: "CORE_GROWTH" },
+    { id: "wa_3000", name: t("billing.wa.pro", "Pro"), messages: 3000, priceUsd: 60, priceAZN: 102, description: t("billing.wa.proDesc", "High-volume operations"), planCode: "CORE_PRO" },
   ];
 
   const { data: addonData, isLoading } = useQuery<{
     hotel: { id: string; name: string; isChannexEnabled: boolean; channexAddonPrice: number; channexRoomCount: number; isWhatsappEnabled: boolean; whatsappBalance: number };
+    planCode: string;
     packages: { id: string; name: string; messages: number; priceUsd: number }[];
     logs: { id: string; eventType: string; description: string; amountUsd: string; messagesAdded: number; packageName: string; createdAt: string }[];
   }>({ queryKey: ["/api/billing/addons"] });
@@ -5504,6 +5505,16 @@ function BillingAddonsView() {
 
   const hotel = addonData?.hotel;
   const logs = addonData?.logs ?? [];
+  const planCode = addonData?.planCode ?? "CORE_PRO";
+
+  // Show only the WhatsApp package matching the user's plan
+  const planToPackageId: Record<string, string> = {
+    CORE_STARTER: "wa_500",
+    CORE_GROWTH: "wa_1000",
+    CORE_PRO: "wa_3000",
+  };
+  const matchingPackageId = planToPackageId[planCode] ?? "wa_3000";
+  const visibleWhatsappPackages = ALL_WHATSAPP_PACKAGES.filter((p) => p.id === matchingPackageId);
 
   const balancePercent = hotel ? Math.min(100, ((hotel.whatsappBalance ?? 0) / 1000) * 100) : 0;
 
@@ -5522,11 +5533,11 @@ function BillingAddonsView() {
         <p className="text-muted-foreground mt-1">{t("billing.addons.subtitle", "Manage your active add-ons and purchase new services")}</p>
       </div>
 
-      {/* Active Subscriptions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Channex Add-on */}
+      {/* Active Subscriptions — 3-column grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Channel Manager */}
         <Card data-testid="card-channex-addon">
-          <CardContent className="p-5">
+          <CardContent className="p-5 flex flex-col gap-3">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-orange-500/10">
@@ -5534,15 +5545,15 @@ function BillingAddonsView() {
                 </div>
                 <div>
                   <h3 className="font-semibold">{t("billing.channex.title", "Channel Manager")}</h3>
-                  <p className="text-sm text-muted-foreground">{t("billing.channex.desc", "OTA sync with Booking.com, Airbnb & more")}</p>
+                  <p className="text-xs text-muted-foreground">{t("billing.channex.desc", "OTA sync with Booking.com, Airbnb & more")}</p>
                 </div>
               </div>
               <Badge variant={hotel?.isChannexEnabled ? "default" : "secondary"} data-testid="badge-channex-status">
                 {hotel?.isChannexEnabled ? t("billing.active", "Active") : t("billing.inactive", "Inactive")}
               </Badge>
             </div>
-            {hotel?.isChannexEnabled && (
-              <div className="mt-4 pt-3 border-t space-y-1 text-sm">
+            {hotel?.isChannexEnabled ? (
+              <div className="pt-2 border-t space-y-1 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("billing.channex.rooms", "Connected Rooms")}</span>
                   <span className="font-medium">{hotel.channexRoomCount}</span>
@@ -5552,16 +5563,23 @@ function BillingAddonsView() {
                   <span className="font-medium text-green-600">${hotel.channexAddonPrice}/mo</span>
                 </div>
               </div>
-            )}
-            {!hotel?.isChannexEnabled && (
-              <p className="text-xs text-muted-foreground mt-3">{t("billing.channex.contactUs", "Contact us to activate Channel Manager for your property.")}</p>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                className="mt-auto w-full"
+                onClick={() => window.open("mailto:support@ossaiproapp.com?subject=Channel Manager Activation Request")}
+                data-testid="button-channex-request"
+              >
+                {t("billing.channex.requestActivation", "Request Activation")}
+              </Button>
             )}
           </CardContent>
         </Card>
 
-        {/* WhatsApp Add-on status */}
+        {/* WhatsApp */}
         <Card data-testid="card-whatsapp-addon">
-          <CardContent className="p-5">
+          <CardContent className="p-5 flex flex-col gap-3">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-green-500/10">
@@ -5569,38 +5587,66 @@ function BillingAddonsView() {
                 </div>
                 <div>
                   <h3 className="font-semibold">{t("billing.wa.title", "WhatsApp Notifications")}</h3>
-                  <p className="text-sm text-muted-foreground">{t("billing.wa.desc", "Send automated guest messages via WhatsApp")}</p>
+                  <p className="text-xs text-muted-foreground">{t("billing.wa.desc", "Send automated guest messages via WhatsApp")}</p>
                 </div>
               </div>
               <Badge variant={hotel?.isWhatsappEnabled ? "default" : "secondary"} data-testid="badge-whatsapp-status">
                 {hotel?.isWhatsappEnabled ? t("billing.active", "Active") : t("billing.inactive", "Inactive")}
               </Badge>
             </div>
-            {hotel?.isWhatsappEnabled && (
-              <div className="mt-4 pt-3 border-t space-y-2">
+            {hotel?.isWhatsappEnabled ? (
+              <div className="pt-2 border-t space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{t("billing.wa.remainingMessages", "Remaining Messages")}</span>
                   <span className="font-semibold" data-testid="text-whatsapp-balance">{hotel.whatsappBalance ?? 0}</span>
                 </div>
                 <Progress value={balancePercent} className="h-2" data-testid="progress-whatsapp-balance" />
               </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">{t("billing.wa.purchaseToActivate", "Purchase a package below to activate WhatsApp notifications.")}</p>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Smart Room */}
+        <Card data-testid="card-smart-room-addon">
+          <CardContent className="p-5 flex flex-col gap-3">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-500/10">
+                  <Wifi className="h-5 w-5 text-blue-500" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">{t("billing.smartRoom.title", "Smart Room")}</h3>
+                  <p className="text-xs text-muted-foreground">{t("billing.smartRoom.desc", "IoT controls: lighting, curtains, HVAC & more")}</p>
+                </div>
+              </div>
+              <Badge variant="secondary">{t("billing.addon", "Add-on")}</Badge>
+            </div>
+            <div className="text-sm text-muted-foreground space-y-1 pt-1 border-t">
+              <p className="font-medium text-foreground">{t("billing.smartRoom.pricingTitle", "From 49.30 ₼ / room / mo")}</p>
+              <p className="text-xs">{t("billing.smartRoom.pricingDesc", "Smart Lite plan — temperature, lighting, curtains")}</p>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="mt-auto w-full"
+              onClick={() => window.open("mailto:support@ossaiproapp.com?subject=Smart Room Addon Request")}
+              data-testid="button-smart-room-request"
+            >
+              {t("billing.smartRoom.requestActivation", "Request Smart Room")}
+            </Button>
           </CardContent>
         </Card>
       </div>
 
-      {/* WhatsApp Package Purchase */}
+      {/* WhatsApp Package Purchase — only matching plan package */}
       <div>
         <h3 className="text-lg font-semibold mb-1">{t("billing.wa.purchaseTitle", "Purchase WhatsApp Package")}</h3>
         <p className="text-sm text-muted-foreground mb-4">{t("billing.wa.purchaseSubtitle", "Top up your WhatsApp message balance")}</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {WHATSAPP_PACKAGES.map((pkg) => (
-            <Card key={pkg.id} className={`relative ${pkg.popular ? "border-primary ring-1 ring-primary" : ""}`} data-testid={`card-package-${pkg.id}`}>
-              {pkg.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-primary text-primary-foreground text-xs px-2 py-0.5">{t("billing.popular", "Most Popular")}</Badge>
-                </div>
-              )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg">
+          {visibleWhatsappPackages.map((pkg) => (
+            <Card key={pkg.id} className="border-primary ring-1 ring-primary" data-testid={`card-package-${pkg.id}`}>
               <CardContent className="p-5 text-center space-y-3">
                 <div>
                   <h4 className="font-bold text-base">{pkg.name}</h4>
@@ -5613,7 +5659,6 @@ function BillingAddonsView() {
                 </div>
                 <Button
                   className="w-full"
-                  variant={pkg.popular ? "default" : "outline"}
                   onClick={() => purchaseMutation.mutate(pkg.id)}
                   disabled={purchaseMutation.isPending}
                   data-testid={`button-purchase-${pkg.id}`}

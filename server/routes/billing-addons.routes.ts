@@ -16,7 +16,12 @@ export function registerBillingAddonRoutes(app: Express) {
       const user = await storage.getUser(req.session.userId!);
       if (!user) return res.status(401).json({ error: "Unauthorized" });
 
-      const tenantId = req.session.demoSessionTenantId || user.tenantId || user.ownerId || null;
+      // For demo sessions: demoSessionTenantId is a random UUID; hotels are stored by real ownerId
+      // So we must prefer user.ownerId over the random demo session tenant ID
+      const isDemo = user.username?.startsWith("demo_");
+      const tenantId = isDemo
+        ? (user.ownerId || user.tenantId || null)
+        : (req.session.demoSessionTenantId || user.tenantId || user.ownerId || null);
       if (!tenantId) return res.status(403).json({ error: "No tenant" });
 
       const hotels = await storage.getAllHotels(tenantId);
@@ -24,6 +29,16 @@ export function registerBillingAddonRoutes(app: Express) {
       if (!hotel) return res.status(404).json({ error: "Hotel not found" });
 
       const logs = await storage.getBillingLogsByTenant(tenantId);
+
+      // Get planCode for the tenant
+      let planCode = "CORE_STARTER";
+      try {
+        const ownerId = hotel.ownerId || tenantId;
+        if (ownerId) {
+          const sub = await storage.getSubscriptionByOwner(ownerId) || await storage.getAnySubscriptionByOwner(ownerId);
+          if (sub?.planCode) planCode = sub.planCode;
+        }
+      } catch (_) {}
 
       return res.json({
         hotel: {
@@ -35,6 +50,7 @@ export function registerBillingAddonRoutes(app: Express) {
           isWhatsappEnabled: hotel.isWhatsappEnabled ?? false,
           whatsappBalance: hotel.whatsappBalance ?? 0,
         },
+        planCode,
         packages: WHATSAPP_PACKAGES,
         logs: logs.slice(-20).reverse(),
       });

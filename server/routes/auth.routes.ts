@@ -987,9 +987,9 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
         planCode: resolvedPlanCode,
         ...planDefaults,
         trialEndsAt: isAbuseEmail ? null : trialEndsAt,
-        isActive: !isAbuseEmail, // Abuse accounts start inactive, must pay first
-        ...(isAbuseEmail ? { status: "expired" } : {}),
-      });
+        isActive: !isAbuseEmail,
+        status: isAbuseEmail ? "expired" : "trial",
+      } as any);
 
       const hotel = await storage.createHotel({
         name: hotelData.name,

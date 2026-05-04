@@ -14,7 +14,6 @@ import crypto from "crypto";
 import { db } from "../db";
 import { pool } from "../db";
 import { eq } from "drizzle-orm";
-import { logger } from "../utils/logger";
 
 export function registerSaasRoutes(app: Express): void {
 
@@ -224,7 +223,7 @@ export function registerSaasRoutes(app: Express): void {
     try {
       const user = await storage.getUser(req.session.userId!);
       if (user?.username?.startsWith("demo_")) {
-        return res.json({ planType: "enterprise", smartPlanType: "smart_ai", isTrial: false, isExpired: false, isActive: true, remainingDays: 0 });
+        return res.json({ planType: "enterprise", planCode: "CORE_PRO", smartPlanType: "smart_ai", isTrial: false, isExpired: false, isActive: true, remainingDays: 0 });
       }
       if (!user?.ownerId) return res.status(403).json({ error: "PLAN_LIMIT", message: "No owner account found." });
       

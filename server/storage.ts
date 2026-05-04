@@ -272,6 +272,7 @@ export interface IStorage {
   // Subscriptions
   getSubscription(id: string): Promise<Subscription | undefined>;
   getSubscriptionByOwner(ownerId: string): Promise<Subscription | undefined>;
+  getAnySubscriptionByOwner(ownerId: string): Promise<Subscription | undefined>;
   getSubscriptionsDueForRenewal(): Promise<Subscription[]>;
   createSubscription(subscription: InsertSubscription): Promise<Subscription>;
   updateSubscription(id: string, updates: Partial<Subscription>): Promise<Subscription | undefined>;
@@ -808,6 +809,14 @@ export class DatabaseStorage implements IStorage {
       );
   }
 
+  async getAnySubscriptionByOwner(ownerId: string): Promise<Subscription | undefined> {
+    const result = await db.select().from(subscriptions)
+      .where(eq(subscriptions.ownerId, ownerId))
+      .orderBy(desc(subscriptions.createdAt))
+      .limit(1);
+    return result[0];
+  }
+
   async createSubscription(subscription: InsertSubscription): Promise<Subscription> {
     const result = await db.insert(subscriptions).values(subscription).returning();
     return result[0];
@@ -841,7 +850,7 @@ export class DatabaseStorage implements IStorage {
 
   async getAllHotels(tenantId: string): Promise<Hotel[]> {
     return db.select().from(hotels)
-      .where(eq(hotels.tenantId, tenantId))
+      .where(or(eq(hotels.tenantId, tenantId), eq(hotels.ownerId, tenantId)))
       .orderBy(desc(hotels.createdAt));
   }
 
