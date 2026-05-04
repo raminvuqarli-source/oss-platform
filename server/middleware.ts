@@ -29,6 +29,11 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
     }
   }
 
+  // Demo sessions require a valid tab-specific token — if none present, reject
+  if (req.session.demoSessionTenantId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
   if (!req.session.userId) {
     return res.status(401).json({ message: "Unauthorized" });
   }
@@ -45,6 +50,11 @@ export function authenticateRequest(req: Request, res: Response, next: NextFunct
       req.session.demoSessionTenantId = tokenData.demoSessionTenantId;
       return next();
     }
+  }
+
+  // Demo sessions require a valid tab-specific token — if none present, reject
+  if (req.session.demoSessionTenantId) {
+    return res.status(401).json({ message: "Unauthorized" });
   }
 
   if (req.session.userId) {
