@@ -9,6 +9,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { DashboardLayout } from "@/components/dashboard-layout";
+import { DashboardRouter } from "@/components/dashboard-router";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -87,54 +88,6 @@ function TrialExpiredGuard({ children }: { children: React.ReactNode }) {
   }
 
   return <>{children}</>;
-}
-
-function OwnerDashboardWithOnboarding() {
-  const { data: onboarding, isLoading } = useQuery<{ isComplete?: boolean; currentStep?: number }>({
-    queryKey: ["/api/onboarding"],
-  });
-
-  if (isLoading) return <PageLoader />;
-
-  if (!onboarding?.isComplete) {
-    return <OnboardingWizard />;
-  }
-
-  return <OwnerDashboard />;
-}
-
-function DashboardRouter() {
-  const { user } = useAuth();
-
-  if (!user) return null;
-
-  switch (user.role) {
-    case "reception":
-      return <ReceptionDashboard />;
-    case "staff":
-      return <HousekeepingDashboard />;
-    case "admin":
-    case "property_manager":
-      return <AdminDashboard />;
-    case "owner_admin":
-      return <OwnerDashboardWithOnboarding />;
-    case "oss_super_admin":
-      return <Redirect to="/oss-admin" />;
-    case "kitchen_staff":
-      return <Redirect to="/restaurant/kitchen" />;
-    case "waiter":
-      return <Redirect to="/restaurant/waiter" />;
-    case "restaurant_manager":
-      return <Redirect to="/restaurant/manager" />;
-    case "restaurant_cleaner":
-      return <Redirect to="/restaurant/cleaner" />;
-    case "restaurant_cashier":
-      return <Redirect to="/restaurant/cashier" />;
-    case "marketing_staff":
-      return <Redirect to="/marketing" />;
-    default:
-      return <GuestDashboard />;
-  }
 }
 
 // OSS Super Admin route with strict role check - isolated from tenant dashboards

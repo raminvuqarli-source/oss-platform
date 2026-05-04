@@ -3,7 +3,7 @@ import { useSearch } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest, setDemoToken } from "@/lib/queryClient";
 import { DashboardLayout } from "@/components/dashboard-layout";
-import DashboardRouter from "@/pages/dashboard-router";
+import { DashboardRouter } from "@/components/dashboard-router";
 import { Building2, Loader2 } from "lucide-react";
 import { useLocation } from "wouter";
 
