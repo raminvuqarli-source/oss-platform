@@ -184,25 +184,19 @@ export default function OnboardingWizard() {
           completedSteps: [1, 2],
         });
       } else if (currentStep === 3) {
-        const propId = createdPropertyId || existingProperties?.[0]?.id;
-        if (propId) {
-          const taxRate = parseFloat(countryTaxRate) || 0;
-          const utilityPct = parseFloat(utilityExpensePct) || 0;
-          const cleaningMonthly = parseFloat(cleaningExpenseMonthly) || 0;
-          const empTaxRate = parseFloat(defaultEmployeeTaxRate) || 0;
-          const additionalMonthly = parseFloat(additionalExpensesMonthly) || 0;
-          await apiRequest("PATCH", `/api/properties/${propId}`, {
-            countryTaxRate: Math.round(taxRate),
-            utilityExpensePct: Math.round(utilityPct),
-            cleaningExpenseMonthly: Math.round(cleaningMonthly * 100),
-            defaultEmployeeTaxRate: Math.round(empTaxRate),
-            additionalExpensesMonthly: Math.round(additionalMonthly * 100),
-          });
-        }
-        await updateProgressMutation.mutateAsync({
-          currentStep: 4,
-          completedSteps: [1, 2, 3],
+        const taxRate = parseFloat(countryTaxRate) || 0;
+        const utilityPct = parseFloat(utilityExpensePct) || 0;
+        const cleaningMonthly = parseFloat(cleaningExpenseMonthly) || 0;
+        const empTaxRate = parseFloat(defaultEmployeeTaxRate) || 0;
+        const additionalMonthly = parseFloat(additionalExpensesMonthly) || 0;
+        await apiRequest("POST", "/api/onboarding/financial", {
+          countryTaxRate: Math.round(taxRate),
+          utilityExpensePct: Math.round(utilityPct),
+          cleaningExpenseMonthly: Math.round(cleaningMonthly * 100),
+          defaultEmployeeTaxRate: Math.round(empTaxRate),
+          additionalExpensesMonthly: Math.round(additionalMonthly * 100),
         });
+        queryClient.invalidateQueries({ queryKey: ["/api/onboarding"] });
       } else if (currentStep === 4) {
         const propId = createdPropertyId || existingProperties?.[0]?.id;
         const validStaff = staffMembers.filter((s) => s.email.trim().length > 0);

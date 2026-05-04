@@ -512,6 +512,42 @@ export function registerSaasRoutes(app: Express): void {
     }
   });
 
+  app.post("/api/onboarding/financial", authenticateRequest, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user?.ownerId) return res.status(400).json({ message: "No owner account" });
+
+      const {
+        countryTaxRate,
+        utilityExpensePct,
+        cleaningExpenseMonthly,
+        defaultEmployeeTaxRate,
+        additionalExpensesMonthly,
+      } = req.body;
+
+      const properties = await storage.getPropertiesByOwner(user.ownerId);
+      if (properties.length > 0) {
+        await storage.updateProperty(properties[0].id, {
+          countryTaxRate: countryTaxRate ?? 0,
+          utilityExpensePct: utilityExpensePct ?? 0,
+          cleaningExpenseMonthly: cleaningExpenseMonthly ?? 0,
+          defaultEmployeeTaxRate: defaultEmployeeTaxRate ?? 0,
+          additionalExpensesMonthly: additionalExpensesMonthly ?? 0,
+        });
+      }
+
+      const progress = await storage.upsertOnboardingProgress({
+        ownerId: user.ownerId,
+        currentStep: 4,
+        completedSteps: [1, 2, 3],
+      });
+      res.json(progress);
+    } catch (error) {
+      logger.error({ err: error }, "Onboarding financial error");
+      res.status(500).json({ message: "Failed to save financial settings" });
+    }
+  });
+
   app.post("/api/onboarding/smart", authenticateRequest, async (req, res) => {
     try {
       const parsed = smartSchema.safeParse(req.body);
