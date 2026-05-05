@@ -152,22 +152,31 @@ export function registerChatRoutes(app: Express): void {
       });
 
       try {
-        const staffName = user.fullName || "Staff";
+        const staffName = user.fullName || "Resepsiyon";
         const shortMsg = message.trim().length > 50 ? message.trim().substring(0, 50) + "..." : message.trim();
+        const notifTitle = `💬 ${staffName} mesaj göndərdi`;
         await storage.createNotification({
           userId: guestId,
           tenantId: user.tenantId || null,
-          title: `New message from ${staffName}`,
+          title: notifTitle,
           message: shortMsg,
           type: "chat",
-          actionUrl: "/guest/chat",
+          actionUrl: "/guest-dashboard?view=messages",
+        });
+        // Real-time WebSocket push to guest
+        broadcastToUser(String(guestId), {
+          type: "new_notification",
+          title: notifTitle,
+          message: shortMsg,
+          actionUrl: "/guest-dashboard?view=messages",
         });
         sendPushNotification({
           userIds: [String(guestId)],
-          title: `New message from ${staffName}`,
+          title: notifTitle,
           message: shortMsg,
           data: { type: "chat" },
         }).catch(err => logger.error({ err }, "OneSignal push error"));
+        logger.info({ guestId }, "Chat notification sent to guest");
       } catch (notifError) {
         logger.error({ err: notifError }, "Error creating guest chat notification");
       }

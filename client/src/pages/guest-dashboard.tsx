@@ -231,6 +231,55 @@ export default function GuestDashboard() {
     }
   }, [searchString]);
 
+  // Real-time WebSocket for instant notifications from reception
+  useEffect(() => {
+    let ws: WebSocket | null = null;
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+    let mounted = true;
+
+    function connect() {
+      if (!mounted) return;
+      fetch("/api/ws-token", { credentials: "include" })
+        .then(r => r.ok ? r.json() : null)
+        .catch(() => null)
+        .then(data => {
+          if (!mounted) return;
+          try {
+            const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+            const tokenParam = data?.token ? `&wsToken=${encodeURIComponent(data.token)}` : "";
+            ws = new WebSocket(`${protocol}//${window.location.host}/ws/devices?type=dashboard${tokenParam}`);
+
+            ws.onmessage = (event) => {
+              try {
+                const msg = JSON.parse(event.data as string);
+                if (msg.type === "new_notification") {
+                  queryClient.invalidateQueries({ queryKey: ["/api/chat/messages"] });
+                  queryClient.invalidateQueries({ queryKey: ["/api/service-requests"] });
+                  if (msg.title) {
+                    toast({ title: msg.title, description: msg.message, duration: 6000 });
+                  }
+                }
+              } catch {}
+            };
+
+            ws.onclose = () => {
+              if (!mounted) return;
+              reconnectTimer = setTimeout(() => { if (mounted) connect(); }, 5000);
+            };
+
+            ws.onerror = () => { ws?.close(); };
+          } catch {}
+        });
+    }
+
+    connect();
+    return () => {
+      mounted = false;
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      if (ws) { ws.onclose = null; ws.close(); }
+    };
+  }, [toast]);
+
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatInputRef = useRef<HTMLInputElement>(null);
 
