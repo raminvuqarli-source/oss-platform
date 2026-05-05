@@ -342,7 +342,7 @@ export default function StaffList() {
     currentUser?.role === "owner_admin" ||
     currentUser?.role === "oss_super_admin";
 
-  const canDeleteStaff = currentUser?.role === "owner_admin" || currentUser?.role === "oss_super_admin";
+  const canDeleteStaff = currentUser?.role === "owner_admin" || currentUser?.role === "oss_super_admin" || currentUser?.role === "admin";
 
   return (
     <div className="p-6 space-y-6 max-w-5xl mx-auto">
