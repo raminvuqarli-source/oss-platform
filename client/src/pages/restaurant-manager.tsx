@@ -179,7 +179,7 @@ export default function RestaurantManager() {
     editingCategory ? updateCategory.mutate({ id: editingCategory.id, data: payload }) : createCategory.mutate(payload);
   }
   function handleItemSubmit() {
-    const payload = { name: itemForm.name, description: itemForm.description || null, priceCents: Number(itemForm.priceCents), categoryId: itemForm.categoryId || null };
+    const payload = { name: itemForm.name, description: itemForm.description || null, priceCents: Number(itemForm.priceCents), categoryId: (itemForm.categoryId && itemForm.categoryId !== "none") ? itemForm.categoryId : null };
     editingItem ? updateItem.mutate({ id: editingItem.id, data: payload }) : createItem.mutate(payload);
   }
   function openWaiterEdit(waiter: any) {
@@ -653,7 +653,7 @@ export default function RestaurantManager() {
               <Select value={itemForm.categoryId} onValueChange={v => setItemForm(f => ({ ...f, categoryId: v }))}>
                 <SelectTrigger data-testid="select-item-category"><SelectValue placeholder="Kateqoriya seçin" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("rm.categoryNone")}</SelectItem>
+                  <SelectItem value="none">{t("rm.categoryNone")}</SelectItem>
                   {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -761,7 +761,7 @@ export default function RestaurantManager() {
                 <Select value={cleaningForm.assignedToId} onValueChange={v => setCleaningForm(f => ({ ...f, assignedToId: v }))}>
                   <SelectTrigger data-testid="select-cleaning-worker"><SelectValue placeholder="İşçi seçin (istəyə görə)" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">{t("rm.noCleaner")}</SelectItem>
+                    <SelectItem value="none">{t("rm.noCleaner")}</SelectItem>
                     {cleaners.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.fullName}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -770,7 +770,7 @@ export default function RestaurantManager() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCleaningTaskDialog(false)}>{t("rm.cancel")}</Button>
-            <Button onClick={() => createCleaningTask.mutate({ description: cleaningForm.description, location: cleaningForm.location || null, assignedToId: cleaningForm.assignedToId || null })} disabled={createCleaningTask.isPending || !cleaningForm.description} data-testid="button-save-cleaning-task">
+            <Button onClick={() => createCleaningTask.mutate({ description: cleaningForm.description, location: cleaningForm.location || null, assignedToId: (cleaningForm.assignedToId && cleaningForm.assignedToId !== "none") ? cleaningForm.assignedToId : null })} disabled={createCleaningTask.isPending || !cleaningForm.description} data-testid="button-save-cleaning-task">
               {createCleaningTask.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : t("rm.create")}
             </Button>
           </DialogFooter>
