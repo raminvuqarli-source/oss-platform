@@ -14,6 +14,15 @@ function requireRestaurantRole(...roles: string[]) {
   return requireRole(...(roles as [string, ...string[]]));
 }
 
+async function resolvePropertyId(user: { propertyId?: string | null; hotelId?: string | null }): Promise<string | null> {
+  if (user.propertyId) return user.propertyId;
+  if (user.hotelId) {
+    const hotel = await storage.getHotel(user.hotelId);
+    if (hotel?.propertyId) return hotel.propertyId;
+  }
+  return null;
+}
+
 export function registerRestaurantRoutes(app: Express): void {
 
   // ─── MENU CATEGORIES ─────────────────────────────────────────────────
@@ -21,9 +30,11 @@ export function registerRestaurantRoutes(app: Express): void {
   app.get("/api/restaurant/menu", requireAuth, async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
-      if (!user?.propertyId) return res.status(400).json({ message: "No property linked" });
-      const categories = await storage.getPosMenuCategories(user.propertyId);
-      const items = await storage.getPosMenuItems(user.propertyId);
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      const propertyId = await resolvePropertyId(user);
+      if (!propertyId) return res.status(400).json({ message: "No property linked" });
+      const categories = await storage.getPosMenuCategories(propertyId);
+      const items = await storage.getPosMenuItems(propertyId);
       res.json({ categories, items });
     } catch (err) {
       logger.error({ err }, "Failed to fetch restaurant menu");
@@ -120,7 +131,9 @@ export function registerRestaurantRoutes(app: Express): void {
   app.post("/api/restaurant/orders", requireAuth, async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
-      if (!user?.propertyId) return res.status(400).json({ message: "No property linked" });
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      const propertyId = await resolvePropertyId(user);
+      if (!propertyId) return res.status(400).json({ message: "No property linked" });
 
       const { tableNumber, roomNumber, orderType, guestName, bookingId, notes, items } = req.body;
       if (!items || items.length === 0) return res.status(400).json({ message: "Order must have at least one item" });
@@ -131,7 +144,7 @@ export function registerRestaurantRoutes(app: Express): void {
       const order = await storage.createPosOrder(
         {
           tenantId: user.tenantId || user.ownerId || "",
-          propertyId: user.propertyId,
+          propertyId,
           tableNumber: tableNumber || null,
           roomNumber: roomNumber || null,
           orderType: orderType || (tableNumber ? "dine_in" : "room_delivery"),
@@ -152,13 +165,13 @@ export function registerRestaurantRoutes(app: Express): void {
         }))
       );
 
-      broadcastToProperty(user.propertyId, {
+      broadcastToProperty(propertyId, {
         type: "RESTAURANT_NEW_ORDER",
         order: { ...order, items: orderItems },
         timestamp: new Date().toISOString(),
       });
 
-      logger.info({ orderId: order.id, propertyId: user.propertyId }, "New restaurant order created");
+      logger.info({ orderId: order.id, propertyId }, "New restaurant order created");
       res.status(201).json(order);
     } catch (err) {
       logger.error({ err }, "Failed to create order");
@@ -296,19 +309,21 @@ export function registerRestaurantRoutes(app: Express): void {
   app.post("/api/restaurant/waiter-call", requireAuth, async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
-      if (!user?.propertyId) return res.status(400).json({ message: "No property linked" });
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      const propertyId = await resolvePropertyId(user);
+      if (!propertyId) return res.status(400).json({ message: "No property linked" });
 
       const { tableNumber, roomNumber, bookingId } = req.body;
       const call = await storage.createWaiterCall({
         tenantId: user.tenantId || user.ownerId || "",
-        propertyId: user.propertyId,
+        propertyId,
         tableNumber: tableNumber || null,
         roomNumber: roomNumber || null,
         bookingId: bookingId || null,
         status: "pending",
       });
 
-      broadcastToProperty(user.propertyId, {
+      broadcastToProperty(propertyId, {
         type: "RESTAURANT_CALL_WAITER",
         call,
         guestName: user.fullName,
@@ -403,7 +418,7 @@ export function registerRestaurantRoutes(app: Express): void {
       if (!description) return res.status(400).json({ message: "Description is required" });
       const task = await storage.createRestaurantCleaningTask({
         tenantId: user.tenantId || user.ownerId || "",
-        propertyId: user.propertyId,
+        propertyId: user.propertyId!,
         description,
         location: location || null,
         assignedToId: assignedToId || null,
@@ -411,7 +426,7 @@ export function registerRestaurantRoutes(app: Express): void {
         status: "pending",
       });
 
-      broadcastToProperty(user.propertyId, {
+      broadcastToProperty(user.propertyId!, {
         type: "RESTAURANT_CLEANING_TASK_CREATED",
         task,
         timestamp: new Date().toISOString(),
