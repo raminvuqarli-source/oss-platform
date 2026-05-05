@@ -2289,8 +2289,24 @@
       "card": "Card",
       "bank_transfer": "Bank Transfer",
       "online_payment": "Online Payment",
-      "ota_prepaid": "OTA Prepaid"
+      "ota_prepaid": "OTA Prepaid",
+      "booking_platform": "Booking Platform"
     }
+  },
+  "payment": {
+    "title": "Payment",
+    "status": "Payment Status",
+    "method": "Method",
+    "selectMethod": "How would you like to pay?",
+    "alreadyPaidOnline": "Already paid via booking platform",
+    "alreadyPaidOnlineDesc": "Paid through Booking.com, Airbnb, Expedia, etc.",
+    "payCashAtHotel": "Pay cash at the hotel",
+    "payCashAtHotelDesc": "You'll pay when you arrive",
+    "payNowByCard": "Pay now by card",
+    "payNowByCardDesc": "Secure online payment",
+    "preferenceRecorded": "Payment preference recorded",
+    "alreadyPaid": "This booking is already paid",
+    "amountError": "Payment amount could not be determined"
   },
   "languageSwitcher": {
     "switchLanguage": "Switch language"

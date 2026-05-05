@@ -445,6 +445,7 @@ export const bookings = pgTable("bookings", {
   discount: integer("discount"),
   travelAgencyName: text("travel_agency_name"),
   paymentStatus: text("payment_status").default("unpaid"),
+  paymentMethod: text("payment_method"),
   guestSignatureBase64: text("guest_signature_base64"),
   idDocumentBase64: text("id_document_base64"),
   ownerId: varchar("owner_id"),

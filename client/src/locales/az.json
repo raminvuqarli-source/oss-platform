@@ -2284,8 +2284,24 @@
       "card": "Kart",
       "bank_transfer": "Bank Köçürməsi",
       "online_payment": "Onlayn Ödəniş",
-      "ota_prepaid": "OTA Əvvəlcədən Ödənilmiş"
+      "ota_prepaid": "OTA Əvvəlcədən Ödənilmiş",
+      "booking_platform": "Rezervasiya Platforması"
     }
+  },
+  "payment": {
+    "title": "Ödəniş",
+    "status": "Ödəniş Statusu",
+    "method": "Üsul",
+    "selectMethod": "Necə ödəmək istəyirsiniz?",
+    "alreadyPaidOnline": "Rezervasiya platforması vasitəsilə ödənilib",
+    "alreadyPaidOnlineDesc": "Booking.com, Airbnb, Expedia və s. vasitəsilə ödənilib",
+    "payCashAtHotel": "Oteldə nağd ödəniş",
+    "payCashAtHotelDesc": "Gəldiyinizdə ödəyəcəksiniz",
+    "payNowByCard": "İndi kartla ödə",
+    "payNowByCardDesc": "Təhlükəsiz onlayn ödəniş",
+    "preferenceRecorded": "Ödəniş üsulu qeydə alındı",
+    "alreadyPaid": "Bu rezervasiya artıq ödənilib",
+    "amountError": "Ödəniş məbləği müəyyən edilə bilmir"
   },
   "languageSwitcher": {
     "switchLanguage": "Dili dəyiş"

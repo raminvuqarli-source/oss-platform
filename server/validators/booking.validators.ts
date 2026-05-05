@@ -25,6 +25,7 @@ export const updateBookingSchema = z.object({
   discount: z.number().int().nullable().optional(),
   travelAgencyName: z.string().nullable().optional(),
   paymentStatus: z.string().nullable().optional(),
+  paymentMethod: z.string().nullable().optional(),
   unitId: z.string().nullable().optional(),
   ratePlanId: z.string().nullable().optional(),
 }).passthrough();

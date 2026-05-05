@@ -369,7 +369,7 @@ function ReceptionCalendarView() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-medium">{t('common.room', 'Room')} {booking.roomNumber}</span>
+                          <span className="font-medium">{t('common.room', 'Room')} {getRoomLabel(booking)}</span>
                           <Badge variant="default" className="text-xs">{t('calendar.checkIn', 'Check-in')}</Badge>
                           <Badge variant={booking.status === "confirmed" ? "secondary" : "outline"} className="text-xs">
                             {t(`common.${booking.status}`, booking.status)}
@@ -392,7 +392,7 @@ function ReceptionCalendarView() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-medium">{t('common.room', 'Room')} {booking.roomNumber}</span>
+                          <span className="font-medium">{t('common.room', 'Room')} {getRoomLabel(booking)}</span>
                           <Badge variant="outline" className="text-xs">{t('calendar.checkOut', 'Check-out')}</Badge>
                         </div>
                         <p className="text-sm text-muted-foreground mt-1">
@@ -1094,8 +1094,15 @@ export default function ReceptionDashboard() {
 
   const { data: availableUnits = [], isLoading: unitsLoading } = useQuery<RoomUnit[]>({
     queryKey: ["/api/units/status"],
-    enabled: addGuestOpen,
   });
+
+  const getRoomLabel = (booking: { roomNumber: string; unitId?: string | null }) => {
+    if (booking.unitId) {
+      const unit = availableUnits.find(u => u.id === booking.unitId);
+      if (unit?.name) return `${unit.name} (${unit.unitNumber})`;
+    }
+    return booking.roomNumber;
+  };
   const [guestDetailOpen, setGuestDetailOpen] = useState(false);
   const [selectedGuestId, setSelectedGuestId] = useState<string | null>(null);
   // Convert local Date → YYYY-MM-DD without UTC shift
@@ -1940,6 +1947,23 @@ export default function ReceptionDashboard() {
         </Card>
       </div>
 
+      {arrivalInfoRequests.length > 0 && !currentView && (
+        <Card className="border-green-500/40 bg-green-500/5 cursor-pointer" onClick={() => {}} data-testid="banner-precheck">
+          <CardContent className="p-3 flex items-center gap-3">
+            <div className="p-2 rounded-md bg-green-500/10 shrink-0">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-green-700 dark:text-green-400">
+                {arrivalInfoRequests.filter(b => b.status === "precheck_submitted").length > 0
+                  ? `${arrivalInfoRequests.filter(b => b.status === "precheck_submitted").length} ${t('dashboard.reception.precheckPending', 'guest(s) submitted Online Check-in — review in Arrival Info tab')}`
+                  : `${arrivalInfoRequests.length} ${t('dashboard.reception.arrivalInfoPending', 'guest(s) sent arrival info — see Arrival Info tab')}`}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {currentView === "tasks" ? (
         <ReceptionTasksView />
       ) : currentView === "calendar" ? (
@@ -2024,7 +2048,7 @@ export default function ReceptionDashboard() {
                             <div className="flex items-center gap-2">
                               <DoorOpen className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                               <span className="text-muted-foreground">{t('common.room', 'Room')}:</span>
-                              <span className="font-medium">{booking.roomNumber}</span>
+                              <span className="font-medium">{getRoomLabel(booking)}</span>
                             </div>
                             {booking.arrivalTime && (
                               <div className="flex items-center gap-2">
@@ -2893,7 +2917,7 @@ export default function ReceptionDashboard() {
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
                     <p className="text-muted-foreground text-xs">Otaq</p>
-                    <p className="font-medium">{precheckDetailBooking.roomNumber}</p>
+                    <p className="font-medium">{getRoomLabel(precheckDetailBooking)}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">Pasport nömrəsi</p>

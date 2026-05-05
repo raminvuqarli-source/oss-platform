@@ -101,6 +101,9 @@ async function runSafetyPatches(): Promise<void> {
   startupLog.info("Running safety schema patches...");
   const client = await pool.connect();
   try {
+    // Patch bookings table: add any missing columns
+    await client.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_method text`);
+
     // Patch hotels table: add any missing columns
     await client.query(`ALTER TABLE hotels ADD COLUMN IF NOT EXISTS is_channex_enabled boolean NOT NULL DEFAULT false`);
     await client.query(`ALTER TABLE hotels ADD COLUMN IF NOT EXISTS channex_property_uuid text`);

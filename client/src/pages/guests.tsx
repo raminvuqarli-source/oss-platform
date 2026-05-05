@@ -890,17 +890,11 @@ function GuestProfile({ guestId, onBack }: { guestId: string; onBack: () => void
                      (booking as any).paymentStatus === "failed" ? t('guests.paymentStatuses.failed') : t('guests.paymentStatuses.unpaid')}
                   </Badge>
                 </div>
-                {(booking as any).paymentStatus !== "paid" && (
-                  <Button
-                    size="sm"
-                    className="w-full mt-2"
-                    onClick={() => paymentMutation.mutate()}
-                    disabled={paymentMutation.isPending}
-                    data-testid="button-pay-now"
-                  >
-                    <CreditCard className="h-4 w-4 mr-1" />
-                    {paymentMutation.isPending ? t('common.loading') : t('guests.payNow')}
-                  </Button>
+                {(booking as any).paymentMethod && (
+                  <div className="flex justify-between items-center flex-wrap gap-1">
+                    <span className="text-muted-foreground">{t('guests.paymentMethod')}</span>
+                    <span className="text-xs font-medium capitalize">{t(`guests.paymentMethods.${(booking as any).paymentMethod}`, (booking as any).paymentMethod?.replace(/_/g, ' '))}</span>
+                  </div>
                 )}
               </div>
             </CardContent>

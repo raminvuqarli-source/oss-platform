@@ -52,6 +52,9 @@ import {
   LightbulbOff,
   XCircle,
   Bell,
+  CreditCard,
+  Banknote,
+  Globe,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -206,6 +209,135 @@ function SmartExtraCard({
   );
 }
 
+
+function PaymentSection({ booking }: { booking: Booking }) {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const [selected, setSelected] = useState<string | null>(null);
+
+  const preferenceMutation = useMutation({
+    mutationFn: async (method: string) => {
+      const res = await apiRequest("PATCH", `/api/bookings/${booking.id}`, { paymentMethod: method });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/bookings/current"] });
+      toast({ title: t('payment.preferenceRecorded', 'Payment preference recorded') });
+    },
+    onError: (err: Error) => showErrorToast(toast, err),
+  });
+
+  const cardPayMutation = useMutation({
+    mutationFn: async () => {
+      let amount = 0;
+      if ((booking as any).totalPrice) {
+        amount = (booking as any).totalPrice;
+      } else if ((booking as any).nightlyRate) {
+        const checkIn = new Date(booking.checkInDate);
+        const checkOut = new Date(booking.checkOutDate);
+        const nights = Math.max(1, Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)));
+        const discount = (booking as any).discount || 0;
+        amount = ((booking as any).nightlyRate * nights) - discount;
+      }
+      if (amount <= 0) throw new Error(t('payment.amountError', 'Payment amount could not be determined'));
+      const res = await apiRequest("POST", "/api/epoint/create-booking-order", { bookingId: booking.id, amount });
+      return res.json();
+    },
+    onSuccess: (result: { paymentUrl: string }) => {
+      window.location.href = result.paymentUrl;
+    },
+    onError: (err: any) => {
+      const msg = err?.message || "";
+      if (msg.includes("BOOKING_ALREADY_PAID")) {
+        toast({ title: t('payment.alreadyPaid', 'This booking is already paid'), variant: "destructive" });
+      } else {
+        showErrorToast(toast, err);
+      }
+    },
+  });
+
+  const paymentStatus = (booking as any).paymentStatus;
+  const paymentMethod = (booking as any).paymentMethod;
+
+  const options = [
+    {
+      key: "booking_platform",
+      icon: Globe,
+      title: t('payment.alreadyPaidOnline', 'Already paid via booking platform'),
+      desc: t('payment.alreadyPaidOnlineDesc', 'Paid through Booking.com, Airbnb, Expedia, etc.'),
+      color: "border-blue-500 bg-blue-500/5",
+      selectedColor: "border-blue-500 bg-blue-500/10",
+    },
+    {
+      key: "cash",
+      icon: Banknote,
+      title: t('payment.payCashAtHotel', 'Pay cash at the hotel'),
+      desc: t('payment.payCashAtHotelDesc', "You'll pay when you arrive"),
+      color: "border-amber-500 bg-amber-500/5",
+      selectedColor: "border-amber-500 bg-amber-500/10",
+    },
+  ];
+
+  return (
+    <Card data-testid="card-payment-section">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <CreditCard className="h-4 w-4 text-primary" />
+          {t('payment.title', 'Payment')}
+        </CardTitle>
+        <p className="text-xs text-muted-foreground">
+          {t('payment.status', 'Status')}: <span className="font-medium capitalize">{paymentStatus ? t(`guests.paymentStatuses.${paymentStatus}`, paymentStatus) : t('guests.paymentStatuses.unpaid', 'Unpaid')}</span>
+          {paymentMethod && <> · {t('payment.method', 'Method')}: <span className="font-medium capitalize">{t(`guests.paymentMethods.${paymentMethod}`, paymentMethod.replace(/_/g, ' '))}</span></>}
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-sm font-medium">{t('payment.selectMethod', 'How would you like to pay?')}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {options.map(opt => {
+            const Icon = opt.icon;
+            const isActive = selected === opt.key || paymentMethod === opt.key;
+            return (
+              <button
+                key={opt.key}
+                className={`rounded-xl border-2 p-3 text-left transition-all hover:opacity-90 ${isActive ? opt.selectedColor : "border-muted bg-muted/30 hover:border-muted-foreground/30"}`}
+                onClick={() => {
+                  setSelected(opt.key);
+                  preferenceMutation.mutate(opt.key);
+                }}
+                disabled={preferenceMutation.isPending}
+                data-testid={`payment-option-${opt.key}`}
+              >
+                <div className="flex items-start gap-2">
+                  <Icon className="h-4 w-4 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium">{opt.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{opt.desc}</p>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+        <button
+          className="w-full rounded-xl border-2 border-primary bg-primary/5 hover:bg-primary/10 p-3 text-left transition-all"
+          onClick={() => cardPayMutation.mutate()}
+          disabled={cardPayMutation.isPending}
+          data-testid="payment-option-card"
+        >
+          <div className="flex items-start gap-2">
+            {cardPayMutation.isPending
+              ? <Loader2 className="h-4 w-4 mt-0.5 animate-spin text-primary shrink-0" />
+              : <CreditCard className="h-4 w-4 mt-0.5 text-primary shrink-0" />}
+            <div>
+              <p className="text-sm font-medium text-primary">{t('payment.payNowByCard', 'Pay now by card')}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t('payment.payNowByCardDesc', 'Secure online payment')}</p>
+            </div>
+          </div>
+        </button>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function GuestDashboard() {
   const { t } = useTranslation();
@@ -851,13 +983,17 @@ export default function GuestDashboard() {
               <CheckCircle className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-sm font-medium">Online check-in göndərilib</p>
+              <p className="text-sm font-medium">{t('dashboard.guest.precheckSubmitted', 'Online check-in submitted')}</p>
               <p className="text-xs text-muted-foreground">
-                Resepşn məlumatlarınızı yoxlayacaq. Otelə gəldiyinizdə check-in təsdiqlənəcək.
+                {t('dashboard.guest.precheckSubmittedDesc', 'Reception will review your information. Check-in will be confirmed upon arrival.')}
               </p>
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {booking && (booking as any).paymentStatus !== "paid" && (
+        <PaymentSection booking={booking} />
       )}
 
       <div ref={roomControlsRef}>
