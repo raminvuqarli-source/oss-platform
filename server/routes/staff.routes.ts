@@ -147,7 +147,7 @@ export function registerStaffRoutes(app: Express): void {
     res.json(usersWithoutPasswords);
   });
 
-  app.post("/api/admin/create-staff", requireRole("admin", "owner_admin", "property_manager", "oss_super_admin"), requireFeature("staff_management"), validateBody(createStaffSchema), async (req, res) => {
+  app.post("/api/admin/create-staff", requireRole("admin", "owner_admin", "property_manager", "oss_super_admin", "restaurant_manager"), requireFeature("staff_management"), validateBody(createStaffSchema), async (req, res) => {
     try {
       const { fullName, username, password, email } = req.body;
       if (username && username.toLowerCase().startsWith("demo_")) {
