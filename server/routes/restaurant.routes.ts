@@ -171,6 +171,22 @@ export function registerRestaurantRoutes(app: Express): void {
         timestamp: new Date().toISOString(),
       });
 
+      const allStaff = await storage.getUsersByProperty(propertyId);
+      const kitchenIds = allStaff
+        .filter(u => u.role === "kitchen_staff" || u.role === "restaurant_manager")
+        .map(u => u.id);
+      if (kitchenIds.length > 0) {
+        const locationLabel = tableNumber ? `Masa ${tableNumber}` : roomNumber ? `Otaq ${roomNumber}` : "Aparma";
+        const itemSummary = orderItems.slice(0, 3).map(i => `${i.quantity}x ${i.itemName}`).join(", ");
+        sendPushNotification({
+          userIds: kitchenIds,
+          title: "🍽️ Yeni sifariş",
+          message: `${locationLabel}: ${itemSummary}${orderItems.length > 3 ? ` +${orderItems.length - 3}` : ""}`,
+          url: "/restaurant/kitchen",
+          data: { type: "RESTAURANT_NEW_ORDER", orderId: order.id },
+        }).catch(err => logger.error({ err }, "Kitchen order push failed"));
+      }
+
       logger.info({ orderId: order.id, propertyId }, "New restaurant order created");
       res.status(201).json(order);
     } catch (err) {
