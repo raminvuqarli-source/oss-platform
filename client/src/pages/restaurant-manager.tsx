@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -67,6 +67,43 @@ export default function RestaurantManager() {
   const [staffForm, setStaffForm] = useState({ fullName: "", username: "", password: "", email: "", role: "waiter" });
   const [waiterProfileForm, setWaiterProfileForm] = useState({ salaryAmount: "", taxRate: "", tablesAssigned: "", notes: "" });
   const [cleaningForm, setCleaningForm] = useState({ description: "", location: "", assignedToId: "" });
+
+  // ── WebSocket for real-time cleaning task updates ──
+  const wsRef = useRef<WebSocket | null>(null);
+  useEffect(() => {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const ws = new WebSocket(`${protocol}//${window.location.host}/ws/devices?type=dashboard`);
+    wsRef.current = ws;
+    ws.onmessage = (evt) => {
+      try {
+        const msg = JSON.parse(evt.data);
+        if (msg.type === "RESTAURANT_CLEANING_TASK_UPDATED") {
+          queryClient.invalidateQueries({ queryKey: ["/api/restaurant/cleaning-tasks"] });
+          const task = msg.task;
+          if (task?.status === "done") {
+            toast({
+              title: "✅ Temizlik tamamlandı",
+              description: task.description + (task.location ? ` — ${task.location}` : ""),
+            });
+          } else if (task?.status === "in_progress") {
+            toast({
+              title: "🔄 Temizlik başladı",
+              description: task.description + (task.location ? ` — ${task.location}` : ""),
+            });
+          }
+        }
+        if (msg.type === "RESTAURANT_CLEANING_TASK_CREATED") {
+          queryClient.invalidateQueries({ queryKey: ["/api/restaurant/cleaning-tasks"] });
+        }
+        if (msg.type === "RESTAURANT_NEW_ORDER" || msg.type === "RESTAURANT_ORDER_UPDATED") {
+          queryClient.invalidateQueries({ queryKey: ["/api/restaurant/orders"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/restaurant/analytics"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/restaurant/room-orders"] });
+        }
+      } catch {}
+    };
+    return () => ws.close();
+  }, [queryClient, toast]);
 
   // ── queries ──
   const { data: menu } = useQuery<{ categories: Category[]; items: MenuItem[] }>({ queryKey: ["/api/restaurant/menu"] });

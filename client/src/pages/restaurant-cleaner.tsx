@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -61,6 +61,28 @@ export default function RestaurantCleaner() {
     },
     onError: () => toast({ title: t("errors.somethingWentWrong"), variant: "destructive" }),
   });
+
+  const wsRef = useRef<WebSocket | null>(null);
+  useEffect(() => {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const ws = new WebSocket(`${protocol}//${window.location.host}/ws/devices?type=dashboard`);
+    wsRef.current = ws;
+    ws.onmessage = (evt) => {
+      try {
+        const msg = JSON.parse(evt.data);
+        if (msg.type === "RESTAURANT_CLEANING_TASK_CREATED" || msg.type === "RESTAURANT_CLEANING_TASK_UPDATED") {
+          queryClient.invalidateQueries({ queryKey: ["/api/restaurant/cleaning-tasks"] });
+          if (msg.type === "RESTAURANT_CLEANING_TASK_CREATED") {
+            toast({
+              title: "🧹 Yeni temizlik tapşırığı",
+              description: msg.task?.description || "",
+            });
+          }
+        }
+      } catch {}
+    };
+    return () => ws.close();
+  }, [queryClient, toast]);
 
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];

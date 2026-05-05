@@ -3,6 +3,7 @@ import { storage } from "../storage";
 import { requireAuth, requireRole } from "../middleware";
 import { logger } from "../utils/logger";
 import { broadcastToProperty } from "../websocket/index";
+import { sendPushNotification } from "../onesignal";
 
 const MANAGER_ROLES = ["restaurant_manager", "owner_admin", "admin", "reception", "property_manager"];
 const KITCHEN_ROLES = ["kitchen_staff", "restaurant_manager", "owner_admin", "admin"];
@@ -409,6 +410,37 @@ export function registerRestaurantRoutes(app: Express): void {
         createdById: user.id,
         status: "pending",
       });
+
+      broadcastToProperty(user.propertyId, {
+        type: "RESTAURANT_CLEANING_TASK_CREATED",
+        task,
+        timestamp: new Date().toISOString(),
+      });
+
+      if (assignedToId) {
+        sendPushNotification({
+          userIds: [assignedToId],
+          title: "🧹 Yeni temizlik tapşırığı",
+          message: description + (location ? ` — ${location}` : ""),
+          url: "/restaurant/cleaner",
+          data: { type: "CLEANING_TASK_ASSIGNED", taskId: task.id },
+        }).catch(err => logger.error({ err }, "Cleaning task assign push failed"));
+      } else {
+        const allStaff = await storage.getUsersByProperty(user.propertyId);
+        const cleanerIds = allStaff
+          .filter(u => u.role === "restaurant_cleaner")
+          .map(u => u.id);
+        if (cleanerIds.length > 0) {
+          sendPushNotification({
+            userIds: cleanerIds,
+            title: "🧹 Yeni temizlik tapşırığı",
+            message: description + (location ? ` — ${location}` : ""),
+            url: "/restaurant/cleaner",
+            data: { type: "CLEANING_TASK_ASSIGNED", taskId: task.id },
+          }).catch(err => logger.error({ err }, "Cleaning task broadcast push failed"));
+        }
+      }
+
       res.status(201).json(task);
     } catch (err) {
       res.status(500).json({ message: "Failed to create cleaning task" });
@@ -418,6 +450,7 @@ export function registerRestaurantRoutes(app: Express): void {
   app.patch("/api/restaurant/cleaning-tasks/:id", requireRestaurantRole(...CLEANING_ROLES), async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
+      if (!user?.propertyId) return res.status(400).json({ message: "No property linked" });
       const { status, photoUrl } = req.body;
       const updates: Record<string, unknown> = {};
       if (status) updates.status = status;
@@ -425,11 +458,38 @@ export function registerRestaurantRoutes(app: Express): void {
       if (status === "done") updates.completedAt = new Date();
       const task = await storage.updateRestaurantCleaningTask(req.params.id, updates);
       if (!task) return res.status(404).json({ message: "Task not found" });
+
       broadcastToProperty(task.propertyId, {
         type: "RESTAURANT_CLEANING_TASK_UPDATED",
         task,
         timestamp: new Date().toISOString(),
       });
+
+      if (status === "done" || status === "in_progress") {
+        const allStaff = await storage.getUsersByProperty(task.propertyId);
+        const managerIds = allStaff
+          .filter(u => u.role === "restaurant_manager" || u.role === "owner_admin")
+          .map(u => u.id);
+
+        if (task.createdById && !managerIds.includes(task.createdById)) {
+          managerIds.push(task.createdById);
+        }
+
+        const notifyIds = [...new Set(managerIds)];
+
+        if (notifyIds.length > 0) {
+          const statusLabel = status === "done" ? "✅ Tapşırıq tamamlandı" : "🔄 Tapşırıq başladı";
+          const cleanerName = user.fullName || user.username || "Temizlikçi";
+          sendPushNotification({
+            userIds: notifyIds,
+            title: statusLabel,
+            message: `${cleanerName}: ${task.description}${task.location ? ` — ${task.location}` : ""}`,
+            url: "/restaurant/manager",
+            data: { type: "CLEANING_TASK_UPDATED", taskId: task.id, newStatus: status },
+          }).catch(err => logger.error({ err }, "Cleaning task done push failed"));
+        }
+      }
+
       res.json(task);
     } catch (err) {
       res.status(500).json({ message: "Failed to update cleaning task" });
