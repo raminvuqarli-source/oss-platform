@@ -209,7 +209,7 @@ export default function RestaurantManager() {
   }
   function openItemEdit(item: MenuItem) {
     setEditingItem(item);
-    setItemForm({ name: item.name, description: item.description || "", priceCents: String(item.priceCents), categoryId: item.categoryId || "" });
+    setItemForm({ name: item.name, description: item.description || "", priceCents: String(item.priceCents / 100), categoryId: item.categoryId || "" });
     setShowItemDialog(true);
   }
   function handleCategorySubmit() {
@@ -217,7 +217,7 @@ export default function RestaurantManager() {
     editingCategory ? updateCategory.mutate({ id: editingCategory.id, data: payload }) : createCategory.mutate(payload);
   }
   function handleItemSubmit() {
-    const payload = { name: itemForm.name, description: itemForm.description || null, priceCents: Number(itemForm.priceCents), categoryId: (itemForm.categoryId && itemForm.categoryId !== "none") ? itemForm.categoryId : null };
+    const payload = { name: itemForm.name, description: itemForm.description || null, priceCents: Math.round(Number(itemForm.priceCents) * 100), categoryId: (itemForm.categoryId && itemForm.categoryId !== "none") ? itemForm.categoryId : null };
     editingItem ? updateItem.mutate({ id: editingItem.id, data: payload }) : createItem.mutate(payload);
   }
   function openWaiterEdit(waiter: any) {
@@ -692,7 +692,7 @@ export default function RestaurantManager() {
           <div className="space-y-4">
             <div><Label htmlFor="item-name">{t("rm.name")}</Label><Input id="item-name" value={itemForm.name} onChange={e => setItemForm(f => ({ ...f, name: e.target.value }))} placeholder="məs. Sezar salatı" data-testid="input-item-name" /></div>
             <div><Label htmlFor="item-desc">{t("rm.description")}</Label><Input id="item-desc" value={itemForm.description} onChange={e => setItemForm(f => ({ ...f, description: e.target.value }))} placeholder="İstəyə görə" data-testid="input-item-description" /></div>
-            <div><Label htmlFor="item-price">{t("rm.priceInCents")}</Label><Input id="item-price" type="number" value={itemForm.priceCents} onChange={e => setItemForm(f => ({ ...f, priceCents: e.target.value }))} placeholder="məs. 1500 = 15.00 ₼" data-testid="input-item-price" /></div>
+            <div><Label htmlFor="item-price">Qiymət (₼)</Label><Input id="item-price" type="number" min="0" step="0.01" value={itemForm.priceCents} onChange={e => setItemForm(f => ({ ...f, priceCents: e.target.value }))} placeholder="məs. 15.00" data-testid="input-item-price" /></div>
             <div>
               <Label>{t("rm.categoryLabel")}</Label>
               <Select value={itemForm.categoryId} onValueChange={v => setItemForm(f => ({ ...f, categoryId: v }))}>
