@@ -1,5 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { storage } from "../storage";
+import { db } from "../db";
+import { sql } from "drizzle-orm";
 import { env } from "../config/env";
 import { type PlanType, type PlanCode, PLAN_TYPE_TO_CODE } from "@shared/schema";
 import { applyPlanFeatures, PLAN_CODE_FEATURES, SMART_PLAN_PRICING } from "@shared/planFeatures";
@@ -729,36 +731,54 @@ export function registerEpointRoutes(app: Express): void {
 
       if (!privateKey || !publicKey) {
         logger.error({ hasPrivateKey: !!privateKey, hasPublicKey: !!publicKey }, "Missing Epoint environment variables for booking order");
-        return res.status(503).json({ message: "Epoint payment is not configured. Please set EPOINT_PRIVATE_KEY and EPOINT_PUBLIC_KEY environment variables." });
+        return res.status(503).json({ message: "Ödəniş sistemi konfiqurasiya edilməyib. Zəhmət olmasa sahiblə əlaqə saxlayın." });
       }
 
       const { bookingId, amount } = req.body;
       if (!bookingId || typeof bookingId !== "string") {
         return res.status(400).json({ message: "bookingId is required" });
       }
-      if (!amount || typeof amount !== "number" || amount <= 0) {
-        return res.status(400).json({ message: "Valid amount is required" });
+
+      // Accept amount as number or numeric string
+      const amountNum = typeof amount === "string" ? parseFloat(amount) : Number(amount);
+      if (!amountNum || isNaN(amountNum) || amountNum <= 0) {
+        return res.status(400).json({ message: "Ödəniş məbləği müəyyən edilə bilmədi. Zəhmət olmasa resepsiyanla əlaqə saxlayın." });
       }
 
-      const booking = await storage.getBooking(bookingId);
-      if (!booking) {
-        return res.status(404).json({ message: "Booking not found" });
+      // Fetch booking using raw SQL to avoid schema/column mismatch issues
+      const bookingResult = await db.execute(
+        sql`SELECT * FROM bookings WHERE id = ${bookingId} LIMIT 1`
+      );
+      const bookingRows = (bookingResult as any).rows ?? bookingResult;
+      if (!bookingRows || bookingRows.length === 0) {
+        return res.status(404).json({ message: "Rezervasiya tapılmadı" });
       }
+      const bookingRow = bookingRows[0];
 
-      if ((booking as any).paymentStatus === "paid") {
+      if (bookingRow.payment_status === "paid") {
         return res.status(400).json({ message: "BOOKING_ALREADY_PAID" });
       }
 
-      const user = await storage.getUser(req.session.userId!);
-      const ownerId = user?.ownerId || req.session.userId!;
+      // Use booking's actual owner ID for the payment record
+      const ownerId = bookingRow.owner_id || req.session.userId!;
+      const tenantId = bookingRow.tenant_id || (req as any).tenantId || null;
 
-      const amountAZN = amount.toFixed(2);
-      const amountCents = Math.round(amount * 100);
+      // Ensure amount is in AZN (not qəpik)
+      // nightlyRate/totalPrice stored as integer AZN in DB (e.g. 150 = 150 AZN)
+      const amountAZN = parseFloat(amountNum.toFixed(2));
+      const amountCents = Math.round(amountAZN * 100);
       const baseUrl = env.BASE_URL;
+
+      // Epoint max is 800 AZN per transaction
+      if (amountAZN > EPOINT_MAX_AZN) {
+        return res.status(400).json({ 
+          message: `Ödəniş məbləği ${amountAZN} AZN Epoint maksimum həddini (${EPOINT_MAX_AZN} AZN) keçir. Zəhmət olmasa resepsiyanla əlaqə saxlayın.` 
+        });
+      }
 
       const order = await storage.createPaymentOrder({
         ownerId,
-        tenantId: (req as any).tenantId || null,
+        tenantId,
         planType: "booking_payment",
         orderType: "booking",
         referenceId: bookingId,
@@ -766,27 +786,28 @@ export function registerEpointRoutes(app: Express): void {
         currency: "AZN",
         status: "pending",
         paymentMethodId: null,
-        customerNote: `Booking payment - Room ${booking.roomNumber}`,
+        customerNote: `Booking payment - Room ${bookingRow.room_number || bookingId}`,
         transferReference: null,
       } as any);
 
+      // Use ASCII-safe description for Epoint
+      const roomDesc = (bookingRow.room_number || "").replace(/[^\x00-\x7F]/g, "").trim() || bookingId.slice(0, 8);
       const epointData = {
         public_key: publicKey,
         merchant_id: merchantId,
-        amount: amountAZN,
+        amount: amountAZN.toFixed(2),
         currency: "AZN",
         language: "az",
         order_id: order.id,
-        description: `O.S.S Booking Payment Room ${booking.roomNumber}`,
+        description: `OSS Booking ${roomDesc}`.slice(0, 50),
         success_redirect_url: `${baseUrl}/dashboard?payment=success&bookingId=${bookingId}`,
         error_redirect_url: `${baseUrl}/dashboard?payment=declined&bookingId=${bookingId}`,
         callback_url: `${baseUrl}/api/epoint/webhook`,
       };
 
-      logger.info({ orderId: order.id, bookingId, amount: amountAZN, room: booking.roomNumber }, "Creating Epoint booking order");
+      logger.info({ orderId: order.id, bookingId, amountAZN, room: bookingRow.room_number, baseUrl }, "Creating Epoint booking order");
 
       const { data, signature } = signData(privateKey, epointData);
-
       const requestBody = new URLSearchParams({ data, signature }).toString();
 
       const epointRes = await fetch(EPOINT_API_URL, {
@@ -797,13 +818,13 @@ export function registerEpointRoutes(app: Express): void {
 
       const epointResponse = await epointRes.json() as any;
 
-      logger.debug({ httpStatus: epointRes.status, responseBody: epointResponse }, "Epoint booking API response");
+      logger.info({ httpStatus: epointRes.status, epointStatus: epointResponse.status, hasRedirect: !!epointResponse.redirect_url, orderId: order.id }, "Epoint booking API response");
 
       if (epointResponse.status !== "success" || !epointResponse.redirect_url) {
-        const errorReason = epointResponse.message || epointResponse.error || epointResponse.status || "Unknown error";
-        logger.error({ errorReason, response: epointResponse }, "Epoint booking order creation failed");
+        const errorReason = epointResponse.message || epointResponse.error || String(epointResponse.status) || "Unknown error";
+        logger.error({ errorReason, response: epointResponse, orderId: order.id, amountAZN }, "Epoint booking order creation failed");
         await storage.updatePaymentOrder(order.id, { status: "rejected", adminNote: `Epoint API error: ${errorReason}` });
-        return res.status(502).json({ message: `Payment gateway error: ${errorReason}` });
+        return res.status(400).json({ message: `Ödəniş sistemi xətası: ${errorReason}` });
       }
 
       await storage.updatePaymentOrder(order.id, {
@@ -816,8 +837,8 @@ export function registerEpointRoutes(app: Express): void {
         orderId: order.id,
       });
     } catch (error: any) {
-      logger.error({ err: error }, "Create Epoint booking order error");
-      res.status(500).json({ message: `Failed to create booking payment: ${error?.message || "Unknown error"}` });
+      logger.error({ err: error, errMsg: error?.message, stack: error?.stack }, "Create Epoint booking order error");
+      res.status(500).json({ message: `Ödəniş xətası: ${error?.message || "Bilinməyən xəta"}` });
     }
   });
 
