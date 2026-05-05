@@ -13,6 +13,17 @@ const APP_ID = import.meta.env.VITE_ONESIGNAL_APP_ID;
 let initialized = false;
 let medianBridgeReady = false;
 let sdkReady: Promise<any> | null = null;
+let initDone: Promise<void> | null = null;
+let resolveInitDone: (() => void) | null = null;
+
+function getInitDone(): Promise<void> {
+  if (!initDone) {
+    initDone = new Promise((resolve) => {
+      resolveInitDone = resolve;
+    });
+  }
+  return initDone;
+}
 
 function isMedianApp(): boolean {
   const ua = navigator.userAgent || "";
@@ -74,8 +85,11 @@ window.median_onesignal_info = function(info: any) {
 export async function initOneSignal() {
   if (initialized || !APP_ID) {
     if (!APP_ID) console.warn("[OneSignal] No APP_ID, skipping init");
+    if (!initDone) { initDone = Promise.resolve(); resolveInitDone = null; }
     return;
   }
+
+  getInitDone();
 
   if (isMedianApp()) {
     console.log("[OneSignal] Median app detected, waiting for native bridge...");
@@ -89,6 +103,7 @@ export async function initOneSignal() {
         console.warn("[OneSignal] Median register error:", e);
       }
     }
+    resolveInitDone?.();
     return;
   }
 
@@ -112,13 +127,17 @@ export async function initOneSignal() {
     console.log("[OneSignal] Permission:", permission, "SubscriptionId:", subId);
   } catch (e) {
     console.warn("[OneSignal] Web init error:", e);
+  } finally {
+    resolveInitDone?.();
   }
 }
 
 async function getOneSignal(): Promise<any | null> {
-  if (!APP_ID || !initialized) return null;
+  if (!APP_ID) return null;
   if (isMedianApp()) return null;
   try {
+    await getInitDone();
+    if (!initialized) return null;
     if (sdkReady) return await sdkReady;
     return window.OneSignal || null;
   } catch {
