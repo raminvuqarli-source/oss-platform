@@ -45,9 +45,15 @@ export function registerChatRoutes(app: Express): void {
       });
 
       try {
-        const effectiveTenantId = req.tenantId || user.tenantId || null;
-        const hotelStaff = effectiveTenantId
-          ? await storage.getUsersByHotel(user.hotelId, effectiveTenantId)
+        // Resolve authoritative tenantId from hotel's ownerId — staff are stored under ownerId
+        let staffTenantId: string | null = req.tenantId || user.tenantId || null;
+        try {
+          const hotel = await storage.getHotel(user.hotelId);
+          if (hotel?.ownerId) staffTenantId = hotel.ownerId;
+        } catch {}
+
+        const hotelStaff = staffTenantId
+          ? await storage.getUsersByHotel(user.hotelId, staffTenantId)
           : [];
         const staffRoles = ["reception", "admin", "owner_admin", "property_manager"];
         const staffToNotify = hotelStaff.filter(u => staffRoles.includes(u.role));
@@ -57,7 +63,7 @@ export function registerChatRoutes(app: Express): void {
         for (const staff of staffToNotify) {
           await storage.createNotification({
             userId: staff.id,
-            tenantId: effectiveTenantId,
+            tenantId: staffTenantId,
             title: notifTitle,
             message: shortMsg,
             type: "chat",
@@ -70,6 +76,7 @@ export function registerChatRoutes(app: Express): void {
             actionUrl: `/reception-dashboard?view=messages`,
           });
         }
+        logger.info({ hotelId: user.hotelId, staffCount: staffToNotify.length }, "Chat notification sent to staff");
         const staffIds = staffToNotify.map(s => String(s.id));
         if (staffIds.length > 0) {
           sendPushNotification({
