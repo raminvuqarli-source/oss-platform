@@ -1221,6 +1221,7 @@ export default function ReceptionDashboard() {
     guestId: string;
     guestName: string;
     roomNumber: string | null;
+    roomName: string | null;
     lastMessage: string;
     lastMessageAt: string;
   }
@@ -2335,9 +2336,9 @@ export default function ReceptionDashboard() {
                             <div className="min-w-0">
                               <div className="flex items-center gap-2">
                                 <span className="font-medium truncate">{chat.guestName}</span>
-                                {chat.roomNumber && (
+                                {(chat.roomName || chat.roomNumber) && (
                                   <Badge variant="outline" className="text-xs shrink-0">
-                                    {t('common.room')} {chat.roomNumber}
+                                    {chat.roomName || `${t('common.room')} ${chat.roomNumber}`}
                                   </Badge>
                                 )}
                               </div>

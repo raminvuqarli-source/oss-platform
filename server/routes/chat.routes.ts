@@ -256,15 +256,20 @@ export function registerChatRoutes(app: Express): void {
             ...chat,
             guestName: guest?.fullName || "Unknown Guest",
             roomNumber: null as string | null,
+            roomName: null as string | null,
           };
         })
       );
       
-      // Get room numbers from bookings
+      // Get room numbers and custom names from bookings
       for (const guest of enrichedGuests) {
         const booking = await storage.getCurrentBookingForGuest(guest.guestId);
         if (booking) {
           guest.roomNumber = booking.roomNumber;
+          if (booking.unitId) {
+            const unit = await storage.getUnit(booking.unitId);
+            guest.roomName = unit?.name || null;
+          }
         }
       }
       
