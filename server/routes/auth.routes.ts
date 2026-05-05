@@ -765,8 +765,18 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
               });
             }
 
-            // Recreate notifications for ALL demo users
-            for (const uname of Object.values(DEMO_ROLE_MAP)) {
+            // Recreate role-appropriate notifications for each demo user
+            const hotelRoleUsernames = [
+              DEMO_ROLE_MAP.owner, DEMO_ROLE_MAP.admin, DEMO_ROLE_MAP.reception,
+              DEMO_ROLE_MAP.housekeeping, DEMO_ROLE_MAP.maintenance,
+            ];
+            const restaurantRoleUsernames = [
+              DEMO_ROLE_MAP.restaurant_manager, DEMO_ROLE_MAP.waiter,
+              DEMO_ROLE_MAP.kitchen, DEMO_ROLE_MAP.restaurant_cleaner, DEMO_ROLE_MAP.restaurant_cashier,
+            ];
+
+            // Hotel staff: booking + service request notifications
+            for (const uname of hotelRoleUsernames) {
               const u = await storage.getUserByUsername(uname);
               if (!u) continue;
               await storage.createNotification({
@@ -780,6 +790,24 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
                 title: "Xidmət Sorğusu",
                 message: "Sarah Johnson (202 otaq) əlavə dəsmal istədi",
                 type: "service_request", read: false,
+              });
+            }
+
+            // Restaurant staff: order + task notifications relevant to their role
+            for (const uname of restaurantRoleUsernames) {
+              const u = await storage.getUserByUsername(uname);
+              if (!u) continue;
+              await storage.createNotification({
+                userId: u.id,
+                title: "Yeni Sifariş",
+                message: "Masa 3 — Sarah Johnson: Biftek, Limonad x2, Tiramisu (₼87.00)",
+                type: "info", read: false,
+              });
+              await storage.createNotification({
+                userId: u.id,
+                title: "Sifariş Hazırdır",
+                message: "Masa 7 — Michael Chen sifarişi hazırdır, qaraşon gözləyir",
+                type: "info", read: false,
               });
             }
 
