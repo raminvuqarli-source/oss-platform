@@ -235,6 +235,30 @@ export function registerStaffRoutes(app: Express): void {
         }).catch((err: any) => logger.error({ err }, "Failed to send staff welcome email"));
       }
 
+      // Auto-create payroll config if salary/tax provided
+      const baseSalaryRaw = req.body.baseSalary;
+      const taxRateRaw = req.body.employeeTaxRate;
+      if (baseSalaryRaw !== undefined && baseSalaryRaw !== "" && baseSalaryRaw !== null) {
+        const baseSalary = Math.round(parseFloat(String(baseSalaryRaw)) * 100); // store in cents
+        const employeeTaxRate = Math.round(parseFloat(String(taxRateRaw || "0")) * 10); // store as 0.1% units
+        const resolvedTenantId = req.tenantId || currentUser?.tenantId || null;
+        await storage.createPayrollConfig({
+          staffId: user.id,
+          staffName: fullName,
+          staffRole: userRole,
+          hotelId: resolvedHotelId!,
+          propertyId: currentUser?.propertyId || null,
+          ownerId: currentUser?.ownerId || null,
+          baseSalary,
+          employeeTaxRate,
+          currency: "AZN",
+          frequency: "monthly",
+          isActive: true,
+          createdBy: currentUser?.id || null,
+          tenantId: resolvedTenantId,
+        });
+      }
+
       const { password: _, ...userWithoutPassword } = user;
       res.json(userWithoutPassword);
     } catch (error: any) {

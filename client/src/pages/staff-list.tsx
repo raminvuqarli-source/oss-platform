@@ -164,6 +164,8 @@ function AddStaffModal({ onSuccess }: { onSuccess: () => void }) {
     password: "",
     email: "",
     role: "reception" as string,
+    baseSalary: "",
+    employeeTaxRate: "",
   });
 
   const createMutation = useMutation({
@@ -174,7 +176,7 @@ function AddStaffModal({ onSuccess }: { onSuccess: () => void }) {
     onSuccess: () => {
       toast({ title: t("staff.created", "Staff member created successfully") });
       setOpen(false);
-      setForm({ fullName: "", username: "", password: "", email: "", role: "reception" });
+      setForm({ fullName: "", username: "", password: "", email: "", role: "reception", baseSalary: "", employeeTaxRate: "" });
       onSuccess();
     },
     onError: (err: any) => {
@@ -260,6 +262,44 @@ function AddStaffModal({ onSuccess }: { onSuccess: () => void }) {
                 <SelectItem value="kitchen_staff">Kitchen Staff</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="border-t pt-3 space-y-3">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Əmək haqqı məlumatları</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="staff-salary" className="text-sm">Aylıq maaş (₼)</Label>
+                <Input
+                  id="staff-salary"
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  placeholder="məs. 800"
+                  value={form.baseSalary}
+                  onChange={(e) => setForm({ ...form, baseSalary: e.target.value })}
+                  data-testid="input-staff-salary"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="staff-tax-rate" className="text-sm">Vergi faizi (%)</Label>
+                <Input
+                  id="staff-tax-rate"
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.1}
+                  placeholder="məs. 22"
+                  value={form.employeeTaxRate}
+                  onChange={(e) => setForm({ ...form, employeeTaxRate: e.target.value })}
+                  data-testid="input-staff-tax-rate"
+                />
+              </div>
+            </div>
+            {form.baseSalary && (
+              <p className="text-xs text-muted-foreground">
+                Xalis maaş: ₼{(parseFloat(form.baseSalary || "0") * (1 - parseFloat(form.employeeTaxRate || "0") / 100)).toFixed(2)}
+                {" "}· Vergi: ₼{(parseFloat(form.baseSalary || "0") * parseFloat(form.employeeTaxRate || "0") / 100).toFixed(2)}
+              </p>
+            )}
           </div>
         </div>
         <DialogFooter>

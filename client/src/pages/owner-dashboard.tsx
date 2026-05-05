@@ -4794,32 +4794,69 @@ function FinanceCenterView() {
             </div>
           ) : payrollConfigs && payrollConfigs.length > 0 ? (
             <div className="space-y-2">
-              {payrollConfigs.map((pc: any, idx: number) => (
-                <Card key={pc.id || idx} data-testid={`card-payroll-${pc.id || idx}`}>
-                  <CardContent className="p-4 flex items-center justify-between gap-3 flex-wrap">
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="p-2 rounded-md bg-blue-500/10 shrink-0">
-                        <Users className="h-4 w-4 text-blue-500" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-medium text-sm truncate" data-testid={`text-payroll-name-${pc.id || idx}`}>{pc.staffName || pc.staffId}</p>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          {pc.role && <Badge variant="secondary" className="text-xs">{pc.role}</Badge>}
-                          <span className="text-xs text-muted-foreground capitalize">{pc.frequency}</span>
+              {payrollConfigs.map((pc: any, idx: number) => {
+                const grossAzn = (pc.baseSalary || 0) / 100;
+                const taxRatePct = (pc.employeeTaxRate || 0) / 10;
+                const taxAzn = grossAzn * taxRatePct / 100;
+                const netAzn = grossAzn - taxAzn;
+                return (
+                  <Card key={pc.id || idx} data-testid={`card-payroll-${pc.id || idx}`}>
+                    <CardContent className="p-4 flex items-center justify-between gap-3 flex-wrap">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="p-2 rounded-md bg-blue-500/10 shrink-0">
+                          <Users className="h-4 w-4 text-blue-500" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-medium text-sm truncate" data-testid={`text-payroll-name-${pc.id || idx}`}>{pc.staffName || pc.staffId}</p>
+                          <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                            {(pc.staffRole || pc.role) && <Badge variant="secondary" className="text-xs">{pc.staffRole || pc.role}</Badge>}
+                            <span className="text-xs text-muted-foreground capitalize">{pc.frequency}</span>
+                            {taxRatePct > 0 && <span className="text-xs text-amber-600 dark:text-amber-400">Vergi {taxRatePct}% = ₼{taxAzn.toFixed(2)}</span>}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <Badge variant={pc.isActive !== false ? "default" : "outline"} className="text-xs">
-                        {pc.isActive !== false ? t('common.active') : t('common.inactive')}
-                      </Badge>
-                      <span className="font-semibold text-sm text-blue-600 dark:text-blue-400" data-testid={`text-payroll-salary-${pc.id || idx}`}>
-                        {formatCurrency(pc.baseSalary || 0)}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <span className="font-semibold text-sm text-blue-600 dark:text-blue-400" data-testid={`text-payroll-salary-${pc.id || idx}`}>
+                          Brüt: ₼{grossAzn.toFixed(2)}
+                        </span>
+                        {taxRatePct > 0 && (
+                          <span className="text-xs font-medium text-green-600 dark:text-green-400">
+                            Xalis: ₼{netAzn.toFixed(2)}
+                          </span>
+                        )}
+                        <Badge variant={pc.isActive !== false ? "default" : "outline"} className="text-xs">
+                          {pc.isActive !== false ? t('common.active') : t('common.inactive')}
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+              {/* Totals row */}
+              {(() => {
+                const totalGross = payrollConfigs.reduce((s: number, pc: any) => s + (pc.baseSalary || 0) / 100, 0);
+                const totalTax = payrollConfigs.reduce((s: number, pc: any) => {
+                  const gross = (pc.baseSalary || 0) / 100;
+                  const taxPct = (pc.employeeTaxRate || 0) / 10;
+                  return s + gross * taxPct / 100;
+                }, 0);
+                const totalNet = totalGross - totalTax;
+                return (
+                  <Card className="border-2 border-primary/20 bg-primary/5">
+                    <CardContent className="p-4 flex items-center justify-between gap-3 flex-wrap">
+                      <div>
+                        <p className="font-semibold text-sm">{payrollConfigs.length} işçi — Aylıq cəm</p>
+                        <p className="text-xs text-muted-foreground">Brüt maaş + vergi ayırması</p>
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className="text-sm font-bold text-blue-600 dark:text-blue-400" data-testid="text-total-gross">Brüt: ₼{totalGross.toFixed(2)}</span>
+                        <span className="text-xs text-amber-600 dark:text-amber-400" data-testid="text-total-tax">Vergi: ₼{totalTax.toFixed(2)}</span>
+                        <span className="text-sm font-bold text-green-600 dark:text-green-400" data-testid="text-total-net">Xalis: ₼{totalNet.toFixed(2)}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })()}
             </div>
           ) : (
             <Card>

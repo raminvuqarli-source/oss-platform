@@ -64,7 +64,7 @@ export default function RestaurantManager() {
   const [categoryForm, setCategoryForm] = useState({ name: "", sortOrder: "0" });
   const [itemForm, setItemForm] = useState({ name: "", description: "", priceCents: "", categoryId: "" });
   const [settleType, setSettleType] = useState("cash");
-  const [staffForm, setStaffForm] = useState({ fullName: "", username: "", password: "", email: "", role: "waiter" });
+  const [staffForm, setStaffForm] = useState({ fullName: "", username: "", password: "", email: "", role: "waiter", baseSalary: "", employeeTaxRate: "" });
   const [waiterProfileForm, setWaiterProfileForm] = useState({ salaryAmount: "", taxRate: "", tablesAssigned: "", notes: "" });
   const [cleaningForm, setCleaningForm] = useState({ description: "", location: "", assignedToId: "" });
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
@@ -759,6 +759,25 @@ export default function RestaurantManager() {
                   <SelectItem value="restaurant_manager">{t("rm.roleManager")}</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="border-t pt-3 space-y-3">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Əmək haqqı məlumatları</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-sm">Aylıq maaş (₼)</Label>
+                  <Input type="number" min={0} step={0.01} placeholder="məs. 600" value={staffForm.baseSalary} onChange={e => setStaffForm(f => ({ ...f, baseSalary: e.target.value }))} data-testid="input-rs-salary" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-sm">Vergi faizi (%)</Label>
+                  <Input type="number" min={0} max={100} step={0.1} placeholder="məs. 14" value={staffForm.employeeTaxRate} onChange={e => setStaffForm(f => ({ ...f, employeeTaxRate: e.target.value }))} data-testid="input-rs-tax" />
+                </div>
+              </div>
+              {staffForm.baseSalary && (
+                <p className="text-xs text-muted-foreground">
+                  Xalis maaş: ₼{(parseFloat(staffForm.baseSalary || "0") * (1 - parseFloat(staffForm.employeeTaxRate || "0") / 100)).toFixed(2)}
+                  {" "}· Vergi: ₼{(parseFloat(staffForm.baseSalary || "0") * parseFloat(staffForm.employeeTaxRate || "0") / 100).toFixed(2)}
+                </p>
+              )}
             </div>
           </div>
           <DialogFooter>
