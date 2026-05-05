@@ -645,13 +645,14 @@ function PropertyUnitsPanel({ propertyId }: { propertyId: string }) {
   const { isFeatureEnabled } = usePlanFeatures();
   const smartEnabled = isFeatureEnabled("smart_controls");
   const [filterGroup, setFilterGroup] = useState<string>("all");
-  const [editUnit, setEditUnit] = useState<{ id: string; name: string; price: string } | null>(null);
+  const [editUnit, setEditUnit] = useState<{ id: string; name: string; price: string; capacity: string } | null>(null);
   const { toast } = useToast();
 
   const editUnitMutation = useMutation({
-    mutationFn: async ({ unitId, name, pricePerNight }: { unitId: string; name: string; pricePerNight?: number }) => {
+    mutationFn: async ({ unitId, name, pricePerNight, capacity }: { unitId: string; name: string; pricePerNight?: number; capacity?: number }) => {
       const body: Record<string, unknown> = { name };
       if (pricePerNight !== undefined) body.pricePerNight = pricePerNight;
+      if (capacity !== undefined) body.capacity = capacity;
       const res = await apiRequest("PATCH", `/api/units/${unitId}`, body);
       return res.json();
     },
@@ -760,13 +761,28 @@ function PropertyUnitsPanel({ propertyId }: { propertyId: string }) {
                   data-testid="input-edit-unit-price"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-unit-capacity">{t('owner.maxGuests', 'Max Guests')}</Label>
+                <Input
+                  id="edit-unit-capacity"
+                  type="number"
+                  min={1}
+                  max={20}
+                  step={1}
+                  value={editUnit.capacity}
+                  onChange={(e) => setEditUnit({ ...editUnit, capacity: e.target.value })}
+                  placeholder="e.g. 2"
+                  data-testid="input-edit-unit-capacity"
+                />
+              </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setEditUnit(null)}>{t('common.cancel')}</Button>
                 <Button
                   disabled={!editUnit.name.trim() || editUnitMutation.isPending}
                   onClick={() => {
                     const priceVal = editUnit.price ? Math.round(parseFloat(editUnit.price) * 100) : undefined;
-                    editUnitMutation.mutate({ unitId: editUnit.id, name: editUnit.name.trim(), pricePerNight: priceVal });
+                    const capVal = editUnit.capacity ? parseInt(editUnit.capacity, 10) : undefined;
+                    editUnitMutation.mutate({ unitId: editUnit.id, name: editUnit.name.trim(), pricePerNight: priceVal, capacity: capVal });
                   }}
                   data-testid="button-save-unit-edit"
                 >
@@ -857,6 +873,7 @@ function PropertyUnitsPanel({ propertyId }: { propertyId: string }) {
                                     id: unit.id,
                                     name: unit.name || unit.unitNumber,
                                     price: unit.pricePerNight ? String(unit.pricePerNight / 100) : "",
+                                    capacity: unit.capacity ? String(unit.capacity) : "2",
                                   })}
                                 >
                                   <Pencil className="h-3.5 w-3.5 text-muted-foreground" />

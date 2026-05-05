@@ -153,8 +153,8 @@ export async function sendTrialEndingNotification(params: {
   trialEndDate: Date;
   planType?: string;
 }): Promise<void> {
-  const dateKey = params.trialEndDate.toISOString().slice(0, 10);
-  const dedupKey = `trial_ending:${params.ownerId}:${dateKey}`;
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const dedupKey = `trial_ending:${params.ownerId}:${todayKey}`;
   if (isDuplicate(dedupKey)) return;
 
   try {
@@ -318,7 +318,8 @@ export async function checkEndingSubscriptions(): Promise<void> {
           const allUsers = await storage.getUsersByOwner(sub.ownerId, sub.tenantId || sub.ownerId);
           const ownerUser = allUsers.find((u: any) => u.role === "owner_admin");
           if (ownerUser) {
-            const dedupKey = `trial_warning_notif:${sub.ownerId}:${new Date(trialEnd).toISOString().slice(0, 10)}`;
+            const todayStr = new Date().toISOString().slice(0, 10);
+            const dedupKey = `trial_warning_notif:${sub.ownerId}:${todayStr}`;
             if (!isDuplicate(dedupKey)) {
               await storage.createNotification({
                 userId: ownerUser.id,
