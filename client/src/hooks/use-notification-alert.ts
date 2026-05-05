@@ -8,15 +8,21 @@ let sharedAudioContext: AudioContext | null = null;
 let lastSoundAt = 0;
 let audioContextWarmedUp = false;
 
-function warmUpAudioContext() {
+async function warmUpAudioContext() {
   if (audioContextWarmedUp) return;
   try {
     if (!sharedAudioContext) {
       sharedAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
     if (sharedAudioContext.state === "suspended") {
-      sharedAudioContext.resume().catch(() => {});
+      await sharedAudioContext.resume();
     }
+    // Play a silent 1-sample buffer — this truly unlocks the AudioContext
+    const buf = sharedAudioContext.createBuffer(1, 1, sharedAudioContext.sampleRate);
+    const src = sharedAudioContext.createBufferSource();
+    src.buffer = buf;
+    src.connect(sharedAudioContext.destination);
+    src.start(0);
     audioContextWarmedUp = true;
   } catch {}
 }
@@ -31,6 +37,13 @@ if (typeof window !== "undefined") {
   window.addEventListener("click", warmOnce);
   window.addEventListener("keydown", warmOnce);
   window.addEventListener("touchstart", warmOnce);
+
+  // Re-resume AudioContext when tab comes back to foreground
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && sharedAudioContext?.state === "suspended") {
+      sharedAudioContext.resume().catch(() => {});
+    }
+  });
 }
 
 async function playNotificationSound() {
@@ -43,9 +56,16 @@ async function playNotificationSound() {
       sharedAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
     const ctx = sharedAudioContext;
+
     if (ctx.state === "suspended") {
-      await ctx.resume();
+      try {
+        await ctx.resume();
+      } catch {
+        return;
+      }
     }
+
+    if (ctx.state !== "running") return;
 
     const playTone = (freq: number, delayMs: number) => {
       const osc = ctx.createOscillator();
