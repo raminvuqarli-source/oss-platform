@@ -6,6 +6,32 @@ const NOTIFICATION_SOUND_DURATION = 150;
 
 let sharedAudioContext: AudioContext | null = null;
 let lastSoundAt = 0;
+let audioContextWarmedUp = false;
+
+function warmUpAudioContext() {
+  if (audioContextWarmedUp) return;
+  try {
+    if (!sharedAudioContext) {
+      sharedAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    if (sharedAudioContext.state === "suspended") {
+      sharedAudioContext.resume().catch(() => {});
+    }
+    audioContextWarmedUp = true;
+  } catch {}
+}
+
+if (typeof window !== "undefined") {
+  const warmOnce = () => {
+    warmUpAudioContext();
+    window.removeEventListener("click", warmOnce);
+    window.removeEventListener("keydown", warmOnce);
+    window.removeEventListener("touchstart", warmOnce);
+  };
+  window.addEventListener("click", warmOnce);
+  window.addEventListener("keydown", warmOnce);
+  window.addEventListener("touchstart", warmOnce);
+}
 
 async function playNotificationSound() {
   const now = Date.now();
