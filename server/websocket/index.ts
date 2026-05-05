@@ -7,6 +7,31 @@ import { requireAuth, requireRole } from "../middleware";
 import { sessionStore } from "../routes/auth.routes";
 import cookie from "cookie";
 import signature from "cookie-signature";
+import { randomUUID } from "crypto";
+
+const wsTokenStore = new Map<string, { userId: string; expiresAt: number }>();
+
+function cleanExpiredWsTokens() {
+  const now = Date.now();
+  for (const [token, data] of wsTokenStore.entries()) {
+    if (data.expiresAt < now) wsTokenStore.delete(token);
+  }
+}
+
+setInterval(cleanExpiredWsTokens, 60_000);
+
+export function createWsToken(userId: string): string {
+  const token = randomUUID();
+  wsTokenStore.set(token, { userId, expiresAt: Date.now() + 60_000 });
+  return token;
+}
+
+function consumeWsToken(token: string): string | null {
+  const data = wsTokenStore.get(token);
+  if (!data || data.expiresAt < Date.now()) return null;
+  wsTokenStore.delete(token);
+  return data.userId;
+}
 
 const deviceConnections = new Map<string, { ws: WebSocket; deviceId: string; tenantId: string }>();
 const ownerConnections = new Map<string, Set<WebSocket>>();
@@ -86,21 +111,34 @@ export function initWebSocket(httpServer: Server, app: Express): void {
     const deviceId = url.searchParams.get("deviceId");
     const clientType = url.searchParams.get("type") || "dashboard";
 
-    const sessionId = parseSessionId(req.headers.cookie);
-    if (!sessionId) {
-      ws.send(JSON.stringify({ type: "error", message: "Authentication required" }));
-      ws.close(4001, "Unauthorized");
-      return;
+    // Auth: prefer short-lived wsToken from query param; fall back to session cookie
+    const wsToken = url.searchParams.get("wsToken");
+    let resolvedUserId: string | null = null;
+
+    if (wsToken) {
+      resolvedUserId = consumeWsToken(wsToken);
+      if (!resolvedUserId) {
+        ws.send(JSON.stringify({ type: "error", message: "Invalid or expired token" }));
+        ws.close(4001, "Unauthorized");
+        return;
+      }
+    } else {
+      const sessionId = parseSessionId(req.headers.cookie);
+      if (!sessionId) {
+        ws.send(JSON.stringify({ type: "error", message: "Authentication required" }));
+        ws.close(4001, "Unauthorized");
+        return;
+      }
+      const sessionData = await getSessionData(sessionId);
+      if (!sessionData?.userId) {
+        ws.send(JSON.stringify({ type: "error", message: "Invalid or expired session" }));
+        ws.close(4001, "Unauthorized");
+        return;
+      }
+      resolvedUserId = sessionData.userId;
     }
 
-    const sessionData = await getSessionData(sessionId);
-    if (!sessionData?.userId) {
-      ws.send(JSON.stringify({ type: "error", message: "Invalid or expired session" }));
-      ws.close(4001, "Unauthorized");
-      return;
-    }
-
-    const user = await storage.getUser(sessionData.userId);
+    const user = await storage.getUser(resolvedUserId);
     if (!user) {
       ws.send(JSON.stringify({ type: "error", message: "User not found" }));
       ws.close(4001, "Unauthorized");
@@ -108,9 +146,7 @@ export function initWebSocket(httpServer: Server, app: Express): void {
     }
 
     let authenticatedTenantId: string | null = null;
-    if (user.username?.startsWith("demo_") && sessionData.demoSessionTenantId) {
-      authenticatedTenantId = sessionData.demoSessionTenantId;
-    } else {
+    {
       authenticatedTenantId = user.tenantId || user.ownerId || null;
       if (!authenticatedTenantId && user.hotelId) {
         const hotel = await storage.getHotel(user.hotelId);
@@ -234,6 +270,16 @@ export function initWebSocket(httpServer: Server, app: Express): void {
     });
 
     ws.send(JSON.stringify({ type: "connected", clientType, timestamp: new Date().toISOString() }));
+  });
+
+  app.get("/api/ws-token", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const token = createWsToken(userId);
+      res.json({ token });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create WS token" });
+    }
   });
 
   app.get("/api/ws/info", requireAuth, async (req, res) => {

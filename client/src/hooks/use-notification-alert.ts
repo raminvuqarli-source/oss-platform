@@ -158,41 +158,48 @@ export function useNotificationAlert(
     if (!mountedRef.current) return;
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
-    try {
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const ws = new WebSocket(`${protocol}//${window.location.host}/ws/devices?type=dashboard`);
-      wsRef.current = ws;
-
-      ws.onopen = () => {
-        console.log("[WS] Dashboard WebSocket connected");
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const msg = JSON.parse(event.data as string);
-          if (msg.type === "new_notification") {
-            queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-            playNotificationSound();
-            if (msg.title) {
-              onNewMessageRef.current?.(msg.title, msg.message || "");
-              showPushNotification(msg.title, msg.message || "", msg.actionUrl);
-            }
-          }
-        } catch {}
-      };
-
-      ws.onclose = (ev) => {
-        console.log("[WS] Dashboard WebSocket closed, code:", ev.code);
+    fetch("/api/ws-token", { credentials: "include" })
+      .then(r => r.ok ? r.json() : null)
+      .catch(() => null)
+      .then(data => {
         if (!mountedRef.current) return;
-        reconnectTimerRef.current = setTimeout(() => {
-          if (mountedRef.current) connectWs();
-        }, 5000);
-      };
+        try {
+          const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+          const tokenParam = data?.token ? `&wsToken=${encodeURIComponent(data.token)}` : "";
+          const ws = new WebSocket(`${protocol}//${window.location.host}/ws/devices?type=dashboard${tokenParam}`);
+          wsRef.current = ws;
 
-      ws.onerror = () => {
-        ws.close();
-      };
-    } catch {}
+          ws.onopen = () => {
+            console.log("[WS] Dashboard WebSocket connected");
+          };
+
+          ws.onmessage = (event) => {
+            try {
+              const msg = JSON.parse(event.data as string);
+              if (msg.type === "new_notification") {
+                queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+                playNotificationSound();
+                if (msg.title) {
+                  onNewMessageRef.current?.(msg.title, msg.message || "");
+                  showPushNotification(msg.title, msg.message || "", msg.actionUrl);
+                }
+              }
+            } catch {}
+          };
+
+          ws.onclose = (ev) => {
+            console.log("[WS] Dashboard WebSocket closed, code:", ev.code);
+            if (!mountedRef.current) return;
+            reconnectTimerRef.current = setTimeout(() => {
+              if (mountedRef.current) connectWs();
+            }, 5000);
+          };
+
+          ws.onerror = () => {
+            ws.close();
+          };
+        } catch {}
+      });
   }, []);
 
   useEffect(() => {
