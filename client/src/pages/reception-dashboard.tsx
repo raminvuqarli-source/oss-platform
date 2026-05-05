@@ -773,7 +773,14 @@ function RoomStatusPanel() {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <BedDouble className="h-5 w-5 text-muted-foreground" />
-                  <span className="font-bold text-lg" data-testid={`text-room-number-${unit.unitNumber}`}>{unit.unitNumber}</span>
+                  <div>
+                    <span className="font-bold text-lg" data-testid={`text-room-number-${unit.unitNumber}`}>
+                      {unit.name || unit.unitNumber}
+                    </span>
+                    {unit.name && (
+                      <span className="text-xs text-muted-foreground ml-1.5">({unit.unitNumber})</span>
+                    )}
+                  </div>
                   <span className="text-xs text-muted-foreground capitalize">{unit.unitType}</span>
                 </div>
                 <Badge className={ROOM_STATUS_COLORS[unit.status] || ROOM_STATUS_COLORS.available} data-testid={`badge-status-${unit.unitNumber}`}>
