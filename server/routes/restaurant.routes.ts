@@ -514,7 +514,7 @@ export function registerRestaurantRoutes(app: Express): void {
   });
 
   // ─── CLEANING TASKS ───────────────────────────────────────────────────
-  const CLEANING_ROLES = ["restaurant_cleaner", "restaurant_manager", "owner_admin", "admin"];
+  const CLEANING_ROLES = ["restaurant_cleaner", "restaurant_manager", "owner_admin", "admin", "restaurant_cashier"];
 
   app.get("/api/restaurant/cleaning-tasks", requireRestaurantRole(...CLEANING_ROLES), async (req, res) => {
     try {

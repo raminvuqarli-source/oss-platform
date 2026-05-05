@@ -15,7 +15,8 @@ import {
   Wallet, CreditCard, Banknote, BedDouble, CheckCircle2,
   Clock, ShoppingBag, Printer, Building2, AlertCircle,
   Utensils, TrendingUp, TableProperties, RefreshCw,
-  MessageSquare, ClipboardList, Plus, MapPin, Users
+  MessageSquare, ClipboardList, Plus, MapPin, Users,
+  Hourglass, Loader2, CheckCheck
 } from "lucide-react";
 import { StaffDmChat } from "@/components/staff-dm-chat";
 import { Input } from "@/components/ui/input";
@@ -53,6 +54,15 @@ const SETTLEMENT_COLORS: Record<string, string> = {
 };
 
 type CleaningStaff = { id: string; fullName: string; role: string };
+type CleaningTask = {
+  id: string;
+  description: string;
+  location: string | null;
+  status: string;
+  createdAt: string;
+  assignedTo?: { fullName: string } | null;
+  photos?: string[];
+};
 
 export default function RestaurantCashierDashboard() {
   const { t } = useTranslation();
@@ -78,6 +88,11 @@ export default function RestaurantCashierDashboard() {
     queryKey: ["/api/users/staff"],
   });
   const cleaners = staffUsers.filter(u => u.role === "restaurant_cleaner");
+
+  const { data: cleaningTasks = [], isLoading: tasksLoading } = useQuery<CleaningTask[]>({
+    queryKey: ["/api/restaurant/cleaning-tasks"],
+    refetchInterval: 20000,
+  });
 
   const createTask = useMutation({
     mutationFn: ({ description, location, assignedToId }: { description: string; location: string; assignedToId?: string }) =>
@@ -392,12 +407,13 @@ export default function RestaurantCashierDashboard() {
             )}
           </TabsContent>
 
-          {/* TASK CREATION */}
-          <TabsContent value="tasks" className="mt-4">
+          {/* TASK CREATION + STATUS */}
+          <TabsContent value="tasks" className="mt-4 space-y-4">
+            {/* Create new task */}
             <Card>
               <CardContent className="p-5 space-y-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <ClipboardList className="h-4 w-4 text-primary" />
+                  <Plus className="h-4 w-4 text-primary" />
                   <h3 className="font-semibold">{t("cashier.cleaningTaskTitle")}</h3>
                 </div>
                 <div className="space-y-3">
@@ -455,6 +471,63 @@ export default function RestaurantCashierDashboard() {
                     {t("cashier.sendTask")}
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Task status list */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <ClipboardList className="h-4 w-4 text-primary" />
+                  Tapşırıqların vəziyyəti
+                  {cleaningTasks.length > 0 && (
+                    <Badge variant="secondary" className="ml-auto">{cleaningTasks.length}</Badge>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {tasksLoading ? (
+                  <div className="space-y-2">{[1,2,3].map(i => <Skeleton key={i} className="h-14 w-full" />)}</div>
+                ) : cleaningTasks.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">Tapşırıq yoxdur</p>
+                ) : (
+                  <div className="space-y-2">
+                    {cleaningTasks.slice().reverse().map(task => (
+                      <div key={task.id} className="flex items-start gap-3 p-3 rounded-lg border bg-card" data-testid={`task-status-${task.id}`}>
+                        <div className="mt-0.5 shrink-0">
+                          {task.status === "done" ? (
+                            <CheckCheck className="h-4 w-4 text-green-500" />
+                          ) : task.status === "in_progress" ? (
+                            <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
+                          ) : (
+                            <Hourglass className="h-4 w-4 text-amber-500" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium leading-tight">{task.description}</p>
+                          {task.location && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                              <MapPin className="h-3 w-3" />{task.location}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {formatDistanceToNow(new Date(task.createdAt), { addSuffix: true })}
+                            {task.assignedTo?.fullName ? ` · ${task.assignedTo.fullName}` : ""}
+                          </p>
+                        </div>
+                        <Badge className={
+                          task.status === "done"
+                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 shrink-0"
+                            : task.status === "in_progress"
+                            ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 shrink-0"
+                            : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 shrink-0"
+                        }>
+                          {task.status === "done" ? "Tamamlandı" : task.status === "in_progress" ? "Davam edir" : "Gözlənilir"}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
