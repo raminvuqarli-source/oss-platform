@@ -8,7 +8,7 @@ import { sendPushNotification } from "../onesignal";
 const MANAGER_ROLES = ["restaurant_manager", "owner_admin", "admin", "reception", "property_manager"];
 const KITCHEN_ROLES = ["kitchen_staff", "restaurant_manager", "owner_admin", "admin"];
 const WAITER_ROLES = ["waiter", "restaurant_manager", "owner_admin", "admin"];
-const SETTLE_ROLES = ["reception", "restaurant_manager", "owner_admin", "admin"];
+const SETTLE_ROLES = ["reception", "restaurant_manager", "owner_admin", "admin", "restaurant_cashier"];
 
 function requireRestaurantRole(...roles: string[]) {
   return requireRole(...(roles as [string, ...string[]]));
@@ -172,19 +172,34 @@ export function registerRestaurantRoutes(app: Express): void {
       });
 
       const allStaff = await storage.getUsersByProperty(propertyId);
+      const locationLabel = tableNumber ? `Masa ${tableNumber}` : roomNumber ? `Otaq ${roomNumber}` : "Aparma";
+      const itemSummary = orderItems.slice(0, 3).map(i => `${i.quantity}x ${i.itemName}`).join(", ");
+      const orderSummary = `${locationLabel}: ${itemSummary}${orderItems.length > 3 ? ` +${orderItems.length - 3}` : ""}`;
+
       const kitchenIds = allStaff
         .filter(u => u.role === "kitchen_staff" || u.role === "restaurant_manager")
         .map(u => u.id);
       if (kitchenIds.length > 0) {
-        const locationLabel = tableNumber ? `Masa ${tableNumber}` : roomNumber ? `Otaq ${roomNumber}` : "Aparma";
-        const itemSummary = orderItems.slice(0, 3).map(i => `${i.quantity}x ${i.itemName}`).join(", ");
         sendPushNotification({
           userIds: kitchenIds,
           title: "🍽️ Yeni sifariş",
-          message: `${locationLabel}: ${itemSummary}${orderItems.length > 3 ? ` +${orderItems.length - 3}` : ""}`,
+          message: orderSummary,
           url: "/restaurant/kitchen",
           data: { type: "RESTAURANT_NEW_ORDER", orderId: order.id },
         }).catch(err => logger.error({ err }, "Kitchen order push failed"));
+      }
+
+      const cashierIds = allStaff
+        .filter(u => u.role === "restaurant_cashier")
+        .map(u => u.id);
+      if (cashierIds.length > 0) {
+        sendPushNotification({
+          userIds: cashierIds,
+          title: "💰 Yeni sifariş gəldi",
+          message: orderSummary,
+          url: "/restaurant/cashier",
+          data: { type: "RESTAURANT_NEW_ORDER", orderId: order.id },
+        }).catch(err => logger.error({ err }, "Cashier order push failed"));
       }
 
       logger.info({ orderId: order.id, propertyId }, "New restaurant order created");
@@ -304,6 +319,7 @@ export function registerRestaurantRoutes(app: Express): void {
   // Reception/cashier settles an order
   app.post("/api/restaurant/orders/:id/settle", requireRestaurantRole(...SETTLE_ROLES), async (req, res) => {
     try {
+      const user = await storage.getUser(req.session.userId!);
       const { paymentType, folioId } = req.body;
       if (!paymentType) return res.status(400).json({ message: "paymentType required: room_charge | cash | card" });
 
@@ -313,23 +329,21 @@ export function registerRestaurantRoutes(app: Express): void {
         return res.status(409).json({ message: "Order already settled" });
       }
 
-      let settlementStatus = "cash_paid";
+      let settlementStatus = paymentType === "card" ? "card_paid" : "cash_paid";
       let linkedFolioId: string | undefined;
 
-      if (paymentType === "room_charge" && (folioId || existing.bookingId)) {
-        // Post charge to folio
+      if (paymentType === "room_charge") {
+        // Post charge to guest folio — appears as debt in Reception
         let targetFolioId = folioId;
         if (!targetFolioId && existing.bookingId) {
-          // Try to find open folio for this booking
           const folio = await storage.getGuestFolioByBooking(existing.bookingId);
           if (folio && folio.status === "open") targetFolioId = folio.id;
         }
-
         if (targetFolioId) {
           await storage.createFolioCharge({
             folioId: targetFolioId,
             chargeType: "restaurant",
-            description: `Restaurant Order #${existing.id.slice(-6).toUpperCase()} — Table ${existing.tableNumber || "N/A"}`,
+            description: `Restoran sifarişi #${existing.id.slice(-6).toUpperCase()} — ${existing.roomNumber ? `Otaq ${existing.roomNumber}` : existing.tableNumber ? `Masa ${existing.tableNumber}` : "N/A"}`,
             amount: String(existing.totalCents / 100),
             quantity: 1,
             unitPrice: String(existing.totalCents / 100),
@@ -342,9 +356,68 @@ export function registerRestaurantRoutes(app: Express): void {
           settlementStatus = "posted_to_folio";
           linkedFolioId = targetFolioId;
         }
+      } else {
+        // Cash or card — record in General Ledger for hotel-wide finance
+        try {
+          const hotel = await storage.getHotelByPropertyId(existing.propertyId);
+          if (hotel) {
+            const payLabel = paymentType === "card" ? "kart" : "nağd";
+            const locationLabel = existing.roomNumber ? `Otaq ${existing.roomNumber}` : existing.tableNumber ? `Masa ${existing.tableNumber}` : "N/A";
+            await storage.createJournalEntry(
+              {
+                hotelId: hotel.id,
+                tenantId: existing.tenantId,
+                entryNumber: `REST-${Date.now()}`,
+                entryDate: new Date(),
+                description: `Restoran gəliri (${payLabel}) — Sifariş #${existing.id.slice(-6).toUpperCase()} ${locationLabel}`,
+                sourceType: "restaurant_order",
+                sourceId: existing.id,
+                status: "posted",
+                totalDebit: existing.totalCents,
+                totalCredit: existing.totalCents,
+                currency: "AZN",
+                createdBy: user?.id,
+              },
+              [
+                { accountCode: paymentType === "card" ? "1020" : "1010", accountName: paymentType === "card" ? "Kart Kassası" : "Nağd Kassa", type: "debit", amount: existing.totalCents, description: `Restoran ${payLabel} qəbzi` },
+                { accountCode: "4010", accountName: "Restoran Gəliri", type: "credit", amount: existing.totalCents, description: `Sifariş #${existing.id.slice(-6).toUpperCase()}` },
+              ]
+            );
+          }
+        } catch (glErr) {
+          logger.error({ glErr }, "GL journal entry failed for restaurant payment — continuing");
+        }
       }
 
       const order = await storage.settlePosOrder(req.params.id, settlementStatus, linkedFolioId);
+
+      // Notify restaurant_manager about payment outcome
+      const allStaff = await storage.getUsersByProperty(existing.propertyId);
+      const managerIds = allStaff.filter(u => u.role === "restaurant_manager").map(u => u.id);
+      if (managerIds.length > 0) {
+        const locationLabel = existing.roomNumber ? `Otaq ${existing.roomNumber}` : existing.tableNumber ? `Masa ${existing.tableNumber}` : "Sifariş";
+        const amountLabel = `₼${(existing.totalCents / 100).toFixed(2)}`;
+        const msgMap: Record<string, string> = {
+          cash: `${locationLabel} — ${amountLabel} nağd ödənildi`,
+          card: `${locationLabel} — ${amountLabel} kartla ödənildi`,
+          room_charge: `${locationLabel} — ${amountLabel} otaq hesabına borc yazıldı`,
+        };
+        sendPushNotification({
+          userIds: managerIds,
+          title: paymentType === "room_charge" ? "🏨 Borc yazıldı" : "✅ Ödəniş alındı",
+          message: msgMap[paymentType] ?? `${locationLabel} — ${amountLabel} ödənildi`,
+          url: "/restaurant/manager",
+          data: { type: "RESTAURANT_ORDER_SETTLED", orderId: existing.id, paymentType },
+        }).catch(err => logger.error({ err }, "Manager settle push failed"));
+      }
+
+      broadcastToProperty(existing.propertyId, {
+        type: "RESTAURANT_ORDER_SETTLED",
+        order,
+        paymentType,
+        timestamp: new Date().toISOString(),
+      });
+
       res.json(order);
     } catch (err) {
       logger.error({ err }, "Failed to settle order");
