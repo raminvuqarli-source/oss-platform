@@ -6,6 +6,8 @@ const NOTIFICATION_SOUND_DURATION = 150;
 
 let swRegistration: ServiceWorkerRegistration | null = null;
 let swReady = false;
+let sharedAudioContext: AudioContext | null = null;
+let lastSoundAt = 0;
 
 async function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return null;
@@ -21,37 +23,37 @@ async function registerServiceWorker() {
   }
 }
 
-function playNotificationSound() {
+async function playNotificationSound() {
+  const now = Date.now();
+  if (now - lastSoundAt < 1500) return;
+  lastSoundAt = now;
+
   try {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+    if (!sharedAudioContext) {
+      sharedAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    const ctx = sharedAudioContext;
+    if (ctx.state === "suspended") {
+      await ctx.resume();
+    }
 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+    const playTone = (freq: number, delayMs: number) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      osc.type = "sine";
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + delayMs / 1000);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + delayMs / 1000 + NOTIFICATION_SOUND_DURATION / 1000);
+      osc.start(ctx.currentTime + delayMs / 1000);
+      osc.stop(ctx.currentTime + delayMs / 1000 + NOTIFICATION_SOUND_DURATION / 1000);
+    };
 
-    oscillator.frequency.setValueAtTime(NOTIFICATION_SOUND_FREQUENCY, audioContext.currentTime);
-    oscillator.type = "sine";
-
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + NOTIFICATION_SOUND_DURATION / 1000);
-
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + NOTIFICATION_SOUND_DURATION / 1000);
-
-    setTimeout(() => {
-      const osc2 = audioContext.createOscillator();
-      const gain2 = audioContext.createGain();
-      osc2.connect(gain2);
-      gain2.connect(audioContext.destination);
-      osc2.frequency.setValueAtTime(1000, audioContext.currentTime);
-      osc2.type = "sine";
-      gain2.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + NOTIFICATION_SOUND_DURATION / 1000);
-      osc2.start(audioContext.currentTime);
-      osc2.stop(audioContext.currentTime + NOTIFICATION_SOUND_DURATION / 1000);
-    }, 180);
+    playTone(NOTIFICATION_SOUND_FREQUENCY, 0);
+    playTone(1000, 180);
   } catch (e) {
+    console.warn("[Notification] Sound error:", e);
   }
 }
 
