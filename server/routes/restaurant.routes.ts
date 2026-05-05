@@ -237,6 +237,22 @@ export function registerRestaurantRoutes(app: Express): void {
           order,
           timestamp: new Date().toISOString(),
         });
+
+        // Notify waiters that this order is ready for pickup
+        const allStaff = await storage.getUsersByProperty(order.propertyId);
+        const waiterIds = allStaff
+          .filter(u => u.role === "waiter" || u.role === "restaurant_manager")
+          .map(u => u.id);
+        if (waiterIds.length > 0) {
+          const locationLabel = order.tableNumber ? `Masa ${order.tableNumber}` : order.roomNumber ? `Otaq ${order.roomNumber}` : "";
+          sendPushNotification({
+            userIds: waiterIds,
+            title: "✅ Sifariş hazırdır!",
+            message: `${locationLabel ? locationLabel + " — " : ""}Təhvil vermək üçün götürün`,
+            url: "/restaurant/waiter",
+            data: { type: "RESTAURANT_ORDER_READY", orderId: order.id },
+          }).catch(err => logger.error({ err }, "Waiter ready push failed"));
+        }
       }
       res.json(order);
     } catch (err) {
@@ -261,6 +277,22 @@ export function registerRestaurantRoutes(app: Express): void {
         waiterName: user!.fullName,
         timestamp: new Date().toISOString(),
       });
+
+      // Notify restaurant_manager that an order was delivered
+      const allStaff = await storage.getUsersByProperty(order.propertyId);
+      const managerIds = allStaff
+        .filter(u => u.role === "restaurant_manager")
+        .map(u => u.id);
+      if (managerIds.length > 0) {
+        const locationLabel = order.tableNumber ? `Masa ${order.tableNumber}` : order.roomNumber ? `Otaq ${order.roomNumber}` : "Sifariş";
+        sendPushNotification({
+          userIds: managerIds,
+          title: "🚀 Sifariş təhvil verildi",
+          message: `${locationLabel} — ${user!.fullName || "Qarson"} tərəfindən çatdırıldı`,
+          url: "/restaurant/manager",
+          data: { type: "RESTAURANT_ORDER_DELIVERED", orderId: order.id },
+        }).catch(err => logger.error({ err }, "Manager delivery push failed"));
+      }
 
       res.json(order);
     } catch (err) {
