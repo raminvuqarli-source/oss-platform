@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
+import { queryClient } from "@/lib/queryClient";
 
 const NOTIFICATION_SOUND_FREQUENCY = 800;
 const NOTIFICATION_SOUND_DURATION = 150;
@@ -54,7 +55,7 @@ function playNotificationSound() {
   }
 }
 
-async function showPushNotification(title: string, body: string, url?: string) {
+export async function showPushNotification(title: string, body: string, url?: string) {
   if (!("Notification" in window)) return;
 
   if (Notification.permission !== "granted") {
@@ -114,6 +115,9 @@ interface NotificationItem {
 export function useNotificationAlert(notifications: NotificationItem[] | undefined) {
   const prevUnreadIdsRef = useRef<Set<string>>(new Set());
   const isInitialLoadRef = useRef(true);
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
     registerServiceWorker();
@@ -155,4 +159,54 @@ export function useNotificationAlert(notifications: NotificationItem[] | undefin
   useEffect(() => {
     checkNewNotifications();
   }, [checkNewNotifications]);
+
+  const connectWs = useCallback(() => {
+    if (!mountedRef.current) return;
+    if (wsRef.current?.readyState === WebSocket.OPEN) return;
+
+    try {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const ws = new WebSocket(`${protocol}//${window.location.host}/ws/devices?type=dashboard`);
+      wsRef.current = ws;
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data as string);
+          if (msg.type === "new_notification") {
+            queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+            playNotificationSound();
+            if (msg.title) {
+              showPushNotification(msg.title, msg.message || "", msg.actionUrl);
+            }
+          }
+        } catch {}
+      };
+
+      ws.onclose = () => {
+        if (!mountedRef.current) return;
+        reconnectTimerRef.current = setTimeout(() => {
+          if (mountedRef.current) connectWs();
+        }, 5000);
+      };
+
+      ws.onerror = () => {
+        ws.close();
+      };
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    connectWs();
+
+    return () => {
+      mountedRef.current = false;
+      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+      if (wsRef.current) {
+        wsRef.current.onclose = null;
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+    };
+  }, [connectWs]);
 }

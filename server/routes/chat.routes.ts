@@ -4,6 +4,7 @@ import { asString } from "../utils/request";
 import { sendPushNotification } from "../onesignal";
 import { requireAuth, requireRole } from "../middleware";
 import { logger } from "../utils/logger";
+import { broadcastToUser } from "../websocket/index";
 
 export function registerChatRoutes(app: Express): void {
 
@@ -57,6 +58,11 @@ export function registerChatRoutes(app: Express): void {
             message: shortMsg,
             type: "chat",
             actionUrl: `/chat?guest=${user.id}`,
+          });
+          broadcastToUser(String(staff.id), {
+            type: "new_notification",
+            title: `New message from ${guestName}`,
+            message: shortMsg,
           });
         }
         const staffIds = staffToNotify.map(s => String(s.id));
@@ -440,7 +446,12 @@ export function registerChatRoutes(app: Express): void {
           title: `Message from ${senderName}`,
           message: shortMsg,
           type: "chat",
-          actionUrl: `/dashboard?view=staff-chat&staffId=${user.id}`,
+          actionUrl: `/dashboard?view=staff-messages&staffId=${user.id}`,
+        });
+        broadcastToUser(String(staffId), {
+          type: "new_notification",
+          title: `Message from ${senderName}`,
+          message: shortMsg,
         });
         sendPushNotification({
           userIds: [String(staffId)],

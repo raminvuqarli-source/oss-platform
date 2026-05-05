@@ -4,6 +4,7 @@ import { asString } from "../utils/request";
 import type { ServiceRequest } from "@shared/schema";
 import { requireAuth, requireRole } from "../middleware";
 import { logger } from "../utils/logger";
+import { broadcastToUser } from "../websocket/index";
 
 export function registerServiceRequestRoutes(app: Express): void {
   // Service Requests Routes
@@ -76,6 +77,11 @@ export function registerServiceRequestRoutes(app: Express): void {
             message: `Room ${request.roomNumber}: ${request.requestType.replace("_", " ")} - ${request.description}`,
             type: "info",
             tenantId: req.tenantId || user?.tenantId || null,
+          });
+          broadcastToUser(String(staff.id), {
+            type: "new_notification",
+            title: "New Service Request",
+            message: `Room ${request.roomNumber}: ${request.requestType.replace("_", " ")} - ${request.description}`,
           });
         }
       }

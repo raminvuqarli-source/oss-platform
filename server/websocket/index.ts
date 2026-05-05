@@ -10,9 +10,22 @@ import signature from "cookie-signature";
 
 const deviceConnections = new Map<string, { ws: WebSocket; deviceId: string; tenantId: string }>();
 const ownerConnections = new Map<string, Set<WebSocket>>();
+const userConnections = new Map<string, Set<WebSocket>>();
 
 function broadcastToOwner(ownerId: string, message: any) {
   const clients = ownerConnections.get(ownerId);
+  if (clients) {
+    const data = JSON.stringify(message);
+    clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(data);
+      }
+    });
+  }
+}
+
+export function broadcastToUser(userId: string, message: any) {
+  const clients = userConnections.get(userId);
   if (clients) {
     const data = JSON.stringify(message);
     clients.forEach(client => {
@@ -132,6 +145,12 @@ export function initWebSocket(httpServer: Server, app: Express): void {
         ownerConnections.set(authenticatedTenantId, new Set());
       }
       ownerConnections.get(authenticatedTenantId)!.add(ws);
+
+      const uid = String(user.id);
+      if (!userConnections.has(uid)) {
+        userConnections.set(uid, new Set());
+      }
+      userConnections.get(uid)!.add(ws);
     } else {
       ws.send(JSON.stringify({ type: "error", message: "Invalid connection parameters or missing tenant context" }));
       ws.close(4001, "Unauthorized");
@@ -204,6 +223,9 @@ export function initWebSocket(httpServer: Server, app: Express): void {
         }
       } else if (clientType === "dashboard" && authenticatedTenantId) {
         ownerConnections.get(authenticatedTenantId)?.delete(ws);
+        const uid = String(user.id);
+        userConnections.get(uid)?.delete(ws);
+        if (userConnections.get(uid)?.size === 0) userConnections.delete(uid);
       }
     });
 
