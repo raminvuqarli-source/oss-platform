@@ -200,32 +200,64 @@ export function registerStaffPerformanceRoutes(app: Express) {
     }
   });
 
+  const ALL_STAFF_ROLES = [
+    "admin", "reception", "staff", "property_manager",
+    "restaurant_manager", "waiter", "kitchen_staff",
+    "restaurant_cleaner", "restaurant_cashier",
+  ];
+
   app.get("/api/staff-performance/hotel", authenticateRequest, requireRole("owner_admin"), async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
       if (!user) return res.status(401).json({ message: "Unauthorized" });
 
       let hotelId = user.hotelId;
-      if (!hotelId && user.ownerId) {
+      const seenIds = new Set<string>();
+      const allStaff: any[] = [];
+
+      const addStaff = (users: any[]) => {
+        for (const u of users) {
+          if (!seenIds.has(u.id) && ALL_STAFF_ROLES.includes(u.role)) {
+            seenIds.add(u.id);
+            allStaff.push(u);
+          }
+        }
+      };
+
+      // Fetch by ownerId (covers all properties)
+      if (user.ownerId) {
         const ownerProperties = await storage.getPropertiesByOwner(user.ownerId);
         for (const prop of ownerProperties) {
-          const hotel = await storage.getHotelByPropertyId(prop.id);
-          if (hotel) {
-            hotelId = hotel.id;
-            break;
+          const propUsers = await storage.getUsersByProperty(prop.id);
+          addStaff(propUsers);
+          if (!hotelId) {
+            const hotel = await storage.getHotelByPropertyId(prop.id);
+            if (hotel) hotelId = hotel.id;
           }
+        }
+        if (req.tenantId) {
+          const ownerUsers = await storage.getUsersByOwner(user.ownerId, req.tenantId);
+          addStaff(ownerUsers);
         }
       }
 
-      if (!hotelId) return res.json([]);
+      // Also fetch by hotelId as fallback
+      if (hotelId && req.tenantId) {
+        const hotelUsers = await storage.getUsersByHotel(hotelId, req.tenantId);
+        addStaff(hotelUsers);
+      }
 
-      const hotelUsers = await storage.getUsersByHotel(hotelId, req.tenantId!);
-      const staffMembers = hotelUsers.filter(u =>
-        u.role === "admin" || u.role === "reception" || u.role === "staff" || u.role === "property_manager"
-      );
+      // Also fetch by propertyId if set on the owner
+      if (user.propertyId) {
+        const propUsers = await storage.getUsersByProperty(user.propertyId);
+        addStaff(propUsers);
+      }
 
-      const performanceData = await Promise.all(staffMembers.map(async (staff) => {
-        const score = await calculateStaffPerformance(staff.id, hotelId!, req.tenantId!);
+      if (allStaff.length === 0) return res.json([]);
+
+      const resolvedHotelId = hotelId || "unknown";
+      const performanceData = await Promise.all(allStaff.map(async (staff) => {
+        const score = await calculateStaffPerformance(staff.id, resolvedHotelId, req.tenantId!);
         const feedbacks = await storage.getStaffFeedbackByStaff(staff.id);
         return {
           staffId: staff.id,
