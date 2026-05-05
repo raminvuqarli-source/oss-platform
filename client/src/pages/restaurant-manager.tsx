@@ -67,6 +67,7 @@ export default function RestaurantManager() {
   const [staffForm, setStaffForm] = useState({ fullName: "", username: "", password: "", email: "", role: "waiter" });
   const [waiterProfileForm, setWaiterProfileForm] = useState({ salaryAmount: "", taxRate: "", tablesAssigned: "", notes: "" });
   const [cleaningForm, setCleaningForm] = useState({ description: "", location: "", assignedToId: "" });
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
   // ── WebSocket for real-time cleaning task updates ──
   const wsRef = useRef<WebSocket | null>(null);
@@ -526,7 +527,13 @@ export default function RestaurantManager() {
                             </div>
                             {task.photoUrl && (
                               <div className="mt-2">
-                                <img src={task.photoUrl} alt={t("rm.cleaningPhoto")} className="h-20 w-20 rounded object-cover border" />
+                                <img
+                                  src={task.photoUrl}
+                                  alt={t("rm.cleaningPhoto")}
+                                  className="h-20 w-20 rounded object-cover border cursor-pointer hover:opacity-80 transition-opacity"
+                                  onClick={() => setLightboxUrl(task.photoUrl)}
+                                  data-testid={`img-cleaning-photo-${task.id}`}
+                                />
                               </div>
                             )}
                           </div>
@@ -813,6 +820,31 @@ export default function RestaurantManager() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* ── Photo Lightbox ── */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setLightboxUrl(null)}
+          data-testid="lightbox-overlay"
+        >
+          <div className="relative max-w-3xl max-h-[90vh] w-full flex items-center justify-center" onClick={e => e.stopPropagation()}>
+            <img
+              src={lightboxUrl}
+              alt="Temizlik şəkli"
+              className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl"
+              data-testid="lightbox-image"
+            />
+            <button
+              className="absolute top-2 right-2 bg-black/60 text-white rounded-full w-9 h-9 flex items-center justify-center text-lg hover:bg-black/80 transition-colors"
+              onClick={() => setLightboxUrl(null)}
+              data-testid="button-close-lightbox"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
