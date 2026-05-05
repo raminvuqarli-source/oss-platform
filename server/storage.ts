@@ -296,6 +296,7 @@ export interface IStorage {
   getAllUsers(tenantId: string): Promise<User[]>;
   getUsersByHotel(hotelId: string, tenantId: string): Promise<User[]>;
   getUsersByOwner(ownerId: string, tenantId: string): Promise<User[]>;
+  getOwnerAdminsByTenant(tenantId: string): Promise<User[]>;
   getUsersByProperty(propertyId: string): Promise<User[]>;
   getStaffUsers(): Promise<User[]>;
   getGuestUsers(hotelId: string, tenantId: string): Promise<User[]>;
@@ -915,6 +916,12 @@ export class DatabaseStorage implements IStorage {
     const conditions = [eq(users.ownerId, ownerId), eq(users.tenantId, tenantId)];
     return db.select().from(users)
       .where(and(...conditions))
+      .orderBy(desc(users.createdAt));
+  }
+
+  async getOwnerAdminsByTenant(tenantId: string): Promise<User[]> {
+    return db.select().from(users)
+      .where(and(eq(users.role, "owner_admin"), eq(users.tenantId, tenantId)))
       .orderBy(desc(users.createdAt));
   }
 

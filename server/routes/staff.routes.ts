@@ -89,7 +89,7 @@ export function registerStaffRoutes(app: Express): void {
     const currentUser = await storage.getUser(req.session.userId!);
     const allStaff: any[] = [];
     const seenIds = new Set<string>();
-    const staffRoles = ["reception", "admin", "staff", "property_manager", "restaurant_manager", "kitchen_staff", "waiter", "restaurant_cleaner", "restaurant_cashier"];
+    const staffRoles = ["reception", "admin", "owner_admin", "staff", "property_manager", "restaurant_manager", "kitchen_staff", "waiter", "restaurant_cleaner", "restaurant_cashier"];
 
     const addStaffUsers = (users: any[]) => {
       for (const u of users) {
@@ -120,6 +120,12 @@ export function registerStaffRoutes(app: Express): void {
       if (req.tenantId) {
         const ownerUsers = await storage.getUsersByOwner(currentUser.ownerId, req.tenantId);
         addStaffUsers(ownerUsers);
+      }
+    } else {
+      const tenantId = req.tenantId || currentUser?.tenantId;
+      if (tenantId) {
+        const ownerAdmins = await storage.getOwnerAdminsByTenant(tenantId);
+        addStaffUsers(ownerAdmins);
       }
     }
 
