@@ -8,13 +8,30 @@ declare global {
   }
 }
 
-const APP_ID = import.meta.env.VITE_ONESIGNAL_APP_ID;
+let APP_ID: string = import.meta.env.VITE_ONESIGNAL_APP_ID || "";
 
 let initialized = false;
 let medianBridgeReady = false;
 let sdkReady: Promise<any> | null = null;
 let initDone: Promise<void> | null = null;
 let resolveInitDone: (() => void) | null = null;
+
+async function resolveAppId(): Promise<string> {
+  if (APP_ID) return APP_ID;
+  try {
+    const res = await fetch("/api/config/public");
+    if (res.ok) {
+      const data = await res.json();
+      if (data.onesignalAppId) {
+        APP_ID = data.onesignalAppId;
+        console.log("[OneSignal] APP_ID loaded from API:", APP_ID);
+      }
+    }
+  } catch (e) {
+    console.warn("[OneSignal] Failed to fetch config:", e);
+  }
+  return APP_ID;
+}
 
 function getInitDone(): Promise<void> {
   if (!initDone) {
@@ -83,6 +100,7 @@ window.median_onesignal_info = function(info: any) {
 };
 
 export async function initOneSignal() {
+  await resolveAppId();
   if (initialized || !APP_ID) {
     if (!APP_ID) console.warn("[OneSignal] No APP_ID, skipping init");
     if (!initDone) { initDone = Promise.resolve(); resolveInitDone = null; }

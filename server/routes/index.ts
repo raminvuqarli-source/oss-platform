@@ -41,6 +41,12 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express,
 ): Promise<Server> {
+  app.get("/api/config/public", (req, res) => {
+    res.json({
+      onesignalAppId: process.env.VITE_ONESIGNAL_APP_ID || "",
+    });
+  });
+
   app.get("/api/download/training-guide", (req, res) => {
     const filePath = path.resolve("OSS_Training_Guide.docx");
     res.download(filePath, "OSS_Training_Guide.docx");
