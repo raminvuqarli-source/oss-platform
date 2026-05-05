@@ -493,7 +493,7 @@ export function registerRestaurantRoutes(app: Express): void {
 
   // ─── ROOM ORDERS VIEW ─────────────────────────────────────────────────
   // Manager sees all orders from room numbers (room_delivery type)
-  app.get("/api/restaurant/room-orders", requireRestaurantRole(...MANAGER_ROLES), async (req, res) => {
+  app.get("/api/restaurant/room-orders", requireRestaurantRole(...MANAGER_ROLES, "restaurant_cashier"), async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
       if (!user?.propertyId) return res.status(400).json({ message: "No property linked" });
@@ -666,7 +666,7 @@ export function registerRestaurantRoutes(app: Express): void {
 
   // ─── ANALYTICS ────────────────────────────────────────────────────────
 
-  app.get("/api/restaurant/analytics", requireRestaurantRole(...MANAGER_ROLES), async (req, res) => {
+  app.get("/api/restaurant/analytics", requireRestaurantRole(...MANAGER_ROLES, "restaurant_cashier"), async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
       if (!user?.propertyId) return res.status(400).json({ message: "No property linked" });
