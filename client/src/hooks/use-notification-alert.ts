@@ -133,6 +133,7 @@ export function useNotificationAlert(
 ) {
   const prevUnreadIdsRef = useRef<Set<string>>(new Set());
   const isInitialLoadRef = useRef(true);
+  const suppressNextCheckRef = useRef(false);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mountedRef = useRef(true);
@@ -154,6 +155,13 @@ export function useNotificationAlert(
     if (isInitialLoadRef.current) {
       prevUnreadIdsRef.current = currentUnreadIds;
       isInitialLoadRef.current = false;
+      return;
+    }
+
+    // WebSocket already showed this notification — just update IDs, skip sound/toast
+    if (suppressNextCheckRef.current) {
+      suppressNextCheckRef.current = false;
+      prevUnreadIdsRef.current = currentUnreadIds;
       return;
     }
 
@@ -197,12 +205,15 @@ export function useNotificationAlert(
             try {
               const msg = JSON.parse(event.data as string);
               if (msg.type === "new_notification") {
-                queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+                // Show notification immediately via WebSocket
                 playNotificationSound();
                 if (msg.title) {
                   onNewMessageRef.current?.(msg.title, msg.message || "");
                   showPushNotification(msg.title, msg.message || "", msg.actionUrl);
                 }
+                // Suppress the next polling check so it won't duplicate
+                suppressNextCheckRef.current = true;
+                queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
               }
             } catch {}
           };

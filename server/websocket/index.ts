@@ -177,7 +177,9 @@ export function initWebSocket(httpServer: Server, app: Express): void {
         ws.close(4002, "Internal error");
       });
     } else if (clientType === "dashboard") {
-      if (authenticatedTenantId) {
+      // Only staff/admin go into ownerConnections (tenant-wide broadcast)
+      // Guests only go into userConnections (targeted broadcast only)
+      if (authenticatedTenantId && user.role !== "guest") {
         if (!ownerConnections.has(authenticatedTenantId)) {
           ownerConnections.set(authenticatedTenantId, new Set());
         }
