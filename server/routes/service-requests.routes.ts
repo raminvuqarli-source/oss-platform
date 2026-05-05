@@ -4,7 +4,7 @@ import { asString } from "../utils/request";
 import type { ServiceRequest } from "@shared/schema";
 import { requireAuth, requireRole } from "../middleware";
 import { logger } from "../utils/logger";
-import { broadcastToUser } from "../websocket/index";
+import { broadcastToUser, broadcastToTenant } from "../websocket/index";
 
 export function registerServiceRequestRoutes(app: Express): void {
   // Service Requests Routes
@@ -81,7 +81,19 @@ export function registerServiceRequestRoutes(app: Express): void {
 
       const notifTitle = "🔔 Yeni Servis Sorğusu";
       const notifMsg = `Otaq ${request.roomNumber}: ${request.requestType.replace(/_/g, " ")} — ${request.description}`;
+      const actionUrl = "/reception-dashboard?view=requests";
 
+      // Broadcast to ALL staff connected to this hotel's dashboard instantly
+      if (staffTenantId) {
+        broadcastToTenant(staffTenantId, {
+          type: "new_notification",
+          title: notifTitle,
+          message: notifMsg,
+          actionUrl,
+        });
+      }
+
+      // Persist DB notifications for notification inbox
       if (hotelId && staffTenantId) {
         try {
           const hotelUsers = await storage.getUsersByHotel(hotelId, staffTenantId);
@@ -94,44 +106,15 @@ export function registerServiceRequestRoutes(app: Express): void {
               title: notifTitle,
               message: notifMsg,
               type: "service_request",
-              actionUrl: "/reception-dashboard?view=requests",
+              actionUrl,
               tenantId: staffTenantId,
             });
-            broadcastToUser(String(staff.id), {
-              type: "new_notification",
-              title: notifTitle,
-              message: notifMsg,
-              actionUrl: "/reception-dashboard?view=requests",
-            });
           }
-          logger.info({ hotelId, staffCount: hotelStaff.length }, "Service request notifications sent");
+          logger.info({ hotelId, staffTenantId, staffCount: hotelStaff.length }, "Service request notifications sent");
         } catch (err) {
-          logger.error({ err }, "Error sending service request notifications");
+          logger.error({ err }, "Error persisting service request DB notifications");
         }
-      } else if (staffTenantId) {
-        // fallback: notify owner admins of the tenant
-        try {
-          const ownerAdmins = await storage.getOwnerAdminsByTenant(staffTenantId);
-          for (const admin of ownerAdmins) {
-            await storage.createNotification({
-              userId: admin.id,
-              title: notifTitle,
-              message: notifMsg,
-              type: "service_request",
-              actionUrl: "/reception-dashboard?view=requests",
-              tenantId: staffTenantId,
-            });
-            broadcastToUser(String(admin.id), {
-              type: "new_notification",
-              title: notifTitle,
-              message: notifMsg,
-              actionUrl: "/reception-dashboard?view=requests",
-            });
-          }
-        } catch (err) {
-          logger.error({ err }, "Error sending service request notifications (fallback)");
-        }
-      } else {
+      } else if (!staffTenantId) {
         logger.warn({ userId: req.session.userId, hotelId }, "Could not resolve tenantId for service request notification");
       }
 

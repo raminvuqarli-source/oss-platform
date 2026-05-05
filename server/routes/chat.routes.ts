@@ -4,7 +4,7 @@ import { asString } from "../utils/request";
 import { sendPushNotification } from "../onesignal";
 import { requireAuth, requireRole } from "../middleware";
 import { logger } from "../utils/logger";
-import { broadcastToUser } from "../websocket/index";
+import { broadcastToUser, broadcastToTenant } from "../websocket/index";
 
 export function registerChatRoutes(app: Express): void {
 
@@ -45,46 +45,60 @@ export function registerChatRoutes(app: Express): void {
       });
 
       try {
-        // Resolve authoritative tenantId from hotel's ownerId — staff are stored under ownerId
-        let staffTenantId: string | null = req.tenantId || user.tenantId || null;
+        // Resolve hotel ownerId — this is the tenantId all staff are registered under
+        let ownerTenantId: string | null = req.tenantId || user.tenantId || null;
         try {
           const hotel = await storage.getHotel(user.hotelId);
-          if (hotel?.ownerId) staffTenantId = hotel.ownerId;
+          if (hotel?.ownerId) ownerTenantId = hotel.ownerId;
         } catch {}
 
-        const hotelStaff = staffTenantId
-          ? await storage.getUsersByHotel(user.hotelId, staffTenantId)
-          : [];
-        const staffRoles = ["reception", "admin", "owner_admin", "property_manager"];
-        const staffToNotify = hotelStaff.filter(u => staffRoles.includes(u.role));
-        const guestName = user.fullName || "Guest";
+        const guestName = user.fullName || "Qonaq";
         const shortMsg = message.trim().length > 80 ? message.trim().substring(0, 80) + "..." : message.trim();
         const notifTitle = `💬 ${guestName} mesaj göndərdi`;
-        for (const staff of staffToNotify) {
-          await storage.createNotification({
-            userId: staff.id,
-            tenantId: staffTenantId,
-            title: notifTitle,
-            message: shortMsg,
-            type: "chat",
-            actionUrl: `/reception-dashboard?view=messages`,
-          });
-          broadcastToUser(String(staff.id), {
+        const actionUrl = `/reception-dashboard?view=messages`;
+
+        // Broadcast to ALL staff connected to this hotel's dashboard — no staff lookup needed
+        if (ownerTenantId) {
+          broadcastToTenant(ownerTenantId, {
             type: "new_notification",
             title: notifTitle,
             message: shortMsg,
-            actionUrl: `/reception-dashboard?view=messages`,
+            actionUrl,
           });
         }
-        logger.info({ hotelId: user.hotelId, staffCount: staffToNotify.length }, "Chat notification sent to staff");
-        const staffIds = staffToNotify.map(s => String(s.id));
-        if (staffIds.length > 0) {
-          sendPushNotification({
-            userIds: staffIds,
-            title: notifTitle,
-            message: shortMsg,
-            data: { type: "chat", guestId: String(user.id) },
-          }).catch(err => logger.error({ err }, "OneSignal push error"));
+
+        // Also persist DB notifications for the notification inbox
+        if (ownerTenantId) {
+          try {
+            const hotelStaff = await storage.getUsersByHotel(user.hotelId, ownerTenantId);
+            const staffToNotify = hotelStaff.filter(u =>
+              ["reception", "admin", "owner_admin", "property_manager"].includes(u.role)
+            );
+            for (const staff of staffToNotify) {
+              await storage.createNotification({
+                userId: staff.id,
+                tenantId: ownerTenantId,
+                title: notifTitle,
+                message: shortMsg,
+                type: "chat",
+                actionUrl,
+              });
+            }
+            const staffIds = staffToNotify.map(s => String(s.id));
+            if (staffIds.length > 0) {
+              sendPushNotification({
+                userIds: staffIds,
+                title: notifTitle,
+                message: shortMsg,
+                data: { type: "chat", guestId: String(user.id) },
+              }).catch(err => logger.error({ err }, "OneSignal push error"));
+            }
+            logger.info({ hotelId: user.hotelId, ownerTenantId, staffCount: staffToNotify.length }, "Chat notification dispatched");
+          } catch (dbErr) {
+            logger.error({ err: dbErr }, "Error persisting chat DB notifications");
+          }
+        } else {
+          logger.warn({ userId: user.id, hotelId: user.hotelId }, "Could not resolve ownerTenantId for chat notification");
         }
       } catch (notifError) {
         logger.error({ err: notifError }, "Error creating chat notifications");
