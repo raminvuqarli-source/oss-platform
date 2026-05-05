@@ -294,6 +294,18 @@ function ReceptionCalendarView() {
     queryKey: ["/api/bookings"],
   });
 
+  const { data: allUnits = [] } = useQuery<RoomUnit[]>({
+    queryKey: ["/api/units/status"],
+  });
+
+  const getRoomLabel = (booking: { roomNumber: string; unitId?: string | null }) => {
+    if (booking.unitId) {
+      const unit = allUnits.find(u => u.id === booking.unitId);
+      if (unit?.name) return `${unit.name} (${unit.unitNumber})`;
+    }
+    return booking.roomNumber;
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-3" data-testid="calendar-view-loading">
