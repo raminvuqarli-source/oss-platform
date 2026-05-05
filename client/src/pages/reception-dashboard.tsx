@@ -1127,12 +1127,27 @@ export default function ReceptionDashboard() {
     };
   });
 
+  // Parse YYYY-MM-DD as LOCAL date (avoids UTC midnight timezone shifts)
+  const parseDateLocal = (s: string): Date | null => {
+    if (!s || s.length !== 10) return null;
+    const [y, m, d] = s.split('-').map(Number);
+    if (!y || !m || !d) return null;
+    const dt = new Date(y, m - 1, d);
+    return isNaN(dt.getTime()) ? null : dt;
+  };
+  // Format YYYY-MM-DD → DD.MM.YYYY for unambiguous display
+  const fmtDateLocal = (s: string): string => {
+    if (!s || s.length !== 10) return '';
+    const [y, m, d] = s.split('-');
+    return `${d}.${m}.${y}`;
+  };
+
   const nights = (() => {
-    if (!guestForm.checkInDate || !guestForm.checkOutDate) return 1;
-    const checkIn = new Date(guestForm.checkInDate).getTime();
-    const checkOut = new Date(guestForm.checkOutDate).getTime();
-    if (isNaN(checkIn) || isNaN(checkOut) || checkOut <= checkIn) return 1;
-    return Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+    const ci = parseDateLocal(guestForm.checkInDate);
+    const co = parseDateLocal(guestForm.checkOutDate);
+    if (!ci || !co) return 1;
+    const diff = Math.round((co.getTime() - ci.getTime()) / (1000 * 60 * 60 * 24));
+    return diff > 0 ? diff : 1;
   })();
   const nightlyRateNum = parseFloat(guestForm.nightlyRate) || 0;
   const discountNum = parseFloat(guestForm.discount) || 0;
@@ -1690,12 +1705,12 @@ export default function ReceptionDashboard() {
                     onChange={(e) => {
                       const newCheckIn = e.target.value;
                       setGuestForm(prev => {
-                        const parsed = new Date(newCheckIn);
-                        const isValid = newCheckIn.length === 10 && !isNaN(parsed.getTime());
-                        if (!isValid) return { ...prev, checkInDate: newCheckIn };
-                        const nextDay = new Date(parsed);
-                        nextDay.setDate(nextDay.getDate() + 1);
-                        const autoCheckOut = nextDay.toISOString().split('T')[0];
+                        if (newCheckIn.length !== 10) return { ...prev, checkInDate: newCheckIn };
+                        const [y, m, d] = newCheckIn.split('-').map(Number);
+                        if (!y || !m || !d) return { ...prev, checkInDate: newCheckIn };
+                        const nextDay = new Date(y, m - 1, d + 1);
+                        const pad = (n: number) => String(n).padStart(2, '0');
+                        const autoCheckOut = `${nextDay.getFullYear()}-${pad(nextDay.getMonth() + 1)}-${pad(nextDay.getDate())}`;
                         const currentCheckOut = prev.checkOutDate;
                         return {
                           ...prev,
@@ -1713,6 +1728,9 @@ export default function ReceptionDashboard() {
                     onChange={(e) => setGuestForm(prev => ({ ...prev, checkInTime: e.target.value }))}
                   />
                 </div>
+                {guestForm.checkInDate && (
+                  <p className="text-xs text-muted-foreground">{fmtDateLocal(guestForm.checkInDate)}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label>{t('dashboard.reception.checkOutDate')}</Label>
@@ -1736,6 +1754,9 @@ export default function ReceptionDashboard() {
                     onChange={(e) => setGuestForm(prev => ({ ...prev, checkOutTime: e.target.value }))}
                   />
                 </div>
+                {guestForm.checkOutDate && (
+                  <p className="text-xs text-muted-foreground">{fmtDateLocal(guestForm.checkOutDate)}</p>
+                )}
                 <p className="text-xs font-medium text-primary" data-testid="text-nights-count">
                   {nights} {t('dashboard.reception.nights', 'night(s)')}
                 </p>
