@@ -66,6 +66,12 @@ async function calculateStaffPerformance(staffId: string, hotelId: string, tenan
 }
 
 export function registerStaffPerformanceRoutes(app: Express) {
+  const ALL_STAFF_ROLES = [
+    "admin", "reception", "staff", "property_manager",
+    "restaurant_manager", "waiter", "kitchen_staff",
+    "restaurant_cleaner", "restaurant_cashier",
+  ];
+
   app.post("/api/staff-messages/broadcast", authenticateRequest, requireRole("owner_admin"), async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
@@ -100,10 +106,38 @@ export function registerStaffPerformanceRoutes(app: Express) {
         messageText: messageText.trim(),
       });
 
-      const hotelUsers = await storage.getUsersByHotel(hotelId, req.tenantId!);
-      const staffMembers = hotelUsers.filter(u =>
-        u.role === "admin" || u.role === "reception" || u.role === "staff" || u.role === "property_manager"
-      );
+      // Gather all staff across all sources (same pattern as performance endpoint)
+      const seenStaffIds = new Set<string>();
+      const staffMembers: any[] = [];
+
+      const addStaffForBroadcast = (users: any[]) => {
+        for (const u of users) {
+          if (!seenStaffIds.has(u.id) && ALL_STAFF_ROLES.includes(u.role)) {
+            seenStaffIds.add(u.id);
+            staffMembers.push(u);
+          }
+        }
+      };
+
+      if (user.ownerId) {
+        const ownerProperties = await storage.getPropertiesByOwner(user.ownerId);
+        for (const prop of ownerProperties) {
+          const propUsers = await storage.getUsersByProperty(prop.id);
+          addStaffForBroadcast(propUsers);
+        }
+        if (req.tenantId) {
+          const ownerUsers = await storage.getUsersByOwner(user.ownerId, req.tenantId);
+          addStaffForBroadcast(ownerUsers);
+        }
+      }
+      if (hotelId && req.tenantId) {
+        const hotelUsers = await storage.getUsersByHotel(hotelId, req.tenantId);
+        addStaffForBroadcast(hotelUsers);
+      }
+      if (user.propertyId) {
+        const propUsers = await storage.getUsersByProperty(user.propertyId);
+        addStaffForBroadcast(propUsers);
+      }
 
       for (const staff of staffMembers) {
         await storage.createStaffMessageStatus({
@@ -115,7 +149,7 @@ export function registerStaffPerformanceRoutes(app: Express) {
         await storage.createNotification({
           userId: staff.id,
           tenantId: user.tenantId,
-          title: "New Broadcast Message",
+          title: "Yeni mesaj",
           message: messageText.trim().substring(0, 100),
           type: "info",
         });
@@ -199,12 +233,6 @@ export function registerStaffPerformanceRoutes(app: Express) {
       res.status(500).json({ message: "Failed to mark as read" });
     }
   });
-
-  const ALL_STAFF_ROLES = [
-    "admin", "reception", "staff", "property_manager",
-    "restaurant_manager", "waiter", "kitchen_staff",
-    "restaurant_cleaner", "restaurant_cashier",
-  ];
 
   app.get("/api/staff-performance/hotel", authenticateRequest, requireRole("owner_admin"), async (req, res) => {
     try {

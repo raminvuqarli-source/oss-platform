@@ -1487,9 +1487,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNotificationsForUser(userId: string, tenantId: string): Promise<Notification[]> {
-    const conditions = [eq(notifications.userId, userId), eq(notifications.tenantId, tenantId)];
     return db.select().from(notifications)
-      .where(and(...conditions))
+      .where(eq(notifications.userId, userId))
       .orderBy(desc(notifications.createdAt));
   }
 
