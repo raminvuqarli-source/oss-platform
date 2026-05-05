@@ -696,6 +696,193 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
         }
       }
 
+      // ─── Recreate fresh demo data after every login cleanup ───────────────
+      try {
+        if (existingOwner?.ownerId && existingOwner?.hotelId) {
+          const demoOwnerId = existingOwner.ownerId;
+          const demoHotelId = existingOwner.hotelId;
+          const demoProperties = await storage.getPropertiesByOwner(demoOwnerId);
+          const demoPropId = demoProperties[0]?.id;
+          const DEMO_TENANT = demoOwnerId;
+
+          if (demoPropId) {
+            const [guest1, guest2, restCleanerUser, restMgrUser, waiterUser] = await Promise.all([
+              storage.getUserByUsername("demo_guest1"),
+              storage.getUserByUsername("demo_guest2"),
+              storage.getUserByUsername("demo_restaurant_cleaner"),
+              storage.getUserByUsername("demo_restaurant_manager"),
+              storage.getUserByUsername("demo_waiter"),
+            ]);
+
+            const today2 = new Date();
+            const yesterday2 = new Date(today2); yesterday2.setDate(today2.getDate() - 1);
+            const tomorrow2 = new Date(today2); tomorrow2.setDate(today2.getDate() + 1);
+            const nextWeek2 = new Date(today2); nextWeek2.setDate(today2.getDate() + 7);
+
+            // Recreate bookings
+            let booking1: any = null;
+            if (guest1) {
+              booking1 = await storage.createBooking({
+                guestId: guest1.id, roomNumber: "202", roomType: "deluxe",
+                checkInDate: yesterday2, checkOutDate: tomorrow2,
+                status: "checked_in", numberOfGuests: 2,
+                specialRequests: "Extra yastıq, gec yoxlama",
+                nightlyRate: 25000, totalPrice: 50000, currency: "USD",
+                ownerId: demoOwnerId, propertyId: demoPropId,
+              });
+              await storage.createRoomSettings({
+                bookingId: booking1.id, temperature: 22, lightsOn: true,
+                lightsBrightness: 70, curtainsOpen: true, jacuzziOn: false,
+                jacuzziTemperature: 38, welcomeMode: false,
+              });
+            }
+            if (guest2) {
+              await storage.createBooking({
+                guestId: guest2.id, roomNumber: "301", roomType: "suite",
+                checkInDate: tomorrow2, checkOutDate: nextWeek2,
+                status: "confirmed", numberOfGuests: 3,
+                specialRequests: "Hava limanından transfer",
+                nightlyRate: 45000, totalPrice: 270000, currency: "USD",
+                ownerId: demoOwnerId, propertyId: demoPropId,
+              });
+            }
+
+            // Recreate service requests
+            if (guest1 && booking1) {
+              await storage.createServiceRequest({
+                guestId: guest1.id, bookingId: booking1.id,
+                roomNumber: "202", requestType: "housekeeping",
+                description: "202 otaq üçün əlavə dəsmal tələb edilir",
+                status: "in_progress", priority: "medium",
+                ownerId: demoOwnerId, propertyId: demoPropId,
+              });
+              await storage.createServiceRequest({
+                guestId: guest1.id, bookingId: booking1.id,
+                roomNumber: "202", requestType: "room_service",
+                description: "Səhər yeməyi saat 08:00-da 202 otağa çatdırılsın",
+                status: "pending", priority: "normal",
+                ownerId: demoOwnerId, propertyId: demoPropId,
+              });
+            }
+
+            // Recreate notifications for ALL demo users
+            for (const uname of Object.values(DEMO_ROLE_MAP)) {
+              const u = await storage.getUserByUsername(uname);
+              if (!u) continue;
+              await storage.createNotification({
+                userId: u.id,
+                title: "Yeni Rezervasiya",
+                message: `Michael Chen 301 nömrəli otağı ${tomorrow2.toLocaleDateString("az-AZ")} - ${nextWeek2.toLocaleDateString("az-AZ")} tarixləri üçün rezerv etdi`,
+                type: "booking", read: false,
+              });
+              await storage.createNotification({
+                userId: u.id,
+                title: "Xidmət Sorğusu",
+                message: "Sarah Johnson (202 otaq) əlavə dəsmal istədi",
+                type: "service_request", read: false,
+              });
+            }
+
+            // Ensure restaurant menu exists
+            const existingMenuCats = await storage.getPosMenuCategories(demoPropId);
+            if (existingMenuCats.length === 0) {
+              const mc1 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: demoPropId, name: "Səhər Yeməyi", sortOrder: 0 });
+              const mc2 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: demoPropId, name: "Əsas Yeməklər", sortOrder: 1 });
+              const mc3 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: demoPropId, name: "İçkilər", sortOrder: 2 });
+              const mc4 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: demoPropId, name: "Şirniyyat", sortOrder: 3 });
+              const menuItemDefs = [
+                { categoryId: mc1.id, name: "Tam Qaynar Səhər Yeməyi", priceCents: 2500, description: "Yumurta, kolbasa, tost" },
+                { categoryId: mc1.id, name: "Pankek", priceCents: 1800, description: "Ağcaqayın şərbəti ilə" },
+                { categoryId: mc1.id, name: "Qranola & Yoqurt", priceCents: 1200, description: "Təzə meyvə ilə" },
+                { categoryId: mc2.id, name: "Cızlama Toyuq", priceCents: 3500, description: "Kartof püresi ilə" },
+                { categoryId: mc2.id, name: "Biftek", priceCents: 5500, description: "Kökü garnir ilə" },
+                { categoryId: mc2.id, name: "Qril Balıq", priceCents: 4200, description: "Limon yağı ilə" },
+                { categoryId: mc2.id, name: "Vegetarian Pasta", priceCents: 2800, description: "Mevsim tərəvəzləri ilə" },
+                { categoryId: mc3.id, name: "Limonad", priceCents: 600, description: "Ev hazırlaması" },
+                { categoryId: mc3.id, name: "Çay", priceCents: 400, description: "Süd ilə" },
+                { categoryId: mc3.id, name: "Espresso", priceCents: 700, description: "İtalyan rostu" },
+                { categoryId: mc3.id, name: "Mineral Su", priceCents: 350, description: "0.5L" },
+                { categoryId: mc4.id, name: "Şokoladlı Keks", priceCents: 1400, description: "Şokolad suyu ilə" },
+                { categoryId: mc4.id, name: "Dondurma", priceCents: 900, description: "3 top" },
+                { categoryId: mc4.id, name: "Tiramisu", priceCents: 1800, description: "Klassik İtalyan" },
+              ];
+              for (const mi of menuItemDefs) {
+                await storage.createPosMenuItem({ tenantId: DEMO_TENANT, propertyId: demoPropId, ...mi });
+              }
+              logger.info("Created demo restaurant menu (post-cleanup)");
+            }
+
+            // Ensure restaurant cleaning tasks exist
+            const existingTasks = await storage.getRestaurantCleaningTasks(demoPropId);
+            if (existingTasks.length === 0 && restCleanerUser && restMgrUser) {
+              await storage.createRestaurantCleaningTask({ tenantId: DEMO_TENANT, propertyId: demoPropId, description: "Masaları silin — Şərq zalı", location: "Şərq zalı", assignedToId: restCleanerUser.id, createdById: restMgrUser.id, status: "pending" });
+              await storage.createRestaurantCleaningTask({ tenantId: DEMO_TENANT, propertyId: demoPropId, description: "Mətbəx döşəməsini yuyun", location: "Mətbəx", assignedToId: restCleanerUser.id, createdById: restMgrUser.id, status: "in_progress" });
+              await storage.createRestaurantCleaningTask({ tenantId: DEMO_TENANT, propertyId: demoPropId, description: "Bar sahəsini dezinfeksiya edin", location: "Bar", assignedToId: restCleanerUser.id, createdById: restMgrUser.id, status: "done" });
+              logger.info("Created demo restaurant cleaning tasks (post-cleanup)");
+            }
+
+            // Ensure payroll configs exist for all demo staff
+            const staffPayrollDefs = [
+              { username: "demo_housekeeping", name: "Nina Torres", role: "staff", salary: 250000, tax: 0 },
+              { username: "demo_maintenance", name: "Dave Park", role: "staff", salary: 270000, tax: 0 },
+              { username: "demo_restaurant_manager", name: "Sofia Reyes", role: "restaurant_manager", salary: 480000, tax: 140 },
+              { username: "demo_waiter", name: "Luca Bianchi", role: "waiter", salary: 280000, tax: 140 },
+              { username: "demo_kitchen", name: "Carlos Mendez", role: "kitchen_staff", salary: 320000, tax: 140 },
+              { username: "demo_restaurant_cleaner", name: "Ana Lima", role: "restaurant_cleaner", salary: 220000, tax: 0 },
+              { username: "demo_restaurant_cashier", name: "Omar Faruk", role: "restaurant_cashier", salary: 300000, tax: 140 },
+            ];
+            for (const sp of staffPayrollDefs) {
+              const su = await storage.getUserByUsername(sp.username);
+              if (!su) continue;
+              const existing = await storage.getPayrollConfigByStaff(su.id);
+              if (!existing) {
+                await storage.createPayrollConfig({
+                  hotelId: demoHotelId, ownerId: demoOwnerId, propertyId: demoPropId,
+                  staffId: su.id, staffName: sp.name, staffRole: sp.role,
+                  baseSalary: sp.salary, frequency: "monthly", employeeTaxRate: sp.tax,
+                });
+              }
+            }
+
+            // Ensure fresh POS orders exist for restaurant demos
+            const existingOrders = await storage.getPosOrders(demoPropId, { settlementStatus: "pending" });
+            if (existingOrders.length === 0 && waiterUser) {
+              await storage.createPosOrder({
+                tenantId: DEMO_TENANT, propertyId: demoPropId,
+                tableNumber: "3", guestName: "Sarah Johnson",
+                orderType: "dine_in", waiterId: waiterUser.id,
+                kitchenStatus: "cooking", settlementStatus: "pending", totalCents: 8700,
+              }, [
+                { itemName: "Biftek", quantity: 1, unitPriceCents: 5500, totalCents: 5500 },
+                { itemName: "Limonad", quantity: 2, unitPriceCents: 600, totalCents: 1200 },
+                { itemName: "Tiramisu", quantity: 1, unitPriceCents: 1800, totalCents: 1800 },
+              ]);
+              await storage.createPosOrder({
+                tenantId: DEMO_TENANT, propertyId: demoPropId,
+                tableNumber: "7", guestName: "Michael Chen",
+                orderType: "dine_in", waiterId: waiterUser.id,
+                kitchenStatus: "ready", settlementStatus: "pending", totalCents: 4550,
+              }, [
+                { itemName: "Qril Balıq", quantity: 1, unitPriceCents: 4200, totalCents: 4200 },
+                { itemName: "Mineral Su", quantity: 1, unitPriceCents: 350, totalCents: 350 },
+              ]);
+              await storage.createPosOrder({
+                tenantId: DEMO_TENANT, propertyId: demoPropId,
+                roomNumber: "202", guestName: "Sarah Johnson",
+                orderType: "room_service", waiterId: waiterUser.id,
+                kitchenStatus: "delivered", settlementStatus: "pending", totalCents: 3900,
+              }, [
+                { itemName: "Cızlama Toyuq", quantity: 1, unitPriceCents: 3500, totalCents: 3500 },
+                { itemName: "Çay", quantity: 1, unitPriceCents: 400, totalCents: 400 },
+              ]);
+              logger.info("Created demo POS orders (post-cleanup)");
+            }
+          }
+        }
+      } catch (demoRecreateErr) {
+        logger.error({ err: demoRecreateErr }, "Failed to recreate demo data after cleanup — continuing anyway");
+      }
+
       if (role === "guest" && user) {
         try {
           const ownerUser = await storage.getUserByUsername("demo_owner");

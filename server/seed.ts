@@ -491,21 +491,118 @@ export async function seedDemoData() {
     });
   }
 
-  await storage.createNotification({
-    userId: ownerUser.id,
-    title: "New Booking Confirmed",
-    message: `Michael Chen booked Room 301 for ${tomorrow.toLocaleDateString()} - ${nextWeek.toLocaleDateString()}`,
-    type: "booking",
-    read: false,
-  });
+  // ─── Payroll configs for all remaining demo staff ─────────────────────────
+  const hkUser = await storage.getUserByUsername("demo_housekeeping");
+  const maintUser = await storage.getUserByUsername("demo_maintenance");
+  const restMgrUser = await storage.getUserByUsername("demo_restaurant_manager");
+  const waiterUser = await storage.getUserByUsername("demo_waiter");
+  const kitchenUser = await storage.getUserByUsername("demo_kitchen");
+  const restCleanerUser = await storage.getUserByUsername("demo_restaurant_cleaner");
+  const cashierUser = await storage.getUserByUsername("demo_restaurant_cashier");
 
-  await storage.createNotification({
-    userId: receptionUser.id,
-    title: "New Service Request",
-    message: "Sarah Johnson (Room 202) requested extra towels",
-    type: "service_request",
-    read: false,
-  });
+  const remainingPayrolls = [
+    hkUser && { staffId: hkUser.id, staffName: "Nina Torres", staffRole: "staff", baseSalary: 250000, employeeTaxRate: 0 },
+    maintUser && { staffId: maintUser.id, staffName: "Dave Park", staffRole: "staff", baseSalary: 270000, employeeTaxRate: 0 },
+    restMgrUser && { staffId: restMgrUser.id, staffName: "Sofia Reyes", staffRole: "restaurant_manager", baseSalary: 480000, employeeTaxRate: 140 },
+    waiterUser && { staffId: waiterUser.id, staffName: "Luca Bianchi", staffRole: "waiter", baseSalary: 280000, employeeTaxRate: 140 },
+    kitchenUser && { staffId: kitchenUser.id, staffName: "Carlos Mendez", staffRole: "kitchen_staff", baseSalary: 320000, employeeTaxRate: 140 },
+    restCleanerUser && { staffId: restCleanerUser.id, staffName: "Ana Lima", staffRole: "restaurant_cleaner", baseSalary: 220000, employeeTaxRate: 0 },
+    cashierUser && { staffId: cashierUser.id, staffName: "Omar Faruk", staffRole: "restaurant_cashier", baseSalary: 300000, employeeTaxRate: 140 },
+  ].filter(Boolean) as Array<{ staffId: string; staffName: string; staffRole: string; baseSalary: number; employeeTaxRate: number }>;
+
+  for (const p of remainingPayrolls) {
+    await storage.createPayrollConfig({
+      hotelId: hotel.id, ownerId: owner.id, propertyId: property.id,
+      staffId: p.staffId, staffName: p.staffName, staffRole: p.staffRole,
+      baseSalary: p.baseSalary, frequency: "monthly", employeeTaxRate: p.employeeTaxRate,
+    });
+  }
+
+  // ─── Restaurant menu ───────────────────────────────────────────────────────
+  const DEMO_TENANT = owner.id;
+  const cat1 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: property.id, name: "Səhər Yeməyi", sortOrder: 0 });
+  const cat2 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: property.id, name: "Əsas Yeməklər", sortOrder: 1 });
+  const cat3 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: property.id, name: "İçkilər", sortOrder: 2 });
+  const cat4 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: property.id, name: "Şirniyyat", sortOrder: 3 });
+
+  const menuItems = [
+    { categoryId: cat1.id, name: "Tam Qaynar Səhər Yeməyi", priceCents: 2500, description: "Yumurta, kolbasa, tost" },
+    { categoryId: cat1.id, name: "Pankek", priceCents: 1800, description: "Ağcaqayın şərbəti ilə" },
+    { categoryId: cat1.id, name: "Qranola & Yoqurt", priceCents: 1200, description: "Təzə meyvə ilə" },
+    { categoryId: cat2.id, name: "Cızlama Toyuq", priceCents: 3500, description: "Kartof püresi ilə" },
+    { categoryId: cat2.id, name: "Biftek", priceCents: 5500, description: "Kökü garnir ilə" },
+    { categoryId: cat2.id, name: "Qril Balıq", priceCents: 4200, description: "Limon yağı ilə" },
+    { categoryId: cat2.id, name: "Vegetarian Pasta", priceCents: 2800, description: "Mevsim tərəvəzləri ilə" },
+    { categoryId: cat3.id, name: "Limonad", priceCents: 600, description: "Ev hazırlaması" },
+    { categoryId: cat3.id, name: "Çay", priceCents: 400, description: "Süd ilə" },
+    { categoryId: cat3.id, name: "Espresso", priceCents: 700, description: "İtalyan rostu" },
+    { categoryId: cat3.id, name: "Mineral Su", priceCents: 350, description: "0.5L" },
+    { categoryId: cat4.id, name: "Şokoladlı Keks", priceCents: 1400, description: "Şokolad suyu ilə" },
+    { categoryId: cat4.id, name: "Dondurma", priceCents: 900, description: "3 top" },
+    { categoryId: cat4.id, name: "Tiramisu", priceCents: 1800, description: "Klassik İtalyan" },
+  ];
+  for (const item of menuItems) {
+    await storage.createPosMenuItem({ tenantId: DEMO_TENANT, propertyId: property.id, ...item });
+  }
+
+  // ─── Demo POS orders ───────────────────────────────────────────────────────
+  if (waiterUser) {
+    await storage.createPosOrder({
+      tenantId: DEMO_TENANT, propertyId: property.id,
+      tableNumber: "3", guestName: "Sarah Johnson",
+      orderType: "dine_in", waiterId: waiterUser.id,
+      kitchenStatus: "cooking", settlementStatus: "pending",
+      totalCents: 8700,
+    }, [
+      { itemName: "Biftek", quantity: 1, unitPriceCents: 5500, totalCents: 5500 },
+      { itemName: "Limonad", quantity: 2, unitPriceCents: 600, totalCents: 1200 },
+      { itemName: "Tiramisu", quantity: 1, unitPriceCents: 1800, totalCents: 1800 },
+    ]);
+    await storage.createPosOrder({
+      tenantId: DEMO_TENANT, propertyId: property.id,
+      tableNumber: "7", guestName: "Michael Chen",
+      orderType: "dine_in", waiterId: waiterUser.id,
+      kitchenStatus: "ready", settlementStatus: "pending",
+      totalCents: 4550,
+    }, [
+      { itemName: "Qril Balıq", quantity: 1, unitPriceCents: 4200, totalCents: 4200 },
+      { itemName: "Mineral Su", quantity: 1, unitPriceCents: 350, totalCents: 350 },
+    ]);
+    await storage.createPosOrder({
+      tenantId: DEMO_TENANT, propertyId: property.id,
+      roomNumber: "202", guestName: "Sarah Johnson",
+      orderType: "room_service", waiterId: waiterUser.id,
+      kitchenStatus: "delivered", settlementStatus: "pending",
+      totalCents: 3900,
+    }, [
+      { itemName: "Cızlama Toyuq", quantity: 1, unitPriceCents: 3500, totalCents: 3500 },
+      { itemName: "Çay", quantity: 1, unitPriceCents: 400, totalCents: 400 },
+    ]);
+  }
+
+  // ─── Restaurant cleaning tasks ─────────────────────────────────────────────
+  if (restCleanerUser && restMgrUser) {
+    await storage.createRestaurantCleaningTask({ tenantId: DEMO_TENANT, propertyId: property.id, description: "Masaları silin — Şərq zalı", location: "Şərq zalı", assignedToId: restCleanerUser.id, createdById: restMgrUser.id, status: "pending" });
+    await storage.createRestaurantCleaningTask({ tenantId: DEMO_TENANT, propertyId: property.id, description: "Mətbəx döşəməsini yuyun", location: "Mətbəx", assignedToId: restCleanerUser.id, createdById: restMgrUser.id, status: "in_progress" });
+    await storage.createRestaurantCleaningTask({ tenantId: DEMO_TENANT, propertyId: property.id, description: "Bar sahəsini dezinfeksiya edin", location: "Bar", assignedToId: restCleanerUser.id, createdById: restMgrUser.id, status: "done" });
+  }
+
+  // ─── Notifications for all demo users ─────────────────────────────────────
+  const allDemoUsers = [ownerUser, receptionUser, adminUser, hkUser, restMgrUser, waiterUser, kitchenUser, restCleanerUser, cashierUser].filter(Boolean) as typeof ownerUser[];
+  for (const u of allDemoUsers) {
+    await storage.createNotification({
+      userId: u.id,
+      title: "Yeni Rezervasiya",
+      message: `Michael Chen 301 nömrəli otağı ${tomorrow.toLocaleDateString("az-AZ")} - ${nextWeek.toLocaleDateString("az-AZ")} tarixləri üçün rezerv etdi`,
+      type: "booking", read: false,
+    });
+    await storage.createNotification({
+      userId: u.id,
+      title: "Xidmət Sorğusu",
+      message: "Sarah Johnson (202 otaq) əlavə dəsmal istədi",
+      type: "service_request", read: false,
+    });
+  }
 
   logger.info("Demo data generated successfully");
 
