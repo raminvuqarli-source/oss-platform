@@ -3023,6 +3023,10 @@
     "paidCash": "Efectivo",
     "paidCard": "Tarjeta",
     "paidRoom": "Cuenta de habitación",
-    "confirmBtn": "Confirmar"
+    "confirmBtn": "Confirmar",
+    "receiptTitle": "Recibo del restaurante",
+    "receiptGuest": "Huésped",
+    "receiptDate": "Fecha",
+    "receiptTotal": "TOTAL"
   }
 }

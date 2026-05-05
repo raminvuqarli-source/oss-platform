@@ -3036,6 +3036,10 @@
     "paidCash": "Наличные",
     "paidCard": "Карта",
     "paidRoom": "На счёт номера",
-    "confirmBtn": "Подтвердить"
+    "confirmBtn": "Подтвердить",
+    "receiptTitle": "Чек ресторана",
+    "receiptGuest": "Гость",
+    "receiptDate": "Дата",
+    "receiptTotal": "ИТОГО"
   }
 }

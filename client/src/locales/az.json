@@ -3119,6 +3119,10 @@
     "paidCash": "Nağd",
     "paidCard": "Kart",
     "paidRoom": "Otaq hesabı",
-    "confirmBtn": "Təsdiqlə"
+    "confirmBtn": "Təsdiqlə",
+    "receiptTitle": "Restoran Çeki",
+    "receiptGuest": "Qonaq",
+    "receiptDate": "Tarix",
+    "receiptTotal": "CƏMİ"
   }
 }

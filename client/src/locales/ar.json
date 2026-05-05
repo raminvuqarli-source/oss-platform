@@ -3023,6 +3023,10 @@
     "paidCash": "نقداً",
     "paidCard": "بطاقة",
     "paidRoom": "حساب الغرفة",
-    "confirmBtn": "تأكيد"
+    "confirmBtn": "تأكيد",
+    "receiptTitle": "إيصال المطعم",
+    "receiptGuest": "الضيف",
+    "receiptDate": "التاريخ",
+    "receiptTotal": "المجموع"
   }
 }

@@ -142,18 +142,24 @@ export default function RestaurantCashierDashboard() {
       `  ${i.quantity}x ${i.itemName}  ${fmt(i.unitPriceCents * i.quantity)}`
     ).join("\n") ?? "";
 
+    const location = order.tableNumber
+      ? `${t("cashier.table")}: ${order.tableNumber}`
+      : order.roomNumber
+        ? `${t("cashier.room")}: ${order.roomNumber}`
+        : "—";
+
     const receipt = [
       "═══════════════════════════════",
       "     GRAND RIVIERA RESORT",
-      "       Restaurant Receipt",
+      `    ${t("cashier.receiptTitle")}`,
       "═══════════════════════════════",
-      `Masa: ${order.tableNumber || order.roomNumber || "—"}`,
-      `Qonaq: ${order.guestName || "—"}`,
-      `Tarix: ${new Date(order.createdAt).toLocaleString()}`,
+      location,
+      `${t("cashier.receiptGuest")}: ${order.guestName || "—"}`,
+      `${t("cashier.receiptDate")}: ${new Date(order.createdAt).toLocaleString()}`,
       "───────────────────────────────",
       items,
       "───────────────────────────────",
-      `CƏMİ:    ${fmt(order.totalCents)}`,
+      `${t("cashier.receiptTotal")}:   ${fmt(order.totalCents)}`,
       "═══════════════════════════════",
     ].join("\n");
 

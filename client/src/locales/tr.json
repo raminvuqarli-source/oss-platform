@@ -3036,6 +3036,10 @@
     "paidCash": "Nakit",
     "paidCard": "Kart",
     "paidRoom": "Oda hesabı",
-    "confirmBtn": "Onayla"
+    "confirmBtn": "Onayla",
+    "receiptTitle": "Restoran Fişi",
+    "receiptGuest": "Misafir",
+    "receiptDate": "Tarih",
+    "receiptTotal": "TOPLAM"
   }
 }

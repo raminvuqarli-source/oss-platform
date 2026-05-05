@@ -3142,6 +3142,10 @@
     "paidCash": "Cash",
     "paidCard": "Card",
     "paidRoom": "Room charge",
-    "confirmBtn": "Confirm"
+    "confirmBtn": "Confirm",
+    "receiptTitle": "Restaurant Receipt",
+    "receiptGuest": "Guest",
+    "receiptDate": "Date",
+    "receiptTotal": "TOTAL"
   }
 }

@@ -3023,6 +3023,10 @@
     "paidCash": "Contant",
     "paidCard": "Kaart",
     "paidRoom": "Kamerrekening",
-    "confirmBtn": "Bevestigen"
+    "confirmBtn": "Bevestigen",
+    "receiptTitle": "Restaurantbon",
+    "receiptGuest": "Gast",
+    "receiptDate": "Datum",
+    "receiptTotal": "TOTAAL"
   }
 }
