@@ -517,6 +517,7 @@ export interface IStorage {
   createStaffInvitation(invitation: InsertStaffInvitation): Promise<StaffInvitation>;
   updateStaffInvitation(id: string, updates: Partial<StaffInvitation>): Promise<StaffInvitation | undefined>;
   deleteStaffInvitation(id: string): Promise<void>;
+  deleteUser(id: string): Promise<void>;
   getStaffInvitationByToken(token: string): Promise<StaffInvitation | undefined>;
 
   // Password Reset Tokens
@@ -2281,6 +2282,10 @@ export class DatabaseStorage implements IStorage {
 
   async deleteStaffInvitation(id: string): Promise<void> {
     await db.delete(staffInvitations).where(eq(staffInvitations.id, id));
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
   }
 
   async getStaffInvitationByToken(token: string): Promise<StaffInvitation | undefined> {

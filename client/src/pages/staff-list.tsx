@@ -35,6 +35,7 @@ import {
   UserPlus,
   Loader2,
   Activity,
+  Trash2,
 } from "lucide-react";
 import type { User } from "@shared/schema";
 import { useTranslation } from "react-i18next";
@@ -282,9 +283,30 @@ function AddStaffModal({ onSuccess }: { onSuccess: () => void }) {
 export default function StaffList() {
   const { t } = useTranslation();
   const { user: currentUser } = useAuth();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeChatStaffId, setActiveChatStaffId] = useState<string | null>(null);
   const [activeChatStaffName, setActiveChatStaffName] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [confirmDeleteName, setConfirmDeleteName] = useState("");
+
+  const deleteMutation = useMutation({
+    mutationFn: async (staffId: string) => {
+      const res = await apiRequest("DELETE", `/api/staff/${staffId}`);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Failed to delete");
+      }
+    },
+    onSuccess: () => {
+      toast({ title: t("staff.deleted", "Staff member deleted") });
+      setConfirmDeleteId(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/users/staff"] });
+    },
+    onError: (err: any) => {
+      toast({ title: err?.message || t("errors.somethingWentWrong"), variant: "destructive" });
+    },
+  });
 
   const { data: staffUsers, isLoading, refetch } = useQuery<StaffUser[]>({
     queryKey: ["/api/users/staff"],
@@ -320,8 +342,34 @@ export default function StaffList() {
     currentUser?.role === "owner_admin" ||
     currentUser?.role === "oss_super_admin";
 
+  const canDeleteStaff = currentUser?.role === "owner_admin" || currentUser?.role === "oss_super_admin";
+
   return (
     <div className="p-6 space-y-6 max-w-5xl mx-auto">
+      {/* Delete confirmation dialog */}
+      <Dialog open={!!confirmDeleteId} onOpenChange={(open) => { if (!open) setConfirmDeleteId(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{t("staff.confirmDelete", "Delete Staff Member")}</DialogTitle>
+            <DialogDescription>
+              {t("staff.confirmDeleteDesc", "Are you sure you want to permanently delete")} <strong>{confirmDeleteName}</strong>? {t("staff.confirmDeleteWarn", "This action cannot be undone.")}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDeleteId(null)}>{t("common.cancel", "Cancel")}</Button>
+            <Button
+              variant="destructive"
+              disabled={deleteMutation.isPending}
+              onClick={() => confirmDeleteId && deleteMutation.mutate(confirmDeleteId)}
+              data-testid="button-confirm-delete-staff"
+            >
+              {deleteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4 mr-1.5" />}
+              {t("common.delete", "Delete")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -428,6 +476,20 @@ export default function StaffList() {
                     >
                       <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
                       {activeChatStaffId === member.id ? "Chat Open" : t("owner.staffMessage.button", "Message")}
+                    </Button>
+                  )}
+                  {canDeleteStaff && currentUser && currentUser.id !== member.id && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => {
+                        setConfirmDeleteId(member.id);
+                        setConfirmDeleteName(member.fullName || member.username || "Staff");
+                      }}
+                      data-testid={`button-delete-staff-${member.id}`}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   )}
                 </div>

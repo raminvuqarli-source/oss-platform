@@ -4,7 +4,7 @@ import { asString } from "../utils/request";
 import { z } from "zod";
 import { createStaffInvitationSchema } from "@shared/schema";
 import { hashPassword } from "../services/auth.service";
-import { sendStaffInvitationEmail, sendBookingConfirmationEmail } from "../email";
+import { sendStaffInvitationEmail, sendBookingConfirmationEmail, sendStaffCreatedEmail } from "../email";
 import { requireAuth, requireRole, requireFeature, resolveTenant, requireStaffLimit } from "../middleware";
 import { logger } from "../utils/logger";
 import { getJobQueue } from "../services/jobQueue";
@@ -209,6 +209,23 @@ export function registerStaffRoutes(app: Express): void {
         propertyId: currentUser?.propertyId || null,
         ownerId: currentUser?.ownerId || null,
       });
+
+      // Send welcome email with credentials if email provided
+      if (email) {
+        const property = currentUser?.propertyId
+          ? await storage.getProperty(currentUser.propertyId).catch(() => null)
+          : null;
+        const propertyName = property?.name || "Your Property";
+        sendStaffCreatedEmail({
+          to: email,
+          fullName,
+          username,
+          password,
+          propertyName,
+          role: userRole,
+          invitedByName: currentUser?.fullName || currentUser?.username || "Admin",
+        }).catch((err: any) => logger.error({ err }, "Failed to send staff welcome email"));
+      }
 
       const { password: _, ...userWithoutPassword } = user;
       res.json(userWithoutPassword);
@@ -886,6 +903,43 @@ export function registerStaffRoutes(app: Express): void {
     } catch (error) {
       logger.error({ err: error }, "Error accepting invitation");
       res.status(500).json({ message: "Failed to accept invitation" });
+    }
+  });
+
+  app.delete("/api/staff/:staffId", requireRole("owner_admin", "admin", "oss_super_admin"), async (req, res) => {
+    try {
+      const currentUser = await storage.getUser(req.session.userId!);
+      if (!currentUser) return res.status(401).json({ message: "Unauthorized" });
+
+      const staffId = asString(req.params.staffId);
+      const staffUser = await storage.getUser(staffId);
+
+      if (!staffUser) return res.status(404).json({ message: "Staff member not found" });
+
+      if (currentUser.role !== "oss_super_admin" && staffUser.ownerId !== currentUser.ownerId) {
+        return res.status(403).json({ message: "Cannot delete staff from another property" });
+      }
+
+      if (staffUser.role === "owner_admin") {
+        return res.status(400).json({ message: "Cannot delete an owner admin account" });
+      }
+
+      await storage.deleteUser(staffId);
+
+      storage.createAuditLog({
+        ownerId: currentUser.ownerId || undefined,
+        userId: currentUser.id,
+        userRole: currentUser.role,
+        action: "staff_deleted",
+        entityType: "user",
+        entityId: staffId,
+        description: `Deleted staff member ${staffUser.fullName || staffUser.username}`,
+      }).catch(() => {});
+
+      res.json({ message: "Staff member deleted" });
+    } catch (error) {
+      logger.error({ err: error }, "Error deleting staff member");
+      res.status(500).json({ message: "Failed to delete staff member" });
     }
   });
 

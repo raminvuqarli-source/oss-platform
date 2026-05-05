@@ -155,6 +155,65 @@ If you didn't expect this invitation, you can safely ignore this email.`;
   return sendEmail({ to: data.to, subject, html, text, emailType: "staff_invitation" });
 }
 
+// ===================== STAFF WELCOME EMAIL (direct create) =====================
+
+interface StaffCreatedEmailData {
+  to: string;
+  fullName: string;
+  username: string;
+  password: string;
+  propertyName: string;
+  role: string;
+  invitedByName: string;
+}
+
+export async function sendStaffCreatedEmail(data: StaffCreatedEmailData): Promise<SendEmailResult> {
+  if (!data.to) return { success: false, error: "No recipient email" };
+
+  const appUrl = getAppUrl();
+  const roleLabels: Record<string, string> = {
+    admin: "Admin", reception: "Reception", cleaner: "Housekeeping",
+    restaurant_manager: "Restaurant Manager", waiter: "Waiter",
+    kitchen_staff: "Kitchen Staff", staff: "Staff",
+  };
+  const roleLabel = roleLabels[data.role] || data.role;
+  const subject = `Welcome to ${data.propertyName} — Your O.S.S Account`;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><style>${baseStyles()}</style></head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Welcome to O.S.S</h1>
+      <p>${data.propertyName}</p>
+    </div>
+    <div class="content">
+      <p style="font-size: 16px; margin-top: 0;">Hello ${data.fullName},</p>
+      <p><strong>${data.invitedByName}</strong> has created an account for you on the <strong>O.S.S Smart Hotel System</strong> as a <strong>${roleLabel}</strong>.</p>
+      <div class="info-box">
+        <strong>Your login credentials:</strong><br/>
+        <strong>Username:</strong> ${data.username}<br/>
+        <strong>Temporary Password:</strong> ${data.password}<br/>
+        <strong>Role:</strong> ${roleLabel}<br/>
+        <strong>Property:</strong> ${data.propertyName}
+      </div>
+      <div class="btn-container">
+        <a href="${appUrl}/login" class="btn">Sign In Now</a>
+      </div>
+      <p style="font-size: 13px; color: #6b7280;">Please change your password after your first login. If you did not expect this email, please contact your property manager.</p>
+    </div>
+    <div class="footer">O.S.S &mdash; Smart Hotel System &copy; ${new Date().getFullYear()}</div>
+  </div>
+</body>
+</html>`;
+
+  const text = `Welcome to ${data.propertyName} — O.S.S\n\nHello ${data.fullName},\n\n${data.invitedByName} has created an account for you.\n\nUsername: ${data.username}\nTemporary Password: ${data.password}\nRole: ${roleLabel}\n\nSign in at: ${appUrl}/login\n\nPlease change your password after first login.`;
+
+  return sendEmail({ to: data.to, subject, html, text, emailType: "staff_invitation" });
+}
+
 // ===================== PASSWORD RESET EMAIL =====================
 
 interface PasswordResetEmailData {
