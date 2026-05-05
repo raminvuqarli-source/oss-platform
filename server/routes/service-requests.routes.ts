@@ -67,23 +67,55 @@ export function registerServiceRequestRoutes(app: Express): void {
         ownerId: user?.ownerId || null,
       });
 
-      if (user?.hotelId) {
-        const hotelUsers = await storage.getUsersByHotel(user.hotelId, req.tenantId!);
-        const hotelStaff = hotelUsers.filter(u => ["reception", "admin", "staff", "property_manager"].includes(u.role));
+      const effectiveTenantId = req.tenantId || user?.tenantId || booking?.tenantId || null;
+      const hotelId = user?.hotelId;
+
+      if (hotelId && effectiveTenantId) {
+        const hotelUsers = await storage.getUsersByHotel(hotelId, effectiveTenantId);
+        const hotelStaff = hotelUsers.filter(u =>
+          ["reception", "admin", "staff", "property_manager", "owner_admin"].includes(u.role)
+        );
+        const notifTitle = "🔔 Yeni Servis Sorğusu";
+        const notifMsg = `Otaq ${request.roomNumber}: ${request.requestType.replace(/_/g, " ")} — ${request.description}`;
         for (const staff of hotelStaff) {
           await storage.createNotification({
             userId: staff.id,
-            title: "New Service Request",
-            message: `Room ${request.roomNumber}: ${request.requestType.replace("_", " ")} - ${request.description}`,
-            type: "info",
-            tenantId: req.tenantId || user?.tenantId || null,
+            title: notifTitle,
+            message: notifMsg,
+            type: "service_request",
+            actionUrl: "/dashboard?view=requests",
+            tenantId: effectiveTenantId,
           });
           broadcastToUser(String(staff.id), {
             type: "new_notification",
-            title: "New Service Request",
-            message: `Room ${request.roomNumber}: ${request.requestType.replace("_", " ")} - ${request.description}`,
+            title: notifTitle,
+            message: notifMsg,
+            actionUrl: "/dashboard?view=requests",
           });
         }
+      } else if (effectiveTenantId) {
+        // fallback: notify all staff in tenant if hotelId not set on guest
+        try {
+          const ownerAdmins = await storage.getOwnerAdminsByTenant(effectiveTenantId);
+          const notifTitle = "🔔 Yeni Servis Sorğusu";
+          const notifMsg = `Otaq ${request.roomNumber}: ${request.requestType.replace(/_/g, " ")} — ${request.description}`;
+          for (const admin of ownerAdmins) {
+            await storage.createNotification({
+              userId: admin.id,
+              title: notifTitle,
+              message: notifMsg,
+              type: "service_request",
+              actionUrl: "/dashboard?view=requests",
+              tenantId: effectiveTenantId,
+            });
+            broadcastToUser(String(admin.id), {
+              type: "new_notification",
+              title: notifTitle,
+              message: notifMsg,
+              actionUrl: "/dashboard?view=requests",
+            });
+          }
+        } catch {}
       }
 
       res.json(request);

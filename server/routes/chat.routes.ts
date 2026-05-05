@@ -45,33 +45,40 @@ export function registerChatRoutes(app: Express): void {
       });
 
       try {
-        const hotelStaff = await storage.getUsersByHotel(user.hotelId, req.tenantId!);
+        const effectiveTenantId = req.tenantId || user.tenantId || null;
+        const hotelStaff = effectiveTenantId
+          ? await storage.getUsersByHotel(user.hotelId, effectiveTenantId)
+          : [];
         const staffRoles = ["reception", "admin", "owner_admin", "property_manager"];
         const staffToNotify = hotelStaff.filter(u => staffRoles.includes(u.role));
         const guestName = user.fullName || "Guest";
-        const shortMsg = message.trim().length > 50 ? message.trim().substring(0, 50) + "..." : message.trim();
+        const shortMsg = message.trim().length > 80 ? message.trim().substring(0, 80) + "..." : message.trim();
+        const notifTitle = `💬 ${guestName} mesaj göndərdi`;
         for (const staff of staffToNotify) {
           await storage.createNotification({
             userId: staff.id,
-            tenantId: user.tenantId || null,
-            title: `New message from ${guestName}`,
+            tenantId: effectiveTenantId,
+            title: notifTitle,
             message: shortMsg,
             type: "chat",
-            actionUrl: `/chat?guest=${user.id}`,
+            actionUrl: `/reception-dashboard?view=messages`,
           });
           broadcastToUser(String(staff.id), {
             type: "new_notification",
-            title: `New message from ${guestName}`,
+            title: notifTitle,
             message: shortMsg,
+            actionUrl: `/reception-dashboard?view=messages`,
           });
         }
         const staffIds = staffToNotify.map(s => String(s.id));
-        sendPushNotification({
-          userIds: staffIds,
-          title: `New message from ${guestName}`,
-          message: shortMsg,
-          data: { type: "chat", guestId: String(user.id) },
-        }).catch(err => logger.error({ err }, "OneSignal push error"));
+        if (staffIds.length > 0) {
+          sendPushNotification({
+            userIds: staffIds,
+            title: notifTitle,
+            message: shortMsg,
+            data: { type: "chat", guestId: String(user.id) },
+          }).catch(err => logger.error({ err }, "OneSignal push error"));
+        }
       } catch (notifError) {
         logger.error({ err: notifError }, "Error creating chat notifications");
       }

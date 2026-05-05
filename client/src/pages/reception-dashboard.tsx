@@ -75,10 +75,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import type { ServiceRequest, User, Booking, ChatMessage, RoomPreparationOrder } from "@shared/schema";
+import type { ServiceRequest, User, Booking, ChatMessage, RoomPreparationOrder, Notification as NotificationItem } from "@shared/schema";
 import { FinancePanel } from "@/components/finance-panel";
 import { StaffMyPerformance } from "@/components/staff-my-performance";
 import { HousekeepingView } from "@/components/housekeeping-view";
+import { useNotificationAlert } from "@/hooks/use-notification-alert";
 
 const serviceIcons: Record<string, React.ElementType> = {
   coffee: Coffee,
@@ -1055,6 +1056,15 @@ export default function ReceptionDashboard() {
   const { toast } = useToast();
   const { logout } = useAuth();
   const searchString = useSearch();
+
+  const { data: receptionNotifications } = useQuery<NotificationItem[]>({
+    queryKey: ["/api/notifications"],
+    refetchInterval: 15000,
+  });
+
+  useNotificationAlert(receptionNotifications as any, (title, message) => {
+    toast({ title, description: message, duration: 6000 });
+  });
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
