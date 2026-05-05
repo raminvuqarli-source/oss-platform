@@ -4,7 +4,7 @@ import { requireAuth, requireRole } from "../middleware";
 import { logger } from "../utils/logger";
 import { broadcastToProperty } from "../websocket/index";
 
-const MANAGER_ROLES = ["restaurant_manager", "owner_admin", "admin"];
+const MANAGER_ROLES = ["restaurant_manager", "owner_admin", "admin", "reception", "property_manager"];
 const KITCHEN_ROLES = ["kitchen_staff", "restaurant_manager", "owner_admin", "admin"];
 const WAITER_ROLES = ["waiter", "restaurant_manager", "owner_admin", "admin"];
 const SETTLE_ROLES = ["reception", "restaurant_manager", "owner_admin", "admin"];
