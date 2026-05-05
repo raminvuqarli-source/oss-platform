@@ -1690,7 +1690,10 @@ export default function ReceptionDashboard() {
                     onChange={(e) => {
                       const newCheckIn = e.target.value;
                       setGuestForm(prev => {
-                        const nextDay = new Date(newCheckIn);
+                        const parsed = new Date(newCheckIn);
+                        const isValid = newCheckIn.length === 10 && !isNaN(parsed.getTime());
+                        if (!isValid) return { ...prev, checkInDate: newCheckIn };
+                        const nextDay = new Date(parsed);
                         nextDay.setDate(nextDay.getDate() + 1);
                         const autoCheckOut = nextDay.toISOString().split('T')[0];
                         const currentCheckOut = prev.checkOutDate;
