@@ -1098,25 +1098,46 @@ export default function ReceptionDashboard() {
   });
   const [guestDetailOpen, setGuestDetailOpen] = useState(false);
   const [selectedGuestId, setSelectedGuestId] = useState<string | null>(null);
-  const [guestForm, setGuestForm] = useState(() => {
+  // Convert local Date → YYYY-MM-DD without UTC shift
+  const toYMD = (d: Date) => {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  };
+  // Convert YYYY-MM-DD → DD.MM.YYYY for display
+  const ymdToDMY = (s: string) => {
+    if (!s || s.length !== 10) return s;
+    const [y, m, d] = s.split('-');
+    return `${d}.${m}.${y}`;
+  };
+  // Parse DD.MM.YYYY → YYYY-MM-DD; returns null if invalid
+  const dmyToYMD = (s: string): string | null => {
+    const match = s.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+    if (!match) return null;
+    const [, d, m, y] = match.map(Number);
+    const dt = new Date(y, m - 1, d);
+    if (isNaN(dt.getTime()) || dt.getMonth() !== m - 1 || dt.getDate() !== d) return null;
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${y}-${pad(m)}-${pad(d)}`;
+  };
+
+  const buildInitialForm = () => {
     const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const formatDate = (d: Date) => d.toISOString().split('T')[0];
+    const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
     return {
       fullName: "",
       email: "",
       phoneNumber: "+994501234567",
       roomNumber: "",
-      checkInDate: formatDate(today),
+      checkInDate: toYMD(today),
+      checkInRaw: ymdToDMY(toYMD(today)),
       checkInTime: "14:00",
-      checkOutDate: formatDate(tomorrow),
+      checkOutDate: toYMD(tomorrow),
+      checkOutRaw: ymdToDMY(toYMD(tomorrow)),
       checkOutTime: "12:00",
       password: "",
       paymentAmount: "",
       paymentStatus: "pending" as "paid" | "pending" | "unpaid",
       paymentMethod: "cash" as "cash" | "card" | "online" | "other",
-      // New optional fields
       bookingNumber: "",
       bookingSource: "" as "" | "booking_com" | "airbnb" | "expedia" | "direct" | "walkin" | "travel_agency" | "other",
       numberOfGuests: "",
@@ -1125,27 +1146,16 @@ export default function ReceptionDashboard() {
       nightlyRate: "",
       discount: "",
     };
-  });
-
-  // Parse YYYY-MM-DD as LOCAL date (avoids UTC midnight timezone shifts)
-  const parseDateLocal = (s: string): Date | null => {
-    if (!s || s.length !== 10) return null;
-    const [y, m, d] = s.split('-').map(Number);
-    if (!y || !m || !d) return null;
-    const dt = new Date(y, m - 1, d);
-    return isNaN(dt.getTime()) ? null : dt;
   };
-  // Format YYYY-MM-DD → DD.MM.YYYY for unambiguous display
-  const fmtDateLocal = (s: string): string => {
-    if (!s || s.length !== 10) return '';
-    const [y, m, d] = s.split('-');
-    return `${d}.${m}.${y}`;
-  };
+  const [guestForm, setGuestForm] = useState(buildInitialForm);
 
   const nights = (() => {
-    const ci = parseDateLocal(guestForm.checkInDate);
-    const co = parseDateLocal(guestForm.checkOutDate);
-    if (!ci || !co) return 1;
+    if (!guestForm.checkInDate || !guestForm.checkOutDate) return 1;
+    const [cy, cm, cd] = guestForm.checkInDate.split('-').map(Number);
+    const [oy, om, od] = guestForm.checkOutDate.split('-').map(Number);
+    if (!cy || !cm || !cd || !oy || !om || !od) return 1;
+    const ci = new Date(cy, cm - 1, cd);
+    const co = new Date(oy, om - 1, od);
     const diff = Math.round((co.getTime() - ci.getTime()) / (1000 * 60 * 60 * 24));
     return diff > 0 ? diff : 1;
   })();
@@ -1273,11 +1283,7 @@ export default function ReceptionDashboard() {
     onSuccess: () => {
       toast({ title: t('dashboard.reception.guestCreated', 'Guest Created'), description: t('dashboard.reception.guestCreatedDesc', 'Guest account and booking created successfully') });
       setAddGuestOpen(false);
-      const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const formatDate = (d: Date) => d.toISOString().split('T')[0];
-        setGuestForm({ fullName: "", email: "", phoneNumber: "+994501234567", roomNumber: "", checkInDate: formatDate(today), checkInTime: "14:00", checkOutDate: formatDate(tomorrow), checkOutTime: "12:00", password: "", paymentAmount: "", paymentStatus: "pending", paymentMethod: "cash", bookingNumber: "", bookingSource: "", numberOfGuests: "", specialNotes: "", travelAgencyName: "", nightlyRate: "", discount: "" });
+        setGuestForm(buildInitialForm());
       setPhoneError("");
       setSelectedUnitId("");
       queryClient.invalidateQueries({ queryKey: ["/api/users/guests"] });
@@ -1699,26 +1705,31 @@ export default function ReceptionDashboard() {
                 <div className="grid grid-cols-2 gap-2">
                   <Input
                     id="checkInDate"
-                    type="date"
+                    type="text"
                     data-testid="input-guest-checkin-date"
-                    value={guestForm.checkInDate}
+                    value={guestForm.checkInRaw}
                     onChange={(e) => {
-                      const newCheckIn = e.target.value;
+                      const raw = e.target.value;
                       setGuestForm(prev => {
-                        if (newCheckIn.length !== 10) return { ...prev, checkInDate: newCheckIn };
-                        const [y, m, d] = newCheckIn.split('-').map(Number);
-                        if (!y || !m || !d) return { ...prev, checkInDate: newCheckIn };
+                        const ymd = dmyToYMD(raw);
+                        if (!ymd) return { ...prev, checkInRaw: raw };
+                        const [y, m, d] = ymd.split('-').map(Number);
                         const nextDay = new Date(y, m - 1, d + 1);
                         const pad = (n: number) => String(n).padStart(2, '0');
-                        const autoCheckOut = `${nextDay.getFullYear()}-${pad(nextDay.getMonth() + 1)}-${pad(nextDay.getDate())}`;
-                        const currentCheckOut = prev.checkOutDate;
+                        const autoYMD = `${nextDay.getFullYear()}-${pad(nextDay.getMonth() + 1)}-${pad(nextDay.getDate())}`;
+                        const autoRaw = ymdToDMY(autoYMD);
+                        const needAutoOut = !prev.checkOutDate || prev.checkOutDate <= ymd;
                         return {
                           ...prev,
-                          checkInDate: newCheckIn,
-                          checkOutDate: (!currentCheckOut || currentCheckOut <= newCheckIn) ? autoCheckOut : currentCheckOut,
+                          checkInRaw: raw,
+                          checkInDate: ymd,
+                          checkOutDate: needAutoOut ? autoYMD : prev.checkOutDate,
+                          checkOutRaw: needAutoOut ? autoRaw : prev.checkOutRaw,
                         };
                       });
                     }}
+                    placeholder="DD.MM.YYYY"
+                    maxLength={10}
                   />
                   <Input
                     id="checkInTime"
@@ -1728,23 +1739,25 @@ export default function ReceptionDashboard() {
                     onChange={(e) => setGuestForm(prev => ({ ...prev, checkInTime: e.target.value }))}
                   />
                 </div>
-                {guestForm.checkInDate && (
-                  <p className="text-xs text-muted-foreground">{fmtDateLocal(guestForm.checkInDate)}</p>
-                )}
               </div>
               <div className="space-y-2">
                 <Label>{t('dashboard.reception.checkOutDate')}</Label>
                 <div className="grid grid-cols-2 gap-2">
                   <Input
                     id="checkOutDate"
-                    type="date"
+                    type="text"
                     data-testid="input-guest-checkout-date"
-                    value={guestForm.checkOutDate}
+                    value={guestForm.checkOutRaw}
                     onChange={(e) => {
-                      const newCheckOut = e.target.value;
-                      if (!newCheckOut) return;
-                      setGuestForm(prev => ({ ...prev, checkOutDate: newCheckOut }));
+                      const raw = e.target.value;
+                      setGuestForm(prev => {
+                        const ymd = dmyToYMD(raw);
+                        if (!ymd) return { ...prev, checkOutRaw: raw };
+                        return { ...prev, checkOutRaw: raw, checkOutDate: ymd };
+                      });
                     }}
+                    placeholder="DD.MM.YYYY"
+                    maxLength={10}
                   />
                   <Input
                     id="checkOutTime"
@@ -1754,9 +1767,6 @@ export default function ReceptionDashboard() {
                     onChange={(e) => setGuestForm(prev => ({ ...prev, checkOutTime: e.target.value }))}
                   />
                 </div>
-                {guestForm.checkOutDate && (
-                  <p className="text-xs text-muted-foreground">{fmtDateLocal(guestForm.checkOutDate)}</p>
-                )}
                 <p className="text-xs font-medium text-primary" data-testid="text-nights-count">
                   {nights} {t('dashboard.reception.nights', 'night(s)')}
                 </p>
