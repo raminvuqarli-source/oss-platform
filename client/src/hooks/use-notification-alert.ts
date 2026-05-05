@@ -1,49 +1,58 @@
 import { useEffect, useRef, useCallback } from "react";
 import { queryClient } from "@/lib/queryClient";
 
-const NOTIFICATION_SOUND_FREQUENCY = 800;
-const NOTIFICATION_SOUND_DURATION = 150;
-
-let sharedAudioContext: AudioContext | null = null;
 let lastSoundAt = 0;
-let audioContextWarmedUp = false;
+let beepAudio: HTMLAudioElement | null = null;
+let beepUnlocked = false;
 
-async function warmUpAudioContext() {
-  if (audioContextWarmedUp) return;
+function buildBeepWav(freq = 800, durationMs = 200, sampleRate = 8000): Blob {
+  const numSamples = Math.floor(sampleRate * durationMs / 1000);
+  const buf = new ArrayBuffer(44 + numSamples * 2);
+  const v = new DataView(buf);
+  const s = (o: number, t: string) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); };
+  s(0, "RIFF"); v.setUint32(4, 36 + numSamples * 2, true);
+  s(8, "WAVE"); s(12, "fmt "); v.setUint32(16, 16, true);
+  v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, sampleRate, true); v.setUint32(28, sampleRate * 2, true);
+  v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  s(36, "data"); v.setUint32(40, numSamples * 2, true);
+  for (let i = 0; i < numSamples; i++) {
+    const env = i < numSamples * 0.05 ? i / (numSamples * 0.05)
+      : i > numSamples * 0.6 ? (numSamples - i) / (numSamples * 0.4) : 1;
+    v.setInt16(44 + i * 2, Math.round(18000 * env * Math.sin(2 * Math.PI * freq * i / sampleRate)), true);
+  }
+  return new Blob([buf], { type: "audio/wav" });
+}
+
+function initBeepAudio() {
+  if (typeof window === "undefined" || beepAudio) return;
   try {
-    if (!sharedAudioContext) {
-      sharedAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    }
-    if (sharedAudioContext.state === "suspended") {
-      await sharedAudioContext.resume();
-    }
-    // Play a silent 1-sample buffer — this truly unlocks the AudioContext
-    const buf = sharedAudioContext.createBuffer(1, 1, sharedAudioContext.sampleRate);
-    const src = sharedAudioContext.createBufferSource();
-    src.buffer = buf;
-    src.connect(sharedAudioContext.destination);
-    src.start(0);
-    audioContextWarmedUp = true;
+    const url = URL.createObjectURL(buildBeepWav());
+    beepAudio = new Audio(url);
+    beepAudio.volume = 0.6;
   } catch {}
 }
 
-if (typeof window !== "undefined") {
-  const warmOnce = () => {
-    warmUpAudioContext();
-    window.removeEventListener("click", warmOnce);
-    window.removeEventListener("keydown", warmOnce);
-    window.removeEventListener("touchstart", warmOnce);
-  };
-  window.addEventListener("click", warmOnce);
-  window.addEventListener("keydown", warmOnce);
-  window.addEventListener("touchstart", warmOnce);
+function unlockBeepAudio() {
+  if (beepUnlocked || !beepAudio) return;
+  beepAudio.play().then(() => {
+    beepAudio!.pause();
+    beepAudio!.currentTime = 0;
+    beepUnlocked = true;
+  }).catch(() => {});
+}
 
-  // Re-resume AudioContext when tab comes back to foreground
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden && sharedAudioContext?.state === "suspended") {
-      sharedAudioContext.resume().catch(() => {});
-    }
-  });
+if (typeof window !== "undefined") {
+  initBeepAudio();
+  const unlockOnce = () => {
+    unlockBeepAudio();
+    window.removeEventListener("click", unlockOnce);
+    window.removeEventListener("keydown", unlockOnce);
+    window.removeEventListener("touchstart", unlockOnce);
+  };
+  window.addEventListener("click", unlockOnce);
+  window.addEventListener("keydown", unlockOnce);
+  window.addEventListener("touchstart", unlockOnce);
 }
 
 async function playNotificationSound() {
@@ -51,39 +60,12 @@ async function playNotificationSound() {
   if (now - lastSoundAt < 1500) return;
   lastSoundAt = now;
 
-  try {
-    if (!sharedAudioContext) {
-      sharedAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    }
-    const ctx = sharedAudioContext;
-
-    if (ctx.state === "suspended") {
-      try {
-        await ctx.resume();
-      } catch {
-        return;
-      }
-    }
-
-    if (ctx.state !== "running") return;
-
-    const playTone = (freq: number, delayMs: number) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.frequency.setValueAtTime(freq, ctx.currentTime);
-      osc.type = "sine";
-      gain.gain.setValueAtTime(0.3, ctx.currentTime + delayMs / 1000);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + delayMs / 1000 + NOTIFICATION_SOUND_DURATION / 1000);
-      osc.start(ctx.currentTime + delayMs / 1000);
-      osc.stop(ctx.currentTime + delayMs / 1000 + NOTIFICATION_SOUND_DURATION / 1000);
-    };
-
-    playTone(NOTIFICATION_SOUND_FREQUENCY, 0);
-    playTone(1000, 180);
-  } catch (e) {
-    console.warn("[Notification] Sound error:", e);
+  if (beepAudio) {
+    try {
+      beepAudio.currentTime = 0;
+      await beepAudio.play();
+      return;
+    } catch {}
   }
 }
 

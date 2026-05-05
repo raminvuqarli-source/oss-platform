@@ -132,7 +132,10 @@ export function registerServiceRequestRoutes(app: Express): void {
     }
 
     if (req.tenantUser?.role !== "oss_super_admin") {
-      if (existing.ownerId !== req.tenantId) {
+      const staffUser = await storage.getUser(req.session.userId!);
+      const staffTenant = req.tenantId || staffUser?.tenantId || staffUser?.ownerId;
+      const reqTenant = existing.tenantId || existing.ownerId;
+      if (staffTenant && reqTenant && staffTenant !== reqTenant) {
         return res.status(403).json({ message: "Forbidden" });
       }
     }
