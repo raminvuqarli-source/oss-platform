@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { navigate } from "wouter/use-browser-location";
 import {
   Bell,
+  BellOff,
   CheckCircle,
   Info,
   AlertCircle,
@@ -27,7 +28,9 @@ import {
   Check,
   X,
   UserPlus,
+  BellRing,
 } from "lucide-react";
+import { useState, useEffect } from "react";
 import type { Notification } from "@shared/schema";
 
 const notificationTypeIcons: Record<string, React.ElementType> = {
@@ -111,6 +114,23 @@ export default function Notifications() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
+
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission | null>(null);
+
+  useEffect(() => {
+    if ("Notification" in window) {
+      setNotifPermission(Notification.permission);
+    }
+  }, []);
+
+  const requestNotificationPermission = async () => {
+    if (!("Notification" in window)) return;
+    const perm = await Notification.requestPermission();
+    setNotifPermission(perm);
+    if (perm === "granted") {
+      toast({ title: t("notifications.enabled", "Browser notifications enabled!") });
+    }
+  };
 
   const { data: notifications, isLoading } = useQuery<Notification[]>({
     queryKey: ["/api/notifications"],
@@ -230,17 +250,41 @@ export default function Notifications() {
                 </p>
               </div>
             </div>
-            {unreadCount > 0 && (
-              <Button
-                variant="outline"
-                onClick={() => markAllReadMutation.mutate()}
-                disabled={markAllReadMutation.isPending}
-                data-testid="button-mark-all-read"
-              >
-                <CheckCheck className="mr-2 h-4 w-4" />
-                {t('notifications.markAllRead', 'Mark all as read')}
-              </Button>
-            )}
+            <div className="flex items-center gap-2 flex-wrap">
+              {notifPermission !== null && notifPermission !== "granted" && (
+                <Button
+                  variant={notifPermission === "denied" ? "ghost" : "outline"}
+                  size="sm"
+                  onClick={requestNotificationPermission}
+                  disabled={notifPermission === "denied"}
+                  data-testid="button-enable-notifications"
+                  className={notifPermission === "denied" ? "text-muted-foreground" : "border-primary/40 text-primary hover:bg-primary/10"}
+                >
+                  {notifPermission === "denied" ? (
+                    <><BellOff className="mr-2 h-4 w-4" />{t("notifications.blocked", "Notifications blocked")}</>
+                  ) : (
+                    <><BellRing className="mr-2 h-4 w-4" />{t("notifications.enablePush", "Enable Notifications")}</>
+                  )}
+                </Button>
+              )}
+              {notifPermission === "granted" && (
+                <span className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
+                  <CheckCircle className="h-3.5 w-3.5" />
+                  {t("notifications.active", "Notifications active")}
+                </span>
+              )}
+              {unreadCount > 0 && (
+                <Button
+                  variant="outline"
+                  onClick={() => markAllReadMutation.mutate()}
+                  disabled={markAllReadMutation.isPending}
+                  data-testid="button-mark-all-read"
+                >
+                  <CheckCheck className="mr-2 h-4 w-4" />
+                  {t('notifications.markAllRead', 'Mark all as read')}
+                </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

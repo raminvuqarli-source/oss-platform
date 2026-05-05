@@ -60,6 +60,7 @@ import {
   Eye,
   BedDouble,
   Sparkles,
+  Users2,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { validatePhone } from "@/lib/validation";
@@ -1078,6 +1079,7 @@ export default function ReceptionDashboard() {
       finance: "finance",
       "arrival-info": "arrival-info",
       "room-status": "room-status",
+      "staff-messages": "staff-messages",
     };
     return currentView ? (viewToTab[currentView] || "arrival-info") : "arrival-info";
   }, [currentView]);
@@ -1953,6 +1955,10 @@ export default function ReceptionDashboard() {
               <BedDouble className="h-3.5 w-3.5" />
               {t('roomStatus.title', 'Room Status')}
             </TabsTrigger>
+            <TabsTrigger value="staff-messages" className="gap-1.5 flex-shrink-0 whitespace-nowrap text-xs sm:text-sm" data-testid="tab-staff-messages">
+              <Users2 className="h-3.5 w-3.5" />
+              {t('staffMessages.tab', 'Staff Messages')}
+            </TabsTrigger>
           </TabsList>
 
         <TabsContent value="arrival-info" className="mt-4">
@@ -2466,6 +2472,10 @@ export default function ReceptionDashboard() {
 
         <TabsContent value="room-status" className="mt-4">
           <RoomStatusPanel />
+        </TabsContent>
+
+        <TabsContent value="staff-messages" className="mt-4">
+          <StaffChatView />
         </TabsContent>
       </Tabs>
       )}
