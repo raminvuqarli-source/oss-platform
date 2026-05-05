@@ -75,6 +75,7 @@ import { useNotificationAlert } from "@/hooks/use-notification-alert";
 import { usePlanFeatures } from "@/hooks/use-plan-features";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { UpgradeModal } from "@/components/upgrade-modal";
+import { useToast } from "@/hooks/use-toast";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -114,8 +115,11 @@ function DashboardSidebar() {
   });
   const planType = planData?.planType || "starter";
   const { isFeatureEnabled, isDemoMode } = usePlanFeatures();
+  const { toast } = useToast();
 
-  useNotificationAlert(notifications as any);
+  useNotificationAlert(notifications as any, (title, message) => {
+    toast({ title, description: message, duration: 5000 });
+  });
 
   const unreadCount = notifications?.filter((n) => !n.read).length || 0;
 

@@ -140,11 +140,13 @@ export function initWebSocket(httpServer: Server, app: Express): void {
       }).catch(() => {
         ws.close(4002, "Internal error");
       });
-    } else if (clientType === "dashboard" && authenticatedTenantId) {
-      if (!ownerConnections.has(authenticatedTenantId)) {
-        ownerConnections.set(authenticatedTenantId, new Set());
+    } else if (clientType === "dashboard") {
+      if (authenticatedTenantId) {
+        if (!ownerConnections.has(authenticatedTenantId)) {
+          ownerConnections.set(authenticatedTenantId, new Set());
+        }
+        ownerConnections.get(authenticatedTenantId)!.add(ws);
       }
-      ownerConnections.get(authenticatedTenantId)!.add(ws);
 
       const uid = String(user.id);
       if (!userConnections.has(uid)) {
@@ -221,8 +223,10 @@ export function initWebSocket(httpServer: Server, app: Express): void {
             }
           }).catch(() => {});
         }
-      } else if (clientType === "dashboard" && authenticatedTenantId) {
-        ownerConnections.get(authenticatedTenantId)?.delete(ws);
+      } else if (clientType === "dashboard") {
+        if (authenticatedTenantId) {
+          ownerConnections.get(authenticatedTenantId)?.delete(ws);
+        }
         const uid = String(user.id);
         userConnections.get(uid)?.delete(ws);
         if (userConnections.get(uid)?.size === 0) userConnections.delete(uid);

@@ -81,12 +81,17 @@ interface NotificationItem {
   createdAt: string | null;
 }
 
-export function useNotificationAlert(notifications: NotificationItem[] | undefined) {
+export function useNotificationAlert(
+  notifications: NotificationItem[] | undefined,
+  onNewMessage?: (title: string, message: string) => void
+) {
   const prevUnreadIdsRef = useRef<Set<string>>(new Set());
   const isInitialLoadRef = useRef(true);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mountedRef = useRef(true);
+  const onNewMessageRef = useRef(onNewMessage);
+  onNewMessageRef.current = onNewMessage;
 
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
@@ -112,13 +117,8 @@ export function useNotificationAlert(notifications: NotificationItem[] | undefin
 
     if (newNotifications.length > 0) {
       playNotificationSound();
-
       const latest = newNotifications[0];
-      showPushNotification(
-        latest.title,
-        latest.message,
-        latest.actionUrl || undefined
-      );
+      showPushNotification(latest.title, latest.message, latest.actionUrl || undefined);
     }
 
     prevUnreadIdsRef.current = currentUnreadIds;
@@ -137,6 +137,10 @@ export function useNotificationAlert(notifications: NotificationItem[] | undefin
       const ws = new WebSocket(`${protocol}//${window.location.host}/ws/devices?type=dashboard`);
       wsRef.current = ws;
 
+      ws.onopen = () => {
+        console.log("[WS] Dashboard WebSocket connected");
+      };
+
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data as string);
@@ -144,13 +148,15 @@ export function useNotificationAlert(notifications: NotificationItem[] | undefin
             queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
             playNotificationSound();
             if (msg.title) {
+              onNewMessageRef.current?.(msg.title, msg.message || "");
               showPushNotification(msg.title, msg.message || "", msg.actionUrl);
             }
           }
         } catch {}
       };
 
-      ws.onclose = () => {
+      ws.onclose = (ev) => {
+        console.log("[WS] Dashboard WebSocket closed, code:", ev.code);
         if (!mountedRef.current) return;
         reconnectTimerRef.current = setTimeout(() => {
           if (mountedRef.current) connectWs();
