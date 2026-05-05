@@ -162,12 +162,12 @@ export default function KitchenDisplay() {
                 </div>
               ))}
               <div className="flex items-center justify-between px-3 py-2 bg-muted/30 text-sm font-semibold border-t">
-                <span>Cəmi</span>
+                <span>{t('restaurant.kdsTotal')}</span>
                 <span className="text-primary">{(order.totalCents / 100).toFixed(2)} ₼</span>
               </div>
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground italic">Məhsul məlumatı yoxdur</p>
+            <p className="text-xs text-muted-foreground italic">{t('restaurant.kdsNoItems')}</p>
           )}
 
           {/* Notes */}
@@ -198,12 +198,12 @@ export default function KitchenDisplay() {
                 data-testid={`button-mark-ready-${order.id}`}
               >
                 <CheckCircle2 className="h-5 w-5 mr-2" />
-                ✅ HAZIRDIR
+                {t('restaurant.markReady')}
               </Button>
             )}
             {order.kitchenStatus === "ready" && (
               <div className="w-full rounded-lg bg-emerald-600 text-white text-center py-3 font-bold text-base animate-pulse">
-                ✅ HAZIRDIR — Qarson gözləyir
+                {t('restaurant.waiterNotified')}
               </div>
             )}
           </div>
@@ -258,22 +258,6 @@ export default function KitchenDisplay() {
             </div>
           </div>
 
-          {/* Column headers */}
-          {!isLoading && active.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
-              {[
-                { label: `⏳ ${t('restaurant.statusPending').toUpperCase()}`, count: pending.length, color: "text-amber-400 border-amber-600" },
-                { label: `🔥 ${t('restaurant.statusCooking').toUpperCase()}`, count: cooking.length, color: "text-blue-400 border-blue-600" },
-                { label: `✅ ${t('restaurant.statusReady').toUpperCase()}`, count: ready.length, color: "text-emerald-400 border-emerald-600" },
-              ].map(col => (
-                <div key={col.label} className={`text-center py-2 rounded-lg border ${col.color} bg-slate-800/50`}>
-                  <span className={`text-sm font-bold ${col.color.split(" ")[0]}`}>{col.label}</span>
-                  <span className="ml-2 text-slate-400 text-xs">({col.count})</span>
-                </div>
-              ))}
-            </div>
-          )}
-
           {isLoading ? (
             <div className="grid grid-cols-3 gap-4">
               {[1,2,3].map(i => (
@@ -287,15 +271,52 @@ export default function KitchenDisplay() {
               <p className="text-sm">{t('common.autoRefresh', 'New orders will appear automatically')}</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {pending.map(o => <OrderCard key={o.id} order={o} />)}
-              {cooking.map(o => <OrderCard key={o.id} order={o} />)}
-              {ready.map(o => <OrderCard key={o.id} order={o} />)}
-            </div>
+            <>
+              {/* Column headers — always 3 columns, aligned to their status */}
+              <div className="grid grid-cols-3 gap-4 mb-3">
+                {[
+                  { label: `⏳ ${t('restaurant.statusPending').toUpperCase()}`, count: pending.length, color: "text-amber-400 border-amber-600" },
+                  { label: `🔥 ${t('restaurant.statusCooking').toUpperCase()}`, count: cooking.length, color: "text-blue-400 border-blue-600" },
+                  { label: `✅ ${t('restaurant.statusReady').toUpperCase()}`, count: ready.length, color: "text-emerald-400 border-emerald-600" },
+                ].map(col => (
+                  <div key={col.label} className={`text-center py-2 rounded-lg border ${col.color} bg-slate-800/50`}>
+                    <span className={`text-sm font-bold ${col.color.split(" ")[0]}`}>{col.label}</span>
+                    <span className="ml-2 text-slate-400 text-xs">({col.count})</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* 3 fixed columns — each status always stays in its own column */}
+              <div className="grid grid-cols-3 gap-4">
+                {/* PENDING column */}
+                <div className="space-y-4">
+                  {pending.map(o => <OrderCard key={o.id} order={o} />)}
+                  {pending.length === 0 && (
+                    <div className="flex items-center justify-center py-12 text-slate-600 text-sm">—</div>
+                  )}
+                </div>
+
+                {/* COOKING column */}
+                <div className="space-y-4">
+                  {cooking.map(o => <OrderCard key={o.id} order={o} />)}
+                  {cooking.length === 0 && (
+                    <div className="flex items-center justify-center py-12 text-slate-600 text-sm">—</div>
+                  )}
+                </div>
+
+                {/* READY column */}
+                <div className="space-y-4">
+                  {ready.map(o => <OrderCard key={o.id} order={o} />)}
+                  {ready.length === 0 && (
+                    <div className="flex items-center justify-center py-12 text-slate-600 text-sm">—</div>
+                  )}
+                </div>
+              </div>
+            </>
           )}
 
           <div className="mt-4 text-center text-xs text-slate-600">
-            Son yeniləmə: {formatDistanceToNow(lastRefresh, { addSuffix: true })} · 15 saniyədən bir avtoyeniləmə
+            {t('restaurant.kdsLastUpdated')}: {formatDistanceToNow(lastRefresh, { addSuffix: true })} · {t('restaurant.kdsAutoRefresh')}
           </div>
         </div>
       </div>
