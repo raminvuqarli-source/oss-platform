@@ -590,7 +590,8 @@ export default function RestaurantManager() {
                       {member.role === "waiter" ? t("rm.roleWaiter") :
                        member.role === "kitchen_staff" ? t("rm.roleKitchen") :
                        member.role === "restaurant_manager" ? t("rm.roleManager") :
-                       member.role === "restaurant_cleaner" ? t("rm.roleCleaner") : member.role}
+                       member.role === "restaurant_cleaner" ? t("rm.roleCleaner") :
+                       member.role === "restaurant_cashier" ? t("rm.roleCashier") : member.role}
                     </Badge>
                   </div>
                 ))}
@@ -754,6 +755,7 @@ export default function RestaurantManager() {
                   <SelectItem value="waiter">{t("rm.roleWaiter")}</SelectItem>
                   <SelectItem value="kitchen_staff">{t("rm.roleKitchen")}</SelectItem>
                   <SelectItem value="restaurant_cleaner">{t("rm.roleCleaner")}</SelectItem>
+                  <SelectItem value="restaurant_cashier">{t("rm.roleCashier")}</SelectItem>
                   <SelectItem value="restaurant_manager">{t("rm.roleManager")}</SelectItem>
                 </SelectContent>
               </Select>
