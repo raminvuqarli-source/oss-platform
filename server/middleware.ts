@@ -71,7 +71,15 @@ export function requireRole(...roles: string[]) {
       return res.status(401).json({ message: "Unauthorized" });
     }
     if (!roles.includes(user.role) && user.role !== "oss_super_admin") {
-      return res.status(403).json({ message: "Forbidden" });
+      mwLogger.warn({
+        url: req.url,
+        method: req.method,
+        userRole: user.role,
+        userId: user.id,
+        username: user.username,
+        allowedRoles: roles,
+      }, "requireRole: 403 Forbidden - role not in allowed list");
+      return res.status(403).json({ message: "Forbidden", userRole: user.role, allowedRoles: roles });
     }
     next();
   };

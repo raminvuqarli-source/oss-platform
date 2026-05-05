@@ -811,4 +811,21 @@ export function registerAdminRoutes(app: Express): void {
       res.status(500).json({ message: "Failed to fetch audit logs" });
     }
   });
+
+  app.patch("/api/oss-admin/users/:userId/role", requireRole("oss_super_admin"), async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { role } = req.body;
+      const ALLOWED_ROLES = ["admin", "owner_admin", "reception", "staff", "property_manager", "restaurant_manager", "waiter", "kitchen_staff", "restaurant_cleaner", "restaurant_cashier", "marketing_staff"];
+      if (!role || !ALLOWED_ROLES.includes(role)) {
+        return res.status(400).json({ message: `Invalid role. Must be one of: ${ALLOWED_ROLES.join(", ")}` });
+      }
+      const user = await storage.updateUser(userId, { role });
+      if (!user) return res.status(404).json({ message: "User not found" });
+      res.json({ id: user.id, username: user.username, role: user.role });
+    } catch (error) {
+      logger.error({ err: error }, "Failed to update user role");
+      res.status(500).json({ message: "Failed to update user role" });
+    }
+  });
 }

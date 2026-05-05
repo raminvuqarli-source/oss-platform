@@ -715,7 +715,7 @@ export function registerStaffRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/properties/:propertyId/staff/create", requireRole("owner_admin", "admin", "oss_super_admin"), requireFeature("staff_management"), requireStaffLimit(), validateBody(createStaffSchema), async (req, res) => {
+  app.post("/api/properties/:propertyId/staff/create", requireRole("owner_admin", "admin", "oss_super_admin", "restaurant_manager"), requireFeature("staff_management"), requireStaffLimit(), validateBody(createStaffSchema), async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
       if (!user) return res.status(401).json({ message: "Unauthorized" });
@@ -735,9 +735,9 @@ export function registerStaffRoutes(app: Express): void {
         return res.status(400).json({ message: "Missing required fields: fullName, username, password, and role are required" });
       }
 
-      const VALID_ROLES = ["admin", "manager", "reception", "cleaner", "front_desk", "restaurant_manager", "waiter", "kitchen_staff"];
+      const VALID_ROLES = ["admin", "manager", "reception", "cleaner", "front_desk", "restaurant_manager", "waiter", "kitchen_staff", "restaurant_cleaner", "restaurant_cashier"];
       if (!VALID_ROLES.includes(rawRole)) {
-        return res.status(400).json({ message: `Invalid staff role "${rawRole}". Must be one of: admin, manager, reception, cleaner, restaurant_manager, waiter, kitchen_staff` });
+        return res.status(400).json({ message: `Invalid staff role "${rawRole}". Must be one of: ${VALID_ROLES.join(", ")}` });
       }
 
       const existingUser = await storage.getUserByUsername(username);
@@ -754,6 +754,8 @@ export function registerStaffRoutes(app: Express): void {
         restaurant_manager: "restaurant_manager",
         waiter: "waiter",
         kitchen_staff: "kitchen_staff",
+        restaurant_cleaner: "restaurant_cleaner",
+        restaurant_cashier: "restaurant_cashier",
       };
 
       const userRole = roleMapping[rawRole] || "staff";
