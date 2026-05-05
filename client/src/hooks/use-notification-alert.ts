@@ -4,24 +4,8 @@ import { queryClient } from "@/lib/queryClient";
 const NOTIFICATION_SOUND_FREQUENCY = 800;
 const NOTIFICATION_SOUND_DURATION = 150;
 
-let swRegistration: ServiceWorkerRegistration | null = null;
-let swReady = false;
 let sharedAudioContext: AudioContext | null = null;
 let lastSoundAt = 0;
-
-async function registerServiceWorker() {
-  if (!("serviceWorker" in navigator)) return null;
-  try {
-    const reg = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
-    await navigator.serviceWorker.ready;
-    swRegistration = reg;
-    swReady = true;
-    return reg;
-  } catch (e) {
-    console.warn("SW registration failed:", e);
-    return null;
-  }
-}
 
 async function playNotificationSound() {
   const now = Date.now();
@@ -59,49 +43,32 @@ async function playNotificationSound() {
 
 export async function showPushNotification(title: string, body: string, url?: string) {
   if (!("Notification" in window)) return;
-
-  if (Notification.permission !== "granted") {
-    const perm = await Notification.requestPermission();
-    if (perm !== "granted") return;
-  }
-
-  if (swReady && swRegistration) {
-    try {
-      await swRegistration.showNotification(title, {
-        body,
-        icon: "/favicon.png",
-        badge: "/favicon.png",
-        tag: "oss-msg-" + Date.now(),
-        vibrate: [200, 100, 200],
-        data: { url: url || "/" },
-      } as NotificationOptions);
-      return;
-    } catch (e) {
-      console.warn("SW showNotification failed, falling back:", e);
-    }
-  }
+  if (Notification.permission !== "granted") return;
 
   try {
     if ("serviceWorker" in navigator) {
       const reg = await navigator.serviceWorker.ready;
       await reg.showNotification(title, {
         body,
-        icon: "/favicon.png",
-        badge: "/favicon.png",
+        icon: "/icon-192.png",
+        badge: "/icon-192.png",
         tag: "oss-msg-" + Date.now(),
+        renotify: true,
         vibrate: [200, 100, 200],
+        requireInteraction: false,
         data: { url: url || "/" },
       } as NotificationOptions);
       return;
     }
   } catch (e) {
-    console.warn("SW ready showNotification failed:", e);
+    console.warn("[Notification] SW showNotification failed:", e);
   }
 
-  new Notification(title, {
-    body,
-    icon: "/favicon.png",
-  });
+  try {
+    new Notification(title, { body, icon: "/icon-192.png" });
+  } catch (e) {
+    console.warn("[Notification] Fallback notification failed:", e);
+  }
 }
 
 interface NotificationItem {
@@ -122,7 +89,6 @@ export function useNotificationAlert(notifications: NotificationItem[] | undefin
   const mountedRef = useRef(true);
 
   useEffect(() => {
-    registerServiceWorker();
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
     }
