@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
-import { Bell, Package, CheckCircle2, Clock, Utensils, MessageSquare } from "lucide-react";
+import { Bell, Package, CheckCircle2, Clock, Utensils, MessageSquare, LayoutGrid } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import type { Locale } from "date-fns";
@@ -40,6 +40,8 @@ type WaiterCall = {
   calledAt: string;
 };
 
+type MyProfile = { tablesAssigned: string | null; salaryAmount: string };
+
 export default function WaiterView() {
   const { t, i18n } = useTranslation();
   const dateFnsLocale = dateFnsLocaleMap[i18n.language] ?? undefined;
@@ -55,6 +57,10 @@ export default function WaiterView() {
   const { data: calls = [], isLoading: callsLoading } = useQuery<WaiterCall[]>({
     queryKey: ["/api/restaurant/waiter-calls"],
     refetchInterval: 8000,
+  });
+
+  const { data: myProfile } = useQuery<MyProfile>({
+    queryKey: ["/api/restaurant/my-profile"],
   });
 
   const deliverOrder = useMutation({
@@ -142,11 +148,11 @@ export default function WaiterView() {
           <div className="p-2 bg-primary rounded-lg">
             <Utensils className="h-5 w-5 text-primary-foreground" />
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="text-xl font-bold">{t('restaurant.waiter')}</h1>
             <p className="text-sm text-muted-foreground">{t('restaurant.markReady')}</p>
           </div>
-          <div className="ml-auto flex gap-2">
+          <div className="flex gap-2 flex-wrap justify-end">
             {readyOrders.length > 0 && (
               <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
                 {t('restaurant.readyCount', { count: readyOrders.length })}
@@ -160,6 +166,21 @@ export default function WaiterView() {
             )}
           </div>
         </div>
+
+        {/* Assigned tables banner */}
+        {myProfile?.tablesAssigned && (
+          <div className="flex items-center gap-2 p-3 rounded-lg border border-primary/20 bg-primary/5" data-testid="waiter-assigned-tables">
+            <LayoutGrid className="h-4 w-4 text-primary shrink-0" />
+            <span className="text-sm font-medium text-primary">{t('rm.waiterTablesAssigned')}:</span>
+            <div className="flex gap-1 flex-wrap">
+              {myProfile.tablesAssigned.split(",").map(s => s.trim()).filter(Boolean).map(tbl => (
+                <Badge key={tbl} className="bg-primary/10 text-primary hover:bg-primary/20 text-xs" data-testid={`badge-waiter-table-${tbl}`}>
+                  {tbl}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
 
         <Tabs defaultValue="orders">
           <TabsList className="flex flex-wrap h-auto gap-1" data-testid="tabs-waiter">

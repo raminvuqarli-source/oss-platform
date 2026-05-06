@@ -632,6 +632,19 @@ export function registerRestaurantRoutes(app: Express): void {
     }
   });
 
+  // ─── MY PROFILE (for waiter/staff to see their own assignments) ─────────
+
+  app.get("/api/restaurant/my-profile", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user?.propertyId) return res.json({ tablesAssigned: null, salaryAmount: "0" });
+      const profile = await storage.getRestaurantStaffProfile(user.id, user.propertyId);
+      res.json({ tablesAssigned: profile?.tablesAssigned ?? null, salaryAmount: profile?.salaryAmount ?? "0" });
+    } catch (err) {
+      res.json({ tablesAssigned: null, salaryAmount: "0" });
+    }
+  });
+
   // ─── STAFF PROFILES ───────────────────────────────────────────────────
 
   app.get("/api/restaurant/staff-profiles", requireRestaurantRole(...MANAGER_ROLES), async (req, res) => {
@@ -733,6 +746,61 @@ export function registerRestaurantRoutes(app: Express): void {
     } catch (err) {
       logger.error({ err }, "Failed to fetch restaurant analytics");
       res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  // ─── RESTAURANT TABLES ────────────────────────────────────────────────
+
+  app.get("/api/restaurant/tables", requireRestaurantRole(...MANAGER_ROLES), async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user?.propertyId) return res.status(400).json({ message: "No property linked" });
+      const tables = await storage.getRestaurantTables(user.propertyId);
+      // Derive status from active orders
+      const allOrders = await storage.getPosOrders(user.propertyId);
+      const activeOrders = allOrders.filter(o => o.kitchenStatus !== "delivered" || o.settlementStatus === "pending");
+      const occupiedTables = new Set(activeOrders.map(o => o.tableNumber).filter(Boolean));
+      const ordersForTable: Record<string, typeof allOrders> = {};
+      for (const o of activeOrders) {
+        if (o.tableNumber) {
+          if (!ordersForTable[o.tableNumber]) ordersForTable[o.tableNumber] = [];
+          ordersForTable[o.tableNumber].push(o);
+        }
+      }
+      const result = tables.map(t => ({
+        ...t,
+        status: occupiedTables.has(t.tableNumber) ? "occupied" : "empty",
+        activeOrders: ordersForTable[t.tableNumber] || [],
+      }));
+      res.json(result);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to fetch tables" });
+    }
+  });
+
+  app.post("/api/restaurant/tables", requireRestaurantRole(...MANAGER_ROLES), async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user?.propertyId) return res.status(400).json({ message: "No property linked" });
+      const { tableNumber, capacity } = req.body;
+      if (!tableNumber) return res.status(400).json({ message: "tableNumber is required" });
+      const table = await storage.createRestaurantTable({
+        propertyId: user.propertyId,
+        tableNumber: String(tableNumber),
+        capacity: capacity ? Number(capacity) : null,
+      });
+      res.json(table);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to create table" });
+    }
+  });
+
+  app.delete("/api/restaurant/tables/:id", requireRestaurantRole(...MANAGER_ROLES), async (req, res) => {
+    try {
+      await storage.deleteRestaurantTable(req.params.id);
+      res.json({ ok: true });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to delete table" });
     }
   });
 }

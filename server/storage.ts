@@ -230,6 +230,9 @@ import {
   restaurantStaffProfiles,
   type RestaurantStaffProfile,
   type InsertRestaurantStaffProfile,
+  restaurantTables,
+  type RestaurantTable,
+  type InsertRestaurantTable,
   deletedTrialAccounts,
   type DeletedTrialAccount,
   billingLogs,
@@ -645,6 +648,11 @@ export interface IStorage {
   upsertRestaurantStaffProfile(data: InsertRestaurantStaffProfile): Promise<RestaurantStaffProfile>;
   getRestaurantStaffProfile(userId: string, propertyId: string): Promise<RestaurantStaffProfile | undefined>;
   getRestaurantStaffProfiles(propertyId: string): Promise<RestaurantStaffProfile[]>;
+
+  // Restaurant — Tables
+  createRestaurantTable(data: InsertRestaurantTable): Promise<RestaurantTable>;
+  getRestaurantTables(propertyId: string): Promise<RestaurantTable[]>;
+  deleteRestaurantTable(id: string): Promise<void>;
 
   // Deleted trial accounts (abuse prevention)
   logDeletedTrialAccount(email: string, hotelName?: string | null, reason?: string): Promise<void>;
@@ -3356,6 +3364,22 @@ export class DatabaseStorage implements IStorage {
 
   async getRestaurantStaffProfiles(propertyId: string): Promise<RestaurantStaffProfile[]> {
     return db.select().from(restaurantStaffProfiles).where(eq(restaurantStaffProfiles.propertyId, propertyId));
+  }
+
+  // ===================== RESTAURANT TABLES =====================
+  async createRestaurantTable(data: InsertRestaurantTable): Promise<RestaurantTable> {
+    const [row] = await db.insert(restaurantTables).values(data).returning();
+    return row;
+  }
+
+  async getRestaurantTables(propertyId: string): Promise<RestaurantTable[]> {
+    return db.select().from(restaurantTables)
+      .where(eq(restaurantTables.propertyId, propertyId))
+      .orderBy(restaurantTables.tableNumber);
+  }
+
+  async deleteRestaurantTable(id: string): Promise<void> {
+    await db.delete(restaurantTables).where(eq(restaurantTables.id, id));
   }
 
   // ===================== DELETED TRIAL ACCOUNTS =====================

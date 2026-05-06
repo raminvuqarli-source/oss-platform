@@ -2381,6 +2381,18 @@ export const insertRestaurantStaffProfileSchema = createInsertSchema(restaurantS
 export type InsertRestaurantStaffProfile = z.infer<typeof insertRestaurantStaffProfileSchema>;
 export type RestaurantStaffProfile = typeof restaurantStaffProfiles.$inferSelect;
 
+// Restaurant Tables — master list of physical tables managed by the restaurant
+export const restaurantTables = pgTable("restaurant_tables", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  propertyId: varchar("property_id").notNull(),
+  tableNumber: varchar("table_number", { length: 20 }).notNull(),
+  capacity: integer("capacity"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+export const insertRestaurantTableSchema = createInsertSchema(restaurantTables).omit({ id: true, createdAt: true });
+export type InsertRestaurantTable = z.infer<typeof insertRestaurantTableSchema>;
+export type RestaurantTable = typeof restaurantTables.$inferSelect;
+
 // Deleted trial accounts — tracks emails/hotel names to prevent re-trial abuse
 export const deletedTrialAccounts = pgTable("deleted_trial_accounts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
