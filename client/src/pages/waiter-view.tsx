@@ -9,6 +9,14 @@ import { useToast } from "@/hooks/use-toast";
 import { Bell, Package, CheckCircle2, Clock, Utensils, MessageSquare } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { formatDistanceToNow } from "date-fns";
+import type { Locale } from "date-fns";
+import { az as azLocale, tr as trLocale, ru as ruLocale, ar as arLocale, fr as frLocale, de as deLocale, es as esLocale, nl as nlLocale } from "date-fns/locale";
+import { faIR } from "date-fns/locale/fa-IR";
+
+const dateFnsLocaleMap: Record<string, Locale> = {
+  az: azLocale, tr: trLocale, ru: ruLocale, ar: arLocale,
+  fr: frLocale, de: deLocale, es: esLocale, nl: nlLocale, fa: faIR,
+};
 import { useTranslation } from "react-i18next";
 import { StaffDmChat } from "@/components/staff-dm-chat";
 
@@ -33,7 +41,8 @@ type WaiterCall = {
 };
 
 export default function WaiterView() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateFnsLocale = dateFnsLocaleMap[i18n.language] ?? undefined;
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const wsRef = useRef<WebSocket | null>(null);
@@ -164,7 +173,7 @@ export default function WaiterView() {
                     </div>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Clock className="h-3 w-3" />
-                      {formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(order.createdAt), { addSuffix: true, locale: dateFnsLocale })}
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -193,7 +202,7 @@ export default function WaiterView() {
                     <p className="font-medium text-sm">
                       {order.tableNumber ? `${t('restaurant.table')} ${order.tableNumber}` : order.guestName || `#${order.id.slice(-6).toUpperCase()}`}
                     </p>
-                    <p className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}</p>
+                    <p className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(order.createdAt), { addSuffix: true, locale: dateFnsLocale })}</p>
                   </div>
                   <Badge variant="secondary" className="capitalize">{order.kitchenStatus}</Badge>
                 </div>
@@ -222,7 +231,7 @@ export default function WaiterView() {
                         </p>
                         <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                           <Clock className="h-3 w-3" />
-                          {formatDistanceToNow(new Date(call.calledAt), { addSuffix: true })}
+                          {formatDistanceToNow(new Date(call.calledAt), { addSuffix: true, locale: dateFnsLocale })}
                         </p>
                       </div>
                       <Button

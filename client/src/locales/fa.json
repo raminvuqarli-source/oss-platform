@@ -1675,7 +1675,11 @@
       "core": "اصلی",
       "operations": "عملیات",
       "communication": "ارتباطات",
-      "system": "سیستم"
+      "system": "سیستم",
+      "restaurant": "رستوران",
+      "kitchen": "آشپزخانه",
+      "cleaning": "نظافت",
+      "cashier": "صندوق"
     },
     "properties": "املاک",
     "guests": "مهمانان",
@@ -1688,6 +1692,8 @@
     "serviceRequests": "درخواست‌های خدمات",
     "tasks": "وظایف",
     "roomPrep": "آماده‌سازی اتاق",
+    "housekeeping": "نظافت",
+    "rooms": "اتاق‌ها",
     "guestMessages": "پیام‌های مهمانان",
     "myBooking": "رزرو من",
     "services": "خدمات",
@@ -1695,7 +1701,18 @@
     "smartRoom": "اتاق هوشمند",
     "staffPerformance": "عملکرد کارکنان",
     "roomStatus": "وضعیت اتاق‌ها",
-    "billingAddons": "صورتحساب و افزونه‌ها"
+    "lockControl": "کنترل قفل",
+    "temperature": "دما",
+    "chat": "گفتگو",
+    "activityLogs": "گزارش فعالیت",
+    "units": "واحدها",
+    "billingAddons": "صورتحساب و افزونه‌ها",
+    "restaurantManagement": "مدیریت رستوران",
+    "kitchenDisplay": "نمایش آشپزخانه (KDS)",
+    "waiterView": "نمای گارسون",
+    "waiterOrders": "سفارش‌ها",
+    "cleaningTasks": "وظایف نظافت",
+    "cashierTables": "میزها و صورتحساب‌ها"
   },
   "smartExtras": {
     "title": "امکانات هوشمند",

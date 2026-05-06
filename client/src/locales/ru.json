@@ -1682,7 +1682,11 @@
       "core": "Основное",
       "operations": "Операции",
       "communication": "Коммуникация",
-      "system": "Система"
+      "system": "Система",
+      "restaurant": "Ресторан",
+      "kitchen": "Кухня",
+      "cleaning": "Уборка",
+      "cashier": "Касса"
     },
     "properties": "Объекты",
     "guests": "Гости",
@@ -1695,6 +1699,8 @@
     "serviceRequests": "Запросы на обслуживание",
     "tasks": "Задачи",
     "roomPrep": "Подготовка номеров",
+    "housekeeping": "Уборка",
+    "rooms": "Номера",
     "guestMessages": "Сообщения гостей",
     "myBooking": "Мое бронирование",
     "services": "Услуги",
@@ -1702,7 +1708,18 @@
     "smartRoom": "Умный номер",
     "staffPerformance": "Производительность Персонала",
     "roomStatus": "Статус номеров",
-    "billingAddons": "Счёт и дополнения"
+    "lockControl": "Управление замками",
+    "temperature": "Температура",
+    "chat": "Чат",
+    "activityLogs": "Журнал активности",
+    "units": "Единицы",
+    "billingAddons": "Счёт и дополнения",
+    "restaurantManagement": "Управление рестораном",
+    "kitchenDisplay": "Экран кухни (KDS)",
+    "waiterView": "Вид официанта",
+    "waiterOrders": "Заказы",
+    "cleaningTasks": "Задачи по уборке",
+    "cashierTables": "Столики и счета"
   },
   "smartExtras": {
     "title": "Умные дополнения",

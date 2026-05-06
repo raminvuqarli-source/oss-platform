@@ -22,6 +22,14 @@ import {
   ClipboardList, CheckSquare, Camera, MapPin
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import type { Locale } from "date-fns";
+import { az as azLocale, tr as trLocale, ru as ruLocale, ar as arLocale, fr as frLocale, de as deLocale, es as esLocale, nl as nlLocale } from "date-fns/locale";
+import { faIR } from "date-fns/locale/fa-IR";
+
+const dateFnsLocaleMap: Record<string, Locale> = {
+  az: azLocale, tr: trLocale, ru: ruLocale, ar: arLocale,
+  fr: frLocale, de: deLocale, es: esLocale, nl: nlLocale, fa: faIR,
+};
 
 type Category = { id: string; name: string; sortOrder: number; isActive: boolean };
 type MenuItem = { id: string; name: string; description: string | null; priceCents: number; categoryId: string | null; isAvailable: boolean };
@@ -46,7 +54,8 @@ type RoomGroup = { roomNumber: string; orders: PosOrder[]; totalCents: number };
 const fmt = (cents: number) => `₼${(cents / 100).toFixed(2)}`;
 
 export default function RestaurantManager() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateFnsLocale = dateFnsLocaleMap[i18n.language] ?? undefined;
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -312,7 +321,7 @@ export default function RestaurantManager() {
                     <p className="font-medium">
                       {order.tableNumber ? `${t("rm.table")} ${order.tableNumber}` : order.roomNumber ? `${t("rm.room")} ${order.roomNumber}` : order.guestName || `#${order.id.slice(-6).toUpperCase()}`}
                     </p>
-                    <p className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}</p>
+                    <p className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(order.createdAt), { addSuffix: true, locale: dateFnsLocale })}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium">{fmt(order.totalCents)}</p>
@@ -376,7 +385,7 @@ export default function RestaurantManager() {
                   <CardContent className="pt-0 space-y-1">
                     {group.orders.map(o => (
                       <div key={o.id} className="flex items-center justify-between text-sm py-1 border-t">
-                        <span className="text-muted-foreground">{formatDistanceToNow(new Date(o.createdAt), { addSuffix: true })}</span>
+                        <span className="text-muted-foreground">{formatDistanceToNow(new Date(o.createdAt), { addSuffix: true, locale: dateFnsLocale })}</span>
                         <div className="flex items-center gap-2">
                           <span>{fmt(o.totalCents)}</span>
                           <span className={`text-xs px-2 py-0.5 rounded-full ${statusColor[o.kitchenStatus]}`}>
@@ -523,7 +532,7 @@ export default function RestaurantManager() {
                             <div className="flex flex-wrap gap-3 mt-1 text-xs text-muted-foreground">
                               {task.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{task.location}</span>}
                               {assignedWorker && <span className="flex items-center gap-1"><Users className="h-3 w-3" />{assignedWorker.fullName}</span>}
-                              <span>{formatDistanceToNow(new Date(task.createdAt), { addSuffix: true })}</span>
+                              <span>{formatDistanceToNow(new Date(task.createdAt), { addSuffix: true, locale: dateFnsLocale })}</span>
                             </div>
                             {task.photoUrl && (
                               <div className="mt-2">

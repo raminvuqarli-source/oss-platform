@@ -1682,7 +1682,11 @@
       "core": "Ana",
       "operations": "Operasyonlar",
       "communication": "İletişim",
-      "system": "Sistem"
+      "system": "Sistem",
+      "restaurant": "Restoran",
+      "kitchen": "Mutfak",
+      "cleaning": "Temizlik",
+      "cashier": "Kasa"
     },
     "properties": "Mülkler",
     "guests": "Misafirler",
@@ -1695,6 +1699,8 @@
     "serviceRequests": "Hizmet talepleri",
     "tasks": "Görevler",
     "roomPrep": "Oda hazırlığı",
+    "housekeeping": "Temizlik",
+    "rooms": "Odalar",
     "guestMessages": "Misafir mesajları",
     "myBooking": "Rezervasyonum",
     "services": "Hizmetler",
@@ -1702,7 +1708,18 @@
     "smartRoom": "Akıllı oda",
     "staffPerformance": "Personel Performansı",
     "roomStatus": "Oda Durumu",
-    "billingAddons": "Fatura ve Eklentiler"
+    "lockControl": "Kilit Kontrolü",
+    "temperature": "Sıcaklık",
+    "chat": "Sohbet",
+    "activityLogs": "Aktivite Günlükleri",
+    "units": "Birimler",
+    "billingAddons": "Fatura ve Eklentiler",
+    "restaurantManagement": "Restoran Yönetimi",
+    "kitchenDisplay": "Mutfak Ekranı (KDS)",
+    "waiterView": "Garson Görünümü",
+    "waiterOrders": "Siparişler",
+    "cleaningTasks": "Temizlik Görevleri",
+    "cashierTables": "Masalar & Hesaplar"
   },
   "smartExtras": {
     "title": "Akıllı Ekstralar",

@@ -14,6 +14,14 @@ import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
 import { Sparkles, CheckSquare, Clock, MapPin, Camera, CheckCircle2, Loader2, MessageSquare } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import type { Locale } from "date-fns";
+import { az as azLocale, tr as trLocale, ru as ruLocale, ar as arLocale, fr as frLocale, de as deLocale, es as esLocale, nl as nlLocale } from "date-fns/locale";
+import { faIR } from "date-fns/locale/fa-IR";
+
+const dateFnsLocaleMap: Record<string, Locale> = {
+  az: azLocale, tr: trLocale, ru: ruLocale, ar: arLocale,
+  fr: frLocale, de: deLocale, es: esLocale, nl: nlLocale, fa: faIR,
+};
 import { StaffDmChat } from "@/components/staff-dm-chat";
 
 type CleaningTask = {
@@ -36,7 +44,8 @@ const statusColor: Record<string, string> = {
 
 export default function RestaurantCleaner() {
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateFnsLocale = dateFnsLocaleMap[i18n.language] ?? undefined;
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -187,7 +196,7 @@ export default function RestaurantCleaner() {
                               {task.location && (
                                 <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{task.location}</span>
                               )}
-                              <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{formatDistanceToNow(new Date(task.createdAt), { addSuffix: true })}</span>
+                              <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{formatDistanceToNow(new Date(task.createdAt), { addSuffix: true, locale: dateFnsLocale })}</span>
                             </div>
                           </div>
                           <span className={`text-xs font-semibold px-2 py-1 rounded-full shrink-0 ${statusColor[task.status]}`}>

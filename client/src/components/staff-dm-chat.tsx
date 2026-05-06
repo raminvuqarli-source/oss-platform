@@ -12,6 +12,15 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth-context";
 import { MessageSquare, Send, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import type { Locale } from "date-fns";
+import { az as azLocale, tr as trLocale, ru as ruLocale, ar as arLocale, fr as frLocale, de as deLocale, es as esLocale, nl as nlLocale } from "date-fns/locale";
+import { faIR } from "date-fns/locale/fa-IR";
+import { useTranslation } from "react-i18next";
+
+const dateFnsLocaleMap: Record<string, Locale> = {
+  az: azLocale, tr: trLocale, ru: ruLocale, ar: arLocale,
+  fr: frLocale, de: deLocale, es: esLocale, nl: nlLocale, fa: faIR,
+};
 import type { User, ChatMessage } from "@shared/schema";
 
 interface StaffDmConversation {
@@ -34,6 +43,8 @@ export function StaffDmChat({
   emptyLabel = "Müdir tapılmadı",
   panelLabel = "Əkip Mesajları",
 }: StaffDmChatProps) {
+  const { i18n } = useTranslation();
+  const dateFnsLocale = dateFnsLocaleMap[i18n.language] ?? undefined;
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -131,7 +142,7 @@ export function StaffDmChat({
                             <span className="font-medium text-sm truncate">{peer.fullName}</span>
                             {conv?.lastMessageAt && (
                               <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                {formatDistanceToNow(new Date(conv.lastMessageAt), { addSuffix: true })}
+                                {formatDistanceToNow(new Date(conv.lastMessageAt), { addSuffix: true, locale: dateFnsLocale })}
                               </span>
                             )}
                           </div>
@@ -194,7 +205,7 @@ export function StaffDmChat({
                           <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${isMe ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-muted rounded-bl-sm"}`}>
                             <p>{msg.message}</p>
                             <p className={`text-xs mt-1 ${isMe ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
-                              {formatDistanceToNow(new Date(msg.createdAt?.toString() ?? ""), { addSuffix: true })}
+                              {formatDistanceToNow(new Date(msg.createdAt?.toString() ?? ""), { addSuffix: true, locale: dateFnsLocale })}
                             </p>
                           </div>
                         </div>

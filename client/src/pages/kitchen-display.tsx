@@ -9,6 +9,9 @@ import { useToast } from "@/hooks/use-toast";
 import { ChefHat, Bell, Clock, CheckCircle2, RefreshCw, MapPin, BedDouble, UtensilsCrossed } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
+import type { Locale } from "date-fns";
+import { az as azLocale, tr as trLocale, ru as ruLocale, ar as arLocale, fr as frLocale, de as deLocale, es as esLocale, nl as nlLocale } from "date-fns/locale";
+import { faIR } from "date-fns/locale/fa-IR";
 import { useTranslation } from "react-i18next";
 
 type PosOrderItem = {
@@ -48,8 +51,21 @@ const STATUS_HEADER_COLORS: Record<string, string> = {
   delivered: "bg-slate-500",
 };
 
+const dateFnsLocaleMap: Record<string, Locale> = {
+  az: azLocale,
+  tr: trLocale,
+  ru: ruLocale,
+  ar: arLocale,
+  fr: frLocale,
+  de: deLocale,
+  es: esLocale,
+  nl: nlLocale,
+  fa: faIR,
+};
+
 export default function KitchenDisplay() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateFnsLocale = dateFnsLocaleMap[i18n.language] ?? undefined;
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -135,7 +151,7 @@ export default function KitchenDisplay() {
           </div>
           <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
             <Clock className="h-3 w-3" />
-            {formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}
+            {formatDistanceToNow(new Date(order.createdAt), { addSuffix: true, locale: dateFnsLocale })}
             <span className="ml-1 text-muted-foreground/60">· #{order.id.slice(-6).toUpperCase()}</span>
           </div>
         </CardHeader>
@@ -316,7 +332,7 @@ export default function KitchenDisplay() {
           )}
 
           <div className="mt-4 text-center text-xs text-slate-600">
-            {t('restaurant.kdsLastUpdated')}: {formatDistanceToNow(lastRefresh, { addSuffix: true })} · {t('restaurant.kdsAutoRefresh')}
+            {t('restaurant.kdsLastUpdated')}: {formatDistanceToNow(lastRefresh, { addSuffix: true, locale: dateFnsLocale })} · {t('restaurant.kdsAutoRefresh')}
           </div>
         </div>
       </div>

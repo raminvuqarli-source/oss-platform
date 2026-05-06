@@ -1675,7 +1675,11 @@
       "core": "Kern",
       "operations": "Operaties",
       "communication": "Communicatie",
-      "system": "Systeem"
+      "system": "Systeem",
+      "restaurant": "Restaurant",
+      "kitchen": "Keuken",
+      "cleaning": "Schoonmaak",
+      "cashier": "Kassa"
     },
     "properties": "Objecten",
     "guests": "Gasten",
@@ -1688,6 +1692,8 @@
     "serviceRequests": "Serviceverzoeken",
     "tasks": "Taken",
     "roomPrep": "Kamervoorbereiding",
+    "housekeeping": "Housekeeping",
+    "rooms": "Kamers",
     "guestMessages": "Gastenberichten",
     "myBooking": "Mijn boeking",
     "services": "Diensten",
@@ -1695,7 +1701,18 @@
     "smartRoom": "Slimme kamer",
     "staffPerformance": "Personeelsperformance",
     "roomStatus": "Kamerstatus",
-    "billingAddons": "Facturering en add-ons"
+    "lockControl": "Slotbeheer",
+    "temperature": "Temperatuur",
+    "chat": "Chat",
+    "activityLogs": "Activiteitenlogboeken",
+    "units": "Eenheden",
+    "billingAddons": "Facturering en add-ons",
+    "restaurantManagement": "Restaurantbeheer",
+    "kitchenDisplay": "Keukenmonitor (KDS)",
+    "waiterView": "Kelner overzicht",
+    "waiterOrders": "Bestellingen",
+    "cleaningTasks": "Schoonmaaktaken",
+    "cashierTables": "Tafels & Rekeningen"
   },
   "smartExtras": {
     "title": "Slimme Extra's",

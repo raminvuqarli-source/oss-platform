@@ -1675,7 +1675,11 @@
       "core": "Principal",
       "operations": "Operaciones",
       "communication": "Comunicación",
-      "system": "Sistema"
+      "system": "Sistema",
+      "restaurant": "Restaurante",
+      "kitchen": "Cocina",
+      "cleaning": "Limpieza",
+      "cashier": "Caja"
     },
     "properties": "Propiedades",
     "guests": "Huéspedes",
@@ -1688,6 +1692,8 @@
     "serviceRequests": "Solicitudes de servicio",
     "tasks": "Tareas",
     "roomPrep": "Preparación de habitaciones",
+    "housekeeping": "Limpieza",
+    "rooms": "Habitaciones",
     "guestMessages": "Mensajes de huéspedes",
     "myBooking": "Mi reserva",
     "services": "Servicios",
@@ -1695,7 +1701,18 @@
     "smartRoom": "Habitación inteligente",
     "staffPerformance": "Desempeño del Personal",
     "roomStatus": "Estado de habitaciones",
-    "billingAddons": "Facturación y complementos"
+    "lockControl": "Control de cerraduras",
+    "temperature": "Temperatura",
+    "chat": "Chat",
+    "activityLogs": "Registros de actividad",
+    "units": "Unidades",
+    "billingAddons": "Facturación y complementos",
+    "restaurantManagement": "Gestión del restaurante",
+    "kitchenDisplay": "Pantalla de cocina (KDS)",
+    "waiterView": "Vista camarero",
+    "waiterOrders": "Pedidos",
+    "cleaningTasks": "Tareas de limpieza",
+    "cashierTables": "Mesas & Cuentas"
   },
   "smartExtras": {
     "title": "Extras Inteligentes",

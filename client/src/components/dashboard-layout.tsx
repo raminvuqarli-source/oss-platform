@@ -300,10 +300,10 @@ function DashboardSidebar() {
             ],
           },
           {
-            label: "Restaurant",
+            label: t("nav.group.restaurant", "Restaurant"),
             items: [
-              { title: "Restaurant Management", icon: UtensilsCrossed, url: "/restaurant/manager", testId: "nav-restaurant-manager" },
-              { title: "Kitchen Display (KDS)", icon: ChefHat, url: "/restaurant/kitchen", testId: "nav-restaurant-kitchen" },
+              { title: t("nav.restaurantManagement", "Restaurant Management"), icon: UtensilsCrossed, url: "/restaurant/manager", testId: "nav-restaurant-manager" },
+              { title: t("nav.kitchenDisplay", "Kitchen Display (KDS)"), icon: ChefHat, url: "/restaurant/kitchen", testId: "nav-restaurant-kitchen" },
             ],
           },
           {
@@ -324,11 +324,11 @@ function DashboardSidebar() {
       case "restaurant_manager":
         return [
           {
-            label: "Restaurant",
+            label: t("nav.group.restaurant", "Restaurant"),
             items: [
-              { title: "Restaurant Management", icon: UtensilsCrossed, url: "/restaurant/manager", testId: "nav-restaurant-manager" },
-              { title: "Kitchen Display (KDS)", icon: ChefHat, url: "/restaurant/kitchen", testId: "nav-restaurant-kitchen" },
-              { title: "Waiter View", icon: Utensils, url: "/restaurant/waiter", testId: "nav-restaurant-waiter" },
+              { title: t("nav.restaurantManagement", "Restaurant Management"), icon: UtensilsCrossed, url: "/restaurant/manager", testId: "nav-restaurant-manager" },
+              { title: t("nav.kitchenDisplay", "Kitchen Display (KDS)"), icon: ChefHat, url: "/restaurant/kitchen", testId: "nav-restaurant-kitchen" },
+              { title: t("nav.waiterView", "Waiter View"), icon: Utensils, url: "/restaurant/waiter", testId: "nav-restaurant-waiter" },
             ],
           },
           {
@@ -343,9 +343,9 @@ function DashboardSidebar() {
       case "kitchen_staff":
         return [
           {
-            label: "Kitchen",
+            label: t("nav.group.kitchen", "Kitchen"),
             items: [
-              { title: "Kitchen Display (KDS)", icon: ChefHat, url: "/restaurant/kitchen", testId: "nav-kitchen-display" },
+              { title: t("nav.kitchenDisplay", "Kitchen Display (KDS)"), icon: ChefHat, url: "/restaurant/kitchen", testId: "nav-kitchen-display" },
             ],
           },
           {
@@ -359,9 +359,9 @@ function DashboardSidebar() {
       case "waiter":
         return [
           {
-            label: "Restaurant",
+            label: t("nav.group.restaurant", "Restaurant"),
             items: [
-              { title: "Sifarişlər", icon: Utensils, url: "/restaurant/waiter", testId: "nav-waiter-orders" },
+              { title: t("nav.waiterOrders", "Orders"), icon: Utensils, url: "/restaurant/waiter", testId: "nav-waiter-orders" },
             ],
           },
           {
@@ -376,9 +376,9 @@ function DashboardSidebar() {
       case "restaurant_cleaner":
         return [
           {
-            label: "Temizlik",
+            label: t("nav.group.cleaning", "Cleaning"),
             items: [
-              { title: "Temizlik Tapşırıqları", icon: Sparkles, url: "/restaurant/cleaner", testId: "nav-restaurant-cleaner" },
+              { title: t("nav.cleaningTasks", "Cleaning Tasks"), icon: Sparkles, url: "/restaurant/cleaner", testId: "nav-restaurant-cleaner" },
             ],
           },
           {
@@ -392,9 +392,9 @@ function DashboardSidebar() {
       case "restaurant_cashier":
         return [
           {
-            label: "Kassa",
+            label: t("nav.group.cashier", "Cashier"),
             items: [
-              { title: "Masalar & Hesablar", icon: Wallet, url: "/restaurant/cashier", testId: "nav-cashier-tables" },
+              { title: t("nav.cashierTables", "Tables & Bills"), icon: Wallet, url: "/restaurant/cashier", testId: "nav-cashier-tables" },
             ],
           },
           {
@@ -723,7 +723,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         return viewTitles[view] || t("common.dashboard");
       }
       if (user.role === "guest") return t("dashboard.guest.title");
-      if (user.role === "staff") return "Housekeeping";
+      if (user.role === "staff") return t("nav.housekeeping", "Housekeeping");
       if (user.role === "reception") return t("dashboard.reception.title");
       if (user.role === "owner_admin") return t("common.dashboard");
       return t("dashboard.admin.title");

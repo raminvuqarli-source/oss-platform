@@ -1700,7 +1700,11 @@
       "core": "Core",
       "operations": "Operations",
       "communication": "Communication",
-      "system": "System"
+      "system": "System",
+      "restaurant": "Restaurant",
+      "kitchen": "Kitchen",
+      "cleaning": "Cleaning",
+      "cashier": "Cashier"
     },
     "properties": "Properties",
     "guests": "Guests",
@@ -1714,6 +1718,8 @@
     "tasks": "Tasks",
     "roomPrep": "Room Prep",
     "roomStatus": "Room Status",
+    "housekeeping": "Housekeeping",
+    "rooms": "Rooms",
     "guestMessages": "Guest Messages",
     "myBooking": "My Booking",
     "services": "Services",
@@ -1725,7 +1731,13 @@
     "chat": "Chat",
     "activityLogs": "Activity Logs",
     "units": "Units",
-    "billingAddons": "Billing & Add-ons"
+    "billingAddons": "Billing & Add-ons",
+    "restaurantManagement": "Restaurant Management",
+    "kitchenDisplay": "Kitchen Display (KDS)",
+    "waiterView": "Waiter View",
+    "waiterOrders": "Orders",
+    "cleaningTasks": "Cleaning Tasks",
+    "cashierTables": "Tables & Bills"
   },
   "staffPerformance": {
     "title": "Staff Performance",

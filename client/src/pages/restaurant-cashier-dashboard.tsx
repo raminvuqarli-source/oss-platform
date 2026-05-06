@@ -23,6 +23,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDistanceToNow } from "date-fns";
+import type { Locale } from "date-fns";
+import { az as azLocale, tr as trLocale, ru as ruLocale, ar as arLocale, fr as frLocale, de as deLocale, es as esLocale, nl as nlLocale } from "date-fns/locale";
+import { faIR } from "date-fns/locale/fa-IR";
+
+const dateFnsLocaleMap: Record<string, Locale> = {
+  az: azLocale, tr: trLocale, ru: ruLocale, ar: arLocale,
+  fr: frLocale, de: deLocale, es: esLocale, nl: nlLocale, fa: faIR,
+};
 
 type PosOrder = {
   id: string;
@@ -65,7 +73,8 @@ type CleaningTask = {
 };
 
 export default function RestaurantCashierDashboard() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateFnsLocale = dateFnsLocaleMap[i18n.language] ?? undefined;
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [settleDialog, setSettleDialog] = useState<PosOrder | null>(null);
@@ -276,7 +285,7 @@ export default function RestaurantCashierDashboard() {
                           <div className="flex items-center gap-2 mt-2">
                             <Clock className="h-3 w-3 text-muted-foreground" />
                             <span className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}
+                              {formatDistanceToNow(new Date(order.createdAt), { addSuffix: true, locale: dateFnsLocale })}
                             </span>
                           </div>
                         </div>
@@ -350,7 +359,7 @@ export default function RestaurantCashierDashboard() {
                         {tableOrders.map(o => (
                           <div key={o.id} className="text-sm border-b pb-2 last:border-0 last:pb-0">
                             <div className="flex justify-between">
-                              <span className="text-muted-foreground">{formatDistanceToNow(new Date(o.createdAt), { addSuffix: true })}</span>
+                              <span className="text-muted-foreground">{formatDistanceToNow(new Date(o.createdAt), { addSuffix: true, locale: dateFnsLocale })}</span>
                               <span className="font-medium">{fmt(o.totalCents)}</span>
                             </div>
                           </div>
@@ -399,7 +408,7 @@ export default function RestaurantCashierDashboard() {
                         {order.settlementStatus === "card_paid" && <Badge className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"><CreditCard className="h-3 w-3 mr-1" />{t("cashier.paidCard")}</Badge>}
                         {order.settlementStatus === "posted_to_folio" && <Badge className="text-xs bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"><BedDouble className="h-3 w-3 mr-1" />{t("cashier.debtPosted", "Borc yazıldı")}</Badge>}
                       </div>
-                      <p className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}</p>
+                      <p className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(order.createdAt), { addSuffix: true, locale: dateFnsLocale })}</p>
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-lg">{fmt(order.totalCents)}</p>
@@ -517,7 +526,7 @@ export default function RestaurantCashierDashboard() {
                             </p>
                           )}
                           <p className="text-xs text-muted-foreground mt-0.5">
-                            {formatDistanceToNow(new Date(task.createdAt), { addSuffix: true })}
+                            {formatDistanceToNow(new Date(task.createdAt), { addSuffix: true, locale: dateFnsLocale })}
                             {task.assignedTo?.fullName ? ` · ${task.assignedTo.fullName}` : ""}
                           </p>
                         </div>

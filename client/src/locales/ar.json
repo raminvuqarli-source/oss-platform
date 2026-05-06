@@ -1675,7 +1675,11 @@
       "core": "الأساسي",
       "operations": "العمليات",
       "communication": "التواصل",
-      "system": "النظام"
+      "system": "النظام",
+      "restaurant": "المطعم",
+      "kitchen": "المطبخ",
+      "cleaning": "التنظيف",
+      "cashier": "الصندوق"
     },
     "properties": "العقارات",
     "guests": "الضيوف",
@@ -1688,6 +1692,8 @@
     "serviceRequests": "طلبات الخدمة",
     "tasks": "المهام",
     "roomPrep": "تجهيز الغرف",
+    "housekeeping": "التدبير المنزلي",
+    "rooms": "الغرف",
     "guestMessages": "رسائل الضيوف",
     "myBooking": "حجزي",
     "services": "الخدمات",
@@ -1695,7 +1701,18 @@
     "smartRoom": "الغرفة الذكية",
     "staffPerformance": "أداء الموظفين",
     "roomStatus": "حالة الغرف",
-    "billingAddons": "الفواتير والإضافات"
+    "lockControl": "التحكم في الأقفال",
+    "temperature": "درجة الحرارة",
+    "chat": "المحادثة",
+    "activityLogs": "سجلات النشاط",
+    "units": "الوحدات",
+    "billingAddons": "الفواتير والإضافات",
+    "restaurantManagement": "إدارة المطعم",
+    "kitchenDisplay": "شاشة المطبخ (KDS)",
+    "waiterView": "عرض النادل",
+    "waiterOrders": "الطلبات",
+    "cleaningTasks": "مهام التنظيف",
+    "cashierTables": "الطاولات والفواتير"
   },
   "smartExtras": {
     "title": "الإضافات الذكية",
