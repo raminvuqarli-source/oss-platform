@@ -2646,10 +2646,17 @@
     "capacity": "السعة",
     "noRooms": "لم يتم العثور على غرف",
     "updated": "تم تحديث حالة الغرفة",
-    "activeBooking": "حجز نشط"
+    "activeBooking": "حجز نشط",
+    "available": "متاح",
+    "groundFloor": "الطابق الأرضي"
+  },
+  "staffMessages": {
+    "tab": "رسائل الموظفين"
   },
   "calendar": {
-    "noUpcoming": "لا توجد حجوزات قادمة"
+    "noUpcoming": "لا توجد حجوزات قادمة",
+    "today": "اليوم",
+    "tomorrow": "غداً"
   },
   "checkin": {
     "description": "أدخل بياناتك الشخصية ووقّع.",

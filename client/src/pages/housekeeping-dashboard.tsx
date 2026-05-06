@@ -111,23 +111,23 @@ function RoomsView() {
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         <div className="p-4 rounded-xl bg-red-50 dark:bg-red-900/20 text-center" data-testid="hk-count-occupied">
           <div className="text-3xl font-bold text-red-700 dark:text-red-300">{statusCounts.occupied}</div>
-          <div className="text-xs text-red-600 dark:text-red-400 mt-1 font-medium">{t('roomStatus.occupied', 'Dolu')}</div>
+          <div className="text-xs text-red-600 dark:text-red-400 mt-1 font-medium">{t('roomStatus.occupied', 'Occupied')}</div>
         </div>
         <div className="p-4 rounded-xl bg-green-50 dark:bg-green-900/20 text-center" data-testid="hk-count-ready">
           <div className="text-3xl font-bold text-green-700 dark:text-green-300">{statusCounts.ready}</div>
-          <div className="text-xs text-green-600 dark:text-green-400 mt-1 font-medium">{t('roomStatus.ready', 'Boş / Hazır')}</div>
+          <div className="text-xs text-green-600 dark:text-green-400 mt-1 font-medium">{t('roomStatus.ready', 'Ready')}</div>
         </div>
         <div className="p-4 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 text-center" data-testid="hk-count-dirty">
           <div className="text-3xl font-bold text-yellow-700 dark:text-yellow-300">{statusCounts.dirty}</div>
-          <div className="text-xs text-yellow-600 dark:text-yellow-400 mt-1 font-medium">{t('roomStatus.dirty', 'Çirkli')}</div>
+          <div className="text-xs text-yellow-600 dark:text-yellow-400 mt-1 font-medium">{t('roomStatus.dirty', 'Dirty')}</div>
         </div>
         <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-center" data-testid="hk-count-cleaning">
           <div className="text-3xl font-bold text-blue-700 dark:text-blue-300">{statusCounts.cleaning}</div>
-          <div className="text-xs text-blue-600 dark:text-blue-400 mt-1 font-medium">{t('roomStatus.cleaning', 'Təmizlənir')}</div>
+          <div className="text-xs text-blue-600 dark:text-blue-400 mt-1 font-medium">{t('roomStatus.cleaning', 'Cleaning')}</div>
         </div>
         <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/20 text-center" data-testid="hk-count-oo">
           <div className="text-3xl font-bold text-gray-700 dark:text-gray-300">{statusCounts.out_of_order}</div>
-          <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium">{t('roomStatus.outOfOrder', 'Sıradan çıxıb')}</div>
+          <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium">{t('roomStatus.outOfOrder', 'Out of Order')}</div>
         </div>
       </div>
 
@@ -151,15 +151,15 @@ function RoomsView() {
                 <div className="mt-1">
                   <Badge variant="outline" className="text-xs">
                     <Activity className="h-3 w-3 mr-1" />
-                    {t('roomStatus.activeBooking', 'Aktiv bron')} ({unit.activeBookingStatus})
+                    {t('roomStatus.activeBooking', 'Active booking')} ({unit.activeBookingStatus})
                   </Badge>
                 </div>
               )}
               {unit.floor !== undefined && unit.floor !== null && (
                 <p className="text-xs text-muted-foreground mt-1">
-                  {unit.floor === 0 ? t('roomStatus.groundFloor', 'Zemin mərtəbə') :
+                  {unit.floor === 0 ? t('roomStatus.groundFloor', 'Ground floor') :
                    unit.floor < 0 ? `B${Math.abs(unit.floor)}` :
-                   `${unit.floor}. ${t('roomStatus.floor', 'mərtəbə')}`}
+                   `${unit.floor}. ${t('roomStatus.floor', 'Floor')}`}
                 </p>
               )}
               {/* Action buttons for cleanable rooms */}
@@ -238,8 +238,8 @@ function HkCalendarView() {
     const tomorrowDate = new Date();
     tomorrowDate.setDate(tomorrowDate.getDate() + 1);
     const tomorrowStr = tomorrowDate.toLocaleDateString("en-CA");
-    if (dateStr === todayStr) return t('calendar.today', 'Bu gün');
-    if (dateStr === tomorrowStr) return t('calendar.tomorrow', 'Sabah');
+    if (dateStr === todayStr) return t('calendar.today', 'Today');
+    if (dateStr === tomorrowStr) return t('calendar.tomorrow', 'Tomorrow');
     return d.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
   };
 
@@ -248,7 +248,7 @@ function HkCalendarView() {
       <Card>
         <CardContent className="p-8 text-center text-muted-foreground">
           <Calendar className="h-10 w-10 mx-auto mb-3 opacity-50" />
-          <p>{t('calendar.noUpcoming', 'Gələcək bron yoxdur')}</p>
+          <p>{t('calendar.noUpcoming', 'No upcoming bookings')}</p>
         </CardContent>
       </Card>
     );
@@ -268,8 +268,8 @@ function HkCalendarView() {
                     <DoorOpen className="h-4 w-4 text-green-500" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium">{b.guestName || t('common.guest', 'Qonaq')}</p>
-                    <p className="text-xs text-muted-foreground">{t('bookings.checkIn', 'Giriş')} · {t('common.room', 'Otaq')} {b.roomNumber}</p>
+                    <p className="text-sm font-medium">{b.guestName || t('common.guest', 'Guest')}</p>
+                    <p className="text-xs text-muted-foreground">{t('bookings.checkIn', 'Check-in')} · {t('common.room', 'Room')} {b.roomNumber}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -281,8 +281,8 @@ function HkCalendarView() {
                     <DoorOpen className="h-4 w-4 text-red-500" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium">{b.guestName || t('common.guest', 'Qonaq')}</p>
-                    <p className="text-xs text-muted-foreground">{t('bookings.checkOut', 'Çıxış')} · {t('common.room', 'Otaq')} {b.roomNumber}</p>
+                    <p className="text-sm font-medium">{b.guestName || t('common.guest', 'Guest')}</p>
+                    <p className="text-xs text-muted-foreground">{t('bookings.checkOut', 'Check-out')} · {t('common.room', 'Room')} {b.roomNumber}</p>
                   </div>
                 </CardContent>
               </Card>

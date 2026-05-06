@@ -2646,10 +2646,17 @@
     "capacity": "Capaciteit",
     "noRooms": "Geen kamers gevonden",
     "updated": "Kamerstatus bijgewerkt",
-    "activeBooking": "Actieve boeking"
+    "activeBooking": "Actieve boeking",
+    "available": "Beschikbaar",
+    "groundFloor": "Begane grond"
+  },
+  "staffMessages": {
+    "tab": "Personeelsberichten"
   },
   "calendar": {
-    "noUpcoming": "Geen aankomende boekingen"
+    "noUpcoming": "Geen aankomende boekingen",
+    "today": "Vandaag",
+    "tomorrow": "Morgen"
   },
   "checkin": {
     "description": "Vul uw persoonlijke gegevens in en onderteken.",

@@ -1733,6 +1733,7 @@
     "cleaning": "Təmizlənir",
     "outOfOrder": "İstifadədən kənar",
     "available": "Mövcud",
+    "groundFloor": "Zemin mərtəbə",
     "noRooms": "Otaq tapılmadı",
     "updated": "Otaq statusu yeniləndi",
     "activeBooking": "Aktiv rezervasiya",
@@ -1744,6 +1745,9 @@
     "title": "Otaq Statusu",
     "outOfService": "İstifadədən kənar",
     "maintenance": "Təmir"
+  },
+  "staffMessages": {
+    "tab": "Heyət Mesajları"
   },
   "staffChat": {
     "title": "Heyət mesajları",
@@ -2745,7 +2749,9 @@
     "sat": "Şən"
   },
   "calendar": {
-    "noUpcoming": "Gələcək rezervasiya yoxdur"
+    "noUpcoming": "Gələcək rezervasiya yoxdur",
+    "today": "Bu gün",
+    "tomorrow": "Sabah"
   },
   "checkin": {
     "description": "Şəxsi məlumatlarınızı daxil edin və imzanızı çəkin.",

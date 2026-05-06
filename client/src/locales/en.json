@@ -2760,10 +2760,17 @@
     "capacity": "Cap",
     "noRooms": "No rooms found",
     "updated": "Room status updated",
-    "activeBooking": "Active booking"
+    "activeBooking": "Active booking",
+    "available": "Available",
+    "groundFloor": "Ground floor"
+  },
+  "staffMessages": {
+    "tab": "Staff Messages"
   },
   "calendar": {
-    "noUpcoming": "No upcoming bookings"
+    "noUpcoming": "No upcoming bookings",
+    "today": "Today",
+    "tomorrow": "Tomorrow"
   },
   "checkin": {
     "description": "Enter your personal details and sign.",

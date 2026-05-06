@@ -2646,10 +2646,17 @@
     "capacity": "Kapazität",
     "noRooms": "Keine Zimmer gefunden",
     "updated": "Zimmerstatus aktualisiert",
-    "activeBooking": "Aktive Buchung"
+    "activeBooking": "Aktive Buchung",
+    "available": "Verfügbar",
+    "groundFloor": "Erdgeschoss"
+  },
+  "staffMessages": {
+    "tab": "Mitarbeiter-Nachrichten"
   },
   "calendar": {
-    "noUpcoming": "Keine bevorstehenden Buchungen"
+    "noUpcoming": "Keine bevorstehenden Buchungen",
+    "today": "Heute",
+    "tomorrow": "Morgen"
   },
   "checkin": {
     "description": "Geben Sie Ihre persönlichen Daten ein und unterschreiben Sie.",

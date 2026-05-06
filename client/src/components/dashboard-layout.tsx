@@ -253,23 +253,23 @@ function DashboardSidebar() {
       case "staff":
         return [
           {
-            label: t("nav.group.core", "Əsas"),
+            label: t("nav.group.core", "Core"),
             items: [
-              { title: t("nav.rooms", "Otaqlar"), icon: BedDouble, url: "/dashboard", testId: "nav-hk-rooms" },
-              { title: t("nav.calendar", "Təqvim"), icon: CalendarDays, url: "/dashboard?view=calendar", testId: "nav-hk-calendar" },
+              { title: t("nav.rooms", "Rooms"), icon: BedDouble, url: "/dashboard", testId: "nav-hk-rooms" },
+              { title: t("nav.calendar", "Calendar"), icon: CalendarDays, url: "/dashboard?view=calendar", testId: "nav-hk-calendar" },
             ],
           },
           {
-            label: t("nav.group.operations", "Əməliyyatlar"),
+            label: t("nav.group.operations", "Operations"),
             items: [
-              { title: t("nav.tasks", "Tapşırıqlar"), icon: ClipboardList, url: "/dashboard?view=tasks", testId: "nav-hk-tasks" },
-              { title: t("staffPerformance.myRating", "Reytinqim"), icon: Star, url: "/dashboard?view=rating", testId: "nav-hk-rating" },
+              { title: t("nav.tasks", "Tasks"), icon: ClipboardList, url: "/dashboard?view=tasks", testId: "nav-hk-tasks" },
+              { title: t("staffPerformance.myRating", "My Rating"), icon: Star, url: "/dashboard?view=rating", testId: "nav-hk-rating" },
             ],
           },
           {
-            label: t("nav.group.communication", "Ünsiyyət"),
+            label: t("nav.group.communication", "Communication"),
             items: [
-              { title: t("nav.messages", "Mesajlar"), icon: MessageSquare, url: "/dashboard?view=messages", testId: "nav-hk-messages" },
+              { title: t("nav.messages", "Messages"), icon: MessageSquare, url: "/dashboard?view=messages", testId: "nav-hk-messages" },
               { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-hk-notifications" },
             ],
           },

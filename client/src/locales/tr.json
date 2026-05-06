@@ -2659,10 +2659,17 @@
     "capacity": "Kapasite",
     "noRooms": "Oda bulunamadı",
     "updated": "Oda durumu güncellendi",
-    "activeBooking": "Aktif rezervasyon"
+    "activeBooking": "Aktif rezervasyon",
+    "available": "Müsait",
+    "groundFloor": "Zemin kat"
+  },
+  "staffMessages": {
+    "tab": "Personel Mesajları"
   },
   "calendar": {
-    "noUpcoming": "Yaklaşan rezervasyon yok"
+    "noUpcoming": "Yaklaşan rezervasyon yok",
+    "today": "Bugün",
+    "tomorrow": "Yarın"
   },
   "checkin": {
     "description": "Kişisel bilgilerinizi girin ve imzanızı atın.",

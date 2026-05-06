@@ -2646,10 +2646,17 @@
     "capacity": "Capacidad",
     "noRooms": "No se encontraron habitaciones",
     "updated": "Estado de la habitación actualizado",
-    "activeBooking": "Reserva activa"
+    "activeBooking": "Reserva activa",
+    "available": "Disponible",
+    "groundFloor": "Planta baja"
+  },
+  "staffMessages": {
+    "tab": "Mensajes del personal"
   },
   "calendar": {
-    "noUpcoming": "No hay reservas próximas"
+    "noUpcoming": "No hay reservas próximas",
+    "today": "Hoy",
+    "tomorrow": "Mañana"
   },
   "checkin": {
     "description": "Ingrese sus datos personales y firme.",

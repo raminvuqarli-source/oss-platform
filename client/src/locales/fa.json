@@ -2646,10 +2646,17 @@
     "capacity": "ظرفیت",
     "noRooms": "اتاقی یافت نشد",
     "updated": "وضعیت اتاق به‌روزرسانی شد",
-    "activeBooking": "رزرو فعال"
+    "activeBooking": "رزرو فعال",
+    "available": "موجود",
+    "groundFloor": "طبقه همکف"
+  },
+  "staffMessages": {
+    "tab": "پیام‌های کارکنان"
   },
   "calendar": {
-    "noUpcoming": "رزرو آتی وجود ندارد"
+    "noUpcoming": "رزرو آتی وجود ندارد",
+    "today": "امروز",
+    "tomorrow": "فردا"
   },
   "checkin": {
     "description": "مشخصات شخصی خود را وارد کنید و امضا بزنید.",
