@@ -151,10 +151,10 @@ export default function RestaurantOwnerDashboard() {
       return res.json();
     },
     onSuccess: (data: any) => {
-      if (data?.redirectUrl) {
-        window.location.href = data.redirectUrl;
+      if (data?.paymentUrl) {
+        window.location.href = data.paymentUrl;
       } else {
-        toast({ title: t("billing.paymentInitiated", "Redirecting to payment...") });
+        showErrorToast(toast, new Error(data?.message || "Payment URL not received"));
       }
     },
     onError: (err: any) => showErrorToast(toast, err),
@@ -653,21 +653,9 @@ export default function RestaurantOwnerDashboard() {
                           : subscriptionData?.status || "—"}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={subscriptionData?.status === "active" ? "default" : "secondary"} className="capitalize">
-                        {subscriptionData?.status || "—"}
-                      </Badge>
-                      {subscriptionData?.planCode && (
-                        <Button
-                          size="sm"
-                          onClick={() => payNowMutation.mutate(subscriptionData.planCode!)}
-                          disabled={payNowMutation.isPending}
-                          data-testid="button-pay-now-current"
-                        >
-                          {payNowMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : t("restaurantOwner.payNow", "Pay Now →")}
-                        </Button>
-                      )}
-                    </div>
+                    <Badge variant={subscriptionData?.status === "active" ? "default" : "secondary"} className="capitalize">
+                      {subscriptionData?.status || "—"}
+                    </Badge>
                   </div>
 
                   <div className="grid grid-cols-3 gap-3">
