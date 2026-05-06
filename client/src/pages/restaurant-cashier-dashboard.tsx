@@ -84,7 +84,7 @@ export default function RestaurantCashierDashboard() {
   const [taskAssignee, setTaskAssignee] = useState<string>("__none__");
 
   const { data: currentUser } = useQuery<{ tenantType?: string | null }>({ queryKey: ["/api/auth/me"] });
-  const isHotelTenant = currentUser?.tenantType !== "restaurant_only";
+  const isHotelTenant = currentUser?.tenantType === "hotel";
 
   const { data: orders = [], isLoading: ordersLoading } = useQuery<PosOrder[]>({
     queryKey: ["/api/restaurant/orders"],
