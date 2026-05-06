@@ -181,7 +181,7 @@ async function runSafetyPatches(): Promise<void> {
     `);
 
     // Fix standalone restaurant owners whose tenant_type incorrectly defaults to "hotel"
-    // Any owner whose ALL properties are of type "restaurant" is a standalone restaurant
+    // Approach 1: owner whose ALL properties are of type "restaurant"
     await client.query(`
       UPDATE owners
       SET tenant_type = 'restaurant_only'
@@ -192,6 +192,16 @@ async function runSafetyPatches(): Promise<void> {
           WHERE p.owner_id IS NOT NULL
           GROUP BY p.owner_id
           HAVING COUNT(*) = COUNT(CASE WHEN p.type = 'restaurant' THEN 1 END)
+        )
+    `);
+    // Approach 2 (belt & suspenders): owner whose subscription plan_code starts with 'REST_'
+    await client.query(`
+      UPDATE owners
+      SET tenant_type = 'restaurant_only'
+      WHERE tenant_type = 'hotel'
+        AND id IN (
+          SELECT DISTINCT owner_id FROM subscriptions
+          WHERE plan_code LIKE 'REST_%' AND owner_id IS NOT NULL
         )
     `);
 

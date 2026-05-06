@@ -1391,8 +1391,8 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
         city: restaurantData.city || null,
         address: restaurantData.address || null,
       });
-      // Force-set tenant_type in DB since Drizzle insert schema may omit it
-      await storage.updateOwner(owner.id, { tenantType: "restaurant_only" } as any);
+      // Force-set tenant_type directly via pool to bypass Drizzle insert schema omissions
+      await pool.query(`UPDATE owners SET tenant_type = 'restaurant_only' WHERE id = $1`, [owner.id]);
 
       const property = await storage.createProperty({
         ownerId: owner.id,
