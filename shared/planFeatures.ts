@@ -427,8 +427,8 @@ export const PLAN_CODE_FEATURES: Record<PlanCode, PlanCodeConfig> = {
   },
   REST_CAFE: {
     displayName: "Cafe",
-    priceMonthlyUSD: 79,
-    priceMonthlyAZN: 134.30,
+    priceMonthlyUSD: 29,
+    priceMonthlyAZN: 49.30,
     currency: "USD",
     features: {
       guest_management: false,
@@ -443,8 +443,8 @@ export const PLAN_CODE_FEATURES: Record<PlanCode, PlanCodeConfig> = {
   },
   REST_BISTRO: {
     displayName: "Bistro",
-    priceMonthlyUSD: 129,
-    priceMonthlyAZN: 219.30,
+    priceMonthlyUSD: 49,
+    priceMonthlyAZN: 83.30,
     currency: "USD",
     features: {
       guest_management: false,
@@ -459,8 +459,8 @@ export const PLAN_CODE_FEATURES: Record<PlanCode, PlanCodeConfig> = {
   },
   REST_CHAIN: {
     displayName: "Chain",
-    priceMonthlyUSD: 199,
-    priceMonthlyAZN: 338.30,
+    priceMonthlyUSD: 0,
+    priceMonthlyAZN: 0,
     currency: "USD",
     features: {
       guest_management: false,

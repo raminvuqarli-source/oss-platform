@@ -1107,9 +1107,9 @@ export default function RestaurantManager() {
                         {!subStatus?.planCode && "Abunəlik"}
                       </h3>
                       <p className="text-xs text-muted-foreground">
-                        {subStatus?.planCode === "REST_CAFE" && "134.30 ₼ / ay"}
-                        {subStatus?.planCode === "REST_BISTRO" && "219.30 ₼ / ay"}
-                        {subStatus?.planCode === "REST_CHAIN" && "338.30 ₼ / ay"}
+                        {subStatus?.planCode === "REST_CAFE" && "49.30 ₼ / ay ($29)"}
+                        {subStatus?.planCode === "REST_BISTRO" && "83.30 ₼ / ay ($49)"}
+                        {subStatus?.planCode === "REST_CHAIN" && "Müqavilə ilə"}
                       </p>
                     </div>
                   </div>
@@ -1164,9 +1164,9 @@ export default function RestaurantManager() {
               <h3 className="font-semibold mb-3">Mövcud Planlar</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {[
-                  { code: "REST_CAFE", name: "Cafe", price: "134.30", features: ["10 işçiyə qədər", "Menyu idarəsi", "Sifarişlər & KDS", "Kassir"] },
-                  { code: "REST_BISTRO", name: "Bistro", price: "219.30", features: ["30 işçiyə qədər", "Analitika paneli", "WhatsApp inteqrasiya", "Bütün Cafe xüsusiyyətləri"] },
-                  { code: "REST_CHAIN", name: "Chain", price: "338.30", features: ["Limitsiz işçi", "Çoxlu lokasiya", "Xüsusi inteqrasiyalar", "Önəmli dəstək"] },
+                  { code: "REST_CAFE", name: "Standard", price: "49.30", features: ["10 işçiyə qədər", "Menyu idarəsi", "Sifarişlər & KDS", "Kassir"] },
+                  { code: "REST_BISTRO", name: "Professional", price: "83.30", features: ["30 işçiyə qədər", "Analitika paneli", "WhatsApp inteqrasiya", "Bütün Standard xüsusiyyətləri"] },
+                  { code: "REST_CHAIN", name: "Enterprise", price: null, features: ["Limitsiz işçi", "Çoxlu lokasiya", "Xüsusi inteqrasiyalar", "Prioritet dəstək"] },
                 ].map(plan => (
                   <Card key={plan.code} className={subStatus?.planCode === plan.code ? "ring-2 ring-primary" : ""} data-testid={`card-plan-${plan.code}`}>
                     <CardContent className="p-4 space-y-3">
@@ -1174,7 +1174,11 @@ export default function RestaurantManager() {
                         <h4 className="font-bold">{plan.name}</h4>
                         {subStatus?.planCode === plan.code && <Badge variant="default" className="text-xs">Cari plan</Badge>}
                       </div>
-                      <p className="text-2xl font-bold">{plan.price} <span className="text-sm font-normal text-muted-foreground">₼/ay</span></p>
+                      {plan.price ? (
+                        <p className="text-2xl font-bold">{plan.price} <span className="text-sm font-normal text-muted-foreground">₼/ay</span></p>
+                      ) : (
+                        <p className="text-lg font-bold text-primary">Müqavilə ilə</p>
+                      )}
                       <ul className="space-y-1">
                         {plan.features.map(f => (
                           <li key={f} className="text-xs text-muted-foreground flex items-center gap-1.5">
