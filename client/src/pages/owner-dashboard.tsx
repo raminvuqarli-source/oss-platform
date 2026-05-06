@@ -5514,7 +5514,7 @@ function OwnerOverview({ analytics, analyticsLoading, allProperties }: {
 const CONTACT_EMAIL = "support@ossaiproapp.com";
 const CONTACT_WHATSAPP = "https://wa.me/994XXXXXXXXX";
 
-function ContactDialog({ open, onClose, subject }: { open: boolean; onClose: () => void; subject: string }) {
+export function ContactDialog({ open, onClose, subject }: { open: boolean; onClose: () => void; subject: string }) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);

@@ -1323,4 +1323,124 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
       res.status(500).json({ message: "Failed to register hotel" });
     }
   });
+
+  // ======== RESTAURANT-ONLY REGISTRATION ========
+  const restaurantRegistrationSchema = z.object({
+    username: z.string().min(3, "Username must be at least 3 characters"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    fullName: z.string().min(2, "Full name is required"),
+    email: z.string().email("Valid email is required"),
+    planCode: z.enum(["REST_CAFE", "REST_BISTRO", "REST_CHAIN"]).optional().default("REST_CAFE"),
+    restaurantData: z.object({
+      name: z.string().min(2, "Restaurant name is required"),
+      city: z.string().optional(),
+      phone: z.string().optional(),
+      country: z.string().optional(),
+      address: z.string().optional(),
+      tableCount: z.number().optional(),
+    }),
+  });
+
+  app.post("/api/auth/register-restaurant", authRateLimiter, async (req, res) => {
+    try {
+      const validated = restaurantRegistrationSchema.parse(req.body);
+      const { username, password, fullName, email, planCode, restaurantData } = validated;
+
+      if (username.toLowerCase().startsWith("demo_")) {
+        return res.status(400).json({ message: "This username prefix is reserved." });
+      }
+
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+
+      const owner = await storage.createOwner({
+        name: fullName,
+        email,
+        phone: restaurantData.phone || null,
+        companyName: restaurantData.name,
+        country: restaurantData.country || null,
+        city: restaurantData.city || null,
+        address: restaurantData.address || null,
+        tenantType: "restaurant_only",
+      } as any);
+
+      const property = await storage.createProperty({
+        ownerId: owner.id,
+        name: restaurantData.name,
+        type: "restaurant",
+        address: restaurantData.address || null,
+        phone: restaurantData.phone || null,
+        email: email || null,
+        country: restaurantData.country || null,
+        city: restaurantData.city || null,
+      });
+
+      // Minimal hotel record needed for tenant resolution compatibility
+      const hotel = await storage.createHotel({
+        name: restaurantData.name,
+        address: restaurantData.address || null,
+        phone: restaurantData.phone || null,
+        email: email || null,
+        country: restaurantData.country || null,
+        city: restaurantData.city || null,
+        ownerId: owner.id,
+        propertyId: property.id,
+      } as any);
+
+      const planCodeResolved = planCode || "REST_CAFE";
+      const CODE_TO_PLAN_TYPE: Record<string, PlanType> = {
+        REST_CAFE: "restaurant_cafe",
+        REST_BISTRO: "restaurant_bistro",
+        REST_CHAIN: "restaurant_chain",
+      };
+      const planType: PlanType = CODE_TO_PLAN_TYPE[planCodeResolved] || "restaurant_cafe";
+      const planDefaults = applyPlanFeatures("starter"); // use starter defaults for limits
+
+      const trialEndsAt = new Date();
+      trialEndsAt.setDate(trialEndsAt.getDate() + 14);
+      await storage.createSubscription({
+        ownerId: owner.id,
+        planType: "trial",
+        planCode: planCodeResolved,
+        ...planDefaults,
+        trialEndsAt,
+        isActive: false,
+        status: "trial",
+      } as any);
+
+      const hashedPw = await hashPassword(password);
+      const user = await storage.createUser({
+        username,
+        password: hashedPw,
+        fullName,
+        email: email || null,
+        role: "owner_admin",
+        hotelId: hotel.id,
+        ownerId: owner.id,
+        propertyId: property.id,
+      });
+
+      req.session.userId = user.id;
+      req.session.role = user.role;
+      delete req.session.demoSessionTenantId;
+
+      req.session.save((saveErr) => {
+        if (saveErr) {
+          logger.error({ err: saveErr }, "Session save error during restaurant registration");
+          return res.status(500).json({ error: "session" });
+        }
+        const { password: _, ...userWithoutPassword } = user;
+        res.setHeader("Cache-Control", "no-store");
+        res.json({ user: userWithoutPassword, hotel, owner, property });
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors[0].message });
+      }
+      logger.error({ err: error }, "Restaurant registration error");
+      res.status(500).json({ message: "Failed to register restaurant" });
+    }
+  });
 }

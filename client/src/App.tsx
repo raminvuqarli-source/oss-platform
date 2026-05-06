@@ -45,6 +45,7 @@ const MarketingDashboard = lazy(() => import("@/pages/marketing-dashboard"));
 const HousekeepingDashboard = lazy(() => import("@/pages/housekeeping-dashboard"));
 const RestaurantCashier = lazy(() => import("@/pages/restaurant-cashier-dashboard"));
 const DemoLogin = lazy(() => import("@/pages/demo-login"));
+const RestaurantRegister = lazy(() => import("@/pages/restaurant-register"));
 
 class ErrorBoundary extends Component<{ children: React.ReactNode }, { hasError: boolean; errorMessage: string }> {
   constructor(props: { children: React.ReactNode }) {
@@ -213,6 +214,9 @@ function Router() {
         ))}
         <Route path="/register-hotel">
           <HotelRegister />
+        </Route>
+        <Route path="/register-restaurant">
+          <RestaurantRegister />
         </Route>
         {protectedRoutes.map(({ path, component: C, guardTrial }) => (
           <Route key={path} path={path}>

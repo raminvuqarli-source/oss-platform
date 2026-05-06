@@ -113,6 +113,9 @@ async function runSafetyPatches(): Promise<void> {
     await client.query(`ALTER TABLE hotels ADD COLUMN IF NOT EXISTS is_whatsapp_enabled boolean NOT NULL DEFAULT false`);
     await client.query(`ALTER TABLE hotels ADD COLUMN IF NOT EXISTS whatsapp_balance integer NOT NULL DEFAULT 0`);
 
+    // Patch owners table: add tenant_type
+    await client.query(`ALTER TABLE owners ADD COLUMN IF NOT EXISTS tenant_type text NOT NULL DEFAULT 'hotel'`);
+
     // Patch users table: add any missing columns
     await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_code varchar`);
 

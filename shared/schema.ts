@@ -38,14 +38,19 @@ export const unitCategoryLabels: Record<UnitCategory, string> = {
 export type UnitType = "room" | "villa" | "tiny_house" | "capsule" | "bungalow" | "apartment" | "cabin" | "a_frame";
 
 // Subscription plans
-export type PlanType = "trial" | "basic" | "starter" | "growth" | "pro" | "apartment_lite";
+export type PlanType = "trial" | "basic" | "starter" | "growth" | "pro" | "apartment_lite" | "restaurant_cafe" | "restaurant_bistro" | "restaurant_chain";
 
 // Plan codes - canonical identifiers for plan tiers
 export type PlanCode =
   | "CORE_STARTER"
   | "CORE_GROWTH"
   | "CORE_PRO"
-  | "APARTMENT_LITE";
+  | "APARTMENT_LITE"
+  | "REST_CAFE"
+  | "REST_BISTRO"
+  | "REST_CHAIN";
+
+export type TenantType = "hotel" | "restaurant_only";
 
 export const PLAN_TYPE_TO_CODE: Record<PlanType, PlanCode> = {
   trial: "CORE_STARTER",
@@ -54,6 +59,9 @@ export const PLAN_TYPE_TO_CODE: Record<PlanType, PlanCode> = {
   growth: "CORE_GROWTH",
   pro: "CORE_PRO",
   apartment_lite: "APARTMENT_LITE",
+  restaurant_cafe: "REST_CAFE",
+  restaurant_bistro: "REST_BISTRO",
+  restaurant_chain: "REST_CHAIN",
 };
 
 // Owners table - top of hierarchy
@@ -68,6 +76,7 @@ export const owners = pgTable("owners", {
   address: text("address"),
   logoUrl: text("logo_url"),
   status: text("status").notNull().default("active"),
+  tenantType: text("tenant_type").notNull().default("hotel"), // "hotel" | "restaurant_only"
   // Business entity fields (for multi-property validation)
   taxId: text("tax_id"),
   legalName: text("legal_name"),

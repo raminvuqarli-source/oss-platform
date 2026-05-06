@@ -10,6 +10,7 @@ const HousekeepingDashboard = lazy(() => import("@/pages/housekeeping-dashboard"
 const OwnerDashboard = lazy(() => import("@/pages/owner-dashboard"));
 const OnboardingWizard = lazy(() => import("@/pages/onboarding-wizard"));
 const OssAdminDashboard = lazy(() => import("@/pages/oss-admin-dashboard"));
+const RestaurantOwnerDashboard = lazy(() => import("@/pages/restaurant-owner-dashboard"));
 
 function PageLoader() {
   return (
@@ -36,6 +37,20 @@ function OwnerDashboardWithOnboarding() {
   return <OwnerDashboard />;
 }
 
+function OwnerDashboardRouter() {
+  const { data: ownerData, isLoading } = useQuery<{ tenantType?: string }>({
+    queryKey: ["/api/owners/me"],
+  });
+
+  if (isLoading) return <PageLoader />;
+
+  if (ownerData?.tenantType === "restaurant_only") {
+    return <RestaurantOwnerDashboard />;
+  }
+
+  return <OwnerDashboardWithOnboarding />;
+}
+
 export function DashboardRouter() {
   const { user } = useAuth();
 
@@ -50,7 +65,7 @@ export function DashboardRouter() {
     case "property_manager":
       return <AdminDashboard />;
     case "owner_admin":
-      return <OwnerDashboardWithOnboarding />;
+      return <OwnerDashboardRouter />;
     case "oss_super_admin":
       return <Redirect to="/oss-admin" />;
     case "kitchen_staff":
