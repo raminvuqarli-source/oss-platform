@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, getDemoToken } from "@/lib/queryClient";
 
 let lastSoundAt = 0;
 let beepAudio: HTMLAudioElement | null = null;
@@ -168,7 +168,9 @@ export function useNotificationAlert(
     if (!mountedRef.current) return;
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
-    fetch("/api/ws-token", { credentials: "include" })
+    const demoToken = getDemoToken();
+    const demoHeaders: Record<string, string> = demoToken ? { "X-Demo-Token": demoToken } : {};
+    fetch("/api/ws-token", { credentials: "include", headers: demoHeaders })
       .then(r => r.ok ? r.json() : null)
       .catch(() => null)
       .then(data => {

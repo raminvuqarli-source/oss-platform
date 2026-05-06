@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, getDemoToken } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
 import { Bell, Package, CheckCircle2, Clock, Utensils, MessageSquare } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import type { Locale } from "date-fns";
 import { az as azLocale, tr as trLocale, ru as ruLocale, ar as arLocale, fr as frLocale, de as deLocale, es as esLocale, nl as nlLocale } from "date-fns/locale";
@@ -75,28 +75,59 @@ export default function WaiterView() {
     onError: () => toast({ title: t('errors.generic', 'Failed to acknowledge'), variant: "destructive" }),
   });
 
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mountedRef = useRef(true);
+
   useEffect(() => {
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const ws = new WebSocket(`${protocol}//${window.location.host}/ws/devices?type=dashboard`);
-    wsRef.current = ws;
-    ws.onmessage = (evt) => {
-      try {
-        const msg = JSON.parse(evt.data);
-        if (msg.type === "RESTAURANT_ORDER_READY") {
-          queryClient.invalidateQueries({ queryKey: ["/api/restaurant/orders"] });
-          toast({ title: t('restaurant.orderReady', { table: msg.order?.tableNumber || "?" }), description: t('restaurant.pickUpFromKitchen') });
-        }
-        if (msg.type === "RESTAURANT_CALL_WAITER") {
-          queryClient.invalidateQueries({ queryKey: ["/api/restaurant/waiter-calls"] });
-          toast({
-            title: `${t('restaurant.waiterNeeded')} — ${msg.tableNumber ? `${t('restaurant.table')} ${msg.tableNumber}` : msg.roomNumber ? `${t('restaurant.room')} ${msg.roomNumber}` : ""}`,
-            description: msg.guestName || undefined,
-          });
-        }
-      } catch {}
+    mountedRef.current = true;
+
+    function connect() {
+      if (!mountedRef.current) return;
+      const demoTok = getDemoToken();
+      const demoHdrs: Record<string, string> = demoTok ? { "X-Demo-Token": demoTok } : {};
+      fetch("/api/ws-token", { credentials: "include", headers: demoHdrs })
+        .then(r => r.ok ? r.json() : null)
+        .catch(() => null)
+        .then(data => {
+          if (!mountedRef.current) return;
+          try {
+            const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+            const tokenParam = data?.token ? `&wsToken=${encodeURIComponent(data.token)}` : "";
+            const ws = new WebSocket(`${protocol}//${window.location.host}/ws/devices?type=dashboard${tokenParam}`);
+            wsRef.current = ws;
+            ws.onmessage = (evt) => {
+              try {
+                const msg = JSON.parse(evt.data as string);
+                if (msg.type === "RESTAURANT_ORDER_READY") {
+                  queryClient.invalidateQueries({ queryKey: ["/api/restaurant/orders"] });
+                  toast({ title: t('restaurant.orderReady', { table: msg.order?.tableNumber || "?" }), description: t('restaurant.pickUpFromKitchen') });
+                }
+                if (msg.type === "RESTAURANT_CALL_WAITER") {
+                  queryClient.invalidateQueries({ queryKey: ["/api/restaurant/waiter-calls"] });
+                  toast({
+                    title: `${t('restaurant.waiterNeeded')} — ${msg.tableNumber ? `${t('restaurant.table')} ${msg.tableNumber}` : msg.roomNumber ? `${t('restaurant.room')} ${msg.roomNumber}` : ""}`,
+                    description: msg.guestName || undefined,
+                  });
+                }
+              } catch {}
+            };
+            ws.onclose = () => {
+              if (!mountedRef.current) return;
+              reconnectTimerRef.current = setTimeout(() => { if (mountedRef.current) connect(); }, 5000);
+            };
+            ws.onerror = () => { ws.close(); };
+          } catch {}
+        });
+    }
+
+    connect();
+
+    return () => {
+      mountedRef.current = false;
+      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+      if (wsRef.current) { wsRef.current.onclose = null; wsRef.current.close(); }
     };
-    return () => ws.close();
-  }, [queryClient, toast]);
+  }, [queryClient, toast, t]);
 
   const readyOrders = orders.filter(o => o.kitchenStatus === "ready");
   const pendingCalls = (calls as WaiterCall[]).filter(c => c.status === "pending");

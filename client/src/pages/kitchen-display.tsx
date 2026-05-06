@@ -13,6 +13,7 @@ import { az as azLocale, tr as trLocale, ru as ruLocale, ar as arLocale, fr as f
 import { faIR } from "date-fns/locale/fa-IR";
 import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { getDemoToken } from "@/lib/queryClient";
 
 type PosOrderItem = {
   id: string;
@@ -73,6 +74,8 @@ export default function KitchenDisplay() {
   const [lastRefresh, setLastRefresh] = useState(new Date());
   const [mobileTab, setMobileTab] = useState<"pending" | "cooking" | "ready">("pending");
   const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mountedRef = useRef(true);
 
   const { data: orders = [], isLoading, refetch } = useQuery<PosOrder[]>({
     queryKey: ["/api/restaurant/orders"],
@@ -90,22 +93,50 @@ export default function KitchenDisplay() {
   });
 
   useEffect(() => {
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const ws = new WebSocket(`${protocol}//${window.location.host}/ws/devices?type=dashboard`);
-    wsRef.current = ws;
-    ws.onmessage = (evt) => {
-      try {
-        const msg = JSON.parse(evt.data);
-        if (msg.type === "RESTAURANT_NEW_ORDER") {
-          queryClient.invalidateQueries({ queryKey: ["/api/restaurant/orders"] });
-          setLastRefresh(new Date());
-          const audio = new Audio("/notification.mp3");
-          audio.play().catch(() => {});
-          if (isMobile) setMobileTab("pending");
-        }
-      } catch {}
+    mountedRef.current = true;
+
+    function connect() {
+      if (!mountedRef.current) return;
+      const demoTok = getDemoToken();
+      const demoHdrs: Record<string, string> = demoTok ? { "X-Demo-Token": demoTok } : {};
+      fetch("/api/ws-token", { credentials: "include", headers: demoHdrs })
+        .then(r => r.ok ? r.json() : null)
+        .catch(() => null)
+        .then(data => {
+          if (!mountedRef.current) return;
+          try {
+            const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+            const tokenParam = data?.token ? `&wsToken=${encodeURIComponent(data.token)}` : "";
+            const ws = new WebSocket(`${protocol}//${window.location.host}/ws/devices?type=dashboard${tokenParam}`);
+            wsRef.current = ws;
+            ws.onmessage = (evt) => {
+              try {
+                const msg = JSON.parse(evt.data as string);
+                if (msg.type === "RESTAURANT_NEW_ORDER") {
+                  queryClient.invalidateQueries({ queryKey: ["/api/restaurant/orders"] });
+                  setLastRefresh(new Date());
+                  const audio = new Audio("/notification.mp3");
+                  audio.play().catch(() => {});
+                  if (isMobile) setMobileTab("pending");
+                }
+              } catch {}
+            };
+            ws.onclose = () => {
+              if (!mountedRef.current) return;
+              reconnectTimerRef.current = setTimeout(() => { if (mountedRef.current) connect(); }, 5000);
+            };
+            ws.onerror = () => { ws.close(); };
+          } catch {}
+        });
+    }
+
+    connect();
+
+    return () => {
+      mountedRef.current = false;
+      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+      if (wsRef.current) { wsRef.current.onclose = null; wsRef.current.close(); }
     };
-    return () => ws.close();
   }, [queryClient, isMobile]);
 
   const active = orders.filter(o => o.kitchenStatus !== "delivered");

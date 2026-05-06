@@ -3,7 +3,7 @@ import { useSearch } from "wouter";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth-context";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient, getDemoToken } from "@/lib/queryClient";
 import { showErrorToast } from "@/lib/error-handler";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -239,7 +239,9 @@ export default function GuestDashboard() {
 
     function connect() {
       if (!mounted) return;
-      fetch("/api/ws-token", { credentials: "include" })
+      const demoTok = getDemoToken();
+      const demoHdrs: Record<string, string> = demoTok ? { "X-Demo-Token": demoTok } : {};
+      fetch("/api/ws-token", { credentials: "include", headers: demoHdrs })
         .then(r => r.ok ? r.json() : null)
         .catch(() => null)
         .then(data => {
