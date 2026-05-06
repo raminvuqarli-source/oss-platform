@@ -246,6 +246,12 @@ export function BillingSection() {
     queryKey: ["/api/smart-plans"],
   });
 
+  const { data: ownerMe } = useQuery<{ tenantType?: string }>({
+    queryKey: ["/api/owners/me"],
+  });
+
+  const isRestaurantOnly = ownerMe?.tenantType === "restaurant_only";
+
   const changePlanMutation = useMutation({
     mutationFn: async (planType: string) => {
       const res = await apiRequest("POST", "/api/billing/change-plan", { planType });
@@ -408,7 +414,7 @@ export function BillingSection() {
         </Card>
       )}
 
-      <div className="space-y-4" data-testid="billing-smart-addon">
+      {!isRestaurantOnly && <div className="space-y-4" data-testid="billing-smart-addon">
         <div className="flex items-center gap-3 flex-wrap">
           <Cpu className="h-5 w-5 text-primary" />
           <span className="font-semibold text-lg">{t('pricing.smartRoomAddon')}</span>
@@ -549,10 +555,10 @@ export function BillingSection() {
             </Card>
           </>
         )}
-      </div>
+      </div>}
 
       {/* ===== CHANNEL MANAGER (CHANNEX) STATUS ===== */}
-      <div className="space-y-4" data-testid="billing-channex-addon">
+      {!isRestaurantOnly && <div className="space-y-4" data-testid="billing-channex-addon">
         <div className="flex items-center gap-3 flex-wrap">
           <Network className="h-5 w-5 text-primary" />
           <span className="font-semibold text-lg">{t('pricing.channexAddon', 'Channel Manager')}</span>
@@ -598,7 +604,7 @@ export function BillingSection() {
             </CardContent>
           </Card>
         )}
-      </div>
+      </div>}
 
       <SubscriptionStatusCard />
 
