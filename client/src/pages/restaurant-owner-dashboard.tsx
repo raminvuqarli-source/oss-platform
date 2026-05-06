@@ -4,6 +4,9 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -14,7 +17,7 @@ import {
   UtensilsCrossed, TrendingUp, ShoppingBag, Users, CreditCard,
   BarChart3, Clock, CheckCircle, ChefHat, Wallet, LogOut,
   RefreshCw, Plus, Utensils, Settings, Package,
-  PhoneCall, Mail, Copy, ExternalLink,
+  PhoneCall, Mail, Copy, ExternalLink, UserPlus, Loader2,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { useAuth } from "@/lib/auth-context";
@@ -139,6 +142,33 @@ export default function RestaurantOwnerDashboard() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
   const [contactDialog, setContactDialog] = useState<{ open: boolean; subject: string }>({ open: false, subject: "" });
+  const [showAddStaffDialog, setShowAddStaffDialog] = useState(false);
+  const [staffForm, setStaffForm] = useState({ fullName: "", username: "", password: "", email: "", role: "waiter", baseSalary: "", employeeTaxRate: "", tablesAssigned: "" });
+
+  const createStaffMutation = useMutation({
+    mutationFn: async (data: object) => {
+      const res = await apiRequest("POST", "/api/admin/create-staff", data);
+      return res.json();
+    },
+    onSuccess: async (newUser: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
+      if (staffForm.role === "waiter" && staffForm.tablesAssigned && newUser?.id) {
+        try {
+          await apiRequest("PUT", `/api/restaurant/staff-profiles/${newUser.id}`, {
+            salaryAmount: staffForm.baseSalary || "0",
+            taxRate: staffForm.employeeTaxRate || "0",
+            tablesAssigned: staffForm.tablesAssigned,
+            notes: "",
+          });
+          queryClient.invalidateQueries({ queryKey: ["/api/restaurant/staff-profiles"] });
+        } catch {}
+      }
+      setShowAddStaffDialog(false);
+      setStaffForm({ fullName: "", username: "", password: "", email: "", role: "waiter", baseSalary: "", employeeTaxRate: "", tablesAssigned: "" });
+      toast({ title: t("rm.staffCreated", "Staff member created!") });
+    },
+    onError: (err: any) => showErrorToast(toast, err),
+  });
 
   const { data: analytics, isLoading: analyticsLoading, refetch: refetchAnalytics } = useQuery<Analytics>({
     queryKey: ["/api/restaurant/analytics"],
@@ -187,6 +217,101 @@ export default function RestaurantOwnerDashboard() {
         onClose={() => setContactDialog({ open: false, subject: "" })}
         subject={contactDialog.subject}
       />
+
+      {/* Add Staff Dialog */}
+      <Dialog open={showAddStaffDialog} onOpenChange={setShowAddStaffDialog}>
+        <DialogContent className="sm:max-w-md" data-testid="dialog-owner-add-staff">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="h-5 w-5" />
+              {t("rm.addStaffTitle", "Add Staff Member")}
+            </DialogTitle>
+            <DialogDescription>{t("rm.addStaffSubtitle", "Create a new login for your restaurant team")}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label>{t("rm.fullName", "Full Name")}</Label>
+              <Input placeholder="Ali Əliyev" value={staffForm.fullName} onChange={e => setStaffForm(f => ({ ...f, fullName: e.target.value }))} data-testid="input-owner-rs-fullname" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t("rm.username", "Username")}</Label>
+              <Input placeholder="ali.aliyev" value={staffForm.username} onChange={e => setStaffForm(f => ({ ...f, username: e.target.value }))} data-testid="input-owner-rs-username" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t("rm.password", "Password")}</Label>
+              <Input type="password" placeholder="••••••••" value={staffForm.password} onChange={e => setStaffForm(f => ({ ...f, password: e.target.value }))} data-testid="input-owner-rs-password" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t("rm.email", "Email")}</Label>
+              <Input type="email" placeholder="ali@restoran.az" value={staffForm.email} onChange={e => setStaffForm(f => ({ ...f, email: e.target.value }))} data-testid="input-owner-rs-email" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t("rm.roleLabel", "Role")}</Label>
+              <Select value={staffForm.role} onValueChange={v => setStaffForm(f => ({ ...f, role: v, tablesAssigned: "" }))}>
+                <SelectTrigger data-testid="select-owner-rs-role"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="waiter">{t("rm.roleWaiter", "Waiter")}</SelectItem>
+                  <SelectItem value="kitchen_staff">{t("rm.roleKitchen", "Kitchen Staff")}</SelectItem>
+                  <SelectItem value="restaurant_cleaner">{t("rm.roleCleaner", "Cleaner")}</SelectItem>
+                  <SelectItem value="restaurant_cashier">{t("rm.roleCashier", "Cashier")}</SelectItem>
+                  <SelectItem value="restaurant_manager">{t("rm.roleManager", "Manager")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="border-t pt-3 space-y-3">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("rm.salarySection", "Salary Info")}</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-sm">{t("rm.salaryLabel", "Base Salary (₼)")}</Label>
+                  <Input type="number" min={0} step={0.01} placeholder="600" value={staffForm.baseSalary} onChange={e => setStaffForm(f => ({ ...f, baseSalary: e.target.value }))} data-testid="input-owner-rs-salary" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-sm">{t("rm.taxLabel", "Tax Rate (%)")}</Label>
+                  <Input type="number" min={0} max={100} step={0.1} placeholder="14" value={staffForm.employeeTaxRate} onChange={e => setStaffForm(f => ({ ...f, employeeTaxRate: e.target.value }))} data-testid="input-owner-rs-tax" />
+                </div>
+              </div>
+              {staffForm.baseSalary && (
+                <p className="text-xs text-muted-foreground">
+                  {t("rm.netSalary", "Net")}: ₼{(parseFloat(staffForm.baseSalary || "0") * (1 - parseFloat(staffForm.employeeTaxRate || "0") / 100)).toFixed(2)}
+                  {" · "}{t("rm.taxAmount", "Tax")}: ₼{(parseFloat(staffForm.baseSalary || "0") * parseFloat(staffForm.employeeTaxRate || "0") / 100).toFixed(2)}
+                </p>
+              )}
+            </div>
+            {staffForm.role === "waiter" && (
+              <div className="border-t pt-3 space-y-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("rm.waiterTablesAssigned", "Table Assignment")}</p>
+                <div className="space-y-1.5">
+                  <Label className="text-sm">{t("rm.tablesLabel", "Tables")}</Label>
+                  <Input
+                    placeholder={t("rm.tablesPlaceholder", "e.g. 1,2,3,4")}
+                    value={staffForm.tablesAssigned}
+                    onChange={e => setStaffForm(f => ({ ...f, tablesAssigned: e.target.value }))}
+                    data-testid="input-owner-rs-tables"
+                  />
+                  <p className="text-xs text-muted-foreground">{t("rm.tablesNote", "Comma-separated table numbers")}</p>
+                </div>
+                {staffForm.tablesAssigned && (
+                  <div className="flex gap-1 flex-wrap">
+                    {staffForm.tablesAssigned.split(",").map(tbl => tbl.trim()).filter(Boolean).map(tbl => (
+                      <Badge key={tbl} variant="secondary" className="text-xs">{tbl}</Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddStaffDialog(false)}>{t("rm.cancel", "Cancel")}</Button>
+            <Button
+              onClick={() => createStaffMutation.mutate(staffForm)}
+              disabled={createStaffMutation.isPending || !staffForm.fullName || !staffForm.username || !staffForm.password}
+              data-testid="button-owner-create-staff"
+            >
+              {createStaffMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : t("rm.create", "Create")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Header */}
       <header className="border-b bg-card sticky top-0 z-30">
@@ -456,8 +581,8 @@ export default function RestaurantOwnerDashboard() {
                   <CardTitle className="text-base">{t("restaurantOwner.staffTitle", "Restaurant Team")}</CardTitle>
                   <CardDescription>{t("restaurantOwner.staffDesc", "Manage your restaurant staff members")}</CardDescription>
                 </div>
-                <Button size="sm" onClick={() => window.location.href = "/restaurant/manager"} data-testid="button-manage-staff">
-                  <Plus className="h-3.5 w-3.5 mr-1.5" /> {t("restaurantOwner.addStaff", "Add Staff")}
+                <Button size="sm" onClick={() => setShowAddStaffDialog(true)} data-testid="button-manage-staff">
+                  <UserPlus className="h-3.5 w-3.5 mr-1.5" /> {t("restaurantOwner.addStaff", "Add Staff")}
                 </Button>
               </CardHeader>
               <CardContent>
@@ -467,7 +592,7 @@ export default function RestaurantOwnerDashboard() {
                   <div className="text-center py-10 text-muted-foreground">
                     <Users className="h-10 w-10 mx-auto mb-2 opacity-30" />
                     <p>{t("restaurantOwner.noStaff", "No staff members yet")}</p>
-                    <p className="text-xs mt-1">{t("restaurantOwner.addStaffHint", "Add staff from the Manager view")}</p>
+                    <p className="text-xs mt-1">{t("restaurantOwner.addStaffHint", "Click \"Add Staff\" above to create your first team member")}</p>
                   </div>
                 ) : (
                   <div className="space-y-2">

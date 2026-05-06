@@ -138,7 +138,19 @@ async function runSafetyPatches(): Promise<void> {
     await client.query(`CREATE INDEX IF NOT EXISTS idx_billing_logs_hotel_id ON billing_logs (hotel_id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_billing_logs_tenant_id ON billing_logs (tenant_id)`);
 
-    // Create restaurant tables if missing
+    // Create restaurant_tables table if missing
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS restaurant_tables (
+        id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+        property_id varchar NOT NULL,
+        table_number varchar NOT NULL,
+        capacity integer,
+        created_at timestamp DEFAULT now()
+      )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_restaurant_tables_property_id ON restaurant_tables (property_id)`);
+
+    // Create restaurant cleaning / staff tables if missing
     await client.query(`
       CREATE TABLE IF NOT EXISTS restaurant_cleaning_tasks (
         id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
