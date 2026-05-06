@@ -105,9 +105,12 @@ export default function RestaurantRegister() {
         },
       });
     },
-    onSuccess: async () => {
+    onSuccess: async (response: Response) => {
+      const data = await response.json();
+      if (data.user) {
+        queryClient.setQueryData(["/api/auth/me"], { ...data.user, tenantType: "restaurant_only" });
+      }
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-      await refreshUser?.();
       toast({
         title: t("restaurantRegister.successTitle", "Welcome aboard!"),
         description: t("restaurantRegister.successDesc", "Your restaurant account has been created. 14-day free trial started."),

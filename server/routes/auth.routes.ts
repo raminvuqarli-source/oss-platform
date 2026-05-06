@@ -161,6 +161,7 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
     "/api/auth/login",
     "/api/auth/register",
     "/api/auth/register-hotel",
+    "/api/auth/register-restaurant",
     "/api/auth/demo-login",
     "/api/auth/forgot-password",
     "/api/auth/reset-password",
