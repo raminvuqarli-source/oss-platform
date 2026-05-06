@@ -114,6 +114,12 @@ function DashboardSidebar() {
     enabled: !!user,
   });
   const planType = planData?.planType || "starter";
+
+  const { data: ownerProfile } = useQuery<{ tenantType?: string }>({
+    queryKey: ["/api/owners/me"],
+    enabled: !!user && user.role === "owner_admin",
+  });
+  const isRestaurantOnly = ownerProfile?.tenantType === "restaurant_only";
   const { isFeatureEnabled, isDemoMode } = usePlanFeatures();
   const { toast } = useToast();
 
@@ -178,6 +184,37 @@ function DashboardSidebar() {
 
     switch (user?.role) {
       case "owner_admin":
+        if (isRestaurantOnly) {
+          return [
+            {
+              label: t("nav.group.core", "Core"),
+              items: [
+                { title: t("common.dashboard"), icon: LayoutDashboard, url: "/dashboard", view: undefined, testId: "nav-dashboard" },
+              ],
+            },
+            {
+              label: t("nav.group.restaurant", "Restaurant"),
+              items: [
+                { title: t("nav.managerView", "Manager View"), icon: UtensilsCrossed, url: "/restaurant/manager", testId: "nav-rest-manager" },
+                { title: t("nav.kitchenDisplay", "Kitchen Display"), icon: ChefHat, url: "/restaurant/kitchen", testId: "nav-rest-kitchen" },
+                { title: t("nav.waiterView", "Waiter View"), icon: Utensils, url: "/restaurant/waiter", testId: "nav-rest-waiter" },
+                { title: t("nav.cashierView", "Cashier View"), icon: Wallet, url: "/restaurant/cashier", testId: "nav-rest-cashier" },
+              ],
+            },
+            {
+              label: t("nav.group.communication", "Communication"),
+              items: [
+                { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-notifications" },
+              ],
+            },
+            {
+              label: t("nav.group.system", "System"),
+              items: [
+                { title: t("common.settings"), icon: Settings, url: "/settings", testId: "nav-settings" },
+              ],
+            },
+          ];
+        }
         return [
           {
             label: t("nav.group.core", "Core"),

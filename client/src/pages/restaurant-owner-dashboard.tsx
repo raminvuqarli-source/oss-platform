@@ -145,6 +145,21 @@ export default function RestaurantOwnerDashboard() {
   const [showAddStaffDialog, setShowAddStaffDialog] = useState(false);
   const [staffForm, setStaffForm] = useState({ fullName: "", username: "", password: "", email: "", role: "waiter", baseSalary: "", employeeTaxRate: "", tablesAssigned: "" });
 
+  const payNowMutation = useMutation({
+    mutationFn: async (planCode: string) => {
+      const res = await apiRequest("POST", "/api/epoint/create-order", { planCode });
+      return res.json();
+    },
+    onSuccess: (data: any) => {
+      if (data?.redirectUrl) {
+        window.location.href = data.redirectUrl;
+      } else {
+        toast({ title: t("billing.paymentInitiated", "Redirecting to payment...") });
+      }
+    },
+    onError: (err: any) => showErrorToast(toast, err),
+  });
+
   const createStaffMutation = useMutation({
     mutationFn: async (data: object) => {
       const res = await apiRequest("POST", "/api/admin/create-staff", data);
@@ -645,9 +660,9 @@ export default function RestaurantOwnerDashboard() {
 
                   <div className="grid grid-cols-3 gap-3">
                     {[
-                      { code: "REST_CAFE", name: "Cafe", price: "49.30 ₼", desc: t("restaurantOwner.planCafeDesc", "Up to 10 staff") },
-                      { code: "REST_BISTRO", name: "Bistro", price: "100.30 ₼", desc: t("restaurantOwner.planBistroDesc", "Up to 30 staff + analytics"), popular: true },
-                      { code: "REST_CHAIN", name: "Chain", price: "253.30 ₼", desc: t("restaurantOwner.planChainDesc", "Unlimited + multi-location") },
+                      { code: "REST_CAFE", name: "Cafe", price: "134.30 ₼", desc: t("restaurantOwner.planCafeDesc", "Up to 10 staff") },
+                      { code: "REST_BISTRO", name: "Bistro", price: "219.30 ₼", desc: t("restaurantOwner.planBistroDesc", "Up to 30 staff + analytics"), popular: true },
+                      { code: "REST_CHAIN", name: "Chain", price: "338.30 ₼", desc: t("restaurantOwner.planChainDesc", "Unlimited + multi-location") },
                     ].map(plan => (
                       <div
                         key={plan.code}
@@ -658,21 +673,32 @@ export default function RestaurantOwnerDashboard() {
                         <p className="font-semibold">{plan.name}</p>
                         <p className="text-lg font-bold mt-1">{plan.price}</p>
                         <p className="text-xs text-muted-foreground">{plan.desc}</p>
-                        {subscriptionData?.planCode !== plan.code && (
+                        {subscriptionData?.planCode === plan.code ? (
+                          <div className="mt-2 space-y-1.5">
+                            <div className="flex items-center justify-center gap-1 text-xs text-green-600">
+                              <CheckCircle className="h-3 w-3" /> {t("restaurantOwner.currentPlan", "Current")}
+                            </div>
+                            <Button
+                              size="sm"
+                              className="w-full text-xs"
+                              onClick={() => payNowMutation.mutate(plan.code)}
+                              disabled={payNowMutation.isPending}
+                              data-testid={`button-pay-now-${plan.code.toLowerCase()}`}
+                            >
+                              {payNowMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : t("restaurantOwner.payNow", "Pay Now →")}
+                            </Button>
+                          </div>
+                        ) : (
                           <Button
                             size="sm"
                             variant="outline"
                             className="mt-2 w-full text-xs"
-                            onClick={() => setContactDialog({ open: true, subject: `Upgrade to Restaurant ${plan.name} Plan` })}
+                            onClick={() => payNowMutation.mutate(plan.code)}
+                            disabled={payNowMutation.isPending}
                             data-testid={`button-upgrade-${plan.code.toLowerCase()}`}
                           >
-                            {t("restaurantOwner.upgradeTo", "Upgrade")}
+                            {payNowMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : t("restaurantOwner.upgradeTo", "Upgrade & Pay →")}
                           </Button>
-                        )}
-                        {subscriptionData?.planCode === plan.code && (
-                          <div className="mt-2 flex items-center justify-center gap-1 text-xs text-green-600">
-                            <CheckCircle className="h-3 w-3" /> {t("restaurantOwner.currentPlan", "Current")}
-                          </div>
                         )}
                       </div>
                     ))}

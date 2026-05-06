@@ -157,6 +157,66 @@ export const PLAN_FEATURE_MATRIX: Record<PlanType, PlanFeatureConfig> = {
       smartRoomsEnabled: false, guestManagement: true, staffManagement: false,
     },
   },
+  restaurant_cafe: {
+    features: {
+      guest_management: false,
+      staff_management: true,
+      smart_controls: false,
+      advanced_analytics: false,
+      multi_property: false,
+      custom_integrations: false,
+      priority_support: false,
+    },
+    limits: {
+      maxProperties: 1, maxUnitsPerProperty: 0, maxDevices: 0, maxUsers: 10, maxStaff: 10,
+    },
+    subscriptionDefaults: {
+      maxProperties: 1, maxStaff: 10, maxUnitsPerProperty: 0,
+      multiProperty: false, performanceEnabled: false, staffPerformanceEnabled: false,
+      advancedAnalytics: false, prioritySupport: false, customIntegrations: false,
+      smartRoomsEnabled: false, guestManagement: false, staffManagement: true,
+    },
+  },
+  restaurant_bistro: {
+    features: {
+      guest_management: false,
+      staff_management: true,
+      smart_controls: false,
+      advanced_analytics: true,
+      multi_property: false,
+      custom_integrations: false,
+      priority_support: false,
+    },
+    limits: {
+      maxProperties: 1, maxUnitsPerProperty: 0, maxDevices: 0, maxUsers: 30, maxStaff: 30,
+    },
+    subscriptionDefaults: {
+      maxProperties: 1, maxStaff: 30, maxUnitsPerProperty: 0,
+      multiProperty: false, performanceEnabled: true, staffPerformanceEnabled: true,
+      advancedAnalytics: true, prioritySupport: false, customIntegrations: false,
+      smartRoomsEnabled: false, guestManagement: false, staffManagement: true,
+    },
+  },
+  restaurant_chain: {
+    features: {
+      guest_management: false,
+      staff_management: true,
+      smart_controls: false,
+      advanced_analytics: true,
+      multi_property: true,
+      custom_integrations: true,
+      priority_support: true,
+    },
+    limits: {
+      maxProperties: 999, maxUnitsPerProperty: 0, maxDevices: 0, maxUsers: 999, maxStaff: 999,
+    },
+    subscriptionDefaults: {
+      maxProperties: 999, maxStaff: 999, maxUnitsPerProperty: 0,
+      multiProperty: true, performanceEnabled: true, staffPerformanceEnabled: true,
+      advancedAnalytics: true, prioritySupport: true, customIntegrations: true,
+      smartRoomsEnabled: false, guestManagement: false, staffManagement: true,
+    },
+  },
 };
 
 export function hasBusinessFeature(planType: PlanType, feature: BusinessFeature): FeatureAccess {
@@ -367,8 +427,8 @@ export const PLAN_CODE_FEATURES: Record<PlanCode, PlanCodeConfig> = {
   },
   REST_CAFE: {
     displayName: "Cafe",
-    priceMonthlyUSD: 29,
-    priceMonthlyAZN: 49.30,
+    priceMonthlyUSD: 79,
+    priceMonthlyAZN: 134.30,
     currency: "USD",
     features: {
       guest_management: false,
@@ -383,8 +443,8 @@ export const PLAN_CODE_FEATURES: Record<PlanCode, PlanCodeConfig> = {
   },
   REST_BISTRO: {
     displayName: "Bistro",
-    priceMonthlyUSD: 59,
-    priceMonthlyAZN: 100.30,
+    priceMonthlyUSD: 129,
+    priceMonthlyAZN: 219.30,
     currency: "USD",
     features: {
       guest_management: false,
@@ -399,8 +459,8 @@ export const PLAN_CODE_FEATURES: Record<PlanCode, PlanCodeConfig> = {
   },
   REST_CHAIN: {
     displayName: "Chain",
-    priceMonthlyUSD: 149,
-    priceMonthlyAZN: 253.30,
+    priceMonthlyUSD: 199,
+    priceMonthlyAZN: 338.30,
     currency: "USD",
     features: {
       guest_management: false,
