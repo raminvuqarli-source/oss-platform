@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { fireLeadConversion } from "@/lib/analytics";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { showErrorToast } from "@/lib/error-handler";
 import { Link } from "wouter";
@@ -111,6 +112,7 @@ export default function RestaurantRegister() {
         queryClient.setQueryData(["/api/auth/me"], { ...data.user, tenantType: "restaurant_only" });
       }
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      fireLeadConversion();
       toast({
         title: t("restaurantRegister.successTitle", "Welcome aboard!"),
         description: t("restaurantRegister.successDesc", "Your restaurant account has been created. 14-day free trial started."),

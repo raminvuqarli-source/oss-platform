@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { showErrorToast } from "@/lib/error-handler";
+import { fireLeadConversion } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -135,6 +136,7 @@ export function GetQuoteDialog({ open, onOpenChange, sourcePage }: GetQuoteDialo
     },
     onSuccess: () => {
       setSubmitted(true);
+      fireLeadConversion();
       toast({
         title: t("quote.successTitle"),
         description: t("quote.successMessage"),

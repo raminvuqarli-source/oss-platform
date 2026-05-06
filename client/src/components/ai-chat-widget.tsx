@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Send, X, MessageCircle, Bot, Minimize2, Building2, Globe, Home, Mail, ChevronRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { fireLeadConversion } from "@/lib/analytics";
 
 type MessageRole = "user" | "assistant";
 
@@ -367,6 +368,7 @@ export function AIChatWidget() {
 
       const data = await res.json();
       setIsLeadFormVisible(false);
+      fireLeadConversion();
       addMessage("assistant", data.type === "message" ? data.content : "Thank you! We'll be in touch soon. 🎉");
     } catch {
       addMessage("assistant", "Sorry, something went wrong saving your information. Please email us at support@ossaiproapp.com");

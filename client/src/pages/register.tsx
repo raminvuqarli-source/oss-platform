@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/auth-context";
+import { fireLeadConversion } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -320,6 +321,7 @@ export default function Register() {
       };
       
       await registerUser(registerData);
+      fireLeadConversion();
       toast({
         title: t('hotel.registrationSuccess', 'Hotel registered successfully!'),
         description: t('hotel.welcomeMessage', 'Welcome to O.S.S Smart Hotel System.'),
