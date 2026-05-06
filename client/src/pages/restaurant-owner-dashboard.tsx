@@ -98,13 +98,19 @@ type Order = {
 type MenuItem = {
   id: string;
   name: string;
-  price: number;
-  categoryName?: string;
+  priceCents: number;
+  categoryId: string | null;
   isAvailable: boolean;
 };
 
+type MenuCategory = {
+  id: string;
+  name: string;
+};
+
 type MenuData = {
-  categories: Array<{ id: string; name: string; items: MenuItem[] }>;
+  categories: MenuCategory[];
+  items: MenuItem[];
 };
 
 function fmt(cents: number) {
@@ -163,7 +169,7 @@ export default function RestaurantOwnerDashboard() {
   const orders = Array.isArray(ordersData) ? ordersData : [];
   const recentOrders = [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 20);
   const activeOrders = orders.filter(o => !["delivered", "cancelled"].includes(o.kitchenStatus) || o.settlementStatus === "pending");
-  const menuItems = menuData?.categories?.flatMap(c => c.items) || [];
+  const menuItems = menuData?.items || [];
   const staffUsers = staffData?.users || (Array.isArray(staffData) ? staffData as any[] : []);
   const restaurantStaff = staffUsers.filter((u: any) => ["waiter", "kitchen_staff", "restaurant_manager", "restaurant_cashier", "restaurant_cleaner"].includes(u.role));
 
@@ -406,26 +412,33 @@ export default function RestaurantOwnerDashboard() {
                   </CardContent>
                 </Card>
               ) : (
-                menuData.categories.map(cat => (
-                  <Card key={cat.id} data-testid={`card-menu-cat-${cat.id}`}>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base">{cat.name}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {cat.items.map(item => (
-                          <div key={item.id} className="flex items-center justify-between p-2 rounded-lg border bg-muted/20" data-testid={`row-menu-item-${item.id}`}>
-                            <div className="flex items-center gap-2">
-                              <div className={`h-2 w-2 rounded-full ${item.isAvailable ? "bg-green-500" : "bg-red-400"}`} />
-                              <span className="text-sm font-medium">{item.name}</span>
-                            </div>
-                            <span className="text-sm font-semibold">{(item.price / 100).toFixed(2)} ₼</span>
+                menuData.categories.map(cat => {
+                  const catItems = menuItems.filter(i => i.categoryId === cat.id);
+                  return (
+                    <Card key={cat.id} data-testid={`card-menu-cat-${cat.id}`}>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">{cat.name}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {catItems.length === 0 ? (
+                          <p className="text-xs text-muted-foreground py-2">{t("restaurantOwner.noItemsInCategory", "No items in this category")}</p>
+                        ) : (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {catItems.map(item => (
+                              <div key={item.id} className="flex items-center justify-between p-2 rounded-lg border bg-muted/20" data-testid={`row-menu-item-${item.id}`}>
+                                <div className="flex items-center gap-2">
+                                  <div className={`h-2 w-2 rounded-full ${item.isAvailable ? "bg-green-500" : "bg-red-400"}`} />
+                                  <span className="text-sm font-medium">{item.name}</span>
+                                </div>
+                                <span className="text-sm font-semibold">{(item.priceCents / 100).toFixed(2)} ₼</span>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })
               )}
               <div className="flex justify-end">
                 <Button variant="outline" onClick={() => window.location.href = "/restaurant/manager"} data-testid="button-full-manager">
