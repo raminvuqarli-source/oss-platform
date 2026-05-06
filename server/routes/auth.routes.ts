@@ -1080,7 +1080,8 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
       return res.status(404).json({ message: "User not found" });
     }
     const { password: _pw, ...userWithoutPassword } = user;
-    // Resolve owner tenantType so frontend can distinguish hotel vs standalone restaurant
+    // Resolve tenantType: check owner record first, then fallback to property type
+    // A standalone restaurant always has its primary property with type = "restaurant"
     let tenantType: string | null = null;
     try {
       const ownerId = (user as any).ownerId;
@@ -1089,6 +1090,21 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
         tenantType = (owner as any)?.tenantType ?? null;
       }
     } catch {}
+    // Fallback: if tenantType is missing or the default "hotel", verify via property type
+    // This protects against cases where tenant_type column defaulted to "hotel" for standalone restaurants
+    if (!tenantType || tenantType === "hotel") {
+      try {
+        const propertyId = (user as any).propertyId;
+        if (propertyId) {
+          const prop = await storage.getProperty(propertyId);
+          if ((prop as any)?.type === "restaurant") {
+            tenantType = "restaurant_only";
+          } else {
+            tenantType = "hotel";
+          }
+        }
+      } catch {}
+    }
     res.json({ ...userWithoutPassword, tenantType });
   });
 
@@ -1373,8 +1389,9 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
         country: restaurantData.country || null,
         city: restaurantData.city || null,
         address: restaurantData.address || null,
-        tenantType: "restaurant_only",
-      } as any);
+      });
+      // Force-set tenant_type in DB since Drizzle insert schema may omit it
+      await storage.updateOwner(owner.id, { tenantType: "restaurant_only" } as any);
 
       const property = await storage.createProperty({
         ownerId: owner.id,

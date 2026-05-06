@@ -180,6 +180,21 @@ async function runSafetyPatches(): Promise<void> {
       )
     `);
 
+    // Fix standalone restaurant owners whose tenant_type incorrectly defaults to "hotel"
+    // Any owner whose ALL properties are of type "restaurant" is a standalone restaurant
+    await client.query(`
+      UPDATE owners
+      SET tenant_type = 'restaurant_only'
+      WHERE tenant_type = 'hotel'
+        AND id IN (
+          SELECT DISTINCT p.owner_id
+          FROM properties p
+          WHERE p.owner_id IS NOT NULL
+          GROUP BY p.owner_id
+          HAVING COUNT(*) = COUNT(CASE WHEN p.type = 'restaurant' THEN 1 END)
+        )
+    `);
+
     startupLog.info("Safety schema patches completed");
   } catch (err: any) {
     startupLog.error({ err: err.message }, "Safety patch error (non-fatal)");
