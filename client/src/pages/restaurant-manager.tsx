@@ -138,14 +138,15 @@ export default function RestaurantManager() {
   }, [queryClient, toast]);
 
   // ── queries ──
-  const { data: currentUser } = useQuery<{ propertyId?: string | null }>({ queryKey: ["/api/auth/me"] });
+  const { data: currentUser } = useQuery<{ propertyId?: string | null; tenantType?: string | null }>({ queryKey: ["/api/auth/me"] });
+  const isHotelTenant = currentUser?.tenantType === "hotel";
   const { data: menu } = useQuery<{ categories: Category[]; items: MenuItem[] }>({ queryKey: ["/api/restaurant/menu"] });
   const { data: orders = [] } = useQuery<PosOrder[]>({ queryKey: ["/api/restaurant/orders"], refetchInterval: 15000 });
   const { data: analytics } = useQuery<Analytics>({ queryKey: ["/api/restaurant/analytics"], refetchInterval: 30000 });
   const { data: restaurantStaff = [] } = useQuery<any[]>({ queryKey: ["/api/users/staff"] });
   const { data: staffProfiles = [] } = useQuery<StaffProfile[]>({ queryKey: ["/api/restaurant/staff-profiles"] });
   const { data: cleaningTasks = [] } = useQuery<CleaningTask[]>({ queryKey: ["/api/restaurant/cleaning-tasks"] });
-  const { data: roomOrders = [] } = useQuery<RoomGroup[]>({ queryKey: ["/api/restaurant/room-orders"], refetchInterval: 20000 });
+  const { data: roomOrders = [] } = useQuery<RoomGroup[]>({ queryKey: ["/api/restaurant/room-orders"], refetchInterval: 20000, enabled: isHotelTenant });
   const { data: restaurantTables = [] } = useQuery<RestaurantTable[]>({ queryKey: ["/api/restaurant/tables"], refetchInterval: 20000 });
 
   const categories = menu?.categories || [];
@@ -299,18 +300,19 @@ export default function RestaurantManager() {
     return { ...c, completed, total };
   }).sort((a, b) => b.completed - a.completed);
 
-  const tabs = [
-    { value: "orders", label: t("rm.tabOrders"), icon: <ShoppingBag className="h-4 w-4" />, badge: pendingSettlementOrders.length },
-    { value: "tables", label: t("rm.tabTables"), icon: <LayoutGrid className="h-4 w-4" />, badge: restaurantTables.filter(t => t.status === "occupied").length },
-    { value: "settlement", label: t("rm.tabSettlement"), icon: <CreditCard className="h-4 w-4" />, badge: pendingSettlementOrders.length },
-    { value: "kabinetler", label: t("rm.tabRooms"), icon: <UtensilsCrossed className="h-4 w-4" />, badge: roomOrders.length },
-    { value: "menu", label: t("rm.tabMenu"), icon: <ChefHat className="h-4 w-4" />, badge: 0 },
-    { value: "waiters", label: t("rm.tabWaiters"), icon: <Utensils className="h-4 w-4" />, badge: waiters.length },
-    { value: "cleaning", label: t("rm.tabCleaning"), icon: <Sparkles className="h-4 w-4" />, badge: cleaningTasks.filter(c => c.status !== "done").length },
-    { value: "staff", label: t("rm.tabStaff"), icon: <Users className="h-4 w-4" />, badge: myRestaurantStaff.length },
-    { value: "performance", label: t("rm.tabPerformance"), icon: <BarChart2 className="h-4 w-4" />, badge: 0 },
-    { value: "finance", label: t("rm.tabFinance"), icon: <TrendingUp className="h-4 w-4" />, badge: 0 },
+  const allTabs = [
+    { value: "orders", label: t("rm.tabOrders"), icon: <ShoppingBag className="h-4 w-4" />, badge: pendingSettlementOrders.length, hotelOnly: false },
+    { value: "tables", label: t("rm.tabTables"), icon: <LayoutGrid className="h-4 w-4" />, badge: restaurantTables.filter(t => t.status === "occupied").length, hotelOnly: false },
+    { value: "settlement", label: t("rm.tabSettlement"), icon: <CreditCard className="h-4 w-4" />, badge: pendingSettlementOrders.length, hotelOnly: false },
+    { value: "kabinetler", label: t("rm.tabRooms"), icon: <UtensilsCrossed className="h-4 w-4" />, badge: roomOrders.length, hotelOnly: true },
+    { value: "menu", label: t("rm.tabMenu"), icon: <ChefHat className="h-4 w-4" />, badge: 0, hotelOnly: false },
+    { value: "waiters", label: t("rm.tabWaiters"), icon: <Utensils className="h-4 w-4" />, badge: waiters.length, hotelOnly: false },
+    { value: "cleaning", label: t("rm.tabCleaning"), icon: <Sparkles className="h-4 w-4" />, badge: cleaningTasks.filter(c => c.status !== "done").length, hotelOnly: false },
+    { value: "staff", label: t("rm.tabStaff"), icon: <Users className="h-4 w-4" />, badge: myRestaurantStaff.length, hotelOnly: false },
+    { value: "performance", label: t("rm.tabPerformance"), icon: <BarChart2 className="h-4 w-4" />, badge: 0, hotelOnly: false },
+    { value: "finance", label: t("rm.tabFinance"), icon: <TrendingUp className="h-4 w-4" />, badge: 0, hotelOnly: false },
   ];
+  const tabs = allTabs.filter(tab => !tab.hotelOnly || isHotelTenant);
 
   return (
     <>
@@ -942,10 +944,12 @@ export default function RestaurantManager() {
                   <div className="flex items-center gap-2"><CardIcon className="h-4 w-4 text-blue-600" /><span>{t("rm.card")}</span></div>
                   <span className="font-semibold">{fmt(analytics?.byPaymentType?.cardCents ?? 0)}</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2"><UtensilsCrossed className="h-4 w-4 text-violet-600" /><span>{t("rm.roomCharge")}</span></div>
-                  <span className="font-semibold">{fmt(analytics?.byPaymentType?.roomChargeCents ?? 0)}</span>
-                </div>
+                {isHotelTenant && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2"><UtensilsCrossed className="h-4 w-4 text-violet-600" /><span>{t("rm.roomCharge")}</span></div>
+                    <span className="font-semibold">{fmt(analytics?.byPaymentType?.roomChargeCents ?? 0)}</span>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

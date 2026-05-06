@@ -1,0 +1,32 @@
+### SYSTEM ARCHITECTURE COMMAND: STRICT ISOLATION BETWEEN HOTEL AND RESTAURANT
+
+**Objective:** Separate the "HOTEL" module and the "RESTORAN" (Standalone) module into two completely independent architectural worlds. A change in one must NEVER affect the other.
+
+---
+
+### 1. LOGICAL WALL (TENANT ISOLATION)
+- **Hotel World:** This is the existing ecosystem linked to PMS, rooms, and guests. The restaurant inside a hotel MUST have the "OTAQ HESABINA ƏLAVƏ ET" (Charge to Room) feature.
+- **Standalone Restaurant World:** This is a new, independent ecosystem. It has NO concept of rooms, guests, or PMS. 
+- **Strict Rule:** The "OTAQ HESABINA ƏLAVƏ ET" button and all room-related code/UI must be strictly REMOVED and DISABLED if the user is in the Standalone Restaurant module. 
+
+---
+
+### 2. UI & FUNCTIONAL SEPARATION
+- **Dynamic Rendering:** Every UI component must first check the environment (Hotel vs. Restoran). 
+- **No Feature Bleeding:** If a feature is developed for Standalone Restaurants (e.g., specific POS layout), it should NOT appear in the Hotel's internal restaurant unless explicitly requested.
+- **Independent Dashboards:** Use strict conditional logic (e.g., `if (isHotel) { ... }` and `if (isStandalone) { ... }`) to ensure that the codebases for these two worlds do not overlap or leak into each other.
+
+---
+
+### 3. OPERATIONAL FLOWS
+- **Standalone POS:** Must focus only on QR -> Waiter Approval -> Kitchen -> Payment. No room selection or guest lookup allowed here.
+- **Hotel POS:** Remains integrated with the hotel management system.
+- **Super Admin:** Must manage these two types of clients in separate sections to keep their data and configurations isolated.
+
+---
+
+### 4. MULTI-LANGUAGE & DEMO
+- Both "worlds" must support all 10 languages independently.
+- Both "worlds" must have their own independent "DEMO" access as per the new landing page design.
+
+**Instruction for AI:** Do not use global styles or shared logic that connects room-management to standalone restaurants. Treat them as two different products sharing the same platform name (O.S.S.).

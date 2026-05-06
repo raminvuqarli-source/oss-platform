@@ -4231,6 +4231,8 @@ function FinanceCenterView() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("revenue");
+  const { data: me } = useQuery<{ tenantType?: string | null }>({ queryKey: ["/api/auth/me"] });
+  const isHotelTenant = me?.tenantType === "hotel";
   const [revenueDialogOpen, setRevenueDialogOpen] = useState(false);
   const [expenseDialogOpen, setExpenseDialogOpen] = useState(false);
   const [payrollDialogOpen, setPayrollDialogOpen] = useState(false);
@@ -4562,7 +4564,7 @@ function FinanceCenterView() {
                           <SelectItem value="cash">{t('finance.cash')}</SelectItem>
                           <SelectItem value="card">{t('finance.card')}</SelectItem>
                           <SelectItem value="online">{t('finance.online')}</SelectItem>
-                          <SelectItem value="room_charge">{t('finance.roomCharge')}</SelectItem>
+                          {isHotelTenant && <SelectItem value="room_charge">{t('finance.roomCharge')}</SelectItem>}
                           <SelectItem value="other">{t('finance.other')}</SelectItem>
                         </SelectContent>
                       </Select>
@@ -5268,6 +5270,8 @@ function RestaurantRevenueCard() {
     queryKey: ["/api/restaurant/analytics"],
     retry: false,
   });
+  const { data: me } = useQuery<{ tenantType?: string | null }>({ queryKey: ["/api/auth/me"] });
+  const isHotelTenant = me?.tenantType === "hotel";
 
   if (!analytics) return null;
 
@@ -5282,7 +5286,7 @@ function RestaurantRevenueCard() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className={`grid gap-4 ${isHotelTenant ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-2 sm:grid-cols-3"}`}>
           <div>
             <p className="text-xs text-muted-foreground">{t("restaurant.revenue.today", "Today")}</p>
             <p className="text-lg font-bold text-emerald-600" data-testid="text-restaurant-today">{fmt(analytics.today?.revenueCents ?? 0)}</p>
@@ -5297,10 +5301,12 @@ function RestaurantRevenueCard() {
             <p className="text-xs text-muted-foreground">{t("restaurant.revenue.cashPayment", "Cash Payment")}</p>
             <p className="text-lg font-bold" data-testid="text-restaurant-cash">{fmt(analytics.byPaymentType?.cashCents ?? 0)}</p>
           </div>
-          <div>
-            <p className="text-xs text-muted-foreground">{t("restaurant.revenue.roomCharge", "Room Charge")}</p>
-            <p className="text-lg font-bold text-purple-600" data-testid="text-restaurant-room">{fmt(analytics.byPaymentType?.roomChargeCents ?? 0)}</p>
-          </div>
+          {isHotelTenant && (
+            <div>
+              <p className="text-xs text-muted-foreground">{t("restaurant.revenue.roomCharge", "Room Charge")}</p>
+              <p className="text-lg font-bold text-purple-600" data-testid="text-restaurant-room">{fmt(analytics.byPaymentType?.roomChargeCents ?? 0)}</p>
+            </div>
+          )}
         </div>
         <div className="border-t pt-3 mt-3">
           <div className="flex items-center justify-between text-sm">
