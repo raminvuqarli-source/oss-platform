@@ -352,6 +352,7 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
     waiter: "demo_waiter",
     restaurant_cleaner: "demo_restaurant_cleaner",
     restaurant_cashier: "demo_restaurant_cashier",
+    restaurant_owner: "demo_restaurant_owner",
   };
 
   app.post("/api/auth/demo-login", authRateLimiter, async (req, res) => {
@@ -368,7 +369,28 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
         return res.status(400).json({ message: "Invalid demo role" });
       }
 
-      const { seedDemoData, ensureDemoUser } = await import("../seed");
+      const { seedDemoData, ensureDemoUser, seedRestaurantOwnerDemoData } = await import("../seed");
+
+      // ─── Restaurant Owner demo is fully isolated from hotel demo ─────────
+      if (role === "restaurant_owner") {
+        await seedRestaurantOwnerDemoData();
+        const restOwnerUser = await storage.getUserByUsername("demo_restaurant_owner");
+        if (!restOwnerUser) {
+          return res.status(500).json({ message: "Failed to create restaurant owner demo" });
+        }
+        const demoSessionTenantId = `demo_session_${crypto.randomUUID()}`;
+        req.session.userId = restOwnerUser.id;
+        req.session.role = restOwnerUser.role;
+        req.session.demoSessionTenantId = demoSessionTenantId;
+        req.session.touch();
+        const demoToken = createDemoToken(restOwnerUser.id, restOwnerUser.role, demoSessionTenantId);
+        return req.session.save((err) => {
+          if (err) return res.status(500).json({ error: "session" });
+          const { password: _pw, ...userWithoutPassword } = restOwnerUser;
+          res.setHeader("Cache-Control", "no-store");
+          res.json({ ...userWithoutPassword, _demoToken: demoToken });
+        });
+      }
 
       let existingOwner = await storage.getUserByUsername("demo_owner");
       if (!existingOwner) {

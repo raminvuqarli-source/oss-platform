@@ -1,4 +1,5 @@
 import { storage } from "./storage";
+import { pool } from "./db";
 import bcrypt from "bcryptjs";
 import { applyPlanFeatures } from "@shared/planFeatures";
 import { logger } from "./utils/logger";
@@ -618,4 +619,122 @@ export async function seedDemoData() {
     },
     property: { name: "Grand Riviera Resort & Spa", units: units.length },
   };
+}
+
+export async function seedRestaurantOwnerDemoData() {
+  const existing = await storage.getUserByUsername("demo_restaurant_owner");
+  if (existing) {
+    logger.info("demo_restaurant_owner already exists, skipping seed");
+    return;
+  }
+
+  logger.info("Seeding restaurant owner demo data...");
+
+  const ownerPassword = await bcrypt.hash("restowner123!", BCRYPT_ROUNDS);
+
+  const owner = await storage.createOwner({
+    name: "Leyla Məmmədova",
+    email: "leyla@ossrestodemo.com",
+    phone: "+994501234567",
+    companyName: "Baku Bistro Group",
+  });
+
+  await pool.query(`UPDATE owners SET tenant_type = 'restaurant_only' WHERE id = $1`, [owner.id]);
+
+  const property = await storage.createProperty({
+    name: "Baku Bistro",
+    ownerId: owner.id,
+    type: "restaurant",
+    address: "Nizami küçəsi 45, Bakı",
+    phone: "+994501234567",
+    email: "info@bakubistro.az",
+    country: "Azerbaijan",
+    city: "Baku",
+    timezone: "Asia/Baku",
+  });
+
+  const ownerUser = await storage.createUser({
+    username: "demo_restaurant_owner",
+    password: ownerPassword,
+    fullName: "Leyla Məmmədova",
+    email: "leyla@ossrestodemo.com",
+    phone: "+994501234567",
+    role: "owner_admin",
+    ownerId: owner.id,
+    propertyId: property.id,
+  });
+
+  const trialEnd = new Date();
+  trialEnd.setDate(trialEnd.getDate() + 14);
+
+  await storage.createSubscription({
+    ownerId: owner.id,
+    planCode: "REST_BISTRO",
+    status: "trial",
+    isActive: true,
+    trialEndsAt: trialEnd,
+    currentPeriodStart: new Date(),
+    currentPeriodEnd: trialEnd,
+  });
+
+  const TENANT = owner.id;
+
+  const mc1 = await storage.createPosMenuCategory({ tenantId: TENANT, propertyId: property.id, name: "Soyuq içkilər", sortOrder: 0 });
+  const mc2 = await storage.createPosMenuCategory({ tenantId: TENANT, propertyId: property.id, name: "Əsas yeməklər", sortOrder: 1 });
+  const mc3 = await storage.createPosMenuCategory({ tenantId: TENANT, propertyId: property.id, name: "Şirniyyat", sortOrder: 2 });
+
+  const menuItems = [
+    { categoryId: mc1.id, name: "Limonad", priceCents: 500, description: "Ev limonadı" },
+    { categoryId: mc1.id, name: "Mineral Su", priceCents: 300, description: "0.5L" },
+    { categoryId: mc1.id, name: "Portağal Şirəsi", priceCents: 600, description: "Təzə sıxılmış" },
+    { categoryId: mc2.id, name: "Qril Toyuq", priceCents: 3200, description: "Kartofla" },
+    { categoryId: mc2.id, name: "Biftek", priceCents: 5000, description: "Qovrulmuş tərəvəzlə" },
+    { categoryId: mc2.id, name: "Balıq", priceCents: 4000, description: "Limon yağı ilə" },
+    { categoryId: mc2.id, name: "Vegetarian Pasta", priceCents: 2500, description: "Mövsümi tərəvəzlə" },
+    { categoryId: mc3.id, name: "Tiramisu", priceCents: 1800, description: "Klassik İtalyan" },
+    { categoryId: mc3.id, name: "Şokolad Tort", priceCents: 1500, description: "Şokolad sousla" },
+  ];
+  for (const mi of menuItems) {
+    await storage.createPosMenuItem({ tenantId: TENANT, propertyId: property.id, ...mi });
+  }
+
+  await storage.createPosOrder(
+    { tenantId: TENANT, propertyId: property.id, tableNumber: "3", guestName: "Əli Hüseynov", orderType: "dine_in", kitchenStatus: "cooking", settlementStatus: "pending", totalCents: 8700 },
+    [
+      { itemName: "Biftek", quantity: 1, unitPriceCents: 5000, totalCents: 5000 },
+      { itemName: "Limonad", quantity: 2, unitPriceCents: 500, totalCents: 1000 },
+      { itemName: "Tiramisu", quantity: 1, unitPriceCents: 1800, totalCents: 1800 },
+    ]
+  );
+  await storage.createPosOrder(
+    { tenantId: TENANT, propertyId: property.id, tableNumber: "5", guestName: "Nigar Əliyeva", orderType: "dine_in", kitchenStatus: "ready", settlementStatus: "pending", totalCents: 4500 },
+    [
+      { itemName: "Balıq", quantity: 1, unitPriceCents: 4000, totalCents: 4000 },
+      { itemName: "Mineral Su", quantity: 1, unitPriceCents: 300, totalCents: 300 },
+      { itemName: "Şokolad Tort", quantity: 1, unitPriceCents: 1500, totalCents: 1500 },
+    ]
+  );
+  await storage.createPosOrder(
+    { tenantId: TENANT, propertyId: property.id, tableNumber: "1", guestName: "Tural Qasımov", orderType: "dine_in", kitchenStatus: "delivered", settlementStatus: "cash_paid", totalCents: 6200 },
+    [
+      { itemName: "Qril Toyuq", quantity: 2, unitPriceCents: 3200, totalCents: 6400 },
+    ]
+  );
+
+  await storage.createNotification({
+    userId: ownerUser.id,
+    title: "Yeni Sifariş",
+    message: "Masa 3 — Əli Hüseynov: Biftek, Limonad x2, Tiramisu (87.00 ₼)",
+    type: "info",
+    read: false,
+  });
+  await storage.createNotification({
+    userId: ownerUser.id,
+    title: "Sifariş Hazırdır",
+    message: "Masa 5 — Nigar Əliyeva sifarişi hazırdır",
+    type: "info",
+    read: false,
+  });
+
+  logger.info({ ownerId: owner.id, propertyId: property.id }, "Restaurant owner demo data seeded");
 }

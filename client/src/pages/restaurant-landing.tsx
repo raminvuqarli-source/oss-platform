@@ -9,8 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { GetQuoteDialog } from "@/components/get-quote-dialog";
-import { apiRequest } from "@/lib/queryClient";
-import { queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient, setDemoToken } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
   UtensilsCrossed, Check, ArrowRight, ChevronLeft, Zap,
@@ -138,6 +137,17 @@ const FEATURES = [
 
 const DEMO_ROLES = [
   {
+    id: "restaurant_owner",
+    icon: Wallet,
+    color: "text-violet-500",
+    bg: "bg-violet-500/10",
+    border: "hover:border-violet-500/40",
+    titleKey: "restLanding.demoRestOwner",
+    title: "Restaurant Owner",
+    descKey: "restLanding.demoRestOwnerDesc",
+    desc: "Owner dashboard: analytics, orders, menu, staff & subscription",
+  },
+  {
     id: "restaurant_manager",
     icon: UtensilsCrossed,
     color: "text-orange-500",
@@ -221,12 +231,12 @@ export default function RestaurantLanding() {
       const response = await apiRequest("POST", "/api/auth/demo-login", { role });
       const data = await response.json();
       if (data._demoToken) {
-        // store token if needed
+        setDemoToken(data._demoToken);
       }
       const { _demoToken: _t, ...user } = data;
       queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== "/api/auth/me" });
       queryClient.setQueryData(["/api/auth/me"], user);
-      navigate(`/demo?role=${role}`);
+      navigate("/dashboard");
     } catch {
       toast({
         title: t("common.error", "Error"),
