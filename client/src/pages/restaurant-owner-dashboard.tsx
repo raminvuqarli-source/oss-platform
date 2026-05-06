@@ -726,7 +726,7 @@ export default function RestaurantOwnerDashboard() {
                             disabled={payNowMutation.isPending}
                             data-testid={`button-upgrade-${plan.code.toLowerCase()}`}
                           >
-                            {payNowMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : t("restaurantOwner.upgradeTo", "Get Started →")}
+                            {payNowMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : t("restaurantOwner.payNow", "Pay Now →")}
                           </Button>
                         )}
                       </div>
