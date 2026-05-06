@@ -919,7 +919,9 @@
       "arrivalTime": "Gözlənilən Gəliş Vaxtı",
       "notesRequests": "Qeydlər / Xüsusi İstəklər",
       "notesRequestsPlaceholder": "Əqamətiniz üçün hər hansı xüsusi istək və ya qeydlər...",
-      "submitArrivalInfo": "Gəliş Məlumatlarını Göndər"
+      "submitArrivalInfo": "Gəliş Məlumatlarını Göndər",
+      "checkinSent": "Online check-in göndərildi",
+      "checkinSentDesc": "Resepşn məlumatlarınızı yoxlayacaq."
     },
     "reception": {
       "title": "Qəbul paneli",
@@ -2970,6 +2972,8 @@
     "addCleaningTask": "Tapşırıq əlavə et",
     "noCleaningTasks": "Tapşırıq yoxdur",
     "cleaningPhoto": "Temizlik şəkli",
+    "cleaningDone": "✅ Temizlik tamamlandı",
+    "cleaningStarted": "🔄 Temizlik başladı",
     "markDone": "Hazır",
     "staffTitle": "Restoran heyəti",
     "staffSubtitle": "Kitçen işçisi, qarson, temizlik işçisi əlavə edin",
@@ -3127,6 +3131,12 @@
     "receiptTitle": "Restoran Çeki",
     "receiptGuest": "Qonaq",
     "receiptDate": "Tarix",
-    "receiptTotal": "CƏMİ"
+    "receiptTotal": "CƏMİ",
+    "selectCleaner": "Temizlik işçisi seçin...",
+    "taskStatusTitle": "Tapşırıqların vəziyyəti",
+    "noTasks": "Tapşırıq yoxdur",
+    "taskStatusPending": "Gözlənilir",
+    "taskStatusInProgress": "Davam edir",
+    "taskStatusDone": "Tamamlandı"
   }
 }

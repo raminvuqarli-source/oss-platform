@@ -602,8 +602,8 @@ export default function GuestDashboard() {
       setIdDocumentBase64(null);
       clearSignatureCanvas();
       toast({
-        title: "Online check-in göndərildi",
-        description: "Resepşn məlumatlarınızı yoxlayacaq.",
+        title: t("guest.checkinSent"),
+        description: t("guest.checkinSentDesc"),
       });
     },
     onError: (error: Error) => {

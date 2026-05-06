@@ -907,7 +907,9 @@
       "arrivalTime": "زمان ورود مورد انتظار",
       "notesRequests": "یادداشت‌ها / درخواست‌های ویژه",
       "notesRequestsPlaceholder": "هرگونه درخواست ویژه یا یادداشت برای اقامت شما...",
-      "submitArrivalInfo": "ارسال اطلاعات ورود"
+      "submitArrivalInfo": "ارسال اطلاعات ورود",
+      "checkinSent": "ورود آنلاین ارسال شد",
+      "checkinSentDesc": "پذیرش اطلاعات شما را تأیید خواهد کرد."
     },
     "reception": {
       "title": "داشبورد پذیرش",
@@ -2874,6 +2876,8 @@
     "addCleaningTask": "افزودن وظیفه",
     "noCleaningTasks": "وظیفه‌ای وجود ندارد",
     "cleaningPhoto": "عکس نظافت",
+    "cleaningDone": "✅ نظافت کامل شد",
+    "cleaningStarted": "🔄 نظافت شروع شد",
     "markDone": "تکمیل شد",
     "staffTitle": "کارکنان رستوران",
     "staffSubtitle": "کارکنان آشپزخانه، گارسون، نظافتچی اضافه کنید",
@@ -3031,6 +3035,12 @@
     "receiptTitle": "رسید رستوران",
     "receiptGuest": "مهمان",
     "receiptDate": "تاریخ",
-    "receiptTotal": "جمع کل"
+    "receiptTotal": "جمع کل",
+    "selectCleaner": "انتخاب نظافتچی...",
+    "taskStatusTitle": "وضعیت وظایف",
+    "noTasks": "وظیفه‌ای وجود ندارد",
+    "taskStatusPending": "در انتظار",
+    "taskStatusInProgress": "در حال انجام",
+    "taskStatusDone": "تکمیل شد"
   }
 }

@@ -914,7 +914,9 @@
       "arrivalTime": "Beklenen Varış Saati",
       "notesRequests": "Notlar / Özel İstekler",
       "notesRequestsPlaceholder": "Konaklamanız için özel istek veya notlarınız...",
-      "submitArrivalInfo": "Varış Bilgilerini Gönder"
+      "submitArrivalInfo": "Varış Bilgilerini Gönder",
+      "checkinSent": "Online check-in gönderildi",
+      "checkinSentDesc": "Resepsiyon bilgilerinizi doğrulayacak."
     },
     "reception": {
       "title": "Resepsiyon Kontrol Paneli",
@@ -2887,6 +2889,8 @@
     "addCleaningTask": "Görev ekle",
     "noCleaningTasks": "Görev yok",
     "cleaningPhoto": "Temizlik fotoğrafı",
+    "cleaningDone": "✅ Temizlik tamamlandı",
+    "cleaningStarted": "🔄 Temizlik başladı",
     "markDone": "Hazır",
     "staffTitle": "Restoran personeli",
     "staffSubtitle": "Mutfak personeli, garson, temizlik personeli ekleyin",
@@ -3044,6 +3048,12 @@
     "receiptTitle": "Restoran Fişi",
     "receiptGuest": "Misafir",
     "receiptDate": "Tarih",
-    "receiptTotal": "TOPLAM"
+    "receiptTotal": "TOPLAM",
+    "selectCleaner": "Temizlik personeli seç...",
+    "taskStatusTitle": "Görev Durumu",
+    "noTasks": "Görev yok",
+    "taskStatusPending": "Beklemede",
+    "taskStatusInProgress": "Devam ediyor",
+    "taskStatusDone": "Tamamlandı"
   }
 }

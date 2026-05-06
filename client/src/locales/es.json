@@ -907,7 +907,9 @@
       "arrivalTime": "Hora de llegada esperada",
       "notesRequests": "Notas / Solicitudes Especiales",
       "notesRequestsPlaceholder": "Solicitudes especiales o notas para su estancia...",
-      "submitArrivalInfo": "Enviar información de llegada"
+      "submitArrivalInfo": "Enviar información de llegada",
+      "checkinSent": "Check-in en línea enviado",
+      "checkinSentDesc": "La recepción verificará su información."
     },
     "reception": {
       "title": "Panel de Recepción",
@@ -2874,6 +2876,8 @@
     "addCleaningTask": "Agregar tarea",
     "noCleaningTasks": "Sin tareas",
     "cleaningPhoto": "Foto de limpieza",
+    "cleaningDone": "✅ Limpieza completada",
+    "cleaningStarted": "🔄 Limpieza iniciada",
     "markDone": "Listo",
     "staffTitle": "Personal del restaurante",
     "staffSubtitle": "Agregar personal de cocina, meseros, limpieza",
@@ -3031,6 +3035,12 @@
     "receiptTitle": "Recibo del restaurante",
     "receiptGuest": "Huésped",
     "receiptDate": "Fecha",
-    "receiptTotal": "TOTAL"
+    "receiptTotal": "TOTAL",
+    "selectCleaner": "Seleccionar limpiador...",
+    "taskStatusTitle": "Estado de tareas",
+    "noTasks": "Sin tareas",
+    "taskStatusPending": "Pendiente",
+    "taskStatusInProgress": "En progreso",
+    "taskStatusDone": "Completado"
   }
 }

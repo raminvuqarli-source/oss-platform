@@ -914,7 +914,9 @@
       "arrivalTime": "Ожидаемое время прибытия",
       "notesRequests": "Заметки / Особые пожелания",
       "notesRequestsPlaceholder": "Любые особые пожелания или заметки...",
-      "submitArrivalInfo": "Отправить информацию о прибытии"
+      "submitArrivalInfo": "Отправить информацию о прибытии",
+      "checkinSent": "Онлайн-регистрация отправлена",
+      "checkinSentDesc": "Ресепшн проверит ваши данные."
     },
     "reception": {
       "title": "Панель ресепшн",
@@ -2887,6 +2889,8 @@
     "addCleaningTask": "Добавить задачу",
     "noCleaningTasks": "Нет задач",
     "cleaningPhoto": "Фото уборки",
+    "cleaningDone": "✅ Уборка завершена",
+    "cleaningStarted": "🔄 Уборка начата",
     "markDone": "Готово",
     "staffTitle": "Персонал ресторана",
     "staffSubtitle": "Добавьте сотрудников кухни, официантов, уборщиков",
@@ -3044,6 +3048,12 @@
     "receiptTitle": "Чек ресторана",
     "receiptGuest": "Гость",
     "receiptDate": "Дата",
-    "receiptTotal": "ИТОГО"
+    "receiptTotal": "ИТОГО",
+    "selectCleaner": "Выбрать уборщика...",
+    "taskStatusTitle": "Статус задач",
+    "noTasks": "Нет задач",
+    "taskStatusPending": "В ожидании",
+    "taskStatusInProgress": "В процессе",
+    "taskStatusDone": "Выполнено"
   }
 }

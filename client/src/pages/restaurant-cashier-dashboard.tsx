@@ -453,7 +453,7 @@ export default function RestaurantCashierDashboard() {
                     <Label>{t("cashier.assignTo")}</Label>
                     <Select value={taskAssignee} onValueChange={setTaskAssignee}>
                       <SelectTrigger data-testid="select-task-assignee">
-                        <SelectValue placeholder="Temizlik işçisi seçin..." />
+                        <SelectValue placeholder={t("cashier.selectCleaner")} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="__none__">{t("cashier.noCleaner")}</SelectItem>
@@ -485,7 +485,7 @@ export default function RestaurantCashierDashboard() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                   <ClipboardList className="h-4 w-4 text-primary" />
-                  Tapşırıqların vəziyyəti
+                  {t("cashier.taskStatusTitle")}
                   {cleaningTasks.length > 0 && (
                     <Badge variant="secondary" className="ml-auto">{cleaningTasks.length}</Badge>
                   )}
@@ -495,7 +495,7 @@ export default function RestaurantCashierDashboard() {
                 {tasksLoading ? (
                   <div className="space-y-2">{[1,2,3].map(i => <Skeleton key={i} className="h-14 w-full" />)}</div>
                 ) : cleaningTasks.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">Tapşırıq yoxdur</p>
+                  <p className="text-sm text-muted-foreground text-center py-4">{t("cashier.noTasks")}</p>
                 ) : (
                   <div className="space-y-2">
                     {cleaningTasks.slice().reverse().map(task => (
@@ -528,7 +528,7 @@ export default function RestaurantCashierDashboard() {
                             ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 shrink-0"
                             : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 shrink-0"
                         }>
-                          {task.status === "done" ? "Tamamlandı" : task.status === "in_progress" ? "Davam edir" : "Gözlənilir"}
+                          {task.status === "done" ? t("cashier.taskStatusDone") : task.status === "in_progress" ? t("cashier.taskStatusInProgress") : t("cashier.taskStatusPending")}
                         </Badge>
                       </div>
                     ))}

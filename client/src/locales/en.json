@@ -919,7 +919,9 @@
       "arrivalTime": "Expected Arrival Time",
       "notesRequests": "Notes / Special Requests",
       "notesRequestsPlaceholder": "Any special requests or notes for your stay...",
-      "submitArrivalInfo": "Submit Arrival Info"
+      "submitArrivalInfo": "Submit Arrival Info",
+      "checkinSent": "Online check-in submitted",
+      "checkinSentDesc": "Reception will verify your information."
     },
     "reception": {
       "title": "Reception Dashboard",
@@ -2993,6 +2995,8 @@
     "addCleaningTask": "Add Task",
     "noCleaningTasks": "No tasks",
     "cleaningPhoto": "Cleaning photo",
+    "cleaningDone": "✅ Cleaning complete",
+    "cleaningStarted": "🔄 Cleaning started",
     "markDone": "Done",
     "staffTitle": "Restaurant staff",
     "staffSubtitle": "Add kitchen, waiter, cleaning staff",
@@ -3150,6 +3154,12 @@
     "receiptTitle": "Restaurant Receipt",
     "receiptGuest": "Guest",
     "receiptDate": "Date",
-    "receiptTotal": "TOTAL"
+    "receiptTotal": "TOTAL",
+    "selectCleaner": "Select cleaner...",
+    "taskStatusTitle": "Task Status",
+    "noTasks": "No tasks",
+    "taskStatusPending": "Pending",
+    "taskStatusInProgress": "In progress",
+    "taskStatusDone": "Done"
   }
 }

@@ -907,7 +907,9 @@
       "arrivalTime": "Verwachte aankomsttijd",
       "notesRequests": "Notities / Speciale verzoeken",
       "notesRequestsPlaceholder": "Speciale verzoeken of notities voor uw verblijf...",
-      "submitArrivalInfo": "Aankomstinformatie verzenden"
+      "submitArrivalInfo": "Aankomstinformatie verzenden",
+      "checkinSent": "Online check-in ingediend",
+      "checkinSentDesc": "De receptie controleert uw informatie."
     },
     "reception": {
       "title": "Receptie Dashboard",
@@ -2874,6 +2876,8 @@
     "addCleaningTask": "Taak toevoegen",
     "noCleaningTasks": "Geen taken",
     "cleaningPhoto": "Schoonmaakfoto",
+    "cleaningDone": "✅ Schoonmaak voltooid",
+    "cleaningStarted": "🔄 Schoonmaak gestart",
     "markDone": "Klaar",
     "staffTitle": "Restaurantpersoneel",
     "staffSubtitle": "Keukenpersoneel, obers, schoonmaakpersoneel toevoegen",
@@ -3031,6 +3035,12 @@
     "receiptTitle": "Restaurantbon",
     "receiptGuest": "Gast",
     "receiptDate": "Datum",
-    "receiptTotal": "TOTAAL"
+    "receiptTotal": "TOTAAL",
+    "selectCleaner": "Schoonmaker selecteren...",
+    "taskStatusTitle": "Taakstatus",
+    "noTasks": "Geen taken",
+    "taskStatusPending": "In afwachting",
+    "taskStatusInProgress": "Bezig",
+    "taskStatusDone": "Klaar"
   }
 }

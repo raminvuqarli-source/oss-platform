@@ -83,12 +83,12 @@ export default function RestaurantManager() {
           const task = msg.task;
           if (task?.status === "done") {
             toast({
-              title: "✅ Temizlik tamamlandı",
+              title: t("restaurant.cleaningDone"),
               description: task.description + (task.location ? ` — ${task.location}` : ""),
             });
           } else if (task?.status === "in_progress") {
             toast({
-              title: "🔄 Temizlik başladı",
+              title: t("restaurant.cleaningStarted"),
               description: task.description + (task.location ? ` — ${task.location}` : ""),
             });
           }
@@ -852,7 +852,7 @@ export default function RestaurantManager() {
           <div className="relative max-w-3xl max-h-[90vh] w-full flex items-center justify-center" onClick={e => e.stopPropagation()}>
             <img
               src={lightboxUrl}
-              alt="Temizlik şəkli"
+              alt={t("restaurant.cleaningPhoto")}
               className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl"
               data-testid="lightbox-image"
             />

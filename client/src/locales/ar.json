@@ -907,7 +907,9 @@
       "arrivalTime": "وقت الوصول المتوقع",
       "notesRequests": "ملاحظات / طلبات خاصة",
       "notesRequestsPlaceholder": "أي طلبات خاصة أو ملاحظات لإقامتك...",
-      "submitArrivalInfo": "إرسال معلومات الوصول"
+      "submitArrivalInfo": "إرسال معلومات الوصول",
+      "checkinSent": "تم إرسال تسجيل الوصول عبر الإنترنت",
+      "checkinSentDesc": "سيتحقق الاستقبال من معلوماتك."
     },
     "reception": {
       "title": "لوحة تحكم الاستقبال",
@@ -2874,6 +2876,8 @@
     "addCleaningTask": "إضافة مهمة",
     "noCleaningTasks": "لا توجد مهام",
     "cleaningPhoto": "صورة التنظيف",
+    "cleaningDone": "✅ اكتمل التنظيف",
+    "cleaningStarted": "🔄 بدأ التنظيف",
     "markDone": "منجز",
     "staffTitle": "موظفو المطعم",
     "staffSubtitle": "إضافة موظفي المطبخ والنادلين وموظفي التنظيف",
@@ -3031,6 +3035,12 @@
     "receiptTitle": "إيصال المطعم",
     "receiptGuest": "الضيف",
     "receiptDate": "التاريخ",
-    "receiptTotal": "المجموع"
+    "receiptTotal": "المجموع",
+    "selectCleaner": "اختر عامل تنظيف...",
+    "taskStatusTitle": "حالة المهام",
+    "noTasks": "لا توجد مهام",
+    "taskStatusPending": "في الانتظار",
+    "taskStatusInProgress": "جارٍ التنفيذ",
+    "taskStatusDone": "مكتمل"
   }
 }
