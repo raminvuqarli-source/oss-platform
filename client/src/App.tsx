@@ -15,10 +15,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Lock as LockIcon } from "lucide-react";
 import NotFound from "@/pages/not-found";
-import Welcome from "@/pages/welcome";
 import { AIChatWidget } from "@/components/ai-chat-widget";
 import '@/lib/i18n';
 
+const Home = lazy(() => import("@/pages/home"));
+const Welcome = lazy(() => import("@/pages/welcome"));
+const RestaurantLanding = lazy(() => import("@/pages/restaurant-landing"));
 const Login = lazy(() => import("@/pages/login"));
 const Register = lazy(() => import("@/pages/register"));
 const ForgotPassword = lazy(() => import("@/pages/forgot-password"));
@@ -179,7 +181,9 @@ function AuthFallback() {
 const JoinTeam = lazy(() => import("@/pages/join-team"));
 
 const publicRoutes = [
-  { path: "/", component: Welcome },
+  { path: "/", component: Home },
+  { path: "/hotel", component: Welcome },
+  { path: "/restaurant", component: RestaurantLanding },
   { path: "/login", component: Login },
   { path: "/demo", component: DemoLogin },
   { path: "/forgot-password", component: ForgotPassword },

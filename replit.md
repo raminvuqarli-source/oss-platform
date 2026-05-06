@@ -1,7 +1,7 @@
-# O.S.S - Smart Hotel System
+# O.S.S - Smart Hotel & Restaurant System
 
 ## Overview
-O.S.S (Smart Hotel System) is a multi-tenant SaaS platform for comprehensive property management in the hospitality industry. It streamlines hotel operations and enhances guest experiences across various property types. Key capabilities include smart room controls, efficient service request handling, role-based dashboards, IoT device tracking, flexible subscription plans, and cross-property analytics. The project aims to be a leading solution in hospitality tech, offering a unified platform for managing all aspects of hotel operations.
+O.S.S is a multi-tenant SaaS platform covering two verticals: (1) **Hotel** — full property management (rooms, bookings, staff, IoT, analytics, financials) and (2) **Restaurant** — standalone POS system (orders, KDS, digital menu, cashier, analytics). The `/` landing page lets visitors choose their module; `/hotel` → hotel landing, `/restaurant` → restaurant POS landing. Both offer 14-day trials and full i18n across 10 languages.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.

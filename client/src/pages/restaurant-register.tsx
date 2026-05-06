@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
+import { useState, useEffect } from "react";
+import { useLocation, useSearch } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -61,8 +61,17 @@ export default function RestaurantRegister() {
   const { t } = useTranslation();
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const search = useSearch();
+  const planParam = new URLSearchParams(search).get("plan");
+
   const [step, setStep] = useState(1);
-  const [selectedPlan, setSelectedPlan] = useState("REST_CAFE");
+  const [selectedPlan, setSelectedPlan] = useState(planParam || "REST_CAFE");
+
+  useEffect(() => {
+    if (planParam && ["REST_CAFE", "REST_BISTRO", "REST_CHAIN"].includes(planParam)) {
+      setSelectedPlan(planParam);
+    }
+  }, [planParam]);
 
   const [accountForm, setAccountForm] = useState({
     fullName: "",

@@ -828,4 +828,72 @@ export function registerAdminRoutes(app: Express): void {
       res.status(500).json({ message: "Failed to update user role" });
     }
   });
+
+  // OSS Admin: List all standalone restaurant accounts
+  app.get("/api/oss-admin/restaurants", requireRole("oss_super_admin"), async (req, res) => {
+    try {
+      const allOwners = await storage.getAllOwners();
+      const restaurantOwners = allOwners.filter(
+        (o) => o.tenantType === "restaurant_only" && o.status !== "deleted"
+      );
+
+      const results = await Promise.all(
+        restaurantOwners.map(async (owner) => {
+          const [allUsers, properties, subscription] = await Promise.all([
+            storage.adminGetAllUsers(),
+            storage.getPropertiesByOwner(owner.id),
+            storage.getSubscriptionByOwner(owner.id),
+          ]);
+          const ownerUser = allUsers.find(
+            (u) => u.ownerId === owner.id && u.role === "owner_admin"
+          ) || allUsers.find((u) => u.ownerId === owner.id);
+
+          return {
+            ownerId: owner.id,
+            restaurantName: owner.companyName || owner.name,
+            ownerName: ownerUser?.fullName || owner.name,
+            email: ownerUser?.email || owner.email,
+            planCode: subscription?.planCode || null,
+            planType: subscription?.planType || null,
+            subscriptionStatus: subscription?.status || "none",
+            isActive: subscription?.isActive || false,
+            trialEndsAt: subscription?.trialEndsAt || null,
+            createdAt: owner.createdAt,
+            propertyCount: properties.length,
+          };
+        })
+      );
+
+      res.json(results);
+    } catch (error) {
+      logger.error({ err: error }, "Failed to fetch restaurant accounts");
+      res.status(500).json({ message: "Failed to fetch restaurant accounts" });
+    }
+  });
+
+  // OSS Admin: Activate/update trial for a restaurant owner
+  app.post("/api/oss-admin/restaurants/:ownerId/activate-trial", requireRole("oss_super_admin"), async (req, res) => {
+    try {
+      const { ownerId } = req.params;
+      const { days = 14 } = req.body;
+      const owner = await storage.getOwner(ownerId);
+      if (!owner || owner.tenantType !== "restaurant_only") {
+        return res.status(404).json({ message: "Restaurant account not found" });
+      }
+      const trialEnd = new Date();
+      trialEnd.setDate(trialEnd.getDate() + Number(days));
+      const existing = await storage.getSubscriptionByOwner(ownerId);
+      if (existing) {
+        await storage.updateSubscription(existing.id, {
+          status: "trial",
+          trialEndsAt: trialEnd,
+          isActive: true,
+        });
+      }
+      res.json({ success: true, trialEndsAt: trialEnd });
+    } catch (error) {
+      logger.error({ err: error }, "Failed to activate restaurant trial");
+      res.status(500).json({ message: "Failed to activate trial" });
+    }
+  });
 }

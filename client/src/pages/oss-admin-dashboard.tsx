@@ -53,6 +53,7 @@ import {
   Snowflake,
   ShieldCheck,
   AlertTriangle,
+  UtensilsCrossed,
 } from "lucide-react";
 import type { QuoteRequest, QuoteNote, User, QuoteRequestStatus, Contract, BoardReport } from "@shared/schema";
 import type { PlatformStats, CustomerSummary, CustomerDetail, SubscriptionRow } from "@/types/dashboard";
@@ -260,6 +261,10 @@ export default function OssAdminDashboard() {
             <TabsTrigger value="billing-reports" className="gap-2" data-testid="tab-billing-reports">
               <CreditCard className="h-4 w-4" />
               {t("ossAdmin.billingReports", "Billing Reports")}
+            </TabsTrigger>
+            <TabsTrigger value="restaurants" className="gap-2" data-testid="tab-restaurants">
+              <UtensilsCrossed className="h-4 w-4" />
+              {t("ossAdmin.restaurants", "Restoranlar")}
             </TabsTrigger>
           </TabsList>
 
@@ -476,6 +481,10 @@ export default function OssAdminDashboard() {
 
           <TabsContent value="billing-reports" className="space-y-4">
             <OssBillingReportsPanel />
+          </TabsContent>
+
+          <TabsContent value="restaurants" className="space-y-4">
+            <OssRestaurantsPanel />
           </TabsContent>
 
         </Tabs>
@@ -2371,6 +2380,179 @@ function OssMarketingPanel() {
             <Button onClick={() => createMutation.mutate(form)} disabled={createMutation.isPending || !form.username || !form.password || !form.fullName} data-testid="button-confirm-create-marketing">
               {createMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               {t("common.create")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ===================== OSS RESTAURANTS PANEL =====================
+type RestaurantRow = {
+  ownerId: string;
+  restaurantName: string;
+  ownerName: string;
+  email: string;
+  planCode: string | null;
+  subscriptionStatus: string;
+  isActive: boolean;
+  trialEndsAt: string | null;
+  createdAt: string;
+};
+
+function OssRestaurantsPanel() {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [trialDays, setTrialDays] = useState(14);
+  const [extendId, setExtendId] = useState<string | null>(null);
+
+  const { data: restaurants, isLoading, refetch } = useQuery<RestaurantRow[]>({
+    queryKey: ["/api/oss-admin/restaurants"],
+  });
+
+  const extendMutation = useMutation({
+    mutationFn: async ({ ownerId, days }: { ownerId: string; days: number }) => {
+      const res = await apiRequest("POST", `/api/oss-admin/restaurants/${ownerId}/activate-trial`, { days });
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: t("common.success"), description: t("ossAdmin.trialExtended", "Trial extended successfully") });
+      queryClient.invalidateQueries({ queryKey: ["/api/oss-admin/restaurants"] });
+      setExtendId(null);
+    },
+    onError: (err) => showErrorToast(toast, err),
+  });
+
+  const PLAN_LABELS: Record<string, string> = {
+    REST_CAFE: "Standard ($29)",
+    REST_BISTRO: "Professional ($49)",
+    REST_CHAIN: "Enterprise",
+  };
+
+  const filtered = (restaurants || []).filter(r => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return r.restaurantName?.toLowerCase().includes(q) || r.email?.toLowerCase().includes(q) || r.ownerName?.toLowerCase().includes(q);
+  });
+
+  const activeCount = (restaurants || []).filter(r => r.isActive).length;
+  const trialCount = (restaurants || []).filter(r => r.subscriptionStatus === "trial").length;
+
+  return (
+    <div className="space-y-5" data-testid="restaurants-panel">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatCard title={t("ossAdmin.restaurantCount", "Total Restaurants")} value={restaurants?.length || 0} icon={UtensilsCrossed} />
+        <StatCard title={t("ossAdmin.restaurantActive", "Active")} value={activeCount} icon={CheckCircle} />
+        <StatCard title={t("ossAdmin.restaurantTrial", "On Trial")} value={trialCount} icon={Clock} />
+      </div>
+
+      <Card>
+        <CardHeader className="pb-3 flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <UtensilsCrossed className="h-5 w-5 text-orange-500" />
+              {t("ossAdmin.restaurantsTitle", "Restaurant Accounts")}
+            </CardTitle>
+            <CardDescription>{t("ossAdmin.restaurantsDesc", "Standalone restaurant POS accounts")}</CardDescription>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => refetch()} data-testid="button-refresh-restaurants">
+            <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> {t("common.refresh", "Refresh")}
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4">
+            <Input
+              placeholder={t("ossAdmin.searchRestaurants", "Search by name, email...")}
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              data-testid="input-search-restaurants"
+            />
+          </div>
+
+          {isLoading ? (
+            <div className="space-y-2">{[1,2,3].map(i => <Skeleton key={i} className="h-14 w-full" />)}</div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <UtensilsCrossed className="h-12 w-12 mx-auto mb-3 opacity-20" />
+              <p>{t("ossAdmin.noRestaurants", "No restaurant accounts registered yet")}</p>
+            </div>
+          ) : (
+            <div className="rounded-lg border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("ossAdmin.restaurant", "Restaurant")}</TableHead>
+                    <TableHead>{t("ossAdmin.owner", "Owner")}</TableHead>
+                    <TableHead>{t("ossAdmin.plan", "Plan")}</TableHead>
+                    <TableHead>{t("ossAdmin.status", "Status")}</TableHead>
+                    <TableHead>{t("ossAdmin.trialEnds", "Trial Ends")}</TableHead>
+                    <TableHead>{t("common.actions", "Actions")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map(r => (
+                    <TableRow key={r.ownerId} data-testid={`row-restaurant-${r.ownerId}`}>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{r.restaurantName}</p>
+                          <p className="text-xs text-muted-foreground">{r.email}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{r.ownerName}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs">
+                          {r.planCode ? PLAN_LABELS[r.planCode] || r.planCode : "—"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={r.isActive ? "default" : "secondary"} className="text-xs capitalize">
+                          {r.subscriptionStatus || "—"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {r.trialEndsAt ? new Date(r.trialEndsAt).toLocaleDateString() : "—"}
+                      </TableCell>
+                      <TableCell>
+                        <Button size="sm" variant="outline" onClick={() => setExtendId(r.ownerId)} data-testid={`button-extend-${r.ownerId}`}>
+                          {t("ossAdmin.extendTrial", "Extend Trial")}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Dialog open={!!extendId} onOpenChange={o => !o && setExtendId(null)}>
+        <DialogContent data-testid="dialog-extend-trial">
+          <DialogHeader>
+            <DialogTitle>{t("ossAdmin.extendTrialTitle", "Extend Restaurant Trial")}</DialogTitle>
+            <DialogDescription>{t("ossAdmin.extendTrialDesc", "Set the number of additional trial days for this restaurant account.")}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <Label>{t("ossAdmin.trialDays", "Trial Days")}</Label>
+            <Input
+              type="number"
+              min={1}
+              max={365}
+              value={trialDays}
+              onChange={e => setTrialDays(parseInt(e.target.value) || 14)}
+              data-testid="input-trial-days"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setExtendId(null)}>{t("common.cancel")}</Button>
+            <Button
+              disabled={extendMutation.isPending}
+              onClick={() => extendId && extendMutation.mutate({ ownerId: extendId, days: trialDays })}
+              data-testid="button-confirm-extend"
+            >
+              {extendMutation.isPending ? t("common.loading", "Saving...") : t("ossAdmin.extendTrial", "Extend Trial")}
             </Button>
           </DialogFooter>
         </DialogContent>

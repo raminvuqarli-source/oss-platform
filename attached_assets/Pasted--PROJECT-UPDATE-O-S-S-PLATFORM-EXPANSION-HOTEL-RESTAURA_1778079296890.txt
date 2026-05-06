@@ -1,0 +1,29 @@
+### PROJECT UPDATE: O.S.S. PLATFORM EXPANSION (HOTEL & RESTAURANT ECOSYSTEM)
+
+Objective: Restructure the O.S.S. (Orange Smart Service) landing page and implement a standalone Restaurant POS module with a new pricing structure.
+
+1. LANDING PAGE ARCHITECTURE:
+- Implement a landing page (main entry) that asks the user to choose between "HOTEL" and "RESTORAN".
+- If "HOTEL" is selected: Redirect to the existing O.S.S. PMS/Hotel management landing page.
+- If "RESTORAN" is selected: Redirect to a new dedicated Restaurant POS page.
+
+2. RESTORAN PAGE & PRICING:
+Implement the following pricing table for standalone restaurants (ensure it matches the existing UI/UX style):
+- STANDARD: $29/month (Features: 1 POS terminal, QR Menu, Sales Reports, Cloud Storage).
+- PROFESSIONAL: $49/month (Features: Unlimited POS terminals, QR Menu, Waiter Panel, Advanced Analytics).
+- ENTERPRISE: "Contact Us" (Link to WhatsApp: +994508880089).
+- Action: Each plan must have a "Register" button that redirects to a dedicated restaurant registration flow.
+
+3. CORE FEATURE INTEGRATION (MANDATORY):
+- NOTIFICATIONS: The existing O.S.S. notification system must be functional and integrated across both Hotel and Restaurant modules.
+- EPOINT: Ensure Epoint payment gateway is active and integrated for all transaction types in both modules.
+- MULTI-LANGUAGE: All new UI elements, buttons, and descriptions must support the platform's 10 languages. Never skip translation files for new features.
+
+4. SUPER ADMIN PANEL UPDATES:
+- Create a dedicated section in the O.S.S. Super Admin panel for "Restoranlar".
+- This panel must allow admins to manage standalone restaurant accounts, monitor their POS status, and handle specific restaurant subscriptions separately from hotel properties.
+
+5. TECHNICAL CONSTRAINTS:
+- No Inventory (Anbar) module for restaurants yet; focus on POS and Sales.
+- Registration for restaurants should automatically tag the account as "Standalone Restaurant" in the DB.
+- Maintain the visual identity of Orange Studio / O.S.S. (dark theme, orange accents).
