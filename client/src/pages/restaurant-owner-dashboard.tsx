@@ -653,9 +653,21 @@ export default function RestaurantOwnerDashboard() {
                           : subscriptionData?.status || "—"}
                       </p>
                     </div>
-                    <Badge variant={subscriptionData?.status === "active" ? "default" : "secondary"} className="capitalize">
-                      {subscriptionData?.status || "—"}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={subscriptionData?.status === "active" ? "default" : "secondary"} className="capitalize">
+                        {subscriptionData?.status || "—"}
+                      </Badge>
+                      {subscriptionData?.planCode && (
+                        <Button
+                          size="sm"
+                          onClick={() => payNowMutation.mutate(subscriptionData.planCode!)}
+                          disabled={payNowMutation.isPending}
+                          data-testid="button-pay-now-current"
+                        >
+                          {payNowMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : t("restaurantOwner.payNow", "Pay Now →")}
+                        </Button>
+                      )}
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-3">
