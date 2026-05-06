@@ -1784,7 +1784,7 @@ function PropertiesView({
             <PropertyTeamPanel
               propertyId={selectedProperty.id}
               onMessageStaff={(staffId) => {
-                navigate(`/owner?view=messages&staffId=${staffId}`);
+                navigate(`/dashboard?view=messages&staffId=${staffId}`);
               }}
             />
           </TabsContent>

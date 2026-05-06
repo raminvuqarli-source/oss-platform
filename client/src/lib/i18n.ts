@@ -62,8 +62,9 @@ i18n
     },
   });
 
-export const changeLanguage = (lng: string) => {
-  i18n.changeLanguage(lng);
+export const changeLanguage = async (lng: string) => {
+  try { localStorage.setItem('i18nextLng', lng); } catch {}
+  await i18n.changeLanguage(lng);
   const language = languages.find(l => l.code === lng);
   if (language) {
     document.documentElement.dir = language.dir;

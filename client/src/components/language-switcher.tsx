@@ -20,7 +20,7 @@ export function LanguageSwitcher({ user }: LanguageSwitcherProps = {}) {
   const currentLanguage = languages.find(l => l.code === i18n.language) || languages[0];
 
   const handleLanguageChange = async (code: string) => {
-    changeLanguage(code);
+    await changeLanguage(code);
     if (user) {
       try {
         await apiRequest("PATCH", "/api/auth/language", { language: code });
