@@ -83,6 +83,9 @@ export default function RestaurantCashierDashboard() {
   const [taskLocation, setTaskLocation] = useState("");
   const [taskAssignee, setTaskAssignee] = useState<string>("__none__");
 
+  const { data: currentUser } = useQuery<{ tenantType?: string | null }>({ queryKey: ["/api/auth/me"] });
+  const isHotelTenant = currentUser?.tenantType !== "restaurant_only";
+
   const { data: orders = [], isLoading: ordersLoading } = useQuery<PosOrder[]>({
     queryKey: ["/api/restaurant/orders"],
     refetchInterval: 15000,
@@ -566,7 +569,7 @@ export default function RestaurantCashierDashboard() {
                   <SelectContent>
                     <SelectItem value="cash"><div className="flex items-center gap-2"><Banknote className="h-4 w-4" />{t("cashier.cash")}</div></SelectItem>
                     <SelectItem value="card"><div className="flex items-center gap-2"><CreditCard className="h-4 w-4" />{t("cashier.card")}</div></SelectItem>
-                    {settleDialog?.roomNumber && (
+                    {isHotelTenant && settleDialog?.roomNumber && (
                       <SelectItem value="room_charge"><div className="flex items-center gap-2"><span className="text-base">🏨</span>{t("cashier.roomCharge", "Borc Yaz")}</div></SelectItem>
                     )}
                   </SelectContent>

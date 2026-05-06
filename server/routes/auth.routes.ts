@@ -1080,7 +1080,16 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
       return res.status(404).json({ message: "User not found" });
     }
     const { password: _pw, ...userWithoutPassword } = user;
-    res.json(userWithoutPassword);
+    // Resolve owner tenantType so frontend can distinguish hotel vs standalone restaurant
+    let tenantType: string | null = null;
+    try {
+      const ownerId = (user as any).ownerId;
+      if (ownerId) {
+        const owner = await storage.getOwner(ownerId);
+        tenantType = (owner as any)?.tenantType ?? null;
+      }
+    } catch {}
+    res.json({ ...userWithoutPassword, tenantType });
   });
 
   app.patch("/api/auth/language", requireAuth, async (req, res) => {
