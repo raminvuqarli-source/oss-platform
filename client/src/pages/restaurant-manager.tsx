@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -60,6 +61,8 @@ export default function RestaurantManager() {
   const dateFnsLocale = dateFnsLocaleMap[i18n.language] ?? undefined;
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
+  const [activeTab, setActiveTab] = useState("orders");
 
   // ── dialog state ──
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
@@ -297,17 +300,35 @@ export default function RestaurantManager() {
           </Card>
         </div>
 
-        <Tabs defaultValue="orders">
-          <TabsList className="flex flex-wrap h-auto gap-1 w-full" data-testid="tabs-manager">
-            <TabsTrigger value="orders" data-testid="tab-manager-orders"><ShoppingBag className="h-4 w-4 mr-1" />{t("rm.tabOrders")}</TabsTrigger>
-            <TabsTrigger value="settlement" data-testid="tab-manager-settlement"><CreditCard className="h-4 w-4 mr-1" />{t("rm.tabSettlement")} {pendingSettlementOrders.length > 0 && `(${pendingSettlementOrders.length})`}</TabsTrigger>
-            <TabsTrigger value="rooms" data-testid="tab-manager-rooms"><BedDouble className="h-4 w-4 mr-1" />{t("rm.tabRooms")} {roomOrders.length > 0 && `(${roomOrders.length})`}</TabsTrigger>
-            <TabsTrigger value="menu" data-testid="tab-manager-menu"><ChefHat className="h-4 w-4 mr-1" />{t("rm.tabMenu")}</TabsTrigger>
-            <TabsTrigger value="waiters" data-testid="tab-manager-waiters"><Utensils className="h-4 w-4 mr-1" />{t("rm.tabWaiters")} {waiters.length > 0 && `(${waiters.length})`}</TabsTrigger>
-            <TabsTrigger value="cleaning" data-testid="tab-manager-cleaning"><Sparkles className="h-4 w-4 mr-1" />{t("rm.tabCleaning")} {cleaningTasks.filter(t=>t.status!=="done").length > 0 && `(${cleaningTasks.filter(t=>t.status!=="done").length})`}</TabsTrigger>
-            <TabsTrigger value="staff" data-testid="tab-manager-staff"><Users className="h-4 w-4 mr-1" />{t("rm.tabStaff")} {myRestaurantStaff.length > 0 && `(${myRestaurantStaff.length})`}</TabsTrigger>
-            <TabsTrigger value="finance" data-testid="tab-manager-finance"><TrendingUp className="h-4 w-4 mr-1" />{t("rm.tabFinance")}</TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          {isMobile ? (
+            <Select value={activeTab} onValueChange={setActiveTab}>
+              <SelectTrigger className="w-full mb-3" data-testid="select-manager-tab">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="orders"><div className="flex items-center gap-2"><ShoppingBag className="h-4 w-4" />{t("rm.tabOrders")}{pendingSettlementOrders.length > 0 ? ` (${pendingSettlementOrders.length})` : ""}</div></SelectItem>
+                <SelectItem value="settlement"><div className="flex items-center gap-2"><CreditCard className="h-4 w-4" />{t("rm.tabSettlement")}{pendingSettlementOrders.length > 0 ? ` (${pendingSettlementOrders.length})` : ""}</div></SelectItem>
+                <SelectItem value="rooms"><div className="flex items-center gap-2"><BedDouble className="h-4 w-4" />{t("rm.tabRooms")}{roomOrders.length > 0 ? ` (${roomOrders.length})` : ""}</div></SelectItem>
+                <SelectItem value="menu"><div className="flex items-center gap-2"><ChefHat className="h-4 w-4" />{t("rm.tabMenu")}</div></SelectItem>
+                <SelectItem value="waiters"><div className="flex items-center gap-2"><Utensils className="h-4 w-4" />{t("rm.tabWaiters")}{waiters.length > 0 ? ` (${waiters.length})` : ""}</div></SelectItem>
+                <SelectItem value="cleaning"><div className="flex items-center gap-2"><Sparkles className="h-4 w-4" />{t("rm.tabCleaning")}{cleaningTasks.filter(c=>c.status!=="done").length > 0 ? ` (${cleaningTasks.filter(c=>c.status!=="done").length})` : ""}</div></SelectItem>
+                <SelectItem value="staff"><div className="flex items-center gap-2"><Users className="h-4 w-4" />{t("rm.tabStaff")}{myRestaurantStaff.length > 0 ? ` (${myRestaurantStaff.length})` : ""}</div></SelectItem>
+                <SelectItem value="finance"><div className="flex items-center gap-2"><TrendingUp className="h-4 w-4" />{t("rm.tabFinance")}</div></SelectItem>
+              </SelectContent>
+            </Select>
+          ) : (
+            <TabsList className="flex flex-wrap h-auto gap-1 w-full" data-testid="tabs-manager">
+              <TabsTrigger value="orders" data-testid="tab-manager-orders"><ShoppingBag className="h-4 w-4 mr-1" />{t("rm.tabOrders")}</TabsTrigger>
+              <TabsTrigger value="settlement" data-testid="tab-manager-settlement"><CreditCard className="h-4 w-4 mr-1" />{t("rm.tabSettlement")} {pendingSettlementOrders.length > 0 && `(${pendingSettlementOrders.length})`}</TabsTrigger>
+              <TabsTrigger value="rooms" data-testid="tab-manager-rooms"><BedDouble className="h-4 w-4 mr-1" />{t("rm.tabRooms")} {roomOrders.length > 0 && `(${roomOrders.length})`}</TabsTrigger>
+              <TabsTrigger value="menu" data-testid="tab-manager-menu"><ChefHat className="h-4 w-4 mr-1" />{t("rm.tabMenu")}</TabsTrigger>
+              <TabsTrigger value="waiters" data-testid="tab-manager-waiters"><Utensils className="h-4 w-4 mr-1" />{t("rm.tabWaiters")} {waiters.length > 0 && `(${waiters.length})`}</TabsTrigger>
+              <TabsTrigger value="cleaning" data-testid="tab-manager-cleaning"><Sparkles className="h-4 w-4 mr-1" />{t("rm.tabCleaning")} {cleaningTasks.filter(c=>c.status!=="done").length > 0 && `(${cleaningTasks.filter(c=>c.status!=="done").length})`}</TabsTrigger>
+              <TabsTrigger value="staff" data-testid="tab-manager-staff"><Users className="h-4 w-4 mr-1" />{t("rm.tabStaff")} {myRestaurantStaff.length > 0 && `(${myRestaurantStaff.length})`}</TabsTrigger>
+              <TabsTrigger value="finance" data-testid="tab-manager-finance"><TrendingUp className="h-4 w-4 mr-1" />{t("rm.tabFinance")}</TabsTrigger>
+            </TabsList>
+          )}
 
           {/* ── Orders Tab ── */}
           <TabsContent value="orders" className="mt-4 space-y-2">

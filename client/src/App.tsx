@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, Component } from "react";
 import { Switch, Route, Redirect } from "wouter";
 import { useTranslation } from "react-i18next";
 import { queryClient } from "./lib/queryClient";
@@ -46,12 +46,46 @@ const HousekeepingDashboard = lazy(() => import("@/pages/housekeeping-dashboard"
 const RestaurantCashier = lazy(() => import("@/pages/restaurant-cashier-dashboard"));
 const DemoLogin = lazy(() => import("@/pages/demo-login"));
 
+class ErrorBoundary extends Component<{ children: React.ReactNode }, { hasError: boolean; errorMessage: string }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, errorMessage: "" };
+  }
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, errorMessage: error?.message || "Unknown error" };
+  }
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error("[ErrorBoundary] caught:", error, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+          <div className="text-center space-y-4 max-w-sm">
+            <div className="h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+              <span className="text-destructive text-2xl">!</span>
+            </div>
+            <p className="text-sm text-muted-foreground">Səhifə yüklənə bilmədi. Yeniləyin.</p>
+            <button
+              onClick={() => { this.setState({ hasError: false, errorMessage: "" }); window.location.reload(); }}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm"
+            >
+              Yenilə
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function PageLoader() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="space-y-4 text-center">
-        <Skeleton className="h-12 w-12 rounded-full mx-auto" />
-        <Skeleton className="h-4 w-32 mx-auto" />
+      <div className="flex flex-col items-center gap-3">
+        <div className="h-10 w-10 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+        <p className="text-sm text-muted-foreground">Yüklənir...</p>
       </div>
     </div>
   );
@@ -171,6 +205,7 @@ const protectedRoutes: { path: string; component: React.ComponentType; guardTria
 
 function Router() {
   return (
+    <ErrorBoundary>
     <Suspense fallback={<PageLoader />}>
       <Switch>
         {publicRoutes.map(({ path, component: C }) => (
@@ -198,6 +233,7 @@ function Router() {
         </Route>
       </Switch>
     </Suspense>
+    </ErrorBoundary>
   );
 }
 
