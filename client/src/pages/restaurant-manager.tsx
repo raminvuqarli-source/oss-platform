@@ -3,6 +3,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/lib/auth-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,8 @@ import {
   DollarSign, ShoppingBag, Clock, CheckCircle2, CreditCard,
   Users, UserPlus, Loader2, Shield, Utensils, LayoutGrid,
   Sparkles, TrendingUp, Banknote, Wallet, CreditCard as CardIcon,
-  ClipboardList, CheckSquare, Camera, MapPin, BarChart2, Trophy, Star
+  ClipboardList, CheckSquare, Camera, MapPin, BarChart2, Trophy, Star,
+  AlertTriangle, BadgeCheck, CalendarClock, RefreshCw, PhoneCall
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { Locale } from "date-fns";
@@ -75,6 +77,7 @@ export default function RestaurantManager() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
+  const { user: authUser } = useAuth();
   const [activeTab, setActiveTab] = useState("orders");
 
   // ── dialog state ──
@@ -138,8 +141,24 @@ export default function RestaurantManager() {
   }, [queryClient, toast]);
 
   // ── queries ──
-  const { data: currentUser } = useQuery<{ propertyId?: string | null; tenantType?: string | null }>({ queryKey: ["/api/auth/me"] });
+  const { data: currentUser } = useQuery<{ propertyId?: string | null; tenantType?: string | null; role?: string | null }>({ queryKey: ["/api/auth/me"] });
   const isHotelTenant = currentUser?.tenantType === "hotel";
+  const isOwnerAdmin = authUser?.role === "owner_admin";
+
+  const { data: subStatus } = useQuery<{
+    hasSubscription: boolean;
+    planType?: string;
+    planCode?: string;
+    status?: string;
+    isTrial?: boolean;
+    trialEndsAt?: string | null;
+    remainingDays?: number;
+    isExpired?: boolean;
+    isActive?: boolean;
+    autoRenew?: boolean;
+    nextBillingDate?: string | null;
+    daysUntilRenewal?: number | null;
+  }>({ queryKey: ["/api/subscription/status"] });
   const { data: menu } = useQuery<{ categories: Category[]; items: MenuItem[] }>({ queryKey: ["/api/restaurant/menu"] });
   const { data: orders = [] } = useQuery<PosOrder[]>({ queryKey: ["/api/restaurant/orders"], refetchInterval: 15000 });
   const { data: analytics } = useQuery<Analytics>({ queryKey: ["/api/restaurant/analytics"], refetchInterval: 30000 });
@@ -156,6 +175,25 @@ export default function RestaurantManager() {
   const myRestaurantStaff = restaurantStaff.filter((s: any) => restaurantRoles.includes(s.role));
   const waiters = myRestaurantStaff.filter((s: any) => s.role === "waiter");
   const cleaners = myRestaurantStaff.filter((s: any) => s.role === "restaurant_cleaner");
+
+  // ── billing payment mutation ──
+  const paySubscriptionMutation = useMutation({
+    mutationFn: async () => {
+      const planCode = subStatus?.planCode || "REST_CAFE";
+      const res = await apiRequest("POST", "/api/epoint/create-order", { planCode });
+      return res.json();
+    },
+    onSuccess: (data: any) => {
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+      } else {
+        toast({ title: "Xəta", description: "Ödəniş linki alına bilmədi. Yenidən cəhd edin.", variant: "destructive" });
+      }
+    },
+    onError: () => {
+      toast({ title: "Xəta", description: "Ödəniş başladıla bilmədi. Yenidən cəhd edin.", variant: "destructive" });
+    },
+  });
 
   // ── mutations ──
   const createStaff = useMutation({
@@ -311,6 +349,7 @@ export default function RestaurantManager() {
     { value: "staff", label: t("rm.tabStaff"), icon: <Users className="h-4 w-4" />, badge: myRestaurantStaff.length, hotelOnly: false },
     { value: "performance", label: t("rm.tabPerformance"), icon: <BarChart2 className="h-4 w-4" />, badge: 0, hotelOnly: false },
     { value: "finance", label: t("rm.tabFinance"), icon: <TrendingUp className="h-4 w-4" />, badge: 0, hotelOnly: false },
+    { value: "billing", label: "Abunəlik", icon: <CreditCard className="h-4 w-4" />, badge: (subStatus?.isTrial && (subStatus?.remainingDays ?? 99) <= 5) ? 1 : 0, hotelOnly: false },
   ];
   const tabs = allTabs.filter(tab => !tab.hotelOnly || isHotelTenant);
 
@@ -1003,6 +1042,176 @@ export default function RestaurantManager() {
                     </table>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ── Billing / Subscription Tab ── */}
+          <TabsContent value="billing" className="mt-4 space-y-4">
+            {/* Trial / Status banner */}
+            {subStatus?.isTrial && (
+              <Card className={
+                subStatus.isExpired ? "border-destructive bg-destructive/5"
+                : (subStatus.remainingDays ?? 99) <= 5 ? "border-yellow-500 bg-yellow-500/5"
+                : "border-blue-500 bg-blue-500/5"
+              } data-testid="card-trial-banner">
+                <CardContent className="flex flex-wrap items-center justify-between gap-4 py-3">
+                  <div className="flex items-center gap-3">
+                    {subStatus.isExpired
+                      ? <AlertTriangle className="h-5 w-5 text-destructive shrink-0" />
+                      : (subStatus.remainingDays ?? 99) <= 5
+                        ? <AlertTriangle className="h-5 w-5 text-yellow-500 shrink-0" />
+                        : <Clock className="h-5 w-5 text-blue-500 shrink-0" />
+                    }
+                    <div>
+                      <p className="font-medium text-sm">
+                        {subStatus.isExpired
+                          ? "Sınaq müddəti başa çatıb"
+                          : `Sınaq dövrü: ${subStatus.remainingDays} gün qalıb`}
+                      </p>
+                      {subStatus.trialEndsAt && (
+                        <p className="text-xs text-muted-foreground">
+                          Bitmə tarixi: {new Date(subStatus.trialEndsAt).toLocaleDateString("az-AZ")}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {isOwnerAdmin && (
+                    <Button
+                      size="sm"
+                      onClick={() => paySubscriptionMutation.mutate()}
+                      disabled={paySubscriptionMutation.isPending}
+                      data-testid="button-pay-trial"
+                    >
+                      {paySubscriptionMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CreditCard className="h-4 w-4 mr-2" />}
+                      İndi Ödə
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Plan info card */}
+            <Card data-testid="card-subscription-plan">
+              <CardContent className="p-5 space-y-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <BadgeCheck className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">
+                        {subStatus?.planCode === "REST_CAFE" && "Cafe Planı"}
+                        {subStatus?.planCode === "REST_BISTRO" && "Bistro Planı"}
+                        {subStatus?.planCode === "REST_CHAIN" && "Chain Planı"}
+                        {!subStatus?.planCode && "Abunəlik"}
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        {subStatus?.planCode === "REST_CAFE" && "49.30 ₼ / ay"}
+                        {subStatus?.planCode === "REST_BISTRO" && "100.30 ₼ / ay"}
+                        {subStatus?.planCode === "REST_CHAIN" && "253.30 ₼ / ay"}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge variant={
+                    subStatus?.status === "active" ? "default"
+                    : subStatus?.isTrial ? "secondary"
+                    : "destructive"
+                  } data-testid="badge-sub-status">
+                    {subStatus?.isTrial ? "Sınaq" : subStatus?.status === "active" ? "Aktiv" : subStatus?.status === "suspended" ? "Dayandırıldı" : "Aktiv deyil"}
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-2 border-t text-sm">
+                  {subStatus?.nextBillingDate && (
+                    <div className="flex items-center gap-2">
+                      <CalendarClock className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Növbəti ödəniş</p>
+                        <p className="font-medium">{new Date(subStatus.nextBillingDate).toLocaleDateString("az-AZ")}</p>
+                      </div>
+                    </div>
+                  )}
+                  {subStatus?.autoRenew !== undefined && (
+                    <div className="flex items-center gap-2">
+                      <RefreshCw className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Avtomatik yenilənmə</p>
+                        <p className="font-medium">{subStatus.autoRenew ? "Aktiv" : "Deaktiv"}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {isOwnerAdmin && (
+                  <Button
+                    className="w-full"
+                    onClick={() => paySubscriptionMutation.mutate()}
+                    disabled={paySubscriptionMutation.isPending}
+                    data-testid="button-pay-subscription"
+                  >
+                    {paySubscriptionMutation.isPending
+                      ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Emal edilir...</>
+                      : <><CreditCard className="h-4 w-4 mr-2" />Epoint ilə Ödə</>
+                    }
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Plans comparison */}
+            <div>
+              <h3 className="font-semibold mb-3">Mövcud Planlar</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {[
+                  { code: "REST_CAFE", name: "Cafe", price: "49.30", features: ["10 işçiyə qədər", "Menyu idarəsi", "Sifarişlər & KDS", "Kassir"] },
+                  { code: "REST_BISTRO", name: "Bistro", price: "100.30", features: ["30 işçiyə qədər", "Analitika paneli", "WhatsApp inteqrasiya", "Bütün Cafe xüsusiyyətləri"] },
+                  { code: "REST_CHAIN", name: "Chain", price: "253.30", features: ["Limitsiz işçi", "Çoxlu lokasiya", "Xüsusi inteqrasiyalar", "Önəmli dəstək"] },
+                ].map(plan => (
+                  <Card key={plan.code} className={subStatus?.planCode === plan.code ? "ring-2 ring-primary" : ""} data-testid={`card-plan-${plan.code}`}>
+                    <CardContent className="p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-bold">{plan.name}</h4>
+                        {subStatus?.planCode === plan.code && <Badge variant="default" className="text-xs">Cari plan</Badge>}
+                      </div>
+                      <p className="text-2xl font-bold">{plan.price} <span className="text-sm font-normal text-muted-foreground">₼/ay</span></p>
+                      <ul className="space-y-1">
+                        {plan.features.map(f => (
+                          <li key={f} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* Contact O.S.S */}
+            <Card className="bg-muted/30" data-testid="card-billing-contact">
+              <CardContent className="p-5 flex items-start gap-4">
+                <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+                  <PhoneCall className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h4 className="font-medium">Dəstəyə ehtiyacınız var?</h4>
+                  <p className="text-sm text-muted-foreground mt-0.5">Plan dəyişikliyi, ödəniş problemi və ya xüsusi tələblər üçün O.S.S komandası ilə əlaqə saxlayın.</p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="mt-3"
+                    onClick={() => {
+                      const msg = `Salam O.S.S komandası,\nRestoran: ${authUser?.fullName || ""}\nPlan: ${subStatus?.planCode || ""}\nSorğu: Abunəlik haqqında`;
+                      window.open(`https://wa.me/994504449292?text=${encodeURIComponent(msg)}`, "_blank");
+                    }}
+                    data-testid="button-contact-billing"
+                  >
+                    <PhoneCall className="h-4 w-4 mr-2" />
+                    Əlaqə Saxla
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

@@ -28,6 +28,9 @@ const PLAN_CODE_TO_TYPE: Record<PlanCode, PlanType> = {
   CORE_GROWTH: "growth",
   CORE_PRO: "pro",
   APARTMENT_LITE: "apartment_lite",
+  REST_CAFE: "restaurant_cafe",
+  REST_BISTRO: "restaurant_bistro",
+  REST_CHAIN: "restaurant_chain",
 };
 
 function signData(privateKey: string, jsonData: Record<string, any>): { data: string; signature: string } {
