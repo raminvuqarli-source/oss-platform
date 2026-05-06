@@ -320,7 +320,7 @@ export function registerRestaurantRoutes(app: Express): void {
   app.post("/api/restaurant/orders/:id/settle", requireRestaurantRole(...SETTLE_ROLES), async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
-      const { paymentType, folioId } = req.body;
+      const { paymentType, folioId, roomNumber: bodyRoomNumber } = req.body;
       if (!paymentType) return res.status(400).json({ message: "paymentType required: room_charge | cash | card" });
 
       const existing = await storage.getPosOrder(req.params.id);
@@ -328,6 +328,9 @@ export function registerRestaurantRoutes(app: Express): void {
       if (existing.settlementStatus !== "pending") {
         return res.status(409).json({ message: "Order already settled" });
       }
+
+      // Effective room number: from body override or order's own roomNumber
+      const effectiveRoomNumber: string | null = bodyRoomNumber || existing.roomNumber || null;
 
       let settlementStatus = paymentType === "card" ? "card_paid" : "cash_paid";
       let linkedFolioId: string | undefined;
@@ -339,11 +342,23 @@ export function registerRestaurantRoutes(app: Express): void {
           const folio = await storage.getGuestFolioByBooking(existing.bookingId);
           if (folio && folio.status === "open") targetFolioId = folio.id;
         }
+        // Fallback: find active checked-in booking by room number
+        if (!targetFolioId && effectiveRoomNumber && existing.propertyId) {
+          const allBookings = await storage.getBookingsByProperty(existing.propertyId);
+          const activeBooking = allBookings.find(
+            b => b.status === "checked_in" &&
+            b.roomNumber?.trim().toUpperCase() === effectiveRoomNumber.trim().toUpperCase()
+          );
+          if (activeBooking) {
+            const folio = await storage.getGuestFolioByBooking(activeBooking.id);
+            if (folio && folio.status === "open") targetFolioId = folio.id;
+          }
+        }
         if (targetFolioId) {
           await storage.createFolioCharge({
             folioId: targetFolioId,
             chargeType: "restaurant",
-            description: `Restaurant order #${existing.id.slice(-6).toUpperCase()} — ${existing.roomNumber ? `Room ${existing.roomNumber}` : existing.tableNumber ? `Table ${existing.tableNumber}` : "N/A"}`,
+            description: `Restaurant order #${existing.id.slice(-6).toUpperCase()} — ${effectiveRoomNumber ? `Room ${effectiveRoomNumber}` : existing.tableNumber ? `Table ${existing.tableNumber}` : "N/A"}`,
             amount: String(existing.totalCents / 100),
             quantity: 1,
             unitPrice: String(existing.totalCents / 100),
@@ -362,7 +377,7 @@ export function registerRestaurantRoutes(app: Express): void {
           const hotel = await storage.getHotelByPropertyId(existing.propertyId);
           if (hotel) {
             const payLabel = paymentType === "card" ? "card" : "cash";
-            const locationLabel = existing.roomNumber ? `Room ${existing.roomNumber}` : existing.tableNumber ? `Table ${existing.tableNumber}` : "N/A";
+            const locationLabel = effectiveRoomNumber ? `Room ${effectiveRoomNumber}` : existing.tableNumber ? `Table ${existing.tableNumber}` : "N/A";
             await storage.createJournalEntry(
               {
                 hotelId: hotel.id,
@@ -395,7 +410,7 @@ export function registerRestaurantRoutes(app: Express): void {
       const allStaff = await storage.getUsersByProperty(existing.propertyId);
       const managerIds = allStaff.filter(u => u.role === "restaurant_manager").map(u => u.id);
       if (managerIds.length > 0) {
-        const locationLabel = existing.roomNumber ? `Room ${existing.roomNumber}` : existing.tableNumber ? `Table ${existing.tableNumber}` : "Order";
+        const locationLabel = effectiveRoomNumber ? `Room ${effectiveRoomNumber}` : existing.tableNumber ? `Table ${existing.tableNumber}` : "Order";
         const amountLabel = `₼${(existing.totalCents / 100).toFixed(2)}`;
         const msgMap: Record<string, string> = {
           cash: `${locationLabel} — ${amountLabel} paid cash`,

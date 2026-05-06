@@ -79,6 +79,7 @@ export default function RestaurantCashierDashboard() {
   const queryClient = useQueryClient();
   const [settleDialog, setSettleDialog] = useState<PosOrder | null>(null);
   const [settleType, setSettleType] = useState("cash");
+  const [chargeRoomNumber, setChargeRoomNumber] = useState("");
   const [taskDesc, setTaskDesc] = useState("");
   const [taskLocation, setTaskLocation] = useState("");
   const [taskAssignee, setTaskAssignee] = useState<string>("__none__");
@@ -120,12 +121,13 @@ export default function RestaurantCashierDashboard() {
   });
 
   const settleOrder = useMutation({
-    mutationFn: ({ id, paymentType }: { id: string; paymentType: string }) =>
-      apiRequest("POST", `/api/restaurant/orders/${id}/settle`, { paymentType }),
+    mutationFn: ({ id, paymentType, roomNumber }: { id: string; paymentType: string; roomNumber?: string }) =>
+      apiRequest("POST", `/api/restaurant/orders/${id}/settle`, { paymentType, roomNumber: roomNumber || undefined }),
     onSuccess: (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: ["/api/restaurant/orders"] });
       queryClient.invalidateQueries({ queryKey: ["/api/restaurant/analytics"] });
       setSettleDialog(null);
+      setChargeRoomNumber("");
       const msg = vars.paymentType === "room_charge"
         ? t("cashier.roomChargePosted", "Otaq hesabına borc yazıldı")
         : t("cashier.confirmed");
@@ -135,6 +137,7 @@ export default function RestaurantCashierDashboard() {
   });
 
   const openSettle = (order: PosOrder, defaultType?: string) => {
+    setChargeRoomNumber(order.roomNumber || "");
     setSettleType(defaultType ?? (order.roomNumber ? "room_charge" : "cash"));
     setSettleDialog(order);
   };
@@ -562,19 +565,33 @@ export default function RestaurantCashierDashboard() {
             <div className="space-y-4 py-2">
               <div className="space-y-2">
                 <p className="text-sm font-medium">{t("cashier.paymentType")}</p>
-                <Select value={settleType} onValueChange={setSettleType}>
+                <Select value={settleType} onValueChange={(v) => { setSettleType(v); }}>
                   <SelectTrigger data-testid="select-payment-type">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="cash"><div className="flex items-center gap-2"><Banknote className="h-4 w-4" />{t("cashier.cash")}</div></SelectItem>
                     <SelectItem value="card"><div className="flex items-center gap-2"><CreditCard className="h-4 w-4" />{t("cashier.card")}</div></SelectItem>
-                    {isHotelTenant && settleDialog?.roomNumber && (
-                      <SelectItem value="room_charge"><div className="flex items-center gap-2"><span className="text-base">🏨</span>{t("cashier.roomCharge", "Borc Yaz")}</div></SelectItem>
+                    {isHotelTenant && (
+                      <SelectItem value="room_charge"><div className="flex items-center gap-2"><BedDouble className="h-4 w-4 text-violet-600" />{t("cashier.roomCharge", "Otağın hesabına əlavə et")}</div></SelectItem>
                     )}
                   </SelectContent>
                 </Select>
               </div>
+              {settleType === "room_charge" && (
+                <div className="space-y-2">
+                  <Label htmlFor="charge-room-number">{t("cashier.roomNumber", "Otaq nömrəsi")}</Label>
+                  <Input
+                    id="charge-room-number"
+                    data-testid="input-charge-room-number"
+                    placeholder={t("cashier.roomNumberPlaceholder", "məs. 202")}
+                    value={chargeRoomNumber}
+                    onChange={(e) => setChargeRoomNumber(e.target.value)}
+                    className="font-mono"
+                  />
+                  <p className="text-xs text-muted-foreground">{t("cashier.roomChargeNote", "Qonağın açıq foliosuna borc kimi yazılacaq.")}</p>
+                </div>
+              )}
               {(settleType === "cash" || settleType === "card") && (
                 <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/30 text-sm text-green-700 dark:text-green-300 flex items-start gap-2">
                   <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
@@ -583,10 +600,10 @@ export default function RestaurantCashierDashboard() {
               )}
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setSettleDialog(null)}>{t("rm.cancel")}</Button>
+              <Button variant="outline" onClick={() => { setSettleDialog(null); setChargeRoomNumber(""); }}>{t("rm.cancel")}</Button>
               <Button
-                onClick={() => settleOrder.mutate({ id: settleDialog.id, paymentType: settleType })}
-                disabled={settleOrder.isPending}
+                onClick={() => settleOrder.mutate({ id: settleDialog.id, paymentType: settleType, roomNumber: chargeRoomNumber || undefined })}
+                disabled={settleOrder.isPending || (settleType === "room_charge" && !chargeRoomNumber.trim())}
                 data-testid="btn-confirm-settle"
               >
                 {settleOrder.isPending ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
