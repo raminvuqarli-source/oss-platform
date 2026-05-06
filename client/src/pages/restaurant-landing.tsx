@@ -25,11 +25,11 @@ const WHATSAPP_LINK = "https://wa.me/994508880089";
 const PLANS = [
   {
     code: "REST_CAFE",
-    nameKey: "restLanding.planCafe",
-    name: "Cafe",
-    priceAZN: 49.30,
-    descKey: "restLanding.planCafeDesc",
-    desc: "Small cafes & quick-service",
+    nameKey: "restLanding.planStandard",
+    name: "Standard",
+    priceUSD: 29,
+    descKey: "restLanding.planStandardDesc",
+    desc: "Perfect for small restaurants & cafes",
     features: [
       { icon: Users, key: "restLanding.featStaff10", label: "Up to 10 staff" },
       { icon: Monitor, key: "restLanding.featMenuMgmt", label: "Menu management" },
@@ -43,16 +43,16 @@ const PLANS = [
   },
   {
     code: "REST_BISTRO",
-    nameKey: "restLanding.planBistro",
-    name: "Bistro",
-    priceAZN: 100.30,
-    descKey: "restLanding.planBistroDesc",
-    desc: "Growing restaurants",
+    nameKey: "restLanding.planProfessional",
+    name: "Professional",
+    priceUSD: 49,
+    descKey: "restLanding.planProfessionalDesc",
+    desc: "For growing restaurants with more needs",
     features: [
       { icon: Users, key: "restLanding.featStaff30", label: "Up to 30 staff" },
       { icon: Activity, key: "restLanding.featAnalytics", label: "Analytics dashboard" },
       { icon: MessageCircle, key: "restLanding.featWhatsapp", label: "WhatsApp integration" },
-      { icon: Layers, key: "restLanding.featAllCafe", label: "All Cafe features" },
+      { icon: Layers, key: "restLanding.featAllStandard", label: "All Standard features" },
     ],
     popular: true,
     cta: "register",
@@ -61,10 +61,10 @@ const PLANS = [
   },
   {
     code: "REST_CHAIN",
-    nameKey: "restLanding.planChain",
-    name: "Chain",
-    priceAZN: 253.30,
-    descKey: "restLanding.planChainDesc",
+    nameKey: "restLanding.planEnterprise",
+    name: "Enterprise",
+    priceUSD: null,
+    descKey: "restLanding.planEnterpriseDesc",
     desc: "Restaurant chains & franchises",
     features: [
       { icon: Users, key: "restLanding.featUnlimitedStaff", label: "Unlimited staff" },
@@ -73,9 +73,9 @@ const PLANS = [
       { icon: HeadphonesIcon, key: "restLanding.featPrioritySupport", label: "Priority support" },
     ],
     popular: false,
-    cta: "register",
-    ctaKey: "restLanding.register",
-    ctaLabel: "Get Started",
+    cta: "contact",
+    ctaKey: "restLanding.contactUs",
+    ctaLabel: "Contact Us",
   },
 ];
 
@@ -382,8 +382,15 @@ export default function RestaurantLanding() {
                       </div>
 
                       <div className="flex items-baseline gap-1">
-                        <span className="text-4xl font-extrabold">{plan.priceAZN}</span>
-                        <span className="text-muted-foreground text-sm">₼ {t("restLanding.perMonth", "/ month")}</span>
+                        {plan.priceUSD !== null ? (
+                          <>
+                            <span className="text-muted-foreground text-xl font-semibold">$</span>
+                            <span className="text-4xl font-extrabold">{plan.priceUSD}</span>
+                            <span className="text-muted-foreground text-sm">{t("restLanding.perMonth", "/ month")}</span>
+                          </>
+                        ) : (
+                          <span className="text-2xl font-bold">{t("restLanding.contactForPricing", "Contact Us")}</span>
+                        )}
                       </div>
 
                       <ul className="space-y-2.5 flex-1">
@@ -428,7 +435,7 @@ export default function RestaurantLanding() {
             </div>
 
             <p className="text-center text-sm text-muted-foreground mt-8">
-              {t("restLanding.pricingNote", "Bütün qiymətlər AZN (Azərbaycan manatı) ilə göstərilir. ƏDV daxil deyil.")}
+              {t("restLanding.pricingNote", "All prices in USD. Cancel anytime. 14-day free trial on all plans.")}
             </p>
           </AnimatedSection>
         </section>
