@@ -2981,7 +2981,12 @@
     "statusDelivered": "Bezorgd",
     "taskStatusPending": "In behandeling",
     "taskStatusInProgress": "In uitvoering",
-    "taskStatusDone": "Klaar"
+    "taskStatusDone": "Klaar",
+    "financeHistory": "Dagelijkse financiële geschiedenis",
+    "noFinanceHistory": "Nog geen financiële geschiedenis",
+    "financeDate": "Datum",
+    "financeOrders": "Bestellingen",
+    "financeRevenue": "Omzet"
   },
   "rcl": {
     "pageTitle": "Schoonmaakpaneel",

@@ -39,6 +39,7 @@ type PosOrder = {
   settlementStatus: string; createdAt: string; bookingId: string | null;
   items?: { itemName: string; quantity: number; unitPriceCents: number }[];
 };
+type DailyEntry = { date: string; orderCount: number; revenueCents: number };
 type Analytics = {
   today: { orderCount: number; revenueCents: number };
   month?: { orderCount: number; revenueCents: number };
@@ -46,6 +47,7 @@ type Analytics = {
   pendingSettlement: number;
   totalAllTime?: number;
   byPaymentType?: { cashCents: number; cardCents: number; roomChargeCents: number };
+  dailyHistory?: DailyEntry[];
 };
 type StaffProfile = { id: string; userId: string; salaryAmount: string; taxRate: string; tablesAssigned: string | null; notes: string | null };
 type CleaningTask = { id: string; description: string; location: string | null; assignedToId: string | null; status: string; createdAt: string; photoUrl: string | null; completedAt: string | null };
@@ -673,6 +675,39 @@ export default function RestaurantManager() {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Daily history table */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">{t("rm.financeHistory")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {(!analytics?.dailyHistory || analytics.dailyHistory.length === 0) ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">{t("rm.noFinanceHistory")}</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-start pb-2 font-medium text-muted-foreground">{t("rm.financeDate")}</th>
+                          <th className="text-center pb-2 font-medium text-muted-foreground">{t("rm.financeOrders")}</th>
+                          <th className="text-end pb-2 font-medium text-muted-foreground">{t("rm.financeRevenue")}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {analytics.dailyHistory.map((entry) => (
+                          <tr key={entry.date} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                            <td className="py-2 font-medium">{entry.date}</td>
+                            <td className="py-2 text-center text-muted-foreground">{entry.orderCount}</td>
+                            <td className="py-2 text-end font-semibold text-emerald-600">{fmt(entry.revenueCents)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

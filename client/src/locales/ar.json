@@ -2981,7 +2981,12 @@
     "statusDelivered": "تم التسليم",
     "taskStatusPending": "قيد الانتظار",
     "taskStatusInProgress": "قيد التنفيذ",
-    "taskStatusDone": "منجز"
+    "taskStatusDone": "منجز",
+    "financeHistory": "السجل المالي اليومي",
+    "noFinanceHistory": "لا يوجد سجل مالي بعد",
+    "financeDate": "التاريخ",
+    "financeOrders": "الطلبات",
+    "financeRevenue": "الإيرادات"
   },
   "rcl": {
     "pageTitle": "لوحة التنظيف",

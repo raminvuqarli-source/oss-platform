@@ -2981,7 +2981,12 @@
     "statusDelivered": "تحویل داده شد",
     "taskStatusPending": "در انتظار",
     "taskStatusInProgress": "در حال انجام",
-    "taskStatusDone": "انجام شد"
+    "taskStatusDone": "انجام شد",
+    "financeHistory": "تاریخچه مالی روزانه",
+    "noFinanceHistory": "هنوز تاریخچه مالی وجود ندارد",
+    "financeDate": "تاریخ",
+    "financeOrders": "سفارشات",
+    "financeRevenue": "درآمد"
   },
   "rcl": {
     "pageTitle": "پنل نظافت",

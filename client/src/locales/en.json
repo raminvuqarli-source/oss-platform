@@ -3095,7 +3095,12 @@
     "statusDelivered": "Delivered",
     "taskStatusPending": "Waiting",
     "taskStatusInProgress": "In progress",
-    "taskStatusDone": "Done"
+    "taskStatusDone": "Done",
+    "financeHistory": "Daily Finance History",
+    "noFinanceHistory": "No finance history yet",
+    "financeDate": "Date",
+    "financeOrders": "Orders",
+    "financeRevenue": "Revenue"
   },
   "rcl": {
     "pageTitle": "Cleaning Panel",

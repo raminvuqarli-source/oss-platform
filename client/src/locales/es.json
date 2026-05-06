@@ -2981,7 +2981,12 @@
     "statusDelivered": "Entregado",
     "taskStatusPending": "Esperando",
     "taskStatusInProgress": "En progreso",
-    "taskStatusDone": "Listo"
+    "taskStatusDone": "Listo",
+    "financeHistory": "Historial financiero diario",
+    "noFinanceHistory": "Aún no hay historial financiero",
+    "financeDate": "Fecha",
+    "financeOrders": "Pedidos",
+    "financeRevenue": "Ingresos"
   },
   "rcl": {
     "pageTitle": "Panel de Limpieza",

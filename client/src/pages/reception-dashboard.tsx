@@ -1073,6 +1073,29 @@ export default function ReceptionDashboard() {
     toast({ title, description: message, duration: 6000 });
   });
 
+  // Real-time WebSocket for room prep notifications
+  useEffect(() => {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const ws = new WebSocket(`${protocol}//${window.location.host}/ws/devices?type=dashboard`);
+    ws.onmessage = (evt) => {
+      try {
+        const data = JSON.parse(evt.data);
+        if (data.type === "room_prep_new") {
+          queryClient.invalidateQueries({ queryKey: ["/api/room-prep-orders/hotel"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+          toast({
+            title: t("roomPrep.newOrderTitle", "New Preparation Order"),
+            description: data.order?.guestName
+              ? `${data.order.guestName} — ${t("roomPrep.room", "Room")} ${data.order.roomNumber}`
+              : t("roomPrep.newOrderDesc", "A guest submitted a preparation request"),
+            duration: 8000,
+          });
+        }
+      } catch {}
+    };
+    return () => { try { ws.close(); } catch {} };
+  }, []);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const paymentResult = params.get("payment");

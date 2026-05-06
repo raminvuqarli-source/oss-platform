@@ -5,6 +5,7 @@ import { z } from "zod";
 import { insertRoomPreparationOrderSchema } from "@shared/schema";
 import { requireAuth, requireRole } from "../middleware";
 import { logger } from "../utils/logger";
+import { broadcastToUser } from "../websocket/index";
 
 export function registerRoomPrepRoutes(app: Express): void {
   // Guest: Create a room preparation order
@@ -29,7 +30,10 @@ export function registerRoomPrepRoutes(app: Express): void {
       const order = await storage.createRoomPreparationOrder(validated);
 
       // Notify admin/reception staff about new order
-      const staffUsers = await storage.getUsersByHotel(user.hotelId!, req.tenantId!);
+      const effectiveTenantId = req.tenantId || user.tenantId;
+      const staffUsers = effectiveTenantId
+        ? await storage.getUsersByHotel(user.hotelId!, effectiveTenantId)
+        : [];
       const adminReceptionStaff = staffUsers.filter(u => u.role === "admin" || u.role === "reception");
       for (const staff of adminReceptionStaff) {
         await storage.createNotification({
@@ -38,7 +42,17 @@ export function registerRoomPrepRoutes(app: Express): void {
           message: `Guest ${user.fullName} (Room ${booking.roomNumber}) has requested a ${order.occasionType.replace(/_/g, ' ')} preparation.`,
           type: "room_prep",
           actionUrl: "/admin/room-prep-orders",
-          tenantId: req.tenantId || user.tenantId || null,
+          tenantId: effectiveTenantId || null,
+        });
+        // Real-time WebSocket push so reception sees it immediately
+        broadcastToUser(String(staff.id), {
+          type: "room_prep_new",
+          order: {
+            id: order.id,
+            guestName: user.fullName,
+            roomNumber: booking.roomNumber,
+            occasionType: order.occasionType,
+          },
         });
       }
 

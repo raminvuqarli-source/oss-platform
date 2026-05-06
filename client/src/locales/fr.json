@@ -2981,7 +2981,12 @@
     "statusDelivered": "Livré",
     "taskStatusPending": "En attente",
     "taskStatusInProgress": "En cours",
-    "taskStatusDone": "Terminé"
+    "taskStatusDone": "Terminé",
+    "financeHistory": "Historique financier quotidien",
+    "noFinanceHistory": "Aucun historique financier pour l'instant",
+    "financeDate": "Date",
+    "financeOrders": "Commandes",
+    "financeRevenue": "Revenu"
   },
   "rcl": {
     "pageTitle": "Tableau de nettoyage",

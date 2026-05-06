@@ -2981,7 +2981,12 @@
     "statusDelivered": "Geliefert",
     "taskStatusPending": "Wartend",
     "taskStatusInProgress": "In Bearbeitung",
-    "taskStatusDone": "Fertig"
+    "taskStatusDone": "Fertig",
+    "financeHistory": "Tägliche Finanzhistorie",
+    "noFinanceHistory": "Noch keine Finanzhistorie vorhanden",
+    "financeDate": "Datum",
+    "financeOrders": "Bestellungen",
+    "financeRevenue": "Umsatz"
   },
   "rcl": {
     "pageTitle": "Reinigungsbereich",

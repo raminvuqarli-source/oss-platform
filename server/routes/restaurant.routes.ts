@@ -706,6 +706,21 @@ export function registerRestaurantRoutes(app: Express): void {
       const roomChargeCents = allOrders.filter(o => o.settlementStatus === "posted_to_folio")
         .reduce((s, o) => s + o.totalCents, 0);
 
+      // Daily history — group settled orders by date, newest first
+      const dailyMap = new Map<string, { orderCount: number; revenueCents: number }>();
+      allOrders
+        .filter(o => !["cancelled", "pending"].includes(o.settlementStatus))
+        .forEach(o => {
+          const date = new Date(o.createdAt!).toISOString().slice(0, 10); // YYYY-MM-DD
+          const existing = dailyMap.get(date) || { orderCount: 0, revenueCents: 0 };
+          existing.orderCount++;
+          existing.revenueCents += o.totalCents;
+          dailyMap.set(date, existing);
+        });
+      const dailyHistory = Array.from(dailyMap.entries())
+        .map(([date, data]) => ({ date, ...data }))
+        .sort((a, b) => b.date.localeCompare(a.date));
+
       res.json({
         today: { orderCount: todayOrders.length, revenueCents: totalRevenueCents },
         month: { orderCount: monthOrders.length, revenueCents: monthRevenueCents },
@@ -713,6 +728,7 @@ export function registerRestaurantRoutes(app: Express): void {
         pendingSettlement,
         totalAllTime: allOrders.filter(o => !["cancelled","pending"].includes(o.settlementStatus)).reduce((s,o)=>s+o.totalCents,0),
         byPaymentType: { cashCents, cardCents, roomChargeCents },
+        dailyHistory,
       });
     } catch (err) {
       logger.error({ err }, "Failed to fetch restaurant analytics");

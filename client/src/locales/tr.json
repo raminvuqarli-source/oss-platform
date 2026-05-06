@@ -2994,7 +2994,12 @@
     "statusDelivered": "Teslim edildi",
     "taskStatusPending": "Bekliyor",
     "taskStatusInProgress": "Devam ediyor",
-    "taskStatusDone": "Hazır"
+    "taskStatusDone": "Hazır",
+    "financeHistory": "Günlük Finansal Geçmiş",
+    "noFinanceHistory": "Henüz finansal geçmiş yok",
+    "financeDate": "Tarih",
+    "financeOrders": "Siparişler",
+    "financeRevenue": "Gelir"
   },
   "rcl": {
     "pageTitle": "Temizlik Paneli",

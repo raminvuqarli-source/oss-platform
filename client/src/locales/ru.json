@@ -2994,7 +2994,12 @@
     "statusDelivered": "Доставлено",
     "taskStatusPending": "Ожидает",
     "taskStatusInProgress": "В процессе",
-    "taskStatusDone": "Готово"
+    "taskStatusDone": "Готово",
+    "financeHistory": "Ежедневная финансовая история",
+    "noFinanceHistory": "Финансовая история отсутствует",
+    "financeDate": "Дата",
+    "financeOrders": "Заказы",
+    "financeRevenue": "Выручка"
   },
   "rcl": {
     "pageTitle": "Панель уборки",

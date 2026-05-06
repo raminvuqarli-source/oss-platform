@@ -3076,7 +3076,12 @@
     "statusDelivered": "Çatdırıldı",
     "taskStatusPending": "Gözləyir",
     "taskStatusInProgress": "Davam edir",
-    "taskStatusDone": "Hazır"
+    "taskStatusDone": "Hazır",
+    "financeHistory": "Günlük Maliyyə Tarixçəsi",
+    "noFinanceHistory": "Hələ maliyyə tarixçəsi yoxdur",
+    "financeDate": "Tarix",
+    "financeOrders": "Sifarişlər",
+    "financeRevenue": "Gəlir"
   },
   "rcl": {
     "pageTitle": "Temizlik Paneli",
