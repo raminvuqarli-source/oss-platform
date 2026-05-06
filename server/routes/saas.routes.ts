@@ -19,7 +19,7 @@ export function registerSaasRoutes(app: Express): void {
 
   app.get("/api/plans", (_req, res) => {
     const plans = (Object.entries(PLAN_CODE_FEATURES) as [PlanCode, typeof PLAN_CODE_FEATURES[PlanCode]][])
-      .filter(([code]) => code !== "APARTMENT_LITE")
+      .filter(([code]) => code !== "APARTMENT_LITE" && !code.startsWith("REST_"))
       .map(([code, config]) => ({
         code,
         displayName: config.displayName,

@@ -266,7 +266,7 @@ export default function Welcome() {
     }
   };
 
-  const corePlans = plans || [];
+  const corePlans = (plans || []).filter(p => !p.code.startsWith("REST_"));
   const smartPlansList = smartPlans || [];
   const selectedCore = corePlans[selectedCorePlanIdx] || corePlans[0];
   const selectedSmart = smartPlansList[selectedSmartIdx] || smartPlansList[0];
