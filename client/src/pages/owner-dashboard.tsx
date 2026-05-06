@@ -80,6 +80,8 @@ import {
   Network,
   ExternalLink,
   Radio,
+  Copy,
+  PhoneCall,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SiWhatsapp } from "react-icons/si";
@@ -5509,9 +5511,72 @@ function OwnerOverview({ analytics, analyticsLoading, allProperties }: {
 }
 
 // ===================== BILLING ADDONS VIEW =====================
+const CONTACT_EMAIL = "support@ossaiproapp.com";
+const CONTACT_WHATSAPP = "https://wa.me/994XXXXXXXXX";
+
+function ContactDialog({ open, onClose, subject }: { open: boolean; onClose: () => void; subject: string }) {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
+
+  function copyEmail() {
+    navigator.clipboard.writeText(CONTACT_EMAIL).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      toast({ title: t("common.copied", "Copied!"), description: CONTACT_EMAIL });
+    }).catch(() => {
+      toast({ title: CONTACT_EMAIL, description: t("billing.contact.copyManually", "Copy the email address above") });
+    });
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <PhoneCall className="h-5 w-5 text-primary" />
+            {t("billing.contact.dialogTitle", "Contact O.S.S Team")}
+          </DialogTitle>
+          <DialogDescription>
+            {t("billing.contact.dialogDesc", "Send us a message and we'll activate your service within 24 hours.")}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3 py-2">
+          <p className="text-sm text-muted-foreground">{t("billing.contact.subject", "Subject")}: <span className="font-medium text-foreground">{subject}</span></p>
+          <div className="flex items-center gap-2 p-3 rounded-lg border bg-muted/30">
+            <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
+            <span className="text-sm font-medium flex-1 truncate">{CONTACT_EMAIL}</span>
+            <Button size="sm" variant="outline" className="h-7 px-2 shrink-0" onClick={copyEmail}>
+              {copied ? <CheckCircle className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+            </Button>
+          </div>
+          <a
+            href={`https://wa.me/994502888402?text=${encodeURIComponent(subject)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 p-3 rounded-lg border bg-green-500/5 border-green-500/30 hover:bg-green-500/10 transition-colors"
+          >
+            <SiWhatsapp className="h-4 w-4 text-green-500 shrink-0" />
+            <span className="text-sm font-medium text-green-700 dark:text-green-400">{t("billing.contact.whatsapp", "Message us on WhatsApp")}</span>
+            <ExternalLink className="h-3.5 w-3.5 text-green-500 ml-auto" />
+          </a>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>{t("common.close", "Close")}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function BillingAddonsView() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const [contactDialog, setContactDialog] = useState<{ open: boolean; subject: string }>({ open: false, subject: "" });
+
+  function openContact(subject: string) {
+    setContactDialog({ open: true, subject });
+  }
 
   const ALL_WHATSAPP_PACKAGES = [
     { id: "wa_500", name: t("billing.wa.starter", "Starter"), messages: 500, priceUsd: 15, priceAZN: 26, description: t("billing.wa.starterDesc", "Perfect for small properties"), planCode: "CORE_STARTER" },
@@ -5581,6 +5646,13 @@ function BillingAddonsView() {
   }
 
   return (
+    <>
+    <ContactDialog
+      open={contactDialog.open}
+      onClose={() => setContactDialog({ open: false, subject: "" })}
+      subject={contactDialog.subject}
+    />
+
     <div className="space-y-6 p-1" data-testid="billing-addons-view">
       <div>
         <h2 className="text-2xl font-bold">{t("billing.addons.title", "Subscription & Add-ons")}</h2>
@@ -5620,11 +5692,11 @@ function BillingAddonsView() {
             ) : (
               <Button
                 size="sm"
-                variant="outline"
-                className="mt-auto w-full"
-                onClick={() => window.open("mailto:support@ossaiproapp.com?subject=Channel Manager Activation Request")}
+                className="mt-auto w-full bg-orange-500 hover:bg-orange-600 text-white"
+                onClick={() => openContact("Channel Manager Activation Request")}
                 data-testid="button-channex-request"
               >
+                <PhoneCall className="h-4 w-4 mr-2" />
                 {t("billing.channex.requestActivation", "Request Activation")}
               </Button>
             )}
@@ -5637,7 +5709,7 @@ function BillingAddonsView() {
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-green-500/10">
-                  <MessageSquare className="h-5 w-5 text-green-500" />
+                  <SiWhatsapp className="h-5 w-5 text-green-500" />
                 </div>
                 <div>
                   <h3 className="font-semibold">{t("billing.wa.title", "WhatsApp Notifications")}</h3>
@@ -5657,7 +5729,26 @@ function BillingAddonsView() {
                 <Progress value={balancePercent} className="h-2" data-testid="progress-whatsapp-balance" />
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground">{t("billing.wa.purchaseToActivate", "Purchase a package below to activate WhatsApp notifications.")}</p>
+              <div className="pt-2 border-t space-y-2">
+                <p className="text-xs text-muted-foreground">{t("billing.wa.purchaseToActivate", "Purchase a package to activate WhatsApp notifications.")}</p>
+                {visibleWhatsappPackages.length > 0 && (
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-muted/40">
+                    <div>
+                      <p className="text-sm font-semibold">{visibleWhatsappPackages[0].name}</p>
+                      <p className="text-xs text-muted-foreground">{visibleWhatsappPackages[0].messages.toLocaleString()} {t("billing.wa.messages", "messages")}</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                      onClick={() => purchaseMutation.mutate(visibleWhatsappPackages[0].id)}
+                      disabled={purchaseMutation.isPending}
+                      data-testid="button-wa-buy-inline"
+                    >
+                      {purchaseMutation.isPending ? "..." : `${visibleWhatsappPackages[0].priceAZN} ₼`}
+                    </Button>
+                  </div>
+                )}
+              </div>
             )}
           </CardContent>
         </Card>
@@ -5683,11 +5774,11 @@ function BillingAddonsView() {
             </div>
             <Button
               size="sm"
-              variant="outline"
-              className="mt-auto w-full"
-              onClick={() => window.open("mailto:support@ossaiproapp.com?subject=Smart Room Addon Request")}
+              className="mt-auto w-full bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={() => openContact("Smart Room Addon Request")}
               data-testid="button-smart-room-request"
             >
+              <PhoneCall className="h-4 w-4 mr-2" />
               {t("billing.smartRoom.requestActivation", "Request Smart Room")}
             </Button>
           </CardContent>
@@ -5765,13 +5856,15 @@ function BillingAddonsView() {
           <div>
             <h4 className="font-medium">{t("billing.contact.title", "Need a custom package?")}</h4>
             <p className="text-sm text-muted-foreground mt-0.5">{t("billing.contact.desc", "Contact our team to discuss enterprise pricing, Channex activation, or custom integrations.")}</p>
-            <Button size="sm" variant="outline" className="mt-3" onClick={() => window.open("mailto:support@ossaiproapp.com")} data-testid="button-contact-billing">
+            <Button size="sm" variant="outline" className="mt-3" onClick={() => openContact("General Inquiry")} data-testid="button-contact-billing">
+              <PhoneCall className="h-4 w-4 mr-2" />
               {t("billing.contact.cta", "Contact Sales")}
             </Button>
           </div>
         </CardContent>
       </Card>
     </div>
+    </>
   );
 }
 
