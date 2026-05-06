@@ -532,21 +532,21 @@ export function registerStaffRoutes(app: Express): void {
       logger.error({ err: error }, "Error creating guest");
       const errMsg = error?.message || "";
       if (errMsg.includes("OVERBOOKING_BLOCKED")) {
-        return res.status(409).json({ message: "Bu otaq seçilmiş tarixlər üçün artıq rezerv edilib." });
+        return res.status(409).json({ message: "This room is already booked for the selected dates." });
       }
       if (errMsg.includes("ROOM_NOT_AVAILABLE")) {
-        return res.status(409).json({ message: "Otaq bu tarixlər üçün mövcud deyil." });
+        return res.status(409).json({ message: "Room is not available for the selected dates." });
       }
       if (error?.code === "23503") {
-        return res.status(400).json({ message: "Bağlantı xətası: əlaqəli cədvəldə uyğun qeyd tapılmadı." });
+        return res.status(400).json({ message: "Link error: matching record not found in related table." });
       }
       if (error?.code === "42703") {
-        return res.status(500).json({ message: `DB sütun xətası (VPS miqrasiya tələb olunur): ${errMsg}` });
+        return res.status(500).json({ message: `DB column error (VPS migration required): ${errMsg}` });
       }
       if (error?.code === "42P01") {
-        return res.status(500).json({ message: `DB cədvəl tapılmadı (VPS miqrasiya tələb olunur): ${errMsg}` });
+        return res.status(500).json({ message: `DB table not found (VPS migration required): ${errMsg}` });
       }
-      res.status(500).json({ message: errMsg || "Qonaq hesabı yaradıla bilmədi." });
+      res.status(500).json({ message: errMsg || "Failed to create guest account." });
     }
   });
 

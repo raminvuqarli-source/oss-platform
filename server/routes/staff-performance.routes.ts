@@ -149,7 +149,7 @@ export function registerStaffPerformanceRoutes(app: Express) {
         await storage.createNotification({
           userId: staff.id,
           tenantId: user.tenantId,
-          title: "Yeni mesaj",
+          title: "New Message",
           message: messageText.trim().substring(0, 100),
           type: "info",
         });

@@ -752,14 +752,14 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
               await storage.createServiceRequest({
                 guestId: guest1.id, bookingId: booking1.id,
                 roomNumber: "202", requestType: "housekeeping",
-                description: "202 otaq üçün əlavə dəsmal tələb edilir",
+                description: "Extra towels requested for room 202",
                 status: "in_progress", priority: "medium",
                 ownerId: demoOwnerId, propertyId: demoPropId,
               });
               await storage.createServiceRequest({
                 guestId: guest1.id, bookingId: booking1.id,
                 roomNumber: "202", requestType: "room_service",
-                description: "Səhər yeməyi saat 08:00-da 202 otağa çatdırılsın",
+                description: "Deliver breakfast to room 202 at 08:00",
                 status: "pending", priority: "normal",
                 ownerId: demoOwnerId, propertyId: demoPropId,
               });
@@ -781,14 +781,14 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
               if (!u) continue;
               await storage.createNotification({
                 userId: u.id,
-                title: "Yeni Rezervasiya",
-                message: `Michael Chen 301 nömrəli otağı ${tomorrow2.toLocaleDateString("az-AZ")} - ${nextWeek2.toLocaleDateString("az-AZ")} tarixləri üçün rezerv etdi`,
+                title: "New Booking",
+                message: `Michael Chen reserved room 301 for ${tomorrow2.toLocaleDateString("en-GB")} - ${nextWeek2.toLocaleDateString("en-GB")}`,
                 type: "booking", read: false,
               });
               await storage.createNotification({
                 userId: u.id,
-                title: "Xidmət Sorğusu",
-                message: "Sarah Johnson (202 otaq) əlavə dəsmal istədi",
+                title: "Service Request",
+                message: "Sarah Johnson (Room 202) requested extra towels",
                 type: "service_request", read: false,
               });
             }
@@ -799,14 +799,14 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
               if (!u) continue;
               await storage.createNotification({
                 userId: u.id,
-                title: "Yeni Sifariş",
-                message: "Masa 3 — Sarah Johnson: Biftek, Limonad x2, Tiramisu (₼87.00)",
+                title: "New Order",
+                message: "Table 3 — Sarah Johnson: Steak, Lemonade x2, Tiramisu (₼87.00)",
                 type: "info", read: false,
               });
               await storage.createNotification({
                 userId: u.id,
-                title: "Sifariş Hazırdır",
-                message: "Masa 7 — Michael Chen sifarişi hazırdır, qaraşon gözləyir",
+                title: "Order Ready",
+                message: "Table 7 — Michael Chen's order is ready, waiter needed",
                 type: "info", read: false,
               });
             }
@@ -814,25 +814,25 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
             // Ensure restaurant menu exists
             const existingMenuCats = await storage.getPosMenuCategories(demoPropId);
             if (existingMenuCats.length === 0) {
-              const mc1 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: demoPropId, name: "Səhər Yeməyi", sortOrder: 0 });
-              const mc2 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: demoPropId, name: "Əsas Yeməklər", sortOrder: 1 });
-              const mc3 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: demoPropId, name: "İçkilər", sortOrder: 2 });
-              const mc4 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: demoPropId, name: "Şirniyyat", sortOrder: 3 });
+              const mc1 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: demoPropId, name: "Breakfast", sortOrder: 0 });
+              const mc2 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: demoPropId, name: "Main Dishes", sortOrder: 1 });
+              const mc3 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: demoPropId, name: "Drinks", sortOrder: 2 });
+              const mc4 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: demoPropId, name: "Desserts", sortOrder: 3 });
               const menuItemDefs = [
-                { categoryId: mc1.id, name: "Tam Qaynar Səhər Yeməyi", priceCents: 2500, description: "Yumurta, kolbasa, tost" },
-                { categoryId: mc1.id, name: "Pankek", priceCents: 1800, description: "Ağcaqayın şərbəti ilə" },
-                { categoryId: mc1.id, name: "Qranola & Yoqurt", priceCents: 1200, description: "Təzə meyvə ilə" },
-                { categoryId: mc2.id, name: "Cızlama Toyuq", priceCents: 3500, description: "Kartof püresi ilə" },
-                { categoryId: mc2.id, name: "Biftek", priceCents: 5500, description: "Kökü garnir ilə" },
-                { categoryId: mc2.id, name: "Qril Balıq", priceCents: 4200, description: "Limon yağı ilə" },
-                { categoryId: mc2.id, name: "Vegetarian Pasta", priceCents: 2800, description: "Mevsim tərəvəzləri ilə" },
-                { categoryId: mc3.id, name: "Limonad", priceCents: 600, description: "Ev hazırlaması" },
-                { categoryId: mc3.id, name: "Çay", priceCents: 400, description: "Süd ilə" },
-                { categoryId: mc3.id, name: "Espresso", priceCents: 700, description: "İtalyan rostu" },
-                { categoryId: mc3.id, name: "Mineral Su", priceCents: 350, description: "0.5L" },
-                { categoryId: mc4.id, name: "Şokoladlı Keks", priceCents: 1400, description: "Şokolad suyu ilə" },
-                { categoryId: mc4.id, name: "Dondurma", priceCents: 900, description: "3 top" },
-                { categoryId: mc4.id, name: "Tiramisu", priceCents: 1800, description: "Klassik İtalyan" },
+                { categoryId: mc1.id, name: "Full English Breakfast", priceCents: 2500, description: "Eggs, sausage, toast" },
+                { categoryId: mc1.id, name: "Pancakes", priceCents: 1800, description: "With maple syrup" },
+                { categoryId: mc1.id, name: "Granola & Yogurt", priceCents: 1200, description: "With fresh fruit" },
+                { categoryId: mc2.id, name: "Grilled Chicken", priceCents: 3500, description: "With mashed potato" },
+                { categoryId: mc2.id, name: "Steak", priceCents: 5500, description: "With roasted vegetables" },
+                { categoryId: mc2.id, name: "Grilled Fish", priceCents: 4200, description: "With lemon butter" },
+                { categoryId: mc2.id, name: "Vegetarian Pasta", priceCents: 2800, description: "With seasonal vegetables" },
+                { categoryId: mc3.id, name: "Lemonade", priceCents: 600, description: "Homemade" },
+                { categoryId: mc3.id, name: "Tea", priceCents: 400, description: "With milk" },
+                { categoryId: mc3.id, name: "Espresso", priceCents: 700, description: "Italian roast" },
+                { categoryId: mc3.id, name: "Mineral Water", priceCents: 350, description: "0.5L" },
+                { categoryId: mc4.id, name: "Chocolate Cake", priceCents: 1400, description: "With chocolate sauce" },
+                { categoryId: mc4.id, name: "Ice Cream", priceCents: 900, description: "3 scoops" },
+                { categoryId: mc4.id, name: "Tiramisu", priceCents: 1800, description: "Classic Italian" },
               ];
               for (const mi of menuItemDefs) {
                 await storage.createPosMenuItem({ tenantId: DEMO_TENANT, propertyId: demoPropId, ...mi });
@@ -843,9 +843,9 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
             // Ensure restaurant cleaning tasks exist
             const existingTasks = await storage.getRestaurantCleaningTasks(demoPropId);
             if (existingTasks.length === 0 && restCleanerUser && restMgrUser) {
-              await storage.createRestaurantCleaningTask({ tenantId: DEMO_TENANT, propertyId: demoPropId, description: "Masaları silin — Şərq zalı", location: "Şərq zalı", assignedToId: restCleanerUser.id, createdById: restMgrUser.id, status: "pending" });
-              await storage.createRestaurantCleaningTask({ tenantId: DEMO_TENANT, propertyId: demoPropId, description: "Mətbəx döşəməsini yuyun", location: "Mətbəx", assignedToId: restCleanerUser.id, createdById: restMgrUser.id, status: "in_progress" });
-              await storage.createRestaurantCleaningTask({ tenantId: DEMO_TENANT, propertyId: demoPropId, description: "Bar sahəsini dezinfeksiya edin", location: "Bar", assignedToId: restCleanerUser.id, createdById: restMgrUser.id, status: "done" });
+              await storage.createRestaurantCleaningTask({ tenantId: DEMO_TENANT, propertyId: demoPropId, description: "Wipe down tables — East hall", location: "East Hall", assignedToId: restCleanerUser.id, createdById: restMgrUser.id, status: "pending" });
+              await storage.createRestaurantCleaningTask({ tenantId: DEMO_TENANT, propertyId: demoPropId, description: "Mop kitchen floor", location: "Kitchen", assignedToId: restCleanerUser.id, createdById: restMgrUser.id, status: "in_progress" });
+              await storage.createRestaurantCleaningTask({ tenantId: DEMO_TENANT, propertyId: demoPropId, description: "Disinfect bar area", location: "Bar", assignedToId: restCleanerUser.id, createdById: restMgrUser.id, status: "done" });
               logger.info("Created demo restaurant cleaning tasks (post-cleanup)");
             }
 
@@ -900,8 +900,8 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
                 orderType: "room_service", waiterId: waiterUser.id,
                 kitchenStatus: "delivered", settlementStatus: "pending", totalCents: 3900,
               }, [
-                { itemName: "Cızlama Toyuq", quantity: 1, unitPriceCents: 3500, totalCents: 3500 },
-                { itemName: "Çay", quantity: 1, unitPriceCents: 400, totalCents: 400 },
+                { itemName: "Grilled Chicken", quantity: 1, unitPriceCents: 3500, totalCents: 3500 },
+                { itemName: "Tea", quantity: 1, unitPriceCents: 400, totalCents: 400 },
               ]);
               logger.info("Created demo POS orders (post-cleanup)");
             }

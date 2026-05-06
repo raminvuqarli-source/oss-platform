@@ -172,7 +172,7 @@ export function registerRestaurantRoutes(app: Express): void {
       });
 
       const allStaff = await storage.getUsersByProperty(propertyId);
-      const locationLabel = tableNumber ? `Masa ${tableNumber}` : roomNumber ? `Otaq ${roomNumber}` : "Aparma";
+      const locationLabel = tableNumber ? `Table ${tableNumber}` : roomNumber ? `Room ${roomNumber}` : "Takeaway";
       const itemSummary = orderItems.slice(0, 3).map(i => `${i.quantity}x ${i.itemName}`).join(", ");
       const orderSummary = `${locationLabel}: ${itemSummary}${orderItems.length > 3 ? ` +${orderItems.length - 3}` : ""}`;
 
@@ -182,7 +182,7 @@ export function registerRestaurantRoutes(app: Express): void {
       if (kitchenIds.length > 0) {
         sendPushNotification({
           userIds: kitchenIds,
-          title: "🍽️ Yeni sifariş",
+          title: "🍽️ New Order",
           message: orderSummary,
           url: "/restaurant/kitchen",
           data: { type: "RESTAURANT_NEW_ORDER", orderId: order.id },
@@ -195,7 +195,7 @@ export function registerRestaurantRoutes(app: Express): void {
       if (cashierIds.length > 0) {
         sendPushNotification({
           userIds: cashierIds,
-          title: "💰 Yeni sifariş gəldi",
+          title: "💰 New Order",
           message: orderSummary,
           url: "/restaurant/cashier",
           data: { type: "RESTAURANT_NEW_ORDER", orderId: order.id },
@@ -259,11 +259,11 @@ export function registerRestaurantRoutes(app: Express): void {
           .filter(u => u.role === "waiter" || u.role === "restaurant_manager")
           .map(u => u.id);
         if (waiterIds.length > 0) {
-          const locationLabel = order.tableNumber ? `Masa ${order.tableNumber}` : order.roomNumber ? `Otaq ${order.roomNumber}` : "";
+          const locationLabel = order.tableNumber ? `Table ${order.tableNumber}` : order.roomNumber ? `Room ${order.roomNumber}` : "";
           sendPushNotification({
             userIds: waiterIds,
-            title: "✅ Sifariş hazırdır!",
-            message: `${locationLabel ? locationLabel + " — " : ""}Təhvil vermək üçün götürün`,
+            title: "✅ Order Ready!",
+            message: `${locationLabel ? locationLabel + " — " : ""}Ready for pickup`,
             url: "/restaurant/waiter",
             data: { type: "RESTAURANT_ORDER_READY", orderId: order.id },
           }).catch(err => logger.error({ err }, "Waiter ready push failed"));
@@ -299,11 +299,11 @@ export function registerRestaurantRoutes(app: Express): void {
         .filter(u => u.role === "restaurant_manager")
         .map(u => u.id);
       if (managerIds.length > 0) {
-        const locationLabel = order.tableNumber ? `Masa ${order.tableNumber}` : order.roomNumber ? `Otaq ${order.roomNumber}` : "Sifariş";
+        const locationLabel = order.tableNumber ? `Table ${order.tableNumber}` : order.roomNumber ? `Room ${order.roomNumber}` : "Order";
         sendPushNotification({
           userIds: managerIds,
-          title: "🚀 Sifariş təhvil verildi",
-          message: `${locationLabel} — ${user!.fullName || "Qarson"} tərəfindən çatdırıldı`,
+          title: "🚀 Order Delivered",
+          message: `${locationLabel} — delivered by ${user!.fullName || "Waiter"}`,
           url: "/restaurant/manager",
           data: { type: "RESTAURANT_ORDER_DELIVERED", orderId: order.id },
         }).catch(err => logger.error({ err }, "Manager delivery push failed"));
@@ -343,7 +343,7 @@ export function registerRestaurantRoutes(app: Express): void {
           await storage.createFolioCharge({
             folioId: targetFolioId,
             chargeType: "restaurant",
-            description: `Restoran sifarişi #${existing.id.slice(-6).toUpperCase()} — ${existing.roomNumber ? `Otaq ${existing.roomNumber}` : existing.tableNumber ? `Masa ${existing.tableNumber}` : "N/A"}`,
+            description: `Restaurant order #${existing.id.slice(-6).toUpperCase()} — ${existing.roomNumber ? `Room ${existing.roomNumber}` : existing.tableNumber ? `Table ${existing.tableNumber}` : "N/A"}`,
             amount: String(existing.totalCents / 100),
             quantity: 1,
             unitPrice: String(existing.totalCents / 100),
@@ -361,15 +361,15 @@ export function registerRestaurantRoutes(app: Express): void {
         try {
           const hotel = await storage.getHotelByPropertyId(existing.propertyId);
           if (hotel) {
-            const payLabel = paymentType === "card" ? "kart" : "nağd";
-            const locationLabel = existing.roomNumber ? `Otaq ${existing.roomNumber}` : existing.tableNumber ? `Masa ${existing.tableNumber}` : "N/A";
+            const payLabel = paymentType === "card" ? "card" : "cash";
+            const locationLabel = existing.roomNumber ? `Room ${existing.roomNumber}` : existing.tableNumber ? `Table ${existing.tableNumber}` : "N/A";
             await storage.createJournalEntry(
               {
                 hotelId: hotel.id,
                 tenantId: existing.tenantId,
                 entryNumber: `REST-${Date.now()}`,
                 entryDate: new Date(),
-                description: `Restoran gəliri (${payLabel}) — Sifariş #${existing.id.slice(-6).toUpperCase()} ${locationLabel}`,
+                description: `Restaurant Revenue (${payLabel}) — Order #${existing.id.slice(-6).toUpperCase()} ${locationLabel}`,
                 sourceType: "restaurant_order",
                 sourceId: existing.id,
                 status: "posted",
@@ -379,8 +379,8 @@ export function registerRestaurantRoutes(app: Express): void {
                 createdBy: user?.id,
               },
               [
-                { accountCode: paymentType === "card" ? "1020" : "1010", accountName: paymentType === "card" ? "Kart Kassası" : "Nağd Kassa", type: "debit", amount: existing.totalCents, description: `Restoran ${payLabel} qəbzi` },
-                { accountCode: "4010", accountName: "Restoran Gəliri", type: "credit", amount: existing.totalCents, description: `Sifariş #${existing.id.slice(-6).toUpperCase()}` },
+                { accountCode: paymentType === "card" ? "1020" : "1010", accountName: paymentType === "card" ? "Card Register" : "Cash Register", type: "debit", amount: existing.totalCents, description: `Restaurant ${payLabel} receipt` },
+                { accountCode: "4010", accountName: "Restaurant Revenue", type: "credit", amount: existing.totalCents, description: `Order #${existing.id.slice(-6).toUpperCase()}` },
               ]
             );
           }
@@ -395,17 +395,17 @@ export function registerRestaurantRoutes(app: Express): void {
       const allStaff = await storage.getUsersByProperty(existing.propertyId);
       const managerIds = allStaff.filter(u => u.role === "restaurant_manager").map(u => u.id);
       if (managerIds.length > 0) {
-        const locationLabel = existing.roomNumber ? `Otaq ${existing.roomNumber}` : existing.tableNumber ? `Masa ${existing.tableNumber}` : "Sifariş";
+        const locationLabel = existing.roomNumber ? `Room ${existing.roomNumber}` : existing.tableNumber ? `Table ${existing.tableNumber}` : "Order";
         const amountLabel = `₼${(existing.totalCents / 100).toFixed(2)}`;
         const msgMap: Record<string, string> = {
-          cash: `${locationLabel} — ${amountLabel} nağd ödənildi`,
-          card: `${locationLabel} — ${amountLabel} kartla ödənildi`,
-          room_charge: `${locationLabel} — ${amountLabel} otaq hesabına borc yazıldı`,
+          cash: `${locationLabel} — ${amountLabel} paid cash`,
+          card: `${locationLabel} — ${amountLabel} paid by card`,
+          room_charge: `${locationLabel} — ${amountLabel} charged to room`,
         };
         sendPushNotification({
           userIds: managerIds,
-          title: paymentType === "room_charge" ? "🏨 Borc yazıldı" : "✅ Ödəniş alındı",
-          message: msgMap[paymentType] ?? `${locationLabel} — ${amountLabel} ödənildi`,
+          title: paymentType === "room_charge" ? "🏨 Room Charge" : "✅ Payment Received",
+          message: msgMap[paymentType] ?? `${locationLabel} — ${amountLabel} paid`,
           url: "/restaurant/manager",
           data: { type: "RESTAURANT_ORDER_SETTLED", orderId: existing.id, paymentType },
         }).catch(err => logger.error({ err }, "Manager settle push failed"));
@@ -556,7 +556,7 @@ export function registerRestaurantRoutes(app: Express): void {
       if (assignedToId) {
         sendPushNotification({
           userIds: [assignedToId],
-          title: "🧹 Yeni temizlik tapşırığı",
+          title: "🧹 New Cleaning Task",
           message: description + (location ? ` — ${location}` : ""),
           url: "/restaurant/cleaner",
           data: { type: "CLEANING_TASK_ASSIGNED", taskId: task.id },
@@ -569,7 +569,7 @@ export function registerRestaurantRoutes(app: Express): void {
         if (cleanerIds.length > 0) {
           sendPushNotification({
             userIds: cleanerIds,
-            title: "🧹 Yeni temizlik tapşırığı",
+            title: "🧹 New Cleaning Task",
             message: description + (location ? ` — ${location}` : ""),
             url: "/restaurant/cleaner",
             data: { type: "CLEANING_TASK_ASSIGNED", taskId: task.id },
@@ -614,8 +614,8 @@ export function registerRestaurantRoutes(app: Express): void {
         const notifyIds = [...new Set(managerIds)];
 
         if (notifyIds.length > 0) {
-          const statusLabel = status === "done" ? "✅ Tapşırıq tamamlandı" : "🔄 Tapşırıq başladı";
-          const cleanerName = user.fullName || user.username || "Temizlikçi";
+          const statusLabel = status === "done" ? "✅ Task Completed" : "🔄 Task Started";
+          const cleanerName = user.fullName || user.username || "Cleaner";
           sendPushNotification({
             userIds: notifyIds,
             title: statusLabel,

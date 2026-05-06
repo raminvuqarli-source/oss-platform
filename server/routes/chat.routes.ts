@@ -52,9 +52,9 @@ export function registerChatRoutes(app: Express): void {
           if (hotel?.ownerId) ownerTenantId = hotel.ownerId;
         } catch {}
 
-        const guestName = user.fullName || "Qonaq";
+        const guestName = user.fullName || "Guest";
         const shortMsg = message.trim().length > 80 ? message.trim().substring(0, 80) + "..." : message.trim();
-        const notifTitle = `💬 ${guestName} mesaj göndərdi`;
+        const notifTitle = `💬 ${guestName} sent a message`;
         const actionUrl = `/reception-dashboard?view=messages`;
 
         // Broadcast to ALL staff connected to this hotel's dashboard — no staff lookup needed
@@ -166,9 +166,9 @@ export function registerChatRoutes(app: Express): void {
       });
 
       try {
-        const staffName = user.fullName || "Resepsiyon";
+        const staffName = user.fullName || "Reception";
         const shortMsg = message.trim().length > 50 ? message.trim().substring(0, 50) + "..." : message.trim();
-        const notifTitle = `💬 ${staffName} mesaj göndərdi`;
+        const notifTitle = `💬 ${staffName} sent a message`;
         await storage.createNotification({
           userId: guestId,
           tenantId: user.tenantId || null,

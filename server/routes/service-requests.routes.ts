@@ -79,8 +79,8 @@ export function registerServiceRequestRoutes(app: Express): void {
         } catch {}
       }
 
-      const notifTitle = "🔔 Yeni Servis Sorğusu";
-      const notifMsg = `Otaq ${request.roomNumber}: ${request.requestType.replace(/_/g, " ")} — ${request.description}`;
+      const notifTitle = "🔔 New Service Request";
+      const notifMsg = `Room ${request.roomNumber}: ${request.requestType.replace(/_/g, " ")} — ${request.description}`;
       const actionUrl = "/reception-dashboard?view=requests";
 
       // Broadcast to ALL staff connected to this hotel's dashboard instantly

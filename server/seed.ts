@@ -520,26 +520,26 @@ export async function seedDemoData() {
 
   // ─── Restaurant menu ───────────────────────────────────────────────────────
   const DEMO_TENANT = owner.id;
-  const cat1 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: property.id, name: "Səhər Yeməyi", sortOrder: 0 });
-  const cat2 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: property.id, name: "Əsas Yeməklər", sortOrder: 1 });
-  const cat3 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: property.id, name: "İçkilər", sortOrder: 2 });
-  const cat4 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: property.id, name: "Şirniyyat", sortOrder: 3 });
+  const cat1 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: property.id, name: "Breakfast", sortOrder: 0 });
+  const cat2 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: property.id, name: "Main Dishes", sortOrder: 1 });
+  const cat3 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: property.id, name: "Drinks", sortOrder: 2 });
+  const cat4 = await storage.createPosMenuCategory({ tenantId: DEMO_TENANT, propertyId: property.id, name: "Desserts", sortOrder: 3 });
 
   const menuItems = [
-    { categoryId: cat1.id, name: "Tam Qaynar Səhər Yeməyi", priceCents: 2500, description: "Yumurta, kolbasa, tost" },
-    { categoryId: cat1.id, name: "Pankek", priceCents: 1800, description: "Ağcaqayın şərbəti ilə" },
-    { categoryId: cat1.id, name: "Qranola & Yoqurt", priceCents: 1200, description: "Təzə meyvə ilə" },
-    { categoryId: cat2.id, name: "Cızlama Toyuq", priceCents: 3500, description: "Kartof püresi ilə" },
-    { categoryId: cat2.id, name: "Biftek", priceCents: 5500, description: "Kökü garnir ilə" },
-    { categoryId: cat2.id, name: "Qril Balıq", priceCents: 4200, description: "Limon yağı ilə" },
-    { categoryId: cat2.id, name: "Vegetarian Pasta", priceCents: 2800, description: "Mevsim tərəvəzləri ilə" },
-    { categoryId: cat3.id, name: "Limonad", priceCents: 600, description: "Ev hazırlaması" },
-    { categoryId: cat3.id, name: "Çay", priceCents: 400, description: "Süd ilə" },
-    { categoryId: cat3.id, name: "Espresso", priceCents: 700, description: "İtalyan rostu" },
-    { categoryId: cat3.id, name: "Mineral Su", priceCents: 350, description: "0.5L" },
-    { categoryId: cat4.id, name: "Şokoladlı Keks", priceCents: 1400, description: "Şokolad suyu ilə" },
-    { categoryId: cat4.id, name: "Dondurma", priceCents: 900, description: "3 top" },
-    { categoryId: cat4.id, name: "Tiramisu", priceCents: 1800, description: "Klassik İtalyan" },
+    { categoryId: cat1.id, name: "Full English Breakfast", priceCents: 2500, description: "Eggs, sausage, toast" },
+    { categoryId: cat1.id, name: "Pancakes", priceCents: 1800, description: "With maple syrup" },
+    { categoryId: cat1.id, name: "Granola & Yogurt", priceCents: 1200, description: "With fresh fruit" },
+    { categoryId: cat2.id, name: "Grilled Chicken", priceCents: 3500, description: "With mashed potato" },
+    { categoryId: cat2.id, name: "Steak", priceCents: 5500, description: "With roasted vegetables" },
+    { categoryId: cat2.id, name: "Grilled Fish", priceCents: 4200, description: "With lemon butter" },
+    { categoryId: cat2.id, name: "Vegetarian Pasta", priceCents: 2800, description: "With seasonal vegetables" },
+    { categoryId: cat3.id, name: "Lemonade", priceCents: 600, description: "Homemade" },
+    { categoryId: cat3.id, name: "Tea", priceCents: 400, description: "With milk" },
+    { categoryId: cat3.id, name: "Espresso", priceCents: 700, description: "Italian roast" },
+    { categoryId: cat3.id, name: "Mineral Water", priceCents: 350, description: "0.5L" },
+    { categoryId: cat4.id, name: "Chocolate Cake", priceCents: 1400, description: "With chocolate sauce" },
+    { categoryId: cat4.id, name: "Ice Cream", priceCents: 900, description: "3 scoops" },
+    { categoryId: cat4.id, name: "Tiramisu", priceCents: 1800, description: "Classic Italian" },
   ];
   for (const item of menuItems) {
     await storage.createPosMenuItem({ tenantId: DEMO_TENANT, propertyId: property.id, ...item });
@@ -554,8 +554,8 @@ export async function seedDemoData() {
       kitchenStatus: "cooking", settlementStatus: "pending",
       totalCents: 8700,
     }, [
-      { itemName: "Biftek", quantity: 1, unitPriceCents: 5500, totalCents: 5500 },
-      { itemName: "Limonad", quantity: 2, unitPriceCents: 600, totalCents: 1200 },
+      { itemName: "Steak", quantity: 1, unitPriceCents: 5500, totalCents: 5500 },
+      { itemName: "Lemonade", quantity: 2, unitPriceCents: 600, totalCents: 1200 },
       { itemName: "Tiramisu", quantity: 1, unitPriceCents: 1800, totalCents: 1800 },
     ]);
     await storage.createPosOrder({
@@ -565,8 +565,8 @@ export async function seedDemoData() {
       kitchenStatus: "ready", settlementStatus: "pending",
       totalCents: 4550,
     }, [
-      { itemName: "Qril Balıq", quantity: 1, unitPriceCents: 4200, totalCents: 4200 },
-      { itemName: "Mineral Su", quantity: 1, unitPriceCents: 350, totalCents: 350 },
+      { itemName: "Grilled Fish", quantity: 1, unitPriceCents: 4200, totalCents: 4200 },
+      { itemName: "Mineral Water", quantity: 1, unitPriceCents: 350, totalCents: 350 },
     ]);
     await storage.createPosOrder({
       tenantId: DEMO_TENANT, propertyId: property.id,
@@ -575,16 +575,16 @@ export async function seedDemoData() {
       kitchenStatus: "delivered", settlementStatus: "pending",
       totalCents: 3900,
     }, [
-      { itemName: "Cızlama Toyuq", quantity: 1, unitPriceCents: 3500, totalCents: 3500 },
-      { itemName: "Çay", quantity: 1, unitPriceCents: 400, totalCents: 400 },
+      { itemName: "Grilled Chicken", quantity: 1, unitPriceCents: 3500, totalCents: 3500 },
+      { itemName: "Tea", quantity: 1, unitPriceCents: 400, totalCents: 400 },
     ]);
   }
 
   // ─── Restaurant cleaning tasks ─────────────────────────────────────────────
   if (restCleanerUser && restMgrUser) {
-    await storage.createRestaurantCleaningTask({ tenantId: DEMO_TENANT, propertyId: property.id, description: "Masaları silin — Şərq zalı", location: "Şərq zalı", assignedToId: restCleanerUser.id, createdById: restMgrUser.id, status: "pending" });
-    await storage.createRestaurantCleaningTask({ tenantId: DEMO_TENANT, propertyId: property.id, description: "Mətbəx döşəməsini yuyun", location: "Mətbəx", assignedToId: restCleanerUser.id, createdById: restMgrUser.id, status: "in_progress" });
-    await storage.createRestaurantCleaningTask({ tenantId: DEMO_TENANT, propertyId: property.id, description: "Bar sahəsini dezinfeksiya edin", location: "Bar", assignedToId: restCleanerUser.id, createdById: restMgrUser.id, status: "done" });
+    await storage.createRestaurantCleaningTask({ tenantId: DEMO_TENANT, propertyId: property.id, description: "Wipe down tables — East hall", location: "East Hall", assignedToId: restCleanerUser.id, createdById: restMgrUser.id, status: "pending" });
+    await storage.createRestaurantCleaningTask({ tenantId: DEMO_TENANT, propertyId: property.id, description: "Mop kitchen floor", location: "Kitchen", assignedToId: restCleanerUser.id, createdById: restMgrUser.id, status: "in_progress" });
+    await storage.createRestaurantCleaningTask({ tenantId: DEMO_TENANT, propertyId: property.id, description: "Disinfect bar area", location: "Bar", assignedToId: restCleanerUser.id, createdById: restMgrUser.id, status: "done" });
   }
 
   // ─── Notifications for all demo users ─────────────────────────────────────
@@ -592,14 +592,14 @@ export async function seedDemoData() {
   for (const u of allDemoUsers) {
     await storage.createNotification({
       userId: u.id,
-      title: "Yeni Rezervasiya",
-      message: `Michael Chen 301 nömrəli otağı ${tomorrow.toLocaleDateString("az-AZ")} - ${nextWeek.toLocaleDateString("az-AZ")} tarixləri üçün rezerv etdi`,
+      title: "New Booking",
+      message: `Michael Chen reserved room 301 for ${tomorrow.toLocaleDateString("en-GB")} - ${nextWeek.toLocaleDateString("en-GB")}`,
       type: "booking", read: false,
     });
     await storage.createNotification({
       userId: u.id,
-      title: "Xidmət Sorğusu",
-      message: "Sarah Johnson (202 otaq) əlavə dəsmal istədi",
+      title: "Service Request",
+      message: "Sarah Johnson (Room 202) requested extra towels",
       type: "service_request", read: false,
     });
   }

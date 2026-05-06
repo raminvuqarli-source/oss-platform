@@ -731,7 +731,7 @@ export function registerEpointRoutes(app: Express): void {
 
       if (!privateKey || !publicKey) {
         logger.error({ hasPrivateKey: !!privateKey, hasPublicKey: !!publicKey }, "Missing Epoint environment variables for booking order");
-        return res.status(503).json({ message: "Ödəniş sistemi konfiqurasiya edilməyib. Zəhmət olmasa sahiblə əlaqə saxlayın." });
+        return res.status(503).json({ message: "Payment system is not configured. Please contact the owner." });
       }
 
       const { bookingId, amount } = req.body;
@@ -742,7 +742,7 @@ export function registerEpointRoutes(app: Express): void {
       // Accept amount as number or numeric string
       const amountNum = typeof amount === "string" ? parseFloat(amount) : Number(amount);
       if (!amountNum || isNaN(amountNum) || amountNum <= 0) {
-        return res.status(400).json({ message: "Ödəniş məbləği müəyyən edilə bilmədi. Zəhmət olmasa resepsiyanla əlaqə saxlayın." });
+        return res.status(400).json({ message: "Payment amount could not be determined. Please contact reception." });
       }
 
       // Fetch booking using raw SQL to avoid schema/column mismatch issues
@@ -838,7 +838,7 @@ export function registerEpointRoutes(app: Express): void {
       });
     } catch (error: any) {
       logger.error({ err: error, errMsg: error?.message, stack: error?.stack }, "Create Epoint booking order error");
-      res.status(500).json({ message: `Ödəniş xətası: ${error?.message || "Bilinməyən xəta"}` });
+      res.status(500).json({ message: `Payment error: ${error?.message || "Unknown error"}` });
     }
   });
 
