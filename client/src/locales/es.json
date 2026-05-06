@@ -3210,6 +3210,22 @@
     "pricingNote": "Todos los precios en USD.",
     "ctaTitle": "¿Listo para modernizar su restaurante?",
     "ctaDesc": "Únase a cientos de restaurantes que usan O.S.S POS.",
-    "talkToUs": "Escribir por WhatsApp"
+    "talkToUs": "Escribir por WhatsApp",
+    "demoTitle": "Try the Restaurant Demo",
+    "demoSubtitle": "Experience the full O.S.S POS system live — no sign-up, no credit card.",
+    "demoBadge": "Live Demo",
+    "demoReadOnly": "Demo data resets automatically. No real data is affected.",
+    "demoManager": "Restaurant Manager",
+    "demoManagerDesc": "Full dashboard: orders, staff, menu, finance & analytics",
+    "demoKitchen": "Kitchen Staff",
+    "demoKitchenDesc": "Live kitchen display — accept and prepare incoming orders",
+    "demoWaiter": "Waiter",
+    "demoWaiterDesc": "Table management, order delivery and guest service",
+    "demoCleaner": "Cleaning Staff",
+    "demoCleanerDesc": "Cleaning tasks with photo verification and status tracking",
+    "demoCashier": "Cashier",
+    "demoCashierDesc": "Settle bills, process payments and view daily revenue",
+    "demoExplore": "Explore as {{role}}",
+    "demoTryLive": "Try Live Demo"
   }
 }

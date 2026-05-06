@@ -1,0 +1,52 @@
+### FINAL MASTER PROMPT: O.S.S. ECOSYSTEM WITH DEMO ACCESS (HOTEL & RESTAURANT)
+
+**Objective:** Restructure O.S.S. (Orange Smart Service) to include a dual-entry landing page (Hotel vs. Restaurant) with dedicated Demo Dashboards for both, ensuring a seamless "Try-Before-Buy" experience.
+
+---
+
+### 1. LANDING PAGE & MULTI-LANGUAGE
+- **Split Entry:** Implement a main landing page with two primary funnels: [HOTEL] and [RESTORAN].
+- **Demo Access:** Both funnels must feature a prominent "PROVİDED DEMO" or "DEMO TEST" button. 
+    - Clicking the Demo button should log the user into a pre-configured, read-only/simulated environment.
+- **Language Support:** Maintain full 10-language support. All strings in the Demo Dashboards (menus, alerts, reports) must be translatable.
+
+---
+
+### 2. RESTAURANT POS REAL-TIME WORKFLOW (Ref: image_758898.png)
+Implement a real-time event-driven system using WebSockets/SignalR:
+- **Order Flow:** Guest scans Table-specific QR -> Digital Menu -> Order Submission.
+- **Waiter Validation (Security):** 
+    - Orders enter `PENDING_VALIDATION`. 
+    - Waiter receives high-priority audio alert and must click "APPROVE" to route the order to Kitchen/Cashier.
+- **Demo Mode Logic:** In Demo mode, simulate the Waiter and Kitchen responses so the user can see the full cycle from the Guest perspective.
+
+---
+
+### 3. STAFF & DISCIPLINE (Ref: image_6b9713.png)
+- **Manager Module:** UI for issuing "TÖHMƏT", "TƏŞVİQ", "CƏRİMƏ", and "ULDUZ".
+- **Cleaning:** Task assignment -> Photo upload verification.
+- **Performance:** Automated efficiency tracking based on service timestamps.
+
+---
+
+### 4. PRICING, REGISTRATION & ADMIN (Ref: image_7596c2.png)
+- **Standard ($29/mo):** 1 POS Terminal, QR Menu.
+- **Professional ($49/mo):** Unlimited Terminals, Waiter Panel, Full Analytics.
+- **Enterprise:** WhatsApp redirect to +994508880089.
+- **Registration:** Automatically tag accounts as "Standalone Restaurant" in the DB.
+- **Super Admin:** Separate "Restoranlar" management section in the O.S.S. Super Admin panel.
+
+---
+
+### 5. FINANCE & SECURITY (Ref: image_6b96d2.png)
+- **Epoint:** Active for all restaurant billing.
+- **Session Security:** Manual waiter approval replaces biometric tracking. QR-Table binding is mandatory. 
+- **Auto-Expire:** Digital sessions must expire immediately upon table closure/payment.
+- **Analytics:** Automated EOD reports including Revenue, Tax, and estimated Net Profit.
+
+---
+
+### 6. TECHNICAL CONSTRAINTS
+- **Backend:** C# / Docker.
+- **Notifications:** Ensure the O.S.S. notification engine is unified across all modules.
+- **Demo Persistence:** Ensure Demo users' actions do not corrupt the production database (use a sandbox or ephemeral session).

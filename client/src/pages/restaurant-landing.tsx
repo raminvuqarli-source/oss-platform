@@ -9,11 +9,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { GetQuoteDialog } from "@/components/get-quote-dialog";
+import { apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import {
   UtensilsCrossed, Check, ArrowRight, ChevronLeft, Zap,
   Monitor, QrCode, BarChart3, Cloud, Layers, Users,
   Activity, HeadphonesIcon, MessageCircle, Star, Phone,
-  ShoppingBag, ChefHat, Wallet, RefreshCw,
+  ShoppingBag, ChefHat, Wallet, RefreshCw, Play, Loader2,
+  Sparkles, CreditCard,
 } from "lucide-react";
 
 const WHATSAPP_LINK = "https://wa.me/994508880089";
@@ -132,6 +136,64 @@ const FEATURES = [
   },
 ];
 
+const DEMO_ROLES = [
+  {
+    id: "restaurant_manager",
+    icon: UtensilsCrossed,
+    color: "text-orange-500",
+    bg: "bg-orange-500/10",
+    border: "hover:border-orange-500/40",
+    titleKey: "restLanding.demoManager",
+    title: "Restaurant Manager",
+    descKey: "restLanding.demoManagerDesc",
+    desc: "Full dashboard: orders, staff, menu, finance & analytics",
+  },
+  {
+    id: "kitchen",
+    icon: ChefHat,
+    color: "text-red-500",
+    bg: "bg-red-500/10",
+    border: "hover:border-red-500/40",
+    titleKey: "restLanding.demoKitchen",
+    title: "Kitchen Staff",
+    descKey: "restLanding.demoKitchenDesc",
+    desc: "Live kitchen display — accept and prepare incoming orders",
+  },
+  {
+    id: "waiter",
+    icon: Users,
+    color: "text-amber-500",
+    bg: "bg-amber-500/10",
+    border: "hover:border-amber-500/40",
+    titleKey: "restLanding.demoWaiter",
+    title: "Waiter",
+    descKey: "restLanding.demoWaiterDesc",
+    desc: "Table management, order delivery and guest service",
+  },
+  {
+    id: "restaurant_cleaner",
+    icon: Sparkles,
+    color: "text-cyan-500",
+    bg: "bg-cyan-500/10",
+    border: "hover:border-cyan-500/40",
+    titleKey: "restLanding.demoCleaner",
+    title: "Cleaning Staff",
+    descKey: "restLanding.demoCleanerDesc",
+    desc: "Cleaning tasks with photo verification and status tracking",
+  },
+  {
+    id: "restaurant_cashier",
+    icon: CreditCard,
+    color: "text-green-500",
+    bg: "bg-green-500/10",
+    border: "hover:border-green-500/40",
+    titleKey: "restLanding.demoCashier",
+    title: "Cashier",
+    descKey: "restLanding.demoCashierDesc",
+    desc: "Settle bills, process payments and view daily revenue",
+  },
+];
+
 function AnimatedSection({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <motion.div
@@ -149,7 +211,32 @@ function AnimatedSection({ children, className = "" }: { children: React.ReactNo
 export default function RestaurantLanding() {
   const [, navigate] = useLocation();
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [quoteOpen, setQuoteOpen] = useState(false);
+  const [demoLoading, setDemoLoading] = useState<string | null>(null);
+
+  const handleDemoLogin = async (role: string) => {
+    setDemoLoading(role);
+    try {
+      const response = await apiRequest("POST", "/api/auth/demo-login", { role });
+      const data = await response.json();
+      if (data._demoToken) {
+        // store token if needed
+      }
+      const { _demoToken: _t, ...user } = data;
+      queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== "/api/auth/me" });
+      queryClient.setQueryData(["/api/auth/me"], user);
+      navigate(`/demo?role=${role}`);
+    } catch {
+      toast({
+        title: t("common.error", "Error"),
+        description: t("restLanding.demoFailed", "Demo login failed. Please try again."),
+        variant: "destructive",
+      });
+    } finally {
+      setDemoLoading(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -177,6 +264,10 @@ export default function RestaurantLanding() {
             </Button>
             <Button variant="ghost" size="sm" onClick={() => document.getElementById("pricing-section")?.scrollIntoView({ behavior: "smooth" })} data-testid="button-nav-pricing">
               {t("landing.pricing", "Pricing")}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => document.getElementById("demo-section")?.scrollIntoView({ behavior: "smooth" })} data-testid="button-nav-demo" className="text-orange-500 hover:text-orange-600">
+              <Play className="h-3.5 w-3.5 mr-1.5" />
+              {t("restLanding.demoTryLive", "Try Live Demo")}
             </Button>
           </nav>
           <div className="flex items-center gap-1.5">
@@ -217,8 +308,9 @@ export default function RestaurantLanding() {
                   {t("restLanding.startFreeTrial", "Start 14-Day Free Trial")}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <Button size="lg" variant="outline" onClick={() => document.getElementById("pricing-section")?.scrollIntoView({ behavior: "smooth" })} className="rounded-xl" data-testid="button-hero-pricing">
-                  {t("restLanding.seePricing", "See Pricing")}
+                <Button size="lg" variant="outline" onClick={() => document.getElementById("demo-section")?.scrollIntoView({ behavior: "smooth" })} className="rounded-xl border-orange-500/40 text-orange-500 hover:bg-orange-500/10" data-testid="button-hero-demo">
+                  <Play className="mr-2 h-4 w-4" />
+                  {t("restLanding.demoTryLive", "Try Live Demo")}
                 </Button>
               </div>
               <p className="text-sm text-muted-foreground/60 mt-3">{t("restLanding.noCreditCard", "No credit card required · Cancel anytime")}</p>
@@ -343,6 +435,75 @@ export default function RestaurantLanding() {
 
             <p className="text-center text-sm text-muted-foreground mt-8">
               {t("restLanding.pricingNote", "All prices in USD. Local currency (AZN) available at checkout. VAT may apply.")}
+            </p>
+          </AnimatedSection>
+        </section>
+
+        {/* DEMO SECTION */}
+        <section id="demo-section" className="py-20 px-6 bg-muted/20" data-testid="section-demo">
+          <AnimatedSection className="max-w-5xl mx-auto">
+            <div className="text-center mb-12 space-y-3">
+              <Badge variant="secondary" className="text-xs px-4 py-1.5 rounded-full border border-orange-500/20 text-orange-500">
+                <Play className="h-3 w-3 mr-1.5" />
+                {t("restLanding.demoBadge", "Live Demo")}
+              </Badge>
+              <h2 className="text-3xl font-bold">{t("restLanding.demoTitle", "Try the Restaurant Demo")}</h2>
+              <p className="text-muted-foreground max-w-xl mx-auto">
+                {t("restLanding.demoSubtitle", "Experience the full O.S.S POS system live — no sign-up, no credit card.")}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {DEMO_ROLES.map((role, i) => {
+                const Icon = role.icon;
+                const isLoading = demoLoading === role.id;
+                const title = t(role.titleKey, role.title);
+                return (
+                  <motion.div
+                    key={role.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: i * 0.07 }}
+                  >
+                    <Card
+                      className={`group cursor-pointer transition-all duration-300 border-border/50 ${role.border} hover:shadow-md hover:-translate-y-0.5 h-full`}
+                      onClick={() => !demoLoading && handleDemoLogin(role.id)}
+                      data-testid={`card-demo-${role.id}`}
+                    >
+                      <CardContent className="p-5 space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-xl ${role.bg} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                            <Icon className={`h-5 w-5 ${role.color}`} />
+                          </div>
+                          <h3 className="font-semibold text-sm">{title}</h3>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{t(role.descKey, role.desc)}</p>
+                        <Button
+                          className="w-full"
+                          variant="outline"
+                          size="sm"
+                          disabled={!!demoLoading}
+                          onClick={(e) => { e.stopPropagation(); handleDemoLogin(role.id); }}
+                          data-testid={`button-demo-${role.id}`}
+                        >
+                          {isLoading ? (
+                            <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                          ) : (
+                            <Play className="h-3.5 w-3.5 mr-1.5" />
+                          )}
+                          {t("restLanding.demoExplore", "Explore as {{role}}", { role: title })}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            <p className="text-center text-xs text-muted-foreground/60 mt-8 flex items-center justify-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5" />
+              {t("restLanding.demoReadOnly", "Demo data resets automatically. No real data is affected.")}
             </p>
           </AnimatedSection>
         </section>
