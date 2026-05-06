@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { showErrorToast } from "@/lib/error-handler";
@@ -13,9 +14,67 @@ import {
   UtensilsCrossed, TrendingUp, ShoppingBag, Users, CreditCard,
   BarChart3, Clock, CheckCircle, ChefHat, Wallet, LogOut,
   RefreshCw, Plus, Utensils, Settings, Package,
+  PhoneCall, Mail, Copy, ExternalLink,
 } from "lucide-react";
+import { SiWhatsapp } from "react-icons/si";
 import { useAuth } from "@/lib/auth-context";
-import { ContactDialog } from "./owner-dashboard";
+
+const CONTACT_EMAIL = "support@ossaiproapp.com";
+
+function RestaurantContactDialog({ open, onClose, subject }: { open: boolean; onClose: () => void; subject: string }) {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
+
+  function copyEmail() {
+    navigator.clipboard.writeText(CONTACT_EMAIL).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      toast({ title: t("common.copied", "Copied!"), description: CONTACT_EMAIL });
+    }).catch(() => {
+      toast({ title: CONTACT_EMAIL, description: t("billing.contact.copyManually", "Copy the email address above") });
+    });
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <PhoneCall className="h-5 w-5 text-primary" />
+            {t("billing.contact.dialogTitle", "Contact O.S.S Team")}
+          </DialogTitle>
+          <DialogDescription>
+            {t("billing.contact.dialogDesc", "Send us a message and we'll activate your service within 24 hours.")}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3 py-2">
+          <p className="text-sm text-muted-foreground">{t("billing.contact.subject", "Subject")}: <span className="font-medium text-foreground">{subject}</span></p>
+          <div className="flex items-center gap-2 p-3 rounded-lg border bg-muted/30">
+            <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
+            <span className="text-sm font-medium flex-1 truncate">{CONTACT_EMAIL}</span>
+            <Button size="sm" variant="outline" className="h-7 px-2 shrink-0" onClick={copyEmail}>
+              {copied ? <CheckCircle className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+            </Button>
+          </div>
+          <a
+            href={`https://wa.me/994502888402?text=${encodeURIComponent(subject)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 p-3 rounded-lg border bg-green-500/5 border-green-500/30 hover:bg-green-500/10 transition-colors"
+          >
+            <SiWhatsapp className="h-4 w-4 text-green-500 shrink-0" />
+            <span className="text-sm font-medium text-green-700 dark:text-green-400">{t("billing.contact.whatsapp", "Message us on WhatsApp")}</span>
+            <ExternalLink className="h-3.5 w-3.5 text-green-500 ml-auto" />
+          </a>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>{t("common.close", "Close")}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 type Analytics = {
   today: { orderCount: number; revenueCents: number };
@@ -117,7 +176,7 @@ export default function RestaurantOwnerDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <ContactDialog
+      <RestaurantContactDialog
         open={contactDialog.open}
         onClose={() => setContactDialog({ open: false, subject: "" })}
         subject={contactDialog.subject}
