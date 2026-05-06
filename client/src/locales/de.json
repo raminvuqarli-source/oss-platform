@@ -3005,7 +3005,16 @@
     "tasksCompleted": "Tapşırıqlar",
     "noPerformanceData": "Məlumat yoxdur",
     "waiterTablesAssigned": "Masalar",
-    "tablesNote": "Qarsona aid masalar"
+    "tablesNote": "Qarsona aid masalar",
+    "customerMsgs": "Kundennachrichten",
+    "noCustomerMsgs": "Keine Kundennachrichten",
+    "confirmOrder": "Bestellung bestätigen",
+    "confirmOrderDesc": "Bestellung an Küche senden",
+    "pendingConfirm": "Warte auf Bestätigung",
+    "waiterConfirmed": "Bestellung an Küche gesendet",
+    "qrScanTitle": "QR scannen",
+    "qrDialogTitle": "Tisch-QR-Code",
+    "qrDialogDesc": "Kunde scannt diesen QR für Bestellung"
   },
   "rcl": {
     "pageTitle": "Reinigungsbereich",
@@ -3036,7 +3045,12 @@
     "confirmComplete": "Abschließen",
     "cancel": "Abbrechen",
     "teamMessages": "Team",
-    "noTeamMembers": "Keine Teammitglieder gefunden"
+    "noTeamMembers": "Keine Teammitglieder gefunden",
+    "tabArchive": "Archiv",
+    "archiveTitle": "Tagesarchiv",
+    "archiveEmpty": "Keine erledigten Aufgaben",
+    "archiveDate": "Datum",
+    "archiveCount": "Aufgaben"
   },
   "cashier": {
     "todayRevenue": "Heutiger Umsatz",
@@ -3245,6 +3259,13 @@
     "demoCashier": "Cashier",
     "demoCashierDesc": "Settle bills, process payments and view daily revenue",
     "demoExplore": "Explore as {{role}}",
-    "demoTryLive": "Try Live Demo"
+    "demoTryLive": "Try Live Demo",
+    "guestPageTitle": "Bestellung aufgeben",
+    "guestPageSubtitle": "Speisekarte ansehen und bestellen",
+    "guestCallWaiter": "Kellner rufen",
+    "guestSendMessage": "Nachricht senden",
+    "guestMessageSent": "Nachricht gesendet",
+    "guestOrderPlaced": "Bestellung aufgegeben!",
+    "guestWaiterWillConfirm": "Der Kellner bestätigt Ihre Bestellung"
   }
 }

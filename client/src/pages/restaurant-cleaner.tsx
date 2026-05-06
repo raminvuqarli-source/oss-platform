@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, CheckSquare, Clock, MapPin, Camera, CheckCircle2, Loader2, MessageSquare } from "lucide-react";
+import { Sparkles, CheckSquare, Clock, MapPin, Camera, CheckCircle2, Loader2, MessageSquare, Archive } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { Locale } from "date-fns";
 import { az as azLocale, tr as trLocale, ru as ruLocale, ar as arLocale, fr as frLocale, de as deLocale, es as esLocale, nl as nlLocale } from "date-fns/locale";
@@ -166,6 +166,11 @@ export default function RestaurantCleaner() {
               {t("rcl.tabTasks")}
               {pending.length > 0 && <Badge variant="destructive" className="ml-1.5 text-xs">{pending.length}</Badge>}
             </TabsTrigger>
+            <TabsTrigger value="archive" data-testid="tab-cleaner-archive">
+              <Archive className="h-4 w-4 mr-1" />
+              {t("rcl.tabArchive")}
+              {done.length > 0 && <Badge variant="secondary" className="ml-1.5 text-xs">{done.length}</Badge>}
+            </TabsTrigger>
             <TabsTrigger value="messages" data-testid="tab-cleaner-messages">
               <MessageSquare className="h-4 w-4 mr-1" />
               {t("rcl.tabMessages")}
@@ -248,6 +253,51 @@ export default function RestaurantCleaner() {
                   ))}
                 </div>
               </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="archive" className="mt-4 space-y-4">
+            <h2 className="font-semibold">{t("rcl.archiveTitle")}</h2>
+            {done.length === 0 ? (
+              <div className="flex flex-col items-center py-12 text-muted-foreground">
+                <Archive className="h-12 w-12 mb-3 opacity-30" />
+                <p>{t("rcl.archiveEmpty")}</p>
+              </div>
+            ) : (
+              (() => {
+                const grouped: Record<string, CleaningTask[]> = {};
+                for (const task of done) {
+                  const dateKey = new Date(task.completedAt || task.createdAt).toLocaleDateString(i18n.language, { year: "numeric", month: "long", day: "numeric" });
+                  if (!grouped[dateKey]) grouped[dateKey] = [];
+                  grouped[dateKey].push(task);
+                }
+                return Object.entries(grouped).map(([date, dateTasks]) => (
+                  <div key={date}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{date}</span>
+                      <div className="flex-1 h-px bg-border" />
+                      <Badge variant="secondary" className="text-xs">{dateTasks.length} {t("rcl.archiveCount")}</Badge>
+                    </div>
+                    <div className="space-y-2">
+                      {dateTasks.map(task => (
+                        <div key={task.id} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30" data-testid={`archive-task-${task.id}`}>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium flex items-center gap-2">
+                              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                              {task.description}
+                            </p>
+                            {task.location && <p className="text-xs text-muted-foreground ml-5"><MapPin className="h-3 w-3 inline mr-0.5" />{task.location}</p>}
+                          </div>
+                          <div className="flex items-center gap-2 ml-2">
+                            {task.photoUrl && <img src={task.photoUrl} alt="foto" className="h-8 w-8 rounded object-cover border" />}
+                            <Badge className="bg-emerald-100 text-emerald-800 text-xs shrink-0">✓</Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ));
+              })()
             )}
           </TabsContent>
 

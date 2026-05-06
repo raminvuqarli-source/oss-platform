@@ -97,6 +97,7 @@ export default function RestaurantManager() {
   const [cleaningForm, setCleaningForm] = useState({ description: "", location: "", assignedToId: "" });
   const [tableForm, setTableForm] = useState({ tableNumber: "", capacity: "" });
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [qrTableNumber, setQrTableNumber] = useState<string | null>(null);
 
   // ── WebSocket for real-time updates ──
   const wsRef = useRef<WebSocket | null>(null);
@@ -119,11 +120,17 @@ export default function RestaurantManager() {
         if (msg.type === "RESTAURANT_CLEANING_TASK_CREATED") {
           queryClient.invalidateQueries({ queryKey: ["/api/restaurant/cleaning-tasks"] });
         }
-        if (msg.type === "RESTAURANT_NEW_ORDER" || msg.type === "RESTAURANT_ORDER_UPDATED") {
+        if (msg.type === "RESTAURANT_NEW_ORDER" || msg.type === "RESTAURANT_ORDER_UPDATED" || msg.type === "RESTAURANT_GUEST_ORDER") {
           queryClient.invalidateQueries({ queryKey: ["/api/restaurant/orders"] });
           queryClient.invalidateQueries({ queryKey: ["/api/restaurant/analytics"] });
           queryClient.invalidateQueries({ queryKey: ["/api/restaurant/room-orders"] });
           queryClient.invalidateQueries({ queryKey: ["/api/restaurant/tables"] });
+          if (msg.type === "RESTAURANT_GUEST_ORDER") {
+            toast({ title: `🍽️ ${t("rm.pendingConfirm")} — ${t("restaurant.table")} ${msg.tableNumber}` });
+          }
+        }
+        if (msg.type === "RESTAURANT_GUEST_MESSAGE") {
+          toast({ title: `💬 ${msg.senderName} — ${t("restaurant.table")} ${msg.tableNumber}`, description: msg.message });
         }
       } catch {}
     };
@@ -131,6 +138,7 @@ export default function RestaurantManager() {
   }, [queryClient, toast]);
 
   // ── queries ──
+  const { data: currentUser } = useQuery<{ propertyId?: string | null }>({ queryKey: ["/api/auth/me"] });
   const { data: menu } = useQuery<{ categories: Category[]; items: MenuItem[] }>({ queryKey: ["/api/restaurant/menu"] });
   const { data: orders = [] } = useQuery<PosOrder[]>({ queryKey: ["/api/restaurant/orders"], refetchInterval: 15000 });
   const { data: analytics } = useQuery<Analytics>({ queryKey: ["/api/restaurant/analytics"], refetchInterval: 30000 });
@@ -432,15 +440,27 @@ export default function RestaurantManager() {
                     <CardContent className="pt-3 pb-3 px-3">
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-bold text-lg">{table.tableNumber}</span>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-                          onClick={() => deleteTable.mutate(table.id)}
-                          data-testid={`button-delete-table-${table.tableNumber}`}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
+                            onClick={() => setQrTableNumber(table.tableNumber)}
+                            data-testid={`button-qr-table-${table.tableNumber}`}
+                            title={t("rm.qrScanTitle")}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h1v1h-1zm3 0h1v1h-1zm-3 3h1v1h-1zm3 0h1v1h-1zm0 3h1v1h-1zm-3 0h1v1h-1zm3-6h1v1h-1z"/></svg>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                            onClick={() => deleteTable.mutate(table.id)}
+                            data-testid={`button-delete-table-${table.tableNumber}`}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
                       {table.capacity && (
                         <p className="text-xs text-muted-foreground mb-1.5">{table.capacity} nəfər</p>
@@ -1231,6 +1251,40 @@ export default function RestaurantManager() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* ── QR Code Dialog ── */}
+      {qrTableNumber && (
+        <Dialog open onOpenChange={() => setQrTableNumber(null)}>
+          <DialogContent className="max-w-sm" data-testid="dialog-qr-code">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                {t("rm.qrDialogTitle")} — {t("restaurant.table")} {qrTableNumber}
+              </DialogTitle>
+              <DialogDescription>{t("rm.qrDialogDesc")}</DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col items-center gap-4 py-4">
+              {(() => {
+                const guestUrl = `${window.location.origin}/restaurant/guest/${currentUser?.propertyId || "demo"}/table/${qrTableNumber}`;
+                const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(guestUrl)}&color=000000&bgcolor=ffffff&margin=10`;
+                return (
+                  <>
+                    <div className="p-3 bg-white rounded-xl border shadow-sm">
+                      <img src={qrApiUrl} alt="QR Code" className="w-[220px] h-[220px] rounded" data-testid="qr-code-image" />
+                    </div>
+                    <div className="w-full space-y-2">
+                      <p className="text-xs text-muted-foreground text-center break-all">{guestUrl}</p>
+                      <Button variant="outline" size="sm" className="w-full" onClick={() => { navigator.clipboard.writeText(guestUrl); toast({ title: "✓ Link kopyalandı" }); }} data-testid="btn-copy-qr-link">
+                        Link Kopyala
+                      </Button>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* ── Photo Lightbox ── */}
       {lightboxUrl && (

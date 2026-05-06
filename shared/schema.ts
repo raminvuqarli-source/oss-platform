@@ -2381,6 +2381,20 @@ export const insertRestaurantStaffProfileSchema = createInsertSchema(restaurantS
 export type InsertRestaurantStaffProfile = z.infer<typeof insertRestaurantStaffProfileSchema>;
 export type RestaurantStaffProfile = typeof restaurantStaffProfiles.$inferSelect;
 
+// Restaurant Guest Messages — table guests send messages to waiter
+export const restaurantGuestMessages = pgTable("restaurant_guest_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  propertyId: varchar("property_id").notNull(),
+  tableNumber: varchar("table_number").notNull(),
+  senderName: varchar("sender_name").default("Qonaq"),
+  message: text("message").notNull(),
+  isReadByWaiter: boolean("is_read_by_waiter").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+export const insertRestaurantGuestMessageSchema = createInsertSchema(restaurantGuestMessages).omit({ id: true, createdAt: true });
+export type InsertRestaurantGuestMessage = z.infer<typeof insertRestaurantGuestMessageSchema>;
+export type RestaurantGuestMessage = typeof restaurantGuestMessages.$inferSelect;
+
 // Restaurant Tables — master list of physical tables managed by the restaurant
 export const restaurantTables = pgTable("restaurant_tables", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

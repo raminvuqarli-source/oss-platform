@@ -3005,7 +3005,16 @@
     "tasksCompleted": "Tapşırıqlar",
     "noPerformanceData": "Məlumat yoxdur",
     "waiterTablesAssigned": "Masalar",
-    "tablesNote": "Qarsona aid masalar"
+    "tablesNote": "Qarsona aid masalar",
+    "customerMsgs": "پیام‌های مشتری",
+    "noCustomerMsgs": "پیامی از مشتری نیست",
+    "confirmOrder": "تأیید سفارش",
+    "confirmOrderDesc": "ارسال سفارش به آشپزخانه",
+    "pendingConfirm": "در انتظار تأیید",
+    "waiterConfirmed": "سفارش به آشپزخانه ارسال شد",
+    "qrScanTitle": "اسکن QR",
+    "qrDialogTitle": "QR کد میز",
+    "qrDialogDesc": "مشتری این QR را برای سفارش اسکن می‌کند"
   },
   "rcl": {
     "pageTitle": "پنل نظافت",
@@ -3036,7 +3045,12 @@
     "confirmComplete": "تکمیل",
     "cancel": "لغو",
     "teamMessages": "تیم",
-    "noTeamMembers": "عضو تیمی یافت نشد"
+    "noTeamMembers": "عضو تیمی یافت نشد",
+    "tabArchive": "آرشیو",
+    "archiveTitle": "آرشیو روزانه",
+    "archiveEmpty": "هیچ وظیفه‌ای کامل نشده",
+    "archiveDate": "تاریخ",
+    "archiveCount": "وظیفه"
   },
   "cashier": {
     "todayRevenue": "درآمد امروز",
@@ -3245,6 +3259,13 @@
     "demoCashier": "Cashier",
     "demoCashierDesc": "Settle bills, process payments and view daily revenue",
     "demoExplore": "Explore as {{role}}",
-    "demoTryLive": "Try Live Demo"
+    "demoTryLive": "Try Live Demo",
+    "guestPageTitle": "ثبت سفارش",
+    "guestPageSubtitle": "منو را ببینید و سفارش دهید",
+    "guestCallWaiter": "صدا زدن گارسون",
+    "guestSendMessage": "ارسال پیام",
+    "guestMessageSent": "پیام ارسال شد",
+    "guestOrderPlaced": "سفارش با موفقیت ثبت شد!",
+    "guestWaiterWillConfirm": "گارسون سفارش شما را تأیید خواهد کرد"
   }
 }

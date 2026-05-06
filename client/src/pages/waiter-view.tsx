@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
-import { Bell, Package, CheckCircle2, Clock, Utensils, MessageSquare, LayoutGrid } from "lucide-react";
+import { Bell, Package, CheckCircle2, Clock, Utensils, MessageSquare, LayoutGrid, Users, ClipboardCheck, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import type { Locale } from "date-fns";
@@ -63,6 +63,29 @@ export default function WaiterView() {
     queryKey: ["/api/restaurant/my-profile"],
   });
 
+  type GuestMessage = { id: string; tableNumber: string; senderName: string | null; message: string; isReadByWaiter: boolean; createdAt: string };
+  const { data: guestMessages = [], refetch: refetchMessages } = useQuery<GuestMessage[]>({
+    queryKey: ["/api/restaurant/guest-messages"],
+    refetchInterval: 15000,
+  });
+
+  const unreadCount = guestMessages.filter(m => !m.isReadByWaiter).length;
+  const pendingConfirmOrders = orders.filter(o => o.kitchenStatus === "awaiting_confirmation");
+
+  const confirmOrder = useMutation({
+    mutationFn: (id: string) => apiRequest("PATCH", `/api/restaurant/orders/${id}/confirm`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/restaurant/orders"] });
+      toast({ title: t("rm.waiterConfirmed") });
+    },
+    onError: () => toast({ title: t("errors.generic", "Failed"), variant: "destructive" }),
+  });
+
+  const markMessagesRead = useMutation({
+    mutationFn: (tableNumber: string) => apiRequest("PATCH", "/api/restaurant/guest-messages/read", { tableNumber }),
+    onSuccess: () => refetchMessages(),
+  });
+
   const deliverOrder = useMutation({
     mutationFn: (id: string) => apiRequest("PATCH", `/api/restaurant/orders/${id}/deliver`, {}),
     onSuccess: () => {
@@ -115,6 +138,14 @@ export default function WaiterView() {
                     description: msg.guestName || undefined,
                   });
                 }
+                if (msg.type === "RESTAURANT_GUEST_MESSAGE") {
+                  queryClient.invalidateQueries({ queryKey: ["/api/restaurant/guest-messages"] });
+                  toast({ title: `💬 ${msg.senderName || "Qonaq"} — ${t('restaurant.table')} ${msg.tableNumber}`, description: msg.message });
+                }
+                if (msg.type === "RESTAURANT_GUEST_ORDER") {
+                  queryClient.invalidateQueries({ queryKey: ["/api/restaurant/orders"] });
+                  toast({ title: `🍽️ ${t("rm.pendingConfirm")} — ${t("restaurant.table")} ${msg.tableNumber}` });
+                }
               } catch {}
             };
             ws.onclose = () => {
@@ -137,6 +168,7 @@ export default function WaiterView() {
 
   const readyOrders = orders.filter(o => o.kitchenStatus === "ready");
   const pendingCalls = (calls as WaiterCall[]).filter(c => c.status === "pending");
+  const [msgTableFilter, setMsgTableFilter] = useState<string | null>(null);
 
   return (
     <>
@@ -189,10 +221,20 @@ export default function WaiterView() {
               {t("restaurant.tabOrders")}
               {readyOrders.length > 0 && <Badge variant="destructive" className="ml-1.5 text-xs">{readyOrders.length}</Badge>}
             </TabsTrigger>
+            <TabsTrigger value="confirm" data-testid="tab-confirm-orders">
+              <ClipboardCheck className="h-4 w-4 mr-1" />
+              {t("rm.pendingConfirm")}
+              {pendingConfirmOrders.length > 0 && <Badge variant="destructive" className="ml-1.5 text-xs animate-pulse">{pendingConfirmOrders.length}</Badge>}
+            </TabsTrigger>
             <TabsTrigger value="calls" data-testid="tab-calls">
               <Bell className="h-4 w-4 mr-1" />
               {t('restaurant.callWaiter')}
               {pendingCalls.length > 0 && <Badge variant="destructive" className="ml-1.5 text-xs">{pendingCalls.length}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="customer-msgs" data-testid="tab-customer-msgs">
+              <Users className="h-4 w-4 mr-1" />
+              {t("rm.customerMsgs")}
+              {unreadCount > 0 && <Badge variant="destructive" className="ml-1.5 text-xs">{unreadCount}</Badge>}
             </TabsTrigger>
             <TabsTrigger value="messages" data-testid="tab-waiter-messages">
               <MessageSquare className="h-4 w-4 mr-1" />
@@ -262,6 +304,50 @@ export default function WaiterView() {
             </div>
           </TabsContent>
 
+          {/* ── Confirm QR Orders Tab ── */}
+          <TabsContent value="confirm" className="space-y-3 mt-3">
+            <div className="flex items-center gap-2 mb-2">
+              <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">{t("rm.pendingConfirm")}</h2>
+            </div>
+            {pendingConfirmOrders.length === 0 ? (
+              <div className="flex flex-col items-center py-12 text-muted-foreground">
+                <ClipboardCheck className="h-12 w-12 mb-3 opacity-30" />
+                <p>{t("rm.noCustomerMsgs")}</p>
+              </div>
+            ) : (
+              pendingConfirmOrders.map(order => (
+                <Card key={order.id} className="border-2 border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-950/20" data-testid={`card-confirm-${order.id}`}>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                        {order.tableNumber ? `${t('restaurant.table')} ${order.tableNumber}` : order.guestName || `#${order.id.slice(-6).toUpperCase()}`}
+                      </CardTitle>
+                      <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 text-xs">QR</Badge>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      {formatDistanceToNow(new Date(order.createdAt), { addSuffix: true, locale: dateFnsLocale })}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {order.notes && <p className="text-sm text-muted-foreground mb-2 italic">{order.notes}</p>}
+                    <p className="text-sm font-medium mb-3">{(order.totalCents / 100).toFixed(2)} ₼</p>
+                    <Button
+                      className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold"
+                      onClick={() => confirmOrder.mutate(order.id)}
+                      disabled={confirmOrder.isPending}
+                      data-testid={`btn-confirm-order-${order.id}`}
+                    >
+                      {confirmOrder.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ClipboardCheck className="h-4 w-4 mr-2" />}
+                      {t("rm.confirmOrder")}
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </TabsContent>
+
           <TabsContent value="calls" className="space-y-3 mt-3">
             {callsLoading ? (
               <div className="space-y-2">
@@ -299,6 +385,58 @@ export default function WaiterView() {
                 </Card>
               ))
             )}
+          </TabsContent>
+
+          {/* ── Customer Messages Tab ── */}
+          <TabsContent value="customer-msgs" className="space-y-3 mt-3">
+            {(() => {
+              const tableGroups = guestMessages.reduce<Record<string, typeof guestMessages>>((acc, m) => {
+                if (!acc[m.tableNumber]) acc[m.tableNumber] = [];
+                acc[m.tableNumber].push(m);
+                return acc;
+              }, {});
+              const tables = Object.keys(tableGroups);
+              if (tables.length === 0) return (
+                <div className="flex flex-col items-center py-12 text-muted-foreground">
+                  <Users className="h-12 w-12 mb-3 opacity-30" />
+                  <p>{t("rm.noCustomerMsgs")}</p>
+                </div>
+              );
+              return (
+                <div className="space-y-4">
+                  {/* Table filter */}
+                  <div className="flex gap-2 flex-wrap">
+                    <Button size="sm" variant={msgTableFilter === null ? "default" : "outline"} className="h-7 text-xs" onClick={() => setMsgTableFilter(null)}>Hamısı</Button>
+                    {tables.map(tbl => {
+                      const unread = tableGroups[tbl].filter(m => !m.isReadByWaiter).length;
+                      return (
+                        <Button key={tbl} size="sm" variant={msgTableFilter === tbl ? "default" : "outline"} className="h-7 text-xs relative" onClick={() => { setMsgTableFilter(tbl); markMessagesRead.mutate(tbl); }}>
+                          {t("restaurant.table")} {tbl}
+                          {unread > 0 && <span className="ml-1 bg-rose-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center">{unread}</span>}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  {/* Messages */}
+                  {(msgTableFilter ? tableGroups[msgTableFilter] || [] : guestMessages).map(msg => (
+                    <div key={msg.id} className={`flex gap-2 items-start p-3 rounded-lg border ${msg.isReadByWaiter ? "opacity-60 bg-muted/20" : "border-amber-200 bg-amber-50 dark:bg-amber-950/20"}`} data-testid={`guest-msg-${msg.id}`}>
+                      <div className="p-1.5 rounded-full bg-primary/10 shrink-0">
+                        <Users className="h-3 w-3 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-xs font-semibold">{msg.senderName || "Qonaq"}</span>
+                          <Badge variant="secondary" className="text-xs h-4 px-1">{t("restaurant.table")} {msg.tableNumber}</Badge>
+                          {!msg.isReadByWaiter && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />}
+                        </div>
+                        <p className="text-sm">{msg.message}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true, locale: dateFnsLocale })}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </TabsContent>
 
           <TabsContent value="messages" className="mt-3">

@@ -3005,7 +3005,16 @@
     "tasksCompleted": "Tapşırıqlar",
     "noPerformanceData": "Məlumat yoxdur",
     "waiterTablesAssigned": "Masalar",
-    "tablesNote": "Qarsona aid masalar"
+    "tablesNote": "Qarsona aid masalar",
+    "customerMsgs": "Klantberichten",
+    "noCustomerMsgs": "Geen klantberichten",
+    "confirmOrder": "Bestelling bevestigen",
+    "confirmOrderDesc": "Bestelling naar keuken sturen",
+    "pendingConfirm": "Wacht op bevestiging",
+    "waiterConfirmed": "Bestelling naar keuken gestuurd",
+    "qrScanTitle": "QR scannen",
+    "qrDialogTitle": "Tafel QR-code",
+    "qrDialogDesc": "Klant scant dit QR om te bestellen"
   },
   "rcl": {
     "pageTitle": "Schoonmaakpaneel",
@@ -3036,7 +3045,12 @@
     "confirmComplete": "Voltooien",
     "cancel": "Annuleren",
     "teamMessages": "Team",
-    "noTeamMembers": "Geen teamleden gevonden"
+    "noTeamMembers": "Geen teamleden gevonden",
+    "tabArchive": "Archief",
+    "archiveTitle": "Dagelijks archief",
+    "archiveEmpty": "Geen voltooide taken",
+    "archiveDate": "Datum",
+    "archiveCount": "taken"
   },
   "cashier": {
     "todayRevenue": "Omzet vandaag",
@@ -3245,6 +3259,13 @@
     "demoCashier": "Cashier",
     "demoCashierDesc": "Settle bills, process payments and view daily revenue",
     "demoExplore": "Explore as {{role}}",
-    "demoTryLive": "Try Live Demo"
+    "demoTryLive": "Try Live Demo",
+    "guestPageTitle": "Bestelling plaatsen",
+    "guestPageSubtitle": "Bekijk het menu en plaats uw bestelling",
+    "guestCallWaiter": "Ober roepen",
+    "guestSendMessage": "Bericht sturen",
+    "guestMessageSent": "Bericht verzonden",
+    "guestOrderPlaced": "Bestelling geplaatst!",
+    "guestWaiterWillConfirm": "De ober bevestigt uw bestelling"
   }
 }

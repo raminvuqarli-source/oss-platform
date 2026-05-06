@@ -3005,7 +3005,16 @@
     "tasksCompleted": "Tapşırıqlar",
     "noPerformanceData": "Məlumat yoxdur",
     "waiterTablesAssigned": "Masalar",
-    "tablesNote": "Qarsona aid masalar"
+    "tablesNote": "Qarsona aid masalar",
+    "customerMsgs": "رسائل الضيوف",
+    "noCustomerMsgs": "لا رسائل من الضيوف",
+    "confirmOrder": "تأكيد الطلب",
+    "confirmOrderDesc": "إرسال الطلب إلى المطبخ",
+    "pendingConfirm": "في انتظار التأكيد",
+    "waiterConfirmed": "تم إرسال الطلب إلى المطبخ",
+    "qrScanTitle": "مسح QR",
+    "qrDialogTitle": "رمز QR للطاولة",
+    "qrDialogDesc": "يمسح العميل هذا الرمز لتقديم طلب"
   },
   "rcl": {
     "pageTitle": "لوحة التنظيف",
@@ -3036,7 +3045,12 @@
     "confirmComplete": "إكمال",
     "cancel": "إلغاء",
     "teamMessages": "الفريق",
-    "noTeamMembers": "لم يتم العثور على أعضاء الفريق"
+    "noTeamMembers": "لم يتم العثور على أعضاء الفريق",
+    "tabArchive": "الأرشيف",
+    "archiveTitle": "الأرشيف اليومي",
+    "archiveEmpty": "لا توجد مهام مكتملة",
+    "archiveDate": "التاريخ",
+    "archiveCount": "مهام"
   },
   "cashier": {
     "todayRevenue": "إيرادات اليوم",
@@ -3245,6 +3259,13 @@
     "demoCashier": "Cashier",
     "demoCashierDesc": "Settle bills, process payments and view daily revenue",
     "demoExplore": "Explore as {{role}}",
-    "demoTryLive": "Try Live Demo"
+    "demoTryLive": "Try Live Demo",
+    "guestPageTitle": "تقديم الطلب",
+    "guestPageSubtitle": "تصفح القائمة وقدم طلبك",
+    "guestCallWaiter": "نادِ النادل",
+    "guestSendMessage": "إرسال رسالة",
+    "guestMessageSent": "تم إرسال الرسالة",
+    "guestOrderPlaced": "تم تقديم طلبك!",
+    "guestWaiterWillConfirm": "سيقوم النادل بتأكيد طلبك"
   }
 }

@@ -3018,7 +3018,16 @@
     "tasksCompleted": "Tapşırıqlar",
     "noPerformanceData": "Məlumat yoxdur",
     "waiterTablesAssigned": "Masalar",
-    "tablesNote": "Qarsona aid masalar"
+    "tablesNote": "Qarsona aid masalar",
+    "customerMsgs": "Сообщения гостей",
+    "noCustomerMsgs": "Нет сообщений от гостей",
+    "confirmOrder": "Подтвердить заказ",
+    "confirmOrderDesc": "Отправить заказ на кухню",
+    "pendingConfirm": "Ожидает подтверждения",
+    "waiterConfirmed": "Заказ отправлен на кухню",
+    "qrScanTitle": "Сканировать QR",
+    "qrDialogTitle": "QR-код стола",
+    "qrDialogDesc": "Гость сканирует QR для заказа"
   },
   "rcl": {
     "pageTitle": "Панель уборки",
@@ -3049,7 +3058,12 @@
     "confirmComplete": "Завершить",
     "cancel": "Отмена",
     "teamMessages": "Команда",
-    "noTeamMembers": "Членов команды не найдено"
+    "noTeamMembers": "Членов команды не найдено",
+    "tabArchive": "Архив",
+    "archiveTitle": "Ежедневный архив",
+    "archiveEmpty": "Нет завершённых задач",
+    "archiveDate": "Дата",
+    "archiveCount": "задания"
   },
   "cashier": {
     "todayRevenue": "Выручка за сегодня",
@@ -3258,6 +3272,13 @@
     "demoCashier": "Cashier",
     "demoCashierDesc": "Settle bills, process payments and view daily revenue",
     "demoExplore": "Explore as {{role}}",
-    "demoTryLive": "Try Live Demo"
+    "demoTryLive": "Try Live Demo",
+    "guestPageTitle": "Сделать заказ",
+    "guestPageSubtitle": "Просмотрите меню и сделайте заказ",
+    "guestCallWaiter": "Позвать официанта",
+    "guestSendMessage": "Отправить сообщение",
+    "guestMessageSent": "Сообщение отправлено",
+    "guestOrderPlaced": "Заказ успешно размещён!",
+    "guestWaiterWillConfirm": "Официант подтвердит ваш заказ"
   }
 }

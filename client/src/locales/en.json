@@ -3133,7 +3133,16 @@
     "tasksCompleted": "Tasks completed",
     "noPerformanceData": "No performance data yet",
     "waiterTablesAssigned": "Assigned tables",
-    "tablesNote": "Tables assigned to this waiter (e.g. 1,2,3)"
+    "tablesNote": "Tables assigned to this waiter (e.g. 1,2,3)",
+    "customerMsgs": "Customer Messages",
+    "noCustomerMsgs": "No customer messages",
+    "confirmOrder": "Confirm Order",
+    "confirmOrderDesc": "Send this order to the kitchen",
+    "pendingConfirm": "Awaiting Confirmation",
+    "waiterConfirmed": "Order sent to kitchen",
+    "qrScanTitle": "Scan QR",
+    "qrDialogTitle": "Table QR Code",
+    "qrDialogDesc": "Customer scans this QR to place an order"
   },
   "rcl": {
     "pageTitle": "Cleaning Panel",
@@ -3164,7 +3173,12 @@
     "confirmComplete": "Complete",
     "cancel": "Cancel",
     "teamMessages": "Team",
-    "noTeamMembers": "No team members found"
+    "noTeamMembers": "No team members found",
+    "tabArchive": "Archive",
+    "archiveTitle": "Daily Archive",
+    "archiveEmpty": "No completed tasks yet",
+    "archiveDate": "Date",
+    "archiveCount": "tasks"
   },
   "cashier": {
     "todayRevenue": "Today's revenue",
@@ -3387,6 +3401,13 @@
     "demoCashier": "Cashier",
     "demoCashierDesc": "Settle bills, process payments and view daily revenue",
     "demoExplore": "Explore as {{role}}",
-    "demoTryLive": "Try Live Demo"
+    "demoTryLive": "Try Live Demo",
+    "guestPageTitle": "Place Order",
+    "guestPageSubtitle": "Browse the menu and place your order",
+    "guestCallWaiter": "Call Waiter",
+    "guestSendMessage": "Send Message",
+    "guestMessageSent": "Message sent to waiter",
+    "guestOrderPlaced": "Order placed successfully!",
+    "guestWaiterWillConfirm": "Waiter will confirm your order shortly"
   }
 }

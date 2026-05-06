@@ -300,18 +300,6 @@ export default function RestaurantCashierDashboard() {
                             >
                               <Printer className="h-3.5 w-3.5 mr-1" />{t("cashier.print")}
                             </Button>
-                            {order.roomNumber && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="border-purple-400 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20"
-                                onClick={() => settleOrder.mutate({ id: order.id, paymentType: "room_charge" })}
-                                disabled={settleOrder.isPending}
-                                data-testid={`btn-room-charge-${order.id}`}
-                              >
-                                <BedDouble className="h-3.5 w-3.5 mr-1" />{t("cashier.chargeToRoom", "Borc yaz")}
-                              </Button>
-                            )}
                             <Button
                               size="sm"
                               onClick={() => openSettle(order)}
@@ -578,16 +566,9 @@ export default function RestaurantCashierDashboard() {
                   <SelectContent>
                     <SelectItem value="cash"><div className="flex items-center gap-2"><Banknote className="h-4 w-4" />{t("cashier.cash")}</div></SelectItem>
                     <SelectItem value="card"><div className="flex items-center gap-2"><CreditCard className="h-4 w-4" />{t("cashier.card")}</div></SelectItem>
-                    <SelectItem value="room_charge"><div className="flex items-center gap-2"><BedDouble className="h-4 w-4" />{t("cashier.roomCharge")}</div></SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              {settleType === "room_charge" && (
-                <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-950/30 text-sm text-purple-700 dark:text-purple-300 flex items-start gap-2">
-                  <Building2 className="h-4 w-4 mt-0.5 shrink-0" />
-                  <p>{t("cashier.roomChargeNote2", "Məbləğ qonağın otaq hesabına borc kimi yazılacaq. Reception ödəniş alındıqda bağlayacaq.")}</p>
-                </div>
-              )}
               {(settleType === "cash" || settleType === "card") && (
                 <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/30 text-sm text-green-700 dark:text-green-300 flex items-start gap-2">
                   <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
@@ -601,13 +582,9 @@ export default function RestaurantCashierDashboard() {
                 onClick={() => settleOrder.mutate({ id: settleDialog.id, paymentType: settleType })}
                 disabled={settleOrder.isPending}
                 data-testid="btn-confirm-settle"
-                className={settleType === "room_charge" ? "bg-purple-600 hover:bg-purple-700" : ""}
               >
-                {settleOrder.isPending ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> :
-                  settleType === "room_charge" ? <BedDouble className="h-4 w-4 mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
-                {settleType === "room_charge"
-                  ? `${t("cashier.chargeToRoom", "Borc yaz")} — ${fmt(settleDialog.totalCents)}`
-                  : `${t("cashier.confirmBtn")} — ${fmt(settleDialog.totalCents)}`}
+                {settleOrder.isPending ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
+                {`${t("cashier.confirmBtn")} — ${fmt(settleDialog.totalCents)}`}
               </Button>
             </DialogFooter>
           </DialogContent>

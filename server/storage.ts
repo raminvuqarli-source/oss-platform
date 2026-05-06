@@ -238,6 +238,9 @@ import {
   billingLogs,
   type BillingLog,
   type InsertBillingLog,
+  restaurantGuestMessages,
+  type RestaurantGuestMessage,
+  type InsertRestaurantGuestMessage,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -653,6 +656,12 @@ export interface IStorage {
   createRestaurantTable(data: InsertRestaurantTable): Promise<RestaurantTable>;
   getRestaurantTables(propertyId: string): Promise<RestaurantTable[]>;
   deleteRestaurantTable(id: string): Promise<void>;
+
+  // Restaurant — Guest Messages (table QR)
+  createRestaurantGuestMessage(data: InsertRestaurantGuestMessage): Promise<RestaurantGuestMessage>;
+  getRestaurantGuestMessages(propertyId: string, tableNumber?: string): Promise<RestaurantGuestMessage[]>;
+  markGuestMessagesRead(propertyId: string, tableNumber: string): Promise<void>;
+  confirmRestaurantOrder(orderId: string): Promise<void>;
 
   // Deleted trial accounts (abuse prevention)
   logDeletedTrialAccount(email: string, hotelName?: string | null, reason?: string): Promise<void>;
@@ -3380,6 +3389,33 @@ export class DatabaseStorage implements IStorage {
 
   async deleteRestaurantTable(id: string): Promise<void> {
     await db.delete(restaurantTables).where(eq(restaurantTables.id, id));
+  }
+
+  // ===================== RESTAURANT GUEST MESSAGES =====================
+  async createRestaurantGuestMessage(data: InsertRestaurantGuestMessage): Promise<RestaurantGuestMessage> {
+    const [row] = await db.insert(restaurantGuestMessages).values(data).returning();
+    return row;
+  }
+
+  async getRestaurantGuestMessages(propertyId: string, tableNumber?: string): Promise<RestaurantGuestMessage[]> {
+    const conditions = tableNumber
+      ? [eq(restaurantGuestMessages.propertyId, propertyId), eq(restaurantGuestMessages.tableNumber, tableNumber)]
+      : [eq(restaurantGuestMessages.propertyId, propertyId)];
+    return db.select().from(restaurantGuestMessages)
+      .where(conditions.length === 1 ? conditions[0] : and(...conditions))
+      .orderBy(restaurantGuestMessages.createdAt);
+  }
+
+  async markGuestMessagesRead(propertyId: string, tableNumber: string): Promise<void> {
+    await db.update(restaurantGuestMessages)
+      .set({ isReadByWaiter: true })
+      .where(and(eq(restaurantGuestMessages.propertyId, propertyId), eq(restaurantGuestMessages.tableNumber, tableNumber)));
+  }
+
+  async confirmRestaurantOrder(orderId: string): Promise<void> {
+    await db.update(posOrders)
+      .set({ kitchenStatus: "pending" })
+      .where(and(eq(posOrders.id, orderId), eq(posOrders.kitchenStatus, "awaiting_confirmation")));
   }
 
   // ===================== DELETED TRIAL ACCOUNTS =====================

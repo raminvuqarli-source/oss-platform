@@ -803,4 +803,149 @@ export function registerRestaurantRoutes(app: Express): void {
       res.status(500).json({ message: "Failed to delete table" });
     }
   });
+
+  // ─── PUBLIC RESTAURANT GUEST ENDPOINTS (no auth — QR-based) ─────────
+
+  // Get menu for a property (public)
+  app.get("/api/public/restaurant/:propertyId/menu", async (req, res) => {
+    try {
+      const { propertyId } = req.params;
+      const categories = await storage.getPosMenuCategories(propertyId);
+      const items = await storage.getPosMenuItems(propertyId);
+      res.json({ categories, items });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to load menu" });
+    }
+  });
+
+  // Place order from QR guest (public — goes to awaiting_confirmation)
+  app.post("/api/public/restaurant/:propertyId/order", async (req, res) => {
+    try {
+      const { propertyId } = req.params;
+      const { tableNumber, guestName, notes, items } = req.body;
+      if (!items || items.length === 0) return res.status(400).json({ message: "Order must have at least one item" });
+      if (!tableNumber) return res.status(400).json({ message: "tableNumber is required" });
+
+      const orderItems = items as Array<{ menuItemId?: string; itemName: string; quantity: number; unitPriceCents: number }>;
+      const totalCents = orderItems.reduce((sum, it) => sum + it.unitPriceCents * it.quantity, 0);
+
+      // Find tenantId from propertyId
+      const propertyUsers = await storage.getUsersByProperty(propertyId);
+      const owner = propertyUsers.find(u => u.role === "owner_admin" || u.role === "restaurant_manager");
+      const tenantId = owner?.tenantId || owner?.ownerId || propertyId;
+
+      const order = await storage.createPosOrder(
+        {
+          tenantId,
+          propertyId,
+          tableNumber,
+          roomNumber: null,
+          orderType: "dine_in",
+          guestName: guestName || "Qonaq",
+          bookingId: null,
+          notes: notes || null,
+          totalCents,
+          kitchenStatus: "awaiting_confirmation",
+          settlementStatus: "pending",
+        },
+        orderItems.map(it => ({
+          orderId: "",
+          menuItemId: it.menuItemId || null,
+          itemName: it.itemName,
+          quantity: it.quantity,
+          unitPriceCents: it.unitPriceCents,
+          totalCents: it.unitPriceCents * it.quantity,
+        }))
+      );
+
+      broadcastToProperty(propertyId, {
+        type: "RESTAURANT_GUEST_ORDER",
+        order: { ...order, items: orderItems },
+        tableNumber,
+        timestamp: new Date().toISOString(),
+      });
+
+      logger.info({ orderId: order.id, propertyId, tableNumber }, "QR guest order created — awaiting waiter confirmation");
+      res.status(201).json(order);
+    } catch (err) {
+      logger.error({ err }, "Failed to create guest order");
+      res.status(500).json({ message: "Failed to create order" });
+    }
+  });
+
+  // Send message from guest to waiter (public)
+  app.post("/api/public/restaurant/:propertyId/message", async (req, res) => {
+    try {
+      const { propertyId } = req.params;
+      const { tableNumber, senderName, message } = req.body;
+      if (!tableNumber || !message) return res.status(400).json({ message: "tableNumber and message are required" });
+
+      const msg = await storage.createRestaurantGuestMessage({
+        propertyId,
+        tableNumber,
+        senderName: senderName || "Qonaq",
+        message,
+        isReadByWaiter: false,
+      });
+
+      broadcastToProperty(propertyId, {
+        type: "RESTAURANT_GUEST_MESSAGE",
+        tableNumber,
+        senderName: senderName || "Qonaq",
+        message,
+        timestamp: new Date().toISOString(),
+      });
+
+      res.status(201).json(msg);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  // Waiter: get all guest messages
+  app.get("/api/restaurant/guest-messages", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user?.propertyId) return res.status(400).json({ message: "No property linked" });
+      const tableNumber = req.query.tableNumber as string | undefined;
+      const msgs = await storage.getRestaurantGuestMessages(user.propertyId, tableNumber);
+      res.json(msgs);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to fetch messages" });
+    }
+  });
+
+  // Waiter: mark messages as read
+  app.patch("/api/restaurant/guest-messages/read", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user?.propertyId) return res.status(400).json({ message: "No property linked" });
+      const { tableNumber } = req.body;
+      if (!tableNumber) return res.status(400).json({ message: "tableNumber required" });
+      await storage.markGuestMessagesRead(user.propertyId, tableNumber);
+      res.json({ ok: true });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to mark messages read" });
+    }
+  });
+
+  // Waiter: confirm a guest QR order (sends it to kitchen)
+  app.patch("/api/restaurant/orders/:id/confirm", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      await storage.confirmRestaurantOrder(req.params.id);
+
+      // Broadcast to kitchen
+      broadcastToProperty(user.propertyId || "", {
+        type: "RESTAURANT_NEW_ORDER",
+        orderId: req.params.id,
+        timestamp: new Date().toISOString(),
+      });
+
+      res.json({ ok: true });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to confirm order" });
+    }
+  });
 }

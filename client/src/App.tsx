@@ -48,6 +48,7 @@ const HousekeepingDashboard = lazy(() => import("@/pages/housekeeping-dashboard"
 const RestaurantCashier = lazy(() => import("@/pages/restaurant-cashier-dashboard"));
 const DemoLogin = lazy(() => import("@/pages/demo-login"));
 const RestaurantRegister = lazy(() => import("@/pages/restaurant-register"));
+const RestaurantGuestPage = lazy(() => import("@/pages/restaurant-guest"));
 
 class ErrorBoundary extends Component<{ children: React.ReactNode }, { hasError: boolean; errorMessage: string }> {
   constructor(props: { children: React.ReactNode }) {
@@ -184,6 +185,7 @@ const publicRoutes = [
   { path: "/", component: Home },
   { path: "/hotel", component: Welcome },
   { path: "/restaurant", component: RestaurantLanding },
+  { path: "/restaurant/guest/:propertyId/table/:tableNumber", component: RestaurantGuestPage },
   { path: "/login", component: Login },
   { path: "/demo", component: DemoLogin },
   { path: "/forgot-password", component: ForgotPassword },

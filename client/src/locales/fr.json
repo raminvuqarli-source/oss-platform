@@ -3005,7 +3005,16 @@
     "tasksCompleted": "Tapşırıqlar",
     "noPerformanceData": "Məlumat yoxdur",
     "waiterTablesAssigned": "Masalar",
-    "tablesNote": "Qarsona aid masalar"
+    "tablesNote": "Qarsona aid masalar",
+    "customerMsgs": "Messages clients",
+    "noCustomerMsgs": "Aucun message client",
+    "confirmOrder": "Confirmer la commande",
+    "confirmOrderDesc": "Envoyer la commande en cuisine",
+    "pendingConfirm": "En attente de confirmation",
+    "waiterConfirmed": "Commande envoyée en cuisine",
+    "qrScanTitle": "Scanner QR",
+    "qrDialogTitle": "QR de la table",
+    "qrDialogDesc": "Le client scanne ce QR pour commander"
   },
   "rcl": {
     "pageTitle": "Tableau de nettoyage",
@@ -3036,7 +3045,12 @@
     "confirmComplete": "Terminer",
     "cancel": "Annuler",
     "teamMessages": "Équipe",
-    "noTeamMembers": "Aucun membre d'équipe trouvé"
+    "noTeamMembers": "Aucun membre d'équipe trouvé",
+    "tabArchive": "Archive",
+    "archiveTitle": "Archive quotidienne",
+    "archiveEmpty": "Aucune tâche terminée",
+    "archiveDate": "Date",
+    "archiveCount": "tâches"
   },
   "cashier": {
     "todayRevenue": "Chiffre d'affaires du jour",
@@ -3245,6 +3259,13 @@
     "demoCashier": "Cashier",
     "demoCashierDesc": "Settle bills, process payments and view daily revenue",
     "demoExplore": "Explore as {{role}}",
-    "demoTryLive": "Try Live Demo"
+    "demoTryLive": "Try Live Demo",
+    "guestPageTitle": "Passer commande",
+    "guestPageSubtitle": "Parcourez le menu et passez votre commande",
+    "guestCallWaiter": "Appeler le serveur",
+    "guestSendMessage": "Envoyer un message",
+    "guestMessageSent": "Message envoyé",
+    "guestOrderPlaced": "Commande passée avec succès!",
+    "guestWaiterWillConfirm": "Le serveur confirmera votre commande"
   }
 }

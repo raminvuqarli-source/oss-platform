@@ -3018,7 +3018,16 @@
     "tasksCompleted": "Tapşırıqlar",
     "noPerformanceData": "Məlumat yoxdur",
     "waiterTablesAssigned": "Masalar",
-    "tablesNote": "Qarsona aid masalar"
+    "tablesNote": "Qarsona aid masalar",
+    "customerMsgs": "Müşteri Mesajları",
+    "noCustomerMsgs": "Müşteri mesajı yok",
+    "confirmOrder": "Siparişi Onayla",
+    "confirmOrderDesc": "Bu siparişi mutfağa gönder",
+    "pendingConfirm": "Onay Bekliyor",
+    "waiterConfirmed": "Sipariş mutfağa gönderildi",
+    "qrScanTitle": "QR Tara",
+    "qrDialogTitle": "Masa QR Kodu",
+    "qrDialogDesc": "Müşteri siparişi için bu QR'ı tarar"
   },
   "rcl": {
     "pageTitle": "Temizlik Paneli",
@@ -3049,7 +3058,12 @@
     "confirmComplete": "Tamamla",
     "cancel": "İptal",
     "teamMessages": "Ekip",
-    "noTeamMembers": "Ekip üyesi bulunamadı"
+    "noTeamMembers": "Ekip üyesi bulunamadı",
+    "tabArchive": "Arşiv",
+    "archiveTitle": "Günlük Arşiv",
+    "archiveEmpty": "Tamamlanmış görev yok",
+    "archiveDate": "Tarih",
+    "archiveCount": "görev"
   },
   "cashier": {
     "todayRevenue": "Bugünkü gelir",
@@ -3258,6 +3272,13 @@
     "demoCashier": "Cashier",
     "demoCashierDesc": "Settle bills, process payments and view daily revenue",
     "demoExplore": "Explore as {{role}}",
-    "demoTryLive": "Try Live Demo"
+    "demoTryLive": "Try Live Demo",
+    "guestPageTitle": "Sipariş Ver",
+    "guestPageSubtitle": "Menüye bakın ve sipariş verin",
+    "guestCallWaiter": "Garson Çağır",
+    "guestSendMessage": "Mesaj Gönder",
+    "guestMessageSent": "Mesajınız gönderildi",
+    "guestOrderPlaced": "Siparişiniz alındı!",
+    "guestWaiterWillConfirm": "Garson siparişinizi onaylayacak"
   }
 }
