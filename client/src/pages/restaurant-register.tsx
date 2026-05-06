@@ -118,7 +118,7 @@ export default function RestaurantRegister() {
       navigate("/dashboard");
     },
     onError: (err: any) => {
-      showErrorToast(err, toast);
+      showErrorToast(toast, err);
     },
   });
 

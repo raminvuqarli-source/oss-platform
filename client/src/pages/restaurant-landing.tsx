@@ -25,16 +25,16 @@ const WHATSAPP_LINK = "https://wa.me/994508880089";
 const PLANS = [
   {
     code: "REST_CAFE",
-    nameKey: "restLanding.planStandard",
-    name: "Standard",
-    priceUSD: 29,
-    descKey: "restLanding.planStandardDesc",
-    desc: "Perfect for small cafés & quick-service restaurants",
+    nameKey: "restLanding.planCafe",
+    name: "Cafe",
+    priceAZN: 49.30,
+    descKey: "restLanding.planCafeDesc",
+    desc: "Small cafes & quick-service",
     features: [
-      { icon: Monitor, key: "restLanding.feat1Pos", label: "1 POS Terminal" },
-      { icon: QrCode, key: "restLanding.featQrMenu", label: "QR Menu" },
-      { icon: BarChart3, key: "restLanding.featSalesReports", label: "Sales Reports" },
-      { icon: Cloud, key: "restLanding.featCloudStorage", label: "Cloud Storage" },
+      { icon: Users, key: "restLanding.featStaff10", label: "Up to 10 staff" },
+      { icon: Monitor, key: "restLanding.featMenuMgmt", label: "Menu management" },
+      { icon: ShoppingBag, key: "restLanding.featOrdersKds", label: "Orders & KDS" },
+      { icon: Wallet, key: "restLanding.featCashier", label: "Cashier" },
     ],
     popular: false,
     cta: "register",
@@ -43,16 +43,16 @@ const PLANS = [
   },
   {
     code: "REST_BISTRO",
-    nameKey: "restLanding.planPro",
-    name: "Professional",
-    priceUSD: 49,
-    descKey: "restLanding.planProDesc",
-    desc: "For growing restaurants that need more power",
+    nameKey: "restLanding.planBistro",
+    name: "Bistro",
+    priceAZN: 100.30,
+    descKey: "restLanding.planBistroDesc",
+    desc: "Growing restaurants",
     features: [
-      { icon: Layers, key: "restLanding.featUnlimitedPos", label: "Unlimited POS Terminals" },
-      { icon: QrCode, key: "restLanding.featQrMenu", label: "QR Menu" },
-      { icon: Users, key: "restLanding.featWaiterPanel", label: "Waiter Panel" },
-      { icon: Activity, key: "restLanding.featAdvancedAnalytics", label: "Advanced Analytics" },
+      { icon: Users, key: "restLanding.featStaff30", label: "Up to 30 staff" },
+      { icon: Activity, key: "restLanding.featAnalytics", label: "Analytics dashboard" },
+      { icon: MessageCircle, key: "restLanding.featWhatsapp", label: "WhatsApp integration" },
+      { icon: Layers, key: "restLanding.featAllCafe", label: "All Cafe features" },
     ],
     popular: true,
     cta: "register",
@@ -61,21 +61,21 @@ const PLANS = [
   },
   {
     code: "REST_CHAIN",
-    nameKey: "restLanding.planEnterprise",
-    name: "Enterprise",
-    priceUSD: null,
-    descKey: "restLanding.planEnterpriseDesc",
-    desc: "Custom solution for restaurant chains & franchises",
+    nameKey: "restLanding.planChain",
+    name: "Chain",
+    priceAZN: 253.30,
+    descKey: "restLanding.planChainDesc",
+    desc: "Restaurant chains & franchises",
     features: [
-      { icon: Layers, key: "restLanding.featMultiLocation", label: "Multi-location Support" },
-      { icon: HeadphonesIcon, key: "restLanding.featPrioritySupport", label: "Priority Support" },
-      { icon: RefreshCw, key: "restLanding.featCustomIntegrations", label: "Custom Integrations" },
-      { icon: Users, key: "restLanding.featUnlimitedStaff", label: "Unlimited Staff" },
+      { icon: Users, key: "restLanding.featUnlimitedStaff", label: "Unlimited staff" },
+      { icon: Layers, key: "restLanding.featMultiLocation", label: "Multi-location" },
+      { icon: RefreshCw, key: "restLanding.featCustomIntegrations", label: "Custom integrations" },
+      { icon: HeadphonesIcon, key: "restLanding.featPrioritySupport", label: "Priority support" },
     ],
     popular: false,
-    cta: "contact",
-    ctaKey: "restLanding.contactUs",
-    ctaLabel: "Contact Us",
+    cta: "register",
+    ctaKey: "restLanding.register",
+    ctaLabel: "Get Started",
   },
 ];
 
@@ -382,14 +382,8 @@ export default function RestaurantLanding() {
                       </div>
 
                       <div className="flex items-baseline gap-1">
-                        {plan.priceUSD !== null ? (
-                          <>
-                            <span className="text-4xl font-extrabold">${plan.priceUSD}</span>
-                            <span className="text-muted-foreground text-sm">{t("restLanding.perMonth", "/ month")}</span>
-                          </>
-                        ) : (
-                          <span className="text-2xl font-bold text-orange-500">{t("restLanding.contactForPrice", "Contact Us")}</span>
-                        )}
+                        <span className="text-4xl font-extrabold">{plan.priceAZN}</span>
+                        <span className="text-muted-foreground text-sm">₼ {t("restLanding.perMonth", "/ month")}</span>
                       </div>
 
                       <ul className="space-y-2.5 flex-1">
@@ -434,7 +428,7 @@ export default function RestaurantLanding() {
             </div>
 
             <p className="text-center text-sm text-muted-foreground mt-8">
-              {t("restLanding.pricingNote", "All prices in USD. Local currency (AZN) available at checkout. VAT may apply.")}
+              {t("restLanding.pricingNote", "Bütün qiymətlər AZN (Azərbaycan manatı) ilə göstərilir. ƏDV daxil deyil.")}
             </p>
           </AnimatedSection>
         </section>
