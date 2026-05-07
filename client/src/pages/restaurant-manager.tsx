@@ -173,6 +173,17 @@ export default function RestaurantManager() {
   const { data: cleaningTasks = [] } = useQuery<CleaningTask[]>({ queryKey: ["/api/restaurant/cleaning-tasks"] });
   const { data: roomOrders = [] } = useQuery<RoomGroup[]>({ queryKey: ["/api/restaurant/room-orders"], refetchInterval: 20000, enabled: isHotelTenant });
   const { data: restaurantTables = [] } = useQuery<RestaurantTable[]>({ queryKey: ["/api/restaurant/tables"], refetchInterval: 20000 });
+  const [archiveFilter, setArchiveFilter] = useState<"day" | "week" | "month" | "all">("week");
+  const { data: archivedOrders = [], isLoading: archiveLoading } = useQuery<PosOrder[]>({
+    queryKey: ["/api/restaurant/orders", "delivered", archiveFilter],
+    queryFn: async () => {
+      const res = await fetch("/api/restaurant/orders?kitchenStatus=delivered");
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
+    enabled: activeTab === "archive",
+    refetchInterval: false,
+  });
 
   const { data: dmConversations = [] } = useQuery<any[]>({
     queryKey: ["/api/chat/staff-dm/conversations"],
@@ -385,8 +396,9 @@ export default function RestaurantManager() {
     { value: "staff", label: t("rm.tabStaff"), icon: <Users className="h-4 w-4" />, badge: myRestaurantStaff.length, hotelOnly: false },
     { value: "performance", label: t("rm.tabPerformance"), icon: <BarChart2 className="h-4 w-4" />, badge: 0, hotelOnly: false },
     { value: "finance", label: t("rm.tabFinance"), icon: <TrendingUp className="h-4 w-4" />, badge: 0, hotelOnly: false },
-    { value: "messages", label: "Mesajlar", icon: <MessageSquare className="h-4 w-4" />, badge: 0, hotelOnly: false },
-    { value: "billing", label: "Abunəlik", icon: <CreditCard className="h-4 w-4" />, badge: (subStatus?.isTrial && (subStatus?.remainingDays ?? 99) <= 5) ? 1 : 0, hotelOnly: false },
+    { value: "messages", label: t("rm.tabMessages"), icon: <MessageSquare className="h-4 w-4" />, badge: 0, hotelOnly: false },
+    { value: "archive", label: t("rm.tabArchive"), icon: <CalendarClock className="h-4 w-4" />, badge: 0, hotelOnly: false },
+    { value: "billing", label: t("rm.tabBilling"), icon: <CreditCard className="h-4 w-4" />, badge: (subStatus?.isTrial && (subStatus?.remainingDays ?? 99) <= 5) ? 1 : 0, hotelOnly: false },
   ];
   const tabs = allTabs.filter(tab => !tab.hotelOnly || isHotelTenant);
 
@@ -1081,6 +1093,110 @@ export default function RestaurantManager() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* ── Archive Tab ── */}
+          <TabsContent value="archive" className="mt-4 space-y-4">
+            <div>
+              <h2 className="text-lg font-bold">{t("rm.archiveTitle")}</h2>
+              <p className="text-sm text-muted-foreground">{t("rm.archiveSubtitle")}</p>
+            </div>
+
+            {/* Filter buttons */}
+            <div className="flex gap-2 flex-wrap">
+              {(["day", "week", "month", "all"] as const).map(f => (
+                <Button
+                  key={f}
+                  size="sm"
+                  variant={archiveFilter === f ? "default" : "outline"}
+                  className="h-7 text-xs"
+                  onClick={() => setArchiveFilter(f)}
+                  data-testid={`archive-filter-${f}`}
+                >
+                  {t(`rm.archiveFilter${f.charAt(0).toUpperCase() + f.slice(1)}`)}
+                </Button>
+              ))}
+            </div>
+
+            {archiveLoading ? (
+              <div className="grid gap-3">
+                {[1,2,3].map(i => <div key={i} className="h-28 bg-muted rounded-xl animate-pulse" />)}
+              </div>
+            ) : (() => {
+              const now = new Date();
+              const filtered = archivedOrders.filter(o => {
+                const d = new Date(o.createdAt);
+                if (archiveFilter === "day") return d.toDateString() === now.toDateString();
+                if (archiveFilter === "week") { const w = new Date(now); w.setDate(now.getDate() - 7); return d >= w; }
+                if (archiveFilter === "month") { const m = new Date(now); m.setDate(now.getDate() - 30); return d >= m; }
+                return true;
+              });
+              if (filtered.length === 0) return (
+                <div className="flex flex-col items-center py-16 text-muted-foreground">
+                  <CalendarClock className="h-12 w-12 mb-3 opacity-30" />
+                  <p>{t("rm.archiveEmpty")}</p>
+                </div>
+              );
+              // Group by date
+              const groups: Record<string, PosOrder[]> = {};
+              filtered.forEach(o => {
+                const d = new Date(o.createdAt).toLocaleDateString(i18n.language, { year: "numeric", month: "long", day: "numeric" });
+                if (!groups[d]) groups[d] = [];
+                groups[d].push(o);
+              });
+              return (
+                <div className="space-y-4">
+                  {Object.entries(groups).map(([date, dateOrders]) => (
+                    <div key={date}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="h-px flex-1 bg-border" />
+                        <span className="text-xs font-semibold text-muted-foreground px-2 py-1 bg-muted rounded-full">
+                          {date} · {dateOrders.length} {t("rm.archiveOrders")}
+                        </span>
+                        <div className="h-px flex-1 bg-border" />
+                      </div>
+                      <div className="grid gap-2">
+                        {dateOrders.map(order => (
+                          <Card key={order.id} className="overflow-hidden" data-testid={`archive-order-${order.id}`}>
+                            <CardContent className="p-3">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="font-semibold text-sm">
+                                      {order.tableNumber
+                                        ? `${t("rm.archiveTable")} ${order.tableNumber}`
+                                        : order.roomNumber
+                                        ? `${t("rm.archiveRoom")} ${order.roomNumber}`
+                                        : order.guestName || t("rm.archiveGuest")}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {new Date(order.createdAt).toLocaleTimeString(i18n.language, { hour: "2-digit", minute: "2-digit" })}
+                                    </span>
+                                  </div>
+                                  {order.items && order.items.length > 0 && (
+                                    <div className="mt-1.5 space-y-0.5">
+                                      {order.items.map((item, idx) => (
+                                        <p key={idx} className="text-xs text-muted-foreground">
+                                          {item.quantity}× {item.itemName}
+                                        </p>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="text-right shrink-0">
+                                  <p className="font-bold text-sm text-primary">{fmt(order.totalCents)}</p>
+                                  <Badge variant="secondary" className="text-xs mt-1">{t("rm.statusDelivered")}</Badge>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </TabsContent>
 
           {/* ── Messages Tab ── */}
