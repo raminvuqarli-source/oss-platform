@@ -259,15 +259,19 @@ function Router() {
   );
 }
 
+const PUBLIC_PATHS = ["/", "/hotel", "/restaurant", "/login", "/demo", "/register", "/register-hotel", "/register-restaurant", "/forgot-password", "/reset-password", "/join-team", "/privacy-policy", "/terms-of-service"];
+
 function AppContent() {
   const [location] = useLocation();
+  const { user } = useAuth();
+  const isPublicPage = PUBLIC_PATHS.some(p => location === p) || location.startsWith("/restaurant/guest/");
   const hideChat = location.startsWith("/restaurant/guest/");
   return (
     <>
       <Toaster />
       <Router />
       {!hideChat && <AIChatWidget />}
-      <RadioWidget />
+      {user && !isPublicPage && <RadioWidget />}
     </>
   );
 }
