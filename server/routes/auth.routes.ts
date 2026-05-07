@@ -197,6 +197,10 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
     "/api/contracts",
     "/api/admin",
     "/api/oss-admin",
+    "/api/owners/me",
+    "/api/notifications",
+    "/api/ws-token",
+    "/api/staff/me",
   ];
 
   app.use("/api", (req, res, next) => {
@@ -1469,7 +1473,9 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
         planCode: planCodeResolved,
         ...planDefaults,
         trialEndsAt,
-        isActive: false,
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: trialEndsAt,
+        isActive: true,
         status: "trial",
       } as any);
 
