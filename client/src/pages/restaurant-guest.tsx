@@ -28,6 +28,7 @@ export default function RestaurantGuestPage() {
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [guestName, setGuestName] = useState("");
+  const [nameConfirmed, setNameConfirmed] = useState(false);
   const [notes, setNotes] = useState("");
   const [showCart, setShowCart] = useState(false);
   const [showMessage, setShowMessage] = useState(false);
@@ -202,19 +203,44 @@ export default function RestaurantGuestPage() {
           </div>
         )}
 
-        {/* ── Main content ── */}
-        <div className="max-w-2xl mx-auto px-4 pb-32">
-          {/* Guest name input */}
-          <div className="mt-4 mb-4">
-            <Label className="text-xs text-muted-foreground">{t("restLanding.guestNameLabel")}</Label>
-            <Input
-              value={guestName}
-              onChange={e => setGuestName(e.target.value)}
-              placeholder={t("restLanding.guestNamePlaceholder")}
-              className="mt-1 h-9"
-              data-testid="input-guest-name"
-            />
+        {/* ── Welcome / Name entry screen ── */}
+        {!nameConfirmed && (
+          <div className="min-h-[calc(100vh-60px)] flex items-center justify-center px-4">
+            <div className="w-full max-w-sm space-y-6 text-center">
+              <div className="p-4 bg-primary/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto">
+                <Utensils className="h-10 w-10 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold">{t("restLanding.guestWelcome", "Xoş gəlmisiniz!")}</h2>
+                <p className="text-sm text-muted-foreground mt-1">{t("restaurant.table")} {tableNumber}</p>
+              </div>
+              <div className="space-y-3 text-left">
+                <Label htmlFor="guest-name-input">{t("restLanding.guestNameLabel")}</Label>
+                <Input
+                  id="guest-name-input"
+                  value={guestName}
+                  onChange={e => setGuestName(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter") setNameConfirmed(true); }}
+                  placeholder={t("restLanding.guestNamePlaceholder")}
+                  className="h-11 text-base"
+                  autoFocus
+                  data-testid="input-guest-name"
+                />
+              </div>
+              <Button
+                className="w-full h-12 text-base font-semibold"
+                onClick={() => setNameConfirmed(true)}
+                data-testid="btn-confirm-name"
+              >
+                {t("restLanding.guestEnterMenu", "Menyuya keç")} →
+              </Button>
+              <p className="text-xs text-muted-foreground">{t("restLanding.guestNameOptional", "Ad yazmaq məcburi deyil")}</p>
+            </div>
           </div>
+        )}
+
+        {/* ── Main content ── */}
+        {nameConfirmed && <div className="max-w-2xl mx-auto px-4 pb-32">
 
           {/* Category filter */}
           {categories.length > 0 && (
@@ -293,7 +319,7 @@ export default function RestaurantGuestPage() {
               })}
             </div>
           )}
-        </div>
+        </div>}
 
         {/* ── Floating cart button ── */}
         {cartCount > 0 && (
