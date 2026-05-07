@@ -831,6 +831,18 @@ export function registerStaffRoutes(app: Express): void {
         description: `Created ${fullName} as ${rawRole} for property ${property.name}`,
       }).catch(() => {});
 
+      if (email) {
+        sendStaffCreatedEmail({
+          to: email,
+          fullName,
+          username,
+          password: req.body.password,
+          propertyName: property.name,
+          role: rawRole,
+          invitedByName: user.fullName || user.username,
+        }).catch((err: any) => logger.error({ err }, "Failed to send staff welcome email"));
+      }
+
       const { password: _, ...userWithoutPassword } = newUser;
       res.json(userWithoutPassword);
     } catch (error: any) {

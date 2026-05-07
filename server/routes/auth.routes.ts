@@ -11,7 +11,7 @@ import { storage } from "../storage";
 import { loginSchema, registerSchema } from "@shared/schema";
 import { hashPassword, verifyPassword, seedOssAdminUser } from "../services/auth.service";
 import { authenticateRequest, resolveTenant, requireAuth, requireActiveSubscription } from "../middleware";
-import { sendPasswordResetEmail, sendHotelWelcomeEmail } from "../email";
+import { sendPasswordResetEmail, sendHotelWelcomeEmail, sendRestaurantWelcomeEmail } from "../email";
 
 import crypto from "crypto";
 import { applyPlanFeatures, PLAN_CODE_FEATURES } from "@shared/planFeatures";
@@ -1494,6 +1494,15 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
       req.session.userId = user.id;
       req.session.role = user.role;
       delete req.session.demoSessionTenantId;
+
+      if (email) {
+        sendRestaurantWelcomeEmail({
+          to: email,
+          ownerName: fullName,
+          restaurantName: restaurantData.name,
+          planName: "14-Day Free Trial",
+        }).catch((err: any) => logger.error({ err }, "Failed to send restaurant welcome email"));
+      }
 
       req.session.save((saveErr) => {
         if (saveErr) {

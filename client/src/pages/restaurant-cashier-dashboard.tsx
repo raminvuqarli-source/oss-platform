@@ -16,7 +16,7 @@ import {
   Clock, ShoppingBag, Printer, Building2, AlertCircle,
   Utensils, TrendingUp, TableProperties, RefreshCw,
   MessageSquare, ClipboardList, Plus, MapPin, Users,
-  Hourglass, Loader2, CheckCheck
+  Hourglass, Loader2, CheckCheck, Mail
 } from "lucide-react";
 import { StaffDmChat } from "@/components/staff-dm-chat";
 import { Input } from "@/components/ui/input";
@@ -80,6 +80,7 @@ export default function RestaurantCashierDashboard() {
   const [settleDialog, setSettleDialog] = useState<PosOrder | null>(null);
   const [settleType, setSettleType] = useState("cash");
   const [chargeRoomNumber, setChargeRoomNumber] = useState("");
+  const [receiptEmail, setReceiptEmail] = useState("");
   const [taskDesc, setTaskDesc] = useState("");
   const [taskLocation, setTaskLocation] = useState("");
   const [taskAssignee, setTaskAssignee] = useState<string>("__none__");
@@ -121,13 +122,14 @@ export default function RestaurantCashierDashboard() {
   });
 
   const settleOrder = useMutation({
-    mutationFn: ({ id, paymentType, roomNumber }: { id: string; paymentType: string; roomNumber?: string }) =>
-      apiRequest("POST", `/api/restaurant/orders/${id}/settle`, { paymentType, roomNumber: roomNumber || undefined }),
+    mutationFn: ({ id, paymentType, roomNumber, customerEmail }: { id: string; paymentType: string; roomNumber?: string; customerEmail?: string }) =>
+      apiRequest("POST", `/api/restaurant/orders/${id}/settle`, { paymentType, roomNumber: roomNumber || undefined, customerEmail: customerEmail || undefined }),
     onSuccess: (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: ["/api/restaurant/orders"] });
       queryClient.invalidateQueries({ queryKey: ["/api/restaurant/analytics"] });
       setSettleDialog(null);
       setChargeRoomNumber("");
+      setReceiptEmail("");
       const msg = vars.paymentType === "room_charge"
         ? t("cashier.roomChargePosted", "Otaq hesabına borc yazıldı")
         : t("cashier.confirmed");
@@ -598,11 +600,26 @@ export default function RestaurantCashierDashboard() {
                   <p>{settleType === "cash" ? t("cashier.cashNote", "Nağd ödəniş qəbul edildi. Maliyyə sisteminə daxil olunacaq.") : t("cashier.cardNote", "Kart ödənişi qəbul edildi. Maliyyə sisteminə daxil olunacaq.")}</p>
                 </div>
               )}
+              <div className="space-y-2">
+                <Label htmlFor="receipt-email" className="flex items-center gap-1.5 text-muted-foreground">
+                  <Mail className="h-3.5 w-3.5" />
+                  {t("cashier.receiptEmailLabel", "Çek emaili (ixtiyari)")}
+                </Label>
+                <Input
+                  id="receipt-email"
+                  data-testid="input-receipt-email"
+                  type="email"
+                  placeholder={t("cashier.receiptEmailPlaceholder", "müştəri@email.com")}
+                  value={receiptEmail}
+                  onChange={(e) => setReceiptEmail(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">{t("cashier.receiptEmailNote", "Doldurulsa, müştəriyə çek emaili göndəriləcək.")}</p>
+              </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => { setSettleDialog(null); setChargeRoomNumber(""); }}>{t("rm.cancel")}</Button>
+              <Button variant="outline" onClick={() => { setSettleDialog(null); setChargeRoomNumber(""); setReceiptEmail(""); }}>{t("rm.cancel")}</Button>
               <Button
-                onClick={() => settleOrder.mutate({ id: settleDialog.id, paymentType: settleType, roomNumber: chargeRoomNumber || undefined })}
+                onClick={() => settleOrder.mutate({ id: settleDialog.id, paymentType: settleType, roomNumber: chargeRoomNumber || undefined, customerEmail: receiptEmail.trim() || undefined })}
                 disabled={settleOrder.isPending || (settleType === "room_charge" && !chargeRoomNumber.trim())}
                 data-testid="btn-confirm-settle"
               >

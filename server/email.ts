@@ -667,6 +667,171 @@ If you have any questions, our support team is here to help.`;
   return sendEmail({ to: data.to, subject, html, text, emailType: "hotel_welcome" });
 }
 
+// ===================== RESTAURANT WELCOME EMAIL =====================
+
+interface RestaurantWelcomeEmailData {
+  to: string;
+  ownerName: string;
+  restaurantName: string;
+  planName?: string;
+}
+
+export async function sendRestaurantWelcomeEmail(data: RestaurantWelcomeEmailData): Promise<SendEmailResult> {
+  if (!data.to) return { success: false, error: "No recipient email" };
+
+  const appUrl = getAppUrl();
+  const dashboardUrl = `${appUrl}/restaurant/manager`;
+  const planName = data.planName || "14-Day Free Trial";
+
+  const subject = `Welcome to O.S.S Restaurant — ${data.restaurantName}`;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><style>${baseStyles()}</style></head>
+<body>
+  <div class="container">
+    <div class="header" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+      <h1>Welcome to O.S.S Restaurant</h1>
+      <p>Smart Restaurant System</p>
+    </div>
+    <div class="content">
+      <p style="font-size: 16px; margin-top: 0;">Hello ${data.ownerName},</p>
+      <p>Thank you for registering <strong>${data.restaurantName}</strong> on the O.S.S Smart Restaurant System. Your account is ready to use.</p>
+
+      <div class="info-box">
+        <strong>Your Plan:</strong> ${planName}<br/>
+        <strong>Restaurant:</strong> ${data.restaurantName}
+      </div>
+
+      <p>Here's what you can do next:</p>
+      <ul style="color: #4b5563; font-size: 14px; line-height: 2;">
+        <li>Set up your menu categories and items</li>
+        <li>Invite your waiters and kitchen staff</li>
+        <li>Configure your tables and seating</li>
+        <li>Start managing orders with the Kitchen Display System</li>
+      </ul>
+
+      <div class="btn-container">
+        <a href="${dashboardUrl}" class="btn" style="background: #ec4899;">Go to Dashboard</a>
+      </div>
+
+      <p style="font-size: 13px; color: #6b7280;">If you have any questions, our support team is here to help. Simply reply to this email.</p>
+    </div>
+    <div class="footer">
+      O.S.S &mdash; Smart Restaurant System &copy; ${new Date().getFullYear()}
+    </div>
+  </div>
+</body>
+</html>`;
+
+  const text = `Welcome to O.S.S Restaurant System
+
+Hello ${data.ownerName},
+
+Thank you for registering ${data.restaurantName}. Your account is ready to use.
+
+Your Plan: ${planName}
+Restaurant: ${data.restaurantName}
+
+Get started by visiting: ${dashboardUrl}
+
+If you have any questions, our support team is here to help.`;
+
+  return sendEmail({ to: data.to, subject, html, text, emailType: "restaurant_welcome" });
+}
+
+// ===================== RESTAURANT ORDER RECEIPT EMAIL =====================
+
+interface RestaurantOrderReceiptData {
+  to: string;
+  guestName?: string;
+  restaurantName: string;
+  orderId: string;
+  tableNumber?: string | null;
+  roomNumber?: string | null;
+  items: Array<{ itemName: string; quantity: number; unitPriceCents: number }>;
+  totalCents: number;
+  paymentType: string;
+  currency?: string;
+}
+
+export async function sendRestaurantOrderReceiptEmail(data: RestaurantOrderReceiptData): Promise<SendEmailResult> {
+  if (!data.to) return { success: false, error: "No recipient email" };
+
+  const curr = data.currency || "₼";
+  const fmt = (cents: number) => `${curr}${(cents / 100).toFixed(2)}`;
+  const payLabel = data.paymentType === "card" ? "Card" : data.paymentType === "room_charge" ? "Room Charge" : "Cash";
+  const location = data.tableNumber ? `Table ${data.tableNumber}` : data.roomNumber ? `Room ${data.roomNumber}` : "";
+  const orderRef = `#${data.orderId.slice(-6).toUpperCase()}`;
+
+  const subject = `Receipt ${orderRef} — ${data.restaurantName}`;
+
+  const itemsHtml = data.items.map(i =>
+    `<tr>
+      <td style="padding:8px 0;border-bottom:1px solid #f3f4f6;color:#374151;font-size:14px;">${i.quantity}× ${i.itemName}</td>
+      <td style="padding:8px 0;border-bottom:1px solid #f3f4f6;color:#1f2937;font-weight:500;font-size:14px;text-align:right;">${fmt(i.unitPriceCents * i.quantity)}</td>
+    </tr>`
+  ).join("");
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><style>${baseStyles()}</style></head>
+<body>
+  <div class="container">
+    <div class="header" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+      <h1>Order Receipt</h1>
+      <p>${data.restaurantName}</p>
+    </div>
+    <div class="content">
+      <p style="font-size: 16px; margin-top: 0;">Hello${data.guestName ? ` ${data.guestName}` : ""},</p>
+      <p>Thank you for dining with us! Here is your receipt for order <strong>${orderRef}</strong>${location ? ` (${location})` : ""}.</p>
+
+      <table style="width:100%;border-collapse:collapse;margin:20px 0;">
+        ${itemsHtml}
+        <tr>
+          <td style="padding:12px 0;color:#1f2937;font-weight:700;font-size:16px;">Total</td>
+          <td style="padding:12px 0;color:#ec4899;font-weight:700;font-size:16px;text-align:right;">${fmt(data.totalCents)}</td>
+        </tr>
+      </table>
+
+      <div class="info-box">
+        <strong>Payment Method:</strong> ${payLabel}<br/>
+        ${location ? `<strong>Location:</strong> ${location}<br/>` : ""}
+        <strong>Order:</strong> ${orderRef}
+      </div>
+
+      <p style="font-size: 13px; color: #6b7280; text-align: center;">We hope to see you again soon!</p>
+    </div>
+    <div class="footer">
+      O.S.S &mdash; Smart Restaurant System &copy; ${new Date().getFullYear()}
+    </div>
+  </div>
+</body>
+</html>`;
+
+  const itemsText = data.items.map(i => `  ${i.quantity}x ${i.itemName}  ${fmt(i.unitPriceCents * i.quantity)}`).join("\n");
+
+  const text = `Receipt ${orderRef} — ${data.restaurantName}
+
+Hello${data.guestName ? ` ${data.guestName}` : ""},
+
+Thank you for dining with us!
+
+Order: ${orderRef}${location ? `\nLocation: ${location}` : ""}
+
+Items:
+${itemsText}
+
+Total: ${fmt(data.totalCents)}
+Payment: ${payLabel}
+
+We hope to see you again soon!`;
+
+  return sendEmail({ to: data.to, subject, html, text, emailType: "restaurant_receipt" });
+}
+
 // ===================== SHARED HELPERS =====================
 
 function formatDisplayDate(date: Date | string | null): string {

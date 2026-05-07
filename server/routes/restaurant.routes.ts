@@ -4,6 +4,7 @@ import { requireAuth, requireRole } from "../middleware";
 import { logger } from "../utils/logger";
 import { broadcastToProperty } from "../websocket/index";
 import { sendPushNotification } from "../onesignal";
+import { sendRestaurantOrderReceiptEmail } from "../email";
 
 const MANAGER_ROLES = ["restaurant_manager", "owner_admin", "admin", "reception", "property_manager"];
 const KITCHEN_ROLES = ["kitchen_staff", "restaurant_manager", "owner_admin", "admin"];
@@ -320,7 +321,7 @@ export function registerRestaurantRoutes(app: Express): void {
   app.post("/api/restaurant/orders/:id/settle", requireRestaurantRole(...SETTLE_ROLES), async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
-      const { paymentType, folioId, roomNumber: bodyRoomNumber } = req.body;
+      const { paymentType, folioId, roomNumber: bodyRoomNumber, customerEmail } = req.body;
       if (!paymentType) return res.status(400).json({ message: "paymentType required: room_charge | cash | card" });
 
       const existing = await storage.getPosOrder(req.params.id);
@@ -432,6 +433,26 @@ export function registerRestaurantRoutes(app: Express): void {
         paymentType,
         timestamp: new Date().toISOString(),
       });
+
+      // Send receipt email if customer email provided
+      if (customerEmail && (paymentType === "cash" || paymentType === "card" || paymentType === "room_charge")) {
+        const property = await storage.getProperty(existing.propertyId);
+        sendRestaurantOrderReceiptEmail({
+          to: customerEmail,
+          guestName: existing.guestName || undefined,
+          restaurantName: property?.name || "Restaurant",
+          orderId: existing.id,
+          tableNumber: existing.tableNumber || undefined,
+          roomNumber: effectiveRoomNumber || undefined,
+          items: (existing.items as any[] || []).map((i: any) => ({
+            itemName: i.itemName || i.name || "Item",
+            quantity: i.quantity || 1,
+            unitPriceCents: i.unitPriceCents || i.priceCents || 0,
+          })),
+          totalCents: existing.totalCents,
+          paymentType,
+        }).catch(err => logger.error({ err }, "Failed to send order receipt email"));
+      }
 
       res.json(order);
     } catch (err) {
