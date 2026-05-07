@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { initOneSignal, requestNotificationPermission } from "@/lib/onesignal";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTranslation } from "react-i18next";
 import { useCurrency } from "@/lib/useCurrency";
@@ -82,6 +83,10 @@ export default function RestaurantManager() {
   const { user: authUser } = useAuth();
   const { fmt, symbol } = useCurrency();
   const [activeTab, setActiveTab] = useState("orders");
+
+  useEffect(() => {
+    initOneSignal().then(() => requestNotificationPermission());
+  }, []);
 
   // ── dialog state ──
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);

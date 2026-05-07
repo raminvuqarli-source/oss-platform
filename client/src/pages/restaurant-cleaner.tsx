@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { initOneSignal, requestNotificationPermission } from "@/lib/onesignal";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -48,6 +49,10 @@ export default function RestaurantCleaner() {
   const dateFnsLocale = dateFnsLocaleMap[i18n.language] ?? undefined;
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    initOneSignal().then(() => requestNotificationPermission());
+  }, []);
 
   const [showPhotoDialog, setShowPhotoDialog] = useState<CleaningTask | null>(null);
   const [photoUrl, setPhotoUrl] = useState("");

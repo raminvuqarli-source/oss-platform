@@ -7,6 +7,7 @@ import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
 import { ChefHat, Clock, CheckCircle2, RefreshCw, MapPin, BedDouble } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { initOneSignal, requestNotificationPermission } from "@/lib/onesignal";
 import { formatDistanceToNow } from "date-fns";
 import type { Locale } from "date-fns";
 import { az as azLocale, tr as trLocale, ru as ruLocale, ar as arLocale, fr as frLocale, de as deLocale, es as esLocale, nl as nlLocale } from "date-fns/locale";
@@ -76,6 +77,10 @@ export default function KitchenDisplay() {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mountedRef = useRef(true);
+
+  useEffect(() => {
+    initOneSignal().then(() => requestNotificationPermission());
+  }, []);
 
   const { data: orders = [], isLoading, refetch } = useQuery<PosOrder[]>({
     queryKey: ["/api/restaurant/orders"],

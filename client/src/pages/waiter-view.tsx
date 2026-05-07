@@ -8,6 +8,7 @@ import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
 import { Bell, Package, CheckCircle2, Clock, Utensils, MessageSquare, LayoutGrid, Users, ClipboardCheck, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { initOneSignal, requestNotificationPermission } from "@/lib/onesignal";
 import { formatDistanceToNow } from "date-fns";
 import type { Locale } from "date-fns";
 import { az as azLocale, tr as trLocale, ru as ruLocale, ar as arLocale, fr as frLocale, de as deLocale, es as esLocale, nl as nlLocale } from "date-fns/locale";
@@ -48,6 +49,10 @@ export default function WaiterView() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const wsRef = useRef<WebSocket | null>(null);
+
+  useEffect(() => {
+    initOneSignal().then(() => requestNotificationPermission());
+  }, []);
 
   const { data: orders = [], isLoading: ordersLoading } = useQuery<PosOrder[]>({
     queryKey: ["/api/restaurant/orders"],
