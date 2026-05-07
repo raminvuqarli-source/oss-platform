@@ -955,6 +955,35 @@ export function registerRestaurantRoutes(app: Express): void {
         timestamp: new Date().toISOString(),
       });
 
+      // Push notifications to waiter and manager
+      const allStaff = await storage.getUsersByProperty(propertyId);
+      const itemSummary = orderItems.slice(0, 3).map(i => `${i.quantity}x ${i.itemName}`).join(", ");
+      const orderSummary = `Masa ${tableNumber}: ${itemSummary}${orderItems.length > 3 ? ` +${orderItems.length - 3}` : ""}`;
+
+      const notifyStaff = allStaff.filter(u => u.role === "waiter" || u.role === "restaurant_manager");
+      const notifyIds = notifyStaff.map(u => u.id);
+      if (notifyIds.length > 0) {
+        sendPushNotification({
+          userIds: notifyIds,
+          title: "🍽️ Yeni Müştəri Sifarişi",
+          message: orderSummary,
+          url: "/restaurant/waiter",
+          data: { type: "RESTAURANT_GUEST_ORDER", orderId: order.id },
+        }).catch(err => logger.error({ err }, "Guest order push failed"));
+
+        for (const u of notifyStaff) {
+          storage.createNotification({
+            userId: u.id,
+            tenantId: u.tenantId || "",
+            title: "🍽️ Yeni Müştəri Sifarişi",
+            message: orderSummary,
+            type: "restaurant_order",
+            read: false,
+            actionUrl: "/restaurant/waiter",
+          }).catch(err => logger.error({ err, userId: u.id }, "Guest order in-app notif failed"));
+        }
+      }
+
       logger.info({ orderId: order.id, propertyId, tableNumber }, "QR guest order created — awaiting waiter confirmation");
       res.status(201).json(order);
     } catch (err) {

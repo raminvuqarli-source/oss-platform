@@ -5264,6 +5264,176 @@ function EscalationsView() {
   );
 }
 
+function RestaurantFinanceView() {
+  const { t } = useTranslation();
+  const { data: analytics, isLoading } = useQuery<any>({
+    queryKey: ["/api/restaurant/analytics"],
+    retry: false,
+  });
+
+  const fmt = (cents: number) => `₼${(cents / 100).toFixed(2)}`;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+    );
+  }
+
+  if (!analytics) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center text-muted-foreground">
+          <UtensilsCrossed className="h-10 w-10 mx-auto mb-3 opacity-30" />
+          <p>{t("restaurant.finance.noData", "Maliyyə məlumatları tapılmadı")}</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const total = analytics.totalAllTime ?? 0;
+  const todayCents = analytics.today?.revenueCents ?? 0;
+  const monthCents = analytics.month?.revenueCents ?? 0;
+  const cashCents = analytics.byPaymentType?.cashCents ?? 0;
+  const cardCents = analytics.byPaymentType?.cardCents ?? 0;
+  const roomCents = analytics.byPaymentType?.roomChargeCents ?? 0;
+  const dailyHistory: { date: string; orderCount: number; revenueCents: number }[] = analytics.dailyHistory ?? [];
+
+  return (
+    <div className="space-y-4" data-testid="restaurant-finance-view">
+      {/* Revenue stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <Card data-testid="card-rest-finance-today">
+          <CardContent className="pt-5 pb-4">
+            <p className="text-xs text-muted-foreground mb-1">{t("restaurant.finance.today", "Bu gün")}</p>
+            <p className="text-2xl font-bold text-emerald-600">{fmt(todayCents)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{analytics.today?.orderCount ?? 0} {t("restaurant.finance.orders", "sifariş")}</p>
+          </CardContent>
+        </Card>
+        <Card data-testid="card-rest-finance-month">
+          <CardContent className="pt-5 pb-4">
+            <p className="text-xs text-muted-foreground mb-1">{t("restaurant.finance.thisMonth", "Bu ay")}</p>
+            <p className="text-2xl font-bold text-blue-600">{fmt(monthCents)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{analytics.month?.orderCount ?? 0} {t("restaurant.finance.orders", "sifariş")}</p>
+          </CardContent>
+        </Card>
+        <Card className="col-span-2 sm:col-span-1" data-testid="card-rest-finance-total">
+          <CardContent className="pt-5 pb-4">
+            <p className="text-xs text-muted-foreground mb-1">{t("restaurant.finance.allTime", "Ümumi")}</p>
+            <p className="text-2xl font-bold text-purple-600">{fmt(total)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("restaurant.finance.allTimeLabel", "bütün zamanlar")}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Payment breakdown */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <CreditCard className="h-4 w-4 text-blue-500" />
+            {t("restaurant.finance.paymentBreakdown", "Ödəniş növü üzrə")}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center">
+              <div className="h-8 w-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center mx-auto mb-2">
+                <DollarSign className="h-4 w-4 text-green-600" />
+              </div>
+              <p className="text-xs text-muted-foreground">{t("restaurant.finance.cash", "Nağd")}</p>
+              <p className="font-bold text-green-600" data-testid="text-finance-cash">{fmt(cashCents)}</p>
+            </div>
+            <div className="text-center">
+              <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mx-auto mb-2">
+                <CreditCard className="h-4 w-4 text-blue-600" />
+              </div>
+              <p className="text-xs text-muted-foreground">{t("restaurant.finance.card", "Kart")}</p>
+              <p className="font-bold text-blue-600" data-testid="text-finance-card">{fmt(cardCents)}</p>
+            </div>
+            <div className="text-center">
+              <div className="h-8 w-8 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center mx-auto mb-2">
+                <BedDouble className="h-4 w-4 text-purple-600" />
+              </div>
+              <p className="text-xs text-muted-foreground">{t("restaurant.finance.roomCharge", "Otaq")}</p>
+              <p className="font-bold text-purple-600" data-testid="text-finance-room">{fmt(roomCents)}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Order status summary */}
+      {analytics.activeOrders && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-orange-500" />
+              {t("restaurant.finance.orderStatus", "Sifariş vəziyyəti")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { key: "pending", label: t("restaurant.finance.statusPending", "Gözləyir"), color: "text-amber-600" },
+                { key: "cooking", label: t("restaurant.finance.statusCooking", "Bişirilir"), color: "text-blue-600" },
+                { key: "ready", label: t("restaurant.finance.statusReady", "Hazır"), color: "text-emerald-600" },
+                { key: "delivered", label: t("restaurant.finance.statusDelivered", "Çatdırıldı"), color: "text-slate-600" },
+              ].map(({ key, label, color }) => (
+                <div key={key} className="text-center p-3 rounded-lg bg-muted/40">
+                  <p className={`text-2xl font-bold ${color}`} data-testid={`text-status-${key}`}>{analytics.activeOrders[key] ?? 0}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{label}</p>
+                </div>
+              ))}
+            </div>
+            {(analytics.pendingSettlement ?? 0) > 0 && (
+              <div className="mt-3 flex items-center gap-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-sm text-amber-700 dark:text-amber-400">
+                <AlertTriangle className="h-4 w-4 shrink-0" />
+                <span>{analytics.pendingSettlement} {t("restaurant.finance.pendingSettlement", "sifariş hesablaşma gözləyir")}</span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Daily history */}
+      {dailyHistory.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-emerald-500" />
+              {t("restaurant.finance.dailyHistory", "Günlük tarix")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="divide-y">
+              {dailyHistory.slice(0, 30).map((row) => {
+                const date = new Date(row.date + "T00:00:00");
+                const label = date.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+                const pct = total > 0 ? Math.min(100, (row.revenueCents / (dailyHistory[0]?.revenueCents || 1)) * 100) : 0;
+                return (
+                  <div key={row.date} className="flex items-center gap-3 px-4 py-2.5" data-testid={`row-daily-${row.date}`}>
+                    <div className="w-28 shrink-0">
+                      <p className="text-xs font-medium">{label}</p>
+                      <p className="text-[10px] text-muted-foreground">{row.orderCount} {t("restaurant.finance.orders", "sifariş")}</p>
+                    </div>
+                    <div className="flex-1">
+                      <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                        <div className="h-full rounded-full bg-emerald-500" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                    <p className="text-sm font-semibold text-emerald-600 w-20 text-right">{fmt(row.revenueCents)}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
 function RestaurantRevenueCard() {
   const { t } = useTranslation();
   const { data: analytics } = useQuery<any>({
@@ -5954,6 +6124,19 @@ export default function OwnerDashboard() {
         return <StaffManagementView />;
       case "billing-addons":
         return <BillingAddonsView />;
+      case "restaurant-finance":
+        return (
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <UtensilsCrossed className="h-5 w-5 text-orange-500" />
+                {t("restaurant.finance.title", "Restoran Maliyyəsi")}
+              </h2>
+              <p className="text-sm text-muted-foreground">{t("restaurant.finance.subtitle", "Restoran gəliri, sifariş statistikası və ödəniş analizi")}</p>
+            </div>
+            <RestaurantFinanceView />
+          </div>
+        );
       default:
         return (
           <OwnerOverview

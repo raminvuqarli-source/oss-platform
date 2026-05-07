@@ -199,6 +199,7 @@ function DashboardSidebar() {
                 { title: t("nav.kitchenDisplay", "Kitchen Display"), icon: ChefHat, url: "/restaurant/kitchen", testId: "nav-rest-kitchen" },
                 { title: t("nav.waiterView", "Waiter View"), icon: Utensils, url: "/restaurant/waiter", testId: "nav-rest-waiter" },
                 { title: t("nav.cashierView", "Cashier View"), icon: Wallet, url: "/restaurant/cashier", testId: "nav-rest-cashier" },
+                { title: t("nav.restaurantFinance", "Restoran Maliyyəsi"), icon: TrendingUp, url: "/dashboard", view: "restaurant-finance", testId: "nav-rest-finance" },
               ],
             },
             {
@@ -233,6 +234,7 @@ function DashboardSidebar() {
               { title: t("nav.performance", "Performance"), icon: TrendingUp, url: "/dashboard", view: "performance", testId: "nav-performance", restricted: !isFeatureEnabled("advanced_analytics") },
               { title: t("nav.staffPerformance", "Staff Performance"), icon: Star, url: "/dashboard", view: "staff-performance", testId: "nav-staff-performance", restricted: !isFeatureEnabled("staff_management") },
               { title: t("nav.finance", "Finance"), icon: Wallet, url: "/dashboard", view: "finance", testId: "nav-finance" },
+              { title: t("nav.restaurantFinance", "Restoran Maliyyəsi"), icon: UtensilsCrossed, url: "/dashboard", view: "restaurant-finance", testId: "nav-restaurant-finance" },
             ],
           },
           {
