@@ -709,6 +709,123 @@ function DashboardSidebar() {
   </>);
 }
 
+function MobileBottomNav({ user, t }: { user: NonNullable<ReturnType<typeof useAuth>["user"]>; t: ReturnType<typeof useTranslation>["t"] }) {
+  const [location] = useLocation();
+  const searchString = useSearch();
+  const currentView = new URLSearchParams(searchString).get("view");
+
+  const isActive = (url: string, view?: string) => {
+    if (url === "/settings") return location === "/settings";
+    if (url === "/notifications") return location === "/notifications";
+    if (url === "/guests") return location === "/guests";
+    if (url === "/staff") return location === "/staff";
+    if (view !== undefined) return location === "/dashboard" && currentView === view;
+    if (url === "/dashboard" && view === undefined) return location === "/dashboard" && !currentView;
+    return location === url;
+  };
+
+  type NavItem = { icon: React.ComponentType<{ className?: string }>; label: string; url: string; view?: string; badge?: number };
+
+  const getItems = (): NavItem[] => {
+    switch (user.role) {
+      case "owner_admin":
+        return [
+          { icon: LayoutDashboard, label: t("common.dashboard"), url: "/dashboard", view: undefined },
+          { icon: CalendarDays, label: t("nav.calendar", "Calendar"), url: "/dashboard", view: "calendar" },
+          { icon: BedDouble, label: t("nav.properties", "Rooms"), url: "/dashboard", view: "properties" },
+          { icon: MessageSquare, label: t("nav.staffChat", "Chat"), url: "/dashboard", view: "staff-chat" },
+          { icon: Bell, label: t("common.notifications"), url: "/notifications" },
+        ];
+      case "reception":
+        return [
+          { icon: LayoutDashboard, label: t("common.dashboard"), url: "/dashboard", view: undefined },
+          { icon: ClipboardList, label: t("nav.tasks", "Tasks"), url: "/dashboard", view: "tasks" },
+          { icon: MessageSquare, label: t("nav.messages", "Messages"), url: "/dashboard", view: "messages" },
+          { icon: Bell, label: t("common.notifications"), url: "/notifications" },
+          { icon: Settings, label: t("common.settings"), url: "/settings" },
+        ];
+      case "staff":
+        return [
+          { icon: LayoutDashboard, label: t("common.dashboard"), url: "/dashboard", view: undefined },
+          { icon: Bell, label: t("common.notifications"), url: "/notifications" },
+          { icon: Settings, label: t("common.settings"), url: "/settings" },
+        ];
+      case "waiter":
+        return [
+          { icon: Utensils, label: t("nav.waiterOrders", "Orders"), url: "/restaurant/waiter" },
+          { icon: Bell, label: t("common.notifications"), url: "/notifications" },
+          { icon: Settings, label: t("common.settings"), url: "/settings" },
+        ];
+      case "kitchen_staff":
+        return [
+          { icon: ChefHat, label: t("nav.kitchenDisplay", "Kitchen"), url: "/restaurant/kitchen" },
+          { icon: Settings, label: t("common.settings"), url: "/settings" },
+        ];
+      case "restaurant_manager":
+        return [
+          { icon: UtensilsCrossed, label: t("nav.restaurantManagement", "Orders"), url: "/restaurant/manager" },
+          { icon: ChefHat, label: t("nav.kitchenDisplay", "Kitchen"), url: "/restaurant/kitchen" },
+          { icon: Bell, label: t("common.notifications"), url: "/notifications" },
+          { icon: Settings, label: t("common.settings"), url: "/settings" },
+        ];
+      case "restaurant_cleaner":
+        return [
+          { icon: Sparkles, label: t("nav.cleaningTasks", "Tasks"), url: "/restaurant/cleaner" },
+          { icon: Settings, label: t("common.settings"), url: "/settings" },
+        ];
+      case "restaurant_cashier":
+        return [
+          { icon: Wallet, label: t("nav.cashierTables", "Tables"), url: "/restaurant/cashier" },
+          { icon: Bell, label: t("common.notifications"), url: "/notifications" },
+          { icon: Settings, label: t("common.settings"), url: "/settings" },
+        ];
+      default:
+        return [
+          { icon: BedDouble, label: t("nav.myBooking", "My Booking"), url: "/dashboard", view: undefined },
+          { icon: Wrench, label: t("nav.services", "Services"), url: "/dashboard", view: "services" },
+          { icon: MessageSquare, label: t("nav.messages", "Messages"), url: "/dashboard", view: "messages" },
+          { icon: Bell, label: t("common.notifications"), url: "/notifications" },
+        ];
+    }
+  };
+
+  const items = getItems();
+
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 z-50 flex sm:hidden bg-background border-t border-border shadow-lg">
+      {items.map((item) => {
+        const active = isActive(item.url, item.view);
+        const Icon = item.icon;
+        return (
+          <button
+            key={`${item.url}-${item.view ?? ""}`}
+            onClick={() => {
+              if (item.view !== undefined) {
+                navigate(`/dashboard?view=${item.view}`);
+              } else if (item.url === "/dashboard" && item.view === undefined) {
+                navigate("/dashboard");
+              } else {
+                navigate(item.url);
+              }
+            }}
+            className={`flex flex-col items-center justify-center flex-1 py-2 px-1 gap-0.5 transition-colors ${
+              active
+                ? "text-primary"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+            data-testid={`mobile-nav-${item.url.replace(/\//g, "-").replace(/\?.*/, "")}-${item.view ?? "home"}`}
+          >
+            <div className="relative">
+              <Icon className="h-5 w-5" />
+            </div>
+            <span className="text-[10px] leading-tight truncate max-w-[56px] text-center">{item.label}</span>
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { t } = useTranslation();
   const { user, isLoading, logout } = useAuth();
@@ -790,7 +907,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="flex flex-col flex-1 min-w-0">
           <header className="flex items-center justify-between gap-2 sm:gap-4 px-3 py-2 sm:p-4 border-b">
             <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-              <SidebarTrigger data-testid="button-sidebar-toggle" />
+              <SidebarTrigger className="hidden sm:flex" data-testid="button-sidebar-toggle" />
               <h1 className="text-base sm:text-lg font-semibold truncate">{getPageTitle()}</h1>
             </div>
             <div className="flex items-center gap-1 sm:gap-2 shrink-0">
@@ -807,11 +924,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               </Button>
             </div>
           </header>
-          <main className="flex-1 overflow-auto p-3 sm:p-6 bg-background">
+          <main className="flex-1 overflow-auto p-3 sm:p-6 bg-background pb-20 sm:pb-6">
             {children}
           </main>
         </div>
       </div>
+      <MobileBottomNav user={user} t={t} />
     </SidebarProvider>
   );
 }
