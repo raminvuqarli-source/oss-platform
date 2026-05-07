@@ -247,7 +247,7 @@ export function RadioWidget() {
   }
 
   return (
-    <div className="fixed bottom-24 right-4 z-40 flex flex-col items-end gap-2" data-testid="radio-widget">
+    <div className="fixed bottom-36 sm:bottom-24 right-4 z-40 flex flex-col items-end gap-2" data-testid="radio-widget">
       {/* Expanded panel */}
       {isOpen && (
         <div className="bg-background border rounded-2xl shadow-2xl p-4 w-64 mb-1">

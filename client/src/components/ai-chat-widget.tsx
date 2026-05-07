@@ -391,7 +391,7 @@ export function AIChatWidget() {
       {isOpen && (
         <div
           data-testid="ai-chat-window"
-          className="fixed bottom-24 right-5 w-[360px] max-h-[600px] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col z-[9999] overflow-hidden"
+          className="fixed bottom-36 sm:bottom-24 right-5 w-[360px] max-h-[600px] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col z-[9999] overflow-hidden"
           style={{ animation: "slideUp 0.25s ease-out" }}
         >
           <div className="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-indigo-600 to-purple-700 flex-shrink-0">
@@ -495,7 +495,7 @@ export function AIChatWidget() {
         onClick={handleOpen}
         data-testid="button-open-chat"
         className={cn(
-          "fixed bottom-5 right-5 z-[9999] w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300",
+          "fixed bottom-20 sm:bottom-5 right-5 z-[9999] w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300",
           "bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700",
           "hover:shadow-indigo-300 dark:hover:shadow-indigo-900 hover:shadow-xl",
           isOpen ? "scale-0 opacity-0 pointer-events-none" : "scale-100 opacity-100",
