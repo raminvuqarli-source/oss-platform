@@ -1,5 +1,5 @@
 import { lazy, Suspense, Component } from "react";
-import { Switch, Route, Redirect } from "wouter";
+import { Switch, Route, Redirect, useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
@@ -247,6 +247,18 @@ function Router() {
   );
 }
 
+function AppContent() {
+  const [location] = useLocation();
+  const hideChat = location.startsWith("/restaurant/guest/");
+  return (
+    <>
+      <Toaster />
+      <Router />
+      {!hideChat && <AIChatWidget />}
+    </>
+  );
+}
+
 function App() {
   return (
     <HelmetProvider>
@@ -254,9 +266,7 @@ function App() {
         <ThemeProvider>
           <AuthProvider>
             <TooltipProvider>
-              <Toaster />
-              <Router />
-              <AIChatWidget />
+              <AppContent />
             </TooltipProvider>
           </AuthProvider>
         </ThemeProvider>

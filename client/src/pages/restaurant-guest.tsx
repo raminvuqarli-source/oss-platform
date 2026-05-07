@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
 import { useParams } from "wouter";
@@ -169,21 +170,23 @@ export default function RestaurantGuestPage() {
               </Button>
 
               {/* Language selector */}
-              <Select value={i18n.language?.slice(0, 2)} onValueChange={lng => changeLanguage(lng)}>
-                <SelectTrigger className="h-8 w-8 sm:w-auto sm:px-2.5 border-dashed [&>svg]:hidden" data-testid="select-language">
-                  <Globe className="h-3.5 w-3.5 sm:mr-1.5 shrink-0" />
-                  <span className="hidden sm:inline text-xs truncate max-w-[64px]">
-                    {languages.find(l => l.code === i18n.language?.slice(0, 2))?.nativeName ?? ""}
-                  </span>
-                </SelectTrigger>
-                <SelectContent align="end">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm" variant="outline" className="h-8 w-8 sm:w-auto sm:px-2.5 border-dashed" data-testid="select-language">
+                    <Globe className="h-3.5 w-3.5 sm:mr-1.5 shrink-0" />
+                    <span className="hidden sm:inline text-xs truncate max-w-[64px]">
+                      {languages.find(l => l.code === i18n.language?.slice(0, 2))?.nativeName ?? ""}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
                   {languages.map(lang => (
-                    <SelectItem key={lang.code} value={lang.code} data-testid={`lang-option-${lang.code}`}>
-                      <span className="text-sm">{lang.nativeName}</span>
-                    </SelectItem>
+                    <DropdownMenuItem key={lang.code} onClick={() => changeLanguage(lang.code)} data-testid={`lang-option-${lang.code}`}>
+                      {lang.nativeName}
+                    </DropdownMenuItem>
                   ))}
-                </SelectContent>
-              </Select>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
