@@ -17,7 +17,7 @@ import { useCurrency } from "@/lib/useCurrency";
 import { changeLanguage, languages } from "@/lib/i18n";
 
 type Category = { id: string; name: string; sortOrder: number; isActive: boolean };
-type MenuItem = { id: string; name: string; description: string | null; priceCents: number; categoryId: string | null; isAvailable: boolean };
+type MenuItem = { id: string; name: string; description: string | null; priceCents: number; categoryId: string | null; isAvailable: boolean; imageUrl?: string | null };
 type CartItem = MenuItem & { quantity: number };
 
 export default function RestaurantGuestPage() {
@@ -259,6 +259,11 @@ export default function RestaurantGuestPage() {
                 const inCart = cart.find(c => c.id === item.id);
                 return (
                   <Card key={item.id} className="overflow-hidden" data-testid={`menu-item-${item.id}`}>
+                    {item.imageUrl && (
+                      <div className="w-full h-36 overflow-hidden">
+                        <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" data-testid={`img-menu-item-${item.id}`} />
+                      </div>
+                    )}
                     <CardContent className="p-3 flex items-center justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-sm">{item.name}</p>

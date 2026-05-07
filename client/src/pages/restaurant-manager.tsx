@@ -38,7 +38,7 @@ const dateFnsLocaleMap: Record<string, Locale> = {
 };
 
 type Category = { id: string; name: string; sortOrder: number; isActive: boolean };
-type MenuItem = { id: string; name: string; description: string | null; priceCents: number; categoryId: string | null; isAvailable: boolean };
+type MenuItem = { id: string; name: string; description: string | null; priceCents: number; categoryId: string | null; isAvailable: boolean; imageUrl?: string | null };
 type PosOrder = {
   id: string; tableNumber: string | null; roomNumber: string | null; guestName: string | null;
   notes: string | null; totalCents: number; kitchenStatus: string; waiterId: string | null;
@@ -101,7 +101,8 @@ export default function RestaurantManager() {
 
   // ── form state ──
   const [categoryForm, setCategoryForm] = useState({ name: "", sortOrder: "0" });
-  const [itemForm, setItemForm] = useState({ name: "", description: "", priceCents: "", categoryId: "" });
+  const [itemForm, setItemForm] = useState({ name: "", description: "", priceCents: "", categoryId: "", imageUrl: "" });
+  const [itemImagePreview, setItemImagePreview] = useState<string>("");
   const [settleType, setSettleType] = useState("cash");
   const [staffForm, setStaffForm] = useState({ fullName: "", username: "", password: "", email: "", role: "waiter", baseSalary: "", employeeTaxRate: "", tablesAssigned: "" });
   const [waiterProfileForm, setWaiterProfileForm] = useState({ salaryAmount: "", taxRate: "", tablesAssigned: "", notes: "" });
@@ -300,12 +301,12 @@ export default function RestaurantManager() {
   });
   const createItem = useMutation({
     mutationFn: (data: object) => apiRequest("POST", "/api/restaurant/menu/items", data),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/restaurant/menu"] }); setShowItemDialog(false); setItemForm({ name: "", description: "", priceCents: "", categoryId: "" }); toast({ title: t("rm.itemCreated") }); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/restaurant/menu"] }); setShowItemDialog(false); setItemForm({ name: "", description: "", priceCents: "", categoryId: "", imageUrl: "" }); setItemImagePreview(""); toast({ title: t("rm.itemCreated") }); },
     onError: () => toast({ title: t("errors.unexpected", "Error"), variant: "destructive" }),
   });
   const updateItem = useMutation({
     mutationFn: ({ id, data }: { id: string; data: object }) => apiRequest("PATCH", `/api/restaurant/menu/items/${id}`, data),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/restaurant/menu"] }); setShowItemDialog(false); setEditingItem(null); toast({ title: t("rm.updated") }); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/restaurant/menu"] }); setShowItemDialog(false); setEditingItem(null); setItemImagePreview(""); setItemForm({ name: "", description: "", priceCents: "", categoryId: "", imageUrl: "" }); toast({ title: t("rm.updated") }); },
     onError: () => toast({ title: t("errors.unexpected", "Error"), variant: "destructive" }),
   });
   const deleteItem = useMutation({
@@ -360,7 +361,12 @@ export default function RestaurantManager() {
   const activeOrders = orders.filter(o => o.kitchenStatus !== "delivered");
 
   function openCategoryEdit(cat: Category) { setEditingCategory(cat); setCategoryForm({ name: cat.name, sortOrder: String(cat.sortOrder) }); setShowCategoryDialog(true); }
-  function openItemEdit(item: MenuItem) { setEditingItem(item); setItemForm({ name: item.name, description: item.description || "", priceCents: String(item.priceCents / 100), categoryId: item.categoryId || "" }); setShowItemDialog(true); }
+  function openItemEdit(item: MenuItem) {
+    setEditingItem(item);
+    setItemForm({ name: item.name, description: item.description || "", priceCents: String(item.priceCents / 100), categoryId: item.categoryId || "", imageUrl: item.imageUrl || "" });
+    setItemImagePreview(item.imageUrl || "");
+    setShowItemDialog(true);
+  }
   function openWaiterEdit(waiter: any) {
     const profile = staffProfiles.find(p => p.userId === waiter.id);
     setWaiterProfileForm({ salaryAmount: profile?.salaryAmount || "", taxRate: profile?.taxRate || "", tablesAssigned: profile?.tablesAssigned || "", notes: profile?.notes || "" });
@@ -370,9 +376,24 @@ export default function RestaurantManager() {
     const data = { name: categoryForm.name, sortOrder: parseInt(categoryForm.sortOrder) || 0 };
     if (editingCategory) { updateCategory.mutate({ id: editingCategory.id, data }); } else { createCategory.mutate(data); }
   }
+  function handleItemImageChange(file: File) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      setItemImagePreview(result);
+      setItemForm(f => ({ ...f, imageUrl: result }));
+    };
+    reader.readAsDataURL(file);
+  }
   function handleItemSubmit() {
     const priceCents = Math.round(parseFloat(itemForm.priceCents || "0") * 100);
-    const data = { name: itemForm.name, description: itemForm.description || null, priceCents, categoryId: (itemForm.categoryId && itemForm.categoryId !== "none") ? itemForm.categoryId : null };
+    const data = {
+      name: itemForm.name,
+      description: itemForm.description || null,
+      priceCents,
+      categoryId: (itemForm.categoryId && itemForm.categoryId !== "none") ? itemForm.categoryId : null,
+      imageUrl: itemForm.imageUrl || null,
+    };
     if (editingItem) { updateItem.mutate({ id: editingItem.id, data }); } else { createItem.mutate(data); }
   }
 
@@ -695,18 +716,25 @@ export default function RestaurantManager() {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-semibold">{t("rm.menuItems")}</h3>
-                  <Button size="sm" variant="outline" onClick={() => { setEditingItem(null); setItemForm({ name: "", description: "", priceCents: "", categoryId: "" }); setShowItemDialog(true); }} data-testid="button-add-item">
+                  <Button size="sm" variant="outline" onClick={() => { setEditingItem(null); setItemForm({ name: "", description: "", priceCents: "", categoryId: "", imageUrl: "" }); setItemImagePreview(""); setShowItemDialog(true); }} data-testid="button-add-item">
                     <Plus className="h-3 w-3 mr-1" /> {t("rm.add")}
                   </Button>
                 </div>
                 <div className="space-y-2">
                   {items.map(item => (
-                    <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg" data-testid={`row-item-${item.id}`}>
-                      <div className="flex-1">
-                        <p className="font-medium">{item.name}</p>
+                    <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg gap-3" data-testid={`row-item-${item.id}`}>
+                      {item.imageUrl ? (
+                        <img src={item.imageUrl} alt={item.name} className="h-12 w-12 rounded-lg object-cover shrink-0 border" data-testid={`img-item-${item.id}`} />
+                      ) : (
+                        <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center shrink-0 border">
+                          <UtensilsCrossed className="h-5 w-5 text-muted-foreground opacity-40" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{item.name}</p>
                         <p className="text-sm text-muted-foreground">{fmt(item.priceCents)}</p>
                       </div>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 shrink-0">
                         {!item.isAvailable && <Badge variant="secondary">{t("rm.itemUnavailable")}</Badge>}
                         <Button size="sm" variant="ghost" onClick={() => openItemEdit(item)} data-testid={`button-edit-item-${item.id}`}><Edit2 className="h-3 w-3" /></Button>
                         <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => deleteItem.mutate(item.id)} data-testid={`button-delete-item-${item.id}`}><Trash2 className="h-3 w-3" /></Button>
@@ -1574,7 +1602,7 @@ export default function RestaurantManager() {
       </Dialog>
 
       {/* ── Item Dialog ── */}
-      <Dialog open={showItemDialog} onOpenChange={setShowItemDialog}>
+      <Dialog open={showItemDialog} onOpenChange={(open) => { setShowItemDialog(open); if (!open) { setItemImagePreview(""); setItemForm({ name: "", description: "", priceCents: "", categoryId: "", imageUrl: "" }); setEditingItem(null); } }}>
         <DialogContent data-testid="dialog-item">
           <DialogHeader><DialogTitle>{editingItem ? t("rm.editItemTitle") : t("rm.addItemTitle")}</DialogTitle></DialogHeader>
           <div className="space-y-4">
@@ -1590,6 +1618,40 @@ export default function RestaurantManager() {
                   {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                 </SelectContent>
               </Select>
+            </div>
+            {/* Image upload */}
+            <div>
+              <Label>{t("rm.itemImage", "Şəkil")}</Label>
+              <div className="mt-1.5 space-y-2">
+                {itemImagePreview ? (
+                  <div className="relative w-full h-36 rounded-xl overflow-hidden border">
+                    <img src={itemImagePreview} alt="preview" className="w-full h-full object-cover" data-testid="img-item-preview" />
+                    <button
+                      type="button"
+                      onClick={() => { setItemImagePreview(""); setItemForm(f => ({ ...f, imageUrl: "" })); }}
+                      className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1 hover:bg-black/80 transition-colors"
+                      data-testid="button-remove-item-image"
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                  </div>
+                ) : (
+                  <label
+                    className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-xl cursor-pointer hover:bg-muted/50 transition-colors"
+                    data-testid="label-item-image-upload"
+                  >
+                    <Camera className="h-6 w-6 text-muted-foreground mb-1" />
+                    <span className="text-xs text-muted-foreground">{t("rm.uploadImage", "Şəkil seçin")}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      data-testid="input-item-image"
+                      onChange={e => { const f = e.target.files?.[0]; if (f) handleItemImageChange(f); }}
+                    />
+                  </label>
+                )}
+              </div>
             </div>
           </div>
           <DialogFooter>
