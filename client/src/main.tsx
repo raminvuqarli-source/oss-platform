@@ -16,6 +16,26 @@ window.addEventListener("beforeinstallprompt", (e) => {
   window.dispatchEvent(new CustomEvent("pwaInstallReady"));
 });
 
+// Auto-reload when Vite fails to load a chunk (happens after new deployments).
+// This prevents the "Page couldn't be loaded" error that requires a manual refresh.
+window.addEventListener("vite:preloadError", () => {
+  window.location.reload();
+});
+
+// Also catch dynamic import failures from unhandled promise rejections
+window.addEventListener("unhandledrejection", (event) => {
+  const msg = event?.reason?.message ?? "";
+  if (
+    msg.includes("Failed to fetch dynamically imported module") ||
+    msg.includes("Importing a module script failed") ||
+    msg.includes("Unable to preload CSS") ||
+    msg.includes("ChunkLoadError")
+  ) {
+    event.preventDefault();
+    window.location.reload();
+  }
+});
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker

@@ -60,6 +60,17 @@ class ErrorBoundary extends Component<{ children: React.ReactNode }, { hasError:
   }
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error("[ErrorBoundary] caught:", error, info);
+    // Auto-reload for chunk loading failures that happen after a new deployment
+    const msg = error?.message ?? "";
+    const isChunkError =
+      msg.includes("Failed to fetch dynamically imported module") ||
+      msg.includes("Importing a module script failed") ||
+      msg.includes("Unable to preload CSS") ||
+      msg.includes("ChunkLoadError") ||
+      error?.name === "ChunkLoadError";
+    if (isChunkError) {
+      window.location.reload();
+    }
   }
   render() {
     if (this.state.hasError) {
