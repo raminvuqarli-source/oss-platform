@@ -3270,6 +3270,25 @@
     "guestSendMessage": "إرسال رسالة",
     "guestMessageSent": "تم إرسال الرسالة",
     "guestOrderPlaced": "تم تقديم طلبك!",
-    "guestWaiterWillConfirm": "سيقوم النادل بتأكيد طلبك"
+    "guestWaiterWillConfirm": "سيقوم النادل بتأكيد طلبك",
+    "guestNameLabel": "اسمك (اختياري)",
+    "guestNamePlaceholder": "أدخل اسمك",
+    "guestAll": "الكل",
+    "guestNoMenu": "لا توجد عناصر في القائمة",
+    "guestAddToCart": "إضافة",
+    "guestItems": "عنصر",
+    "guestYourOrder": "طلبك",
+    "guestNotesLabel": "ملاحظة (اختياري)",
+    "guestNotesPlaceholder": "طلبات خاصة...",
+    "guestTotal": "المجموع",
+    "guestBack": "رجوع",
+    "guestPlaceOrder": "تقديم الطلب",
+    "guestMessagePlaceholder": "اكتب رسالة للنادل...",
+    "guestCancel": "إلغاء",
+    "guestError": "حدث خطأ",
+    "guestGuest": "ضيف",
+    "guestCallingWaiter": "🔔 استدعاء النادل",
+    "guestInvalidQr": "رمز QR غير صالح",
+    "guestLanguage": "اللغة"
   }
 }

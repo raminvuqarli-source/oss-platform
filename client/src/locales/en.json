@@ -3412,6 +3412,25 @@
     "guestSendMessage": "Send Message",
     "guestMessageSent": "Message sent to waiter",
     "guestOrderPlaced": "Order placed successfully!",
-    "guestWaiterWillConfirm": "Waiter will confirm your order shortly"
+    "guestWaiterWillConfirm": "Waiter will confirm your order shortly",
+    "guestNameLabel": "Your name (optional)",
+    "guestNamePlaceholder": "Enter your name",
+    "guestAll": "All",
+    "guestNoMenu": "No menu items added yet",
+    "guestAddToCart": "Add",
+    "guestItems": "item(s)",
+    "guestYourOrder": "Your Order",
+    "guestNotesLabel": "Notes (optional)",
+    "guestNotesPlaceholder": "Special requests...",
+    "guestTotal": "Total",
+    "guestBack": "Back",
+    "guestPlaceOrder": "Place Order",
+    "guestMessagePlaceholder": "Write a message to the waiter...",
+    "guestCancel": "Cancel",
+    "guestError": "An error occurred",
+    "guestGuest": "Guest",
+    "guestCallingWaiter": "🔔 Calling waiter",
+    "guestInvalidQr": "Invalid QR code",
+    "guestLanguage": "Language"
   }
 }

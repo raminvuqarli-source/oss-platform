@@ -3270,6 +3270,25 @@
     "guestSendMessage": "ارسال پیام",
     "guestMessageSent": "پیام ارسال شد",
     "guestOrderPlaced": "سفارش با موفقیت ثبت شد!",
-    "guestWaiterWillConfirm": "گارسون سفارش شما را تأیید خواهد کرد"
+    "guestWaiterWillConfirm": "گارسون سفارش شما را تأیید خواهد کرد",
+    "guestNameLabel": "نام شما (اختیاری)",
+    "guestNamePlaceholder": "نام خود را وارد کنید",
+    "guestAll": "همه",
+    "guestNoMenu": "هنوز آیتمی به منو اضافه نشده",
+    "guestAddToCart": "افزودن",
+    "guestItems": "آیتم",
+    "guestYourOrder": "سفارش شما",
+    "guestNotesLabel": "یادداشت (اختیاری)",
+    "guestNotesPlaceholder": "درخواست‌های ویژه...",
+    "guestTotal": "جمع کل",
+    "guestBack": "بازگشت",
+    "guestPlaceOrder": "ثبت سفارش",
+    "guestMessagePlaceholder": "پیام به گارسون بنویسید...",
+    "guestCancel": "لغو",
+    "guestError": "خطایی رخ داد",
+    "guestGuest": "مهمان",
+    "guestCallingWaiter": "🔔 در حال صدا زدن گارسون",
+    "guestInvalidQr": "QR کد نامعتبر",
+    "guestLanguage": "زبان"
   }
 }

@@ -3270,6 +3270,25 @@
     "guestSendMessage": "Bericht sturen",
     "guestMessageSent": "Bericht verzonden",
     "guestOrderPlaced": "Bestelling geplaatst!",
-    "guestWaiterWillConfirm": "De ober bevestigt uw bestelling"
+    "guestWaiterWillConfirm": "De ober bevestigt uw bestelling",
+    "guestNameLabel": "Uw naam (optioneel)",
+    "guestNamePlaceholder": "Voer uw naam in",
+    "guestAll": "Alle",
+    "guestNoMenu": "Nog geen menu-items",
+    "guestAddToCart": "Toevoegen",
+    "guestItems": "artikel(en)",
+    "guestYourOrder": "Uw bestelling",
+    "guestNotesLabel": "Opmerking (optioneel)",
+    "guestNotesPlaceholder": "Speciale verzoeken...",
+    "guestTotal": "Totaal",
+    "guestBack": "Terug",
+    "guestPlaceOrder": "Bestelling plaatsen",
+    "guestMessagePlaceholder": "Stuur een bericht naar de ober...",
+    "guestCancel": "Annuleren",
+    "guestError": "Er is een fout opgetreden",
+    "guestGuest": "Gast",
+    "guestCallingWaiter": "🔔 Ober wordt geroepen",
+    "guestInvalidQr": "Ongeldige QR-code",
+    "guestLanguage": "Taal"
   }
 }

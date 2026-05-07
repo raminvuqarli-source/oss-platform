@@ -3283,6 +3283,25 @@
     "guestSendMessage": "Отправить сообщение",
     "guestMessageSent": "Сообщение отправлено",
     "guestOrderPlaced": "Заказ успешно размещён!",
-    "guestWaiterWillConfirm": "Официант подтвердит ваш заказ"
+    "guestWaiterWillConfirm": "Официант подтвердит ваш заказ",
+    "guestNameLabel": "Ваше имя (необязательно)",
+    "guestNamePlaceholder": "Введите ваше имя",
+    "guestAll": "Все",
+    "guestNoMenu": "Меню пока не добавлено",
+    "guestAddToCart": "Добавить",
+    "guestItems": "товар(ов)",
+    "guestYourOrder": "Ваш заказ",
+    "guestNotesLabel": "Примечание (необязательно)",
+    "guestNotesPlaceholder": "Особые пожелания...",
+    "guestTotal": "Итого",
+    "guestBack": "Назад",
+    "guestPlaceOrder": "Оформить заказ",
+    "guestMessagePlaceholder": "Напишите сообщение официанту...",
+    "guestCancel": "Отмена",
+    "guestError": "Произошла ошибка",
+    "guestGuest": "Гость",
+    "guestCallingWaiter": "🔔 Вызов официанта",
+    "guestInvalidQr": "Недействительный QR-код",
+    "guestLanguage": "Язык"
   }
 }

@@ -3283,6 +3283,25 @@
     "guestSendMessage": "Mesaj Gönder",
     "guestMessageSent": "Mesajınız gönderildi",
     "guestOrderPlaced": "Siparişiniz alındı!",
-    "guestWaiterWillConfirm": "Garson siparişinizi onaylayacak"
+    "guestWaiterWillConfirm": "Garson siparişinizi onaylayacak",
+    "guestNameLabel": "Adınız (isteğe bağlı)",
+    "guestNamePlaceholder": "Adınızı girin",
+    "guestAll": "Tümü",
+    "guestNoMenu": "Henüz menü eklenmedi",
+    "guestAddToCart": "Ekle",
+    "guestItems": "ürün",
+    "guestYourOrder": "Siparişiniz",
+    "guestNotesLabel": "Not (isteğe bağlı)",
+    "guestNotesPlaceholder": "Özel istekler...",
+    "guestTotal": "Toplam",
+    "guestBack": "Geri",
+    "guestPlaceOrder": "Sipariş Ver",
+    "guestMessagePlaceholder": "Garsona mesaj yazın...",
+    "guestCancel": "İptal",
+    "guestError": "Bir hata oluştu",
+    "guestGuest": "Misafir",
+    "guestCallingWaiter": "🔔 Garson çağrılıyor",
+    "guestInvalidQr": "Geçersiz QR kodu",
+    "guestLanguage": "Dil"
   }
 }

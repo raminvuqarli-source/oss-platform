@@ -3270,6 +3270,25 @@
     "guestSendMessage": "Enviar mensaje",
     "guestMessageSent": "Mensaje enviado",
     "guestOrderPlaced": "¡Pedido realizado!",
-    "guestWaiterWillConfirm": "El camarero confirmará tu pedido"
+    "guestWaiterWillConfirm": "El camarero confirmará tu pedido",
+    "guestNameLabel": "Tu nombre (opcional)",
+    "guestNamePlaceholder": "Ingresa tu nombre",
+    "guestAll": "Todo",
+    "guestNoMenu": "No hay artículos en el menú",
+    "guestAddToCart": "Agregar",
+    "guestItems": "artículo(s)",
+    "guestYourOrder": "Tu pedido",
+    "guestNotesLabel": "Nota (opcional)",
+    "guestNotesPlaceholder": "Solicitudes especiales...",
+    "guestTotal": "Total",
+    "guestBack": "Atrás",
+    "guestPlaceOrder": "Hacer pedido",
+    "guestMessagePlaceholder": "Escribe un mensaje al camarero...",
+    "guestCancel": "Cancelar",
+    "guestError": "Ocurrió un error",
+    "guestGuest": "Huésped",
+    "guestCallingWaiter": "🔔 Llamando al camarero",
+    "guestInvalidQr": "Código QR inválido",
+    "guestLanguage": "Idioma"
   }
 }

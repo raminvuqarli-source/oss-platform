@@ -3270,6 +3270,25 @@
     "guestSendMessage": "Envoyer un message",
     "guestMessageSent": "Message envoyé",
     "guestOrderPlaced": "Commande passée avec succès!",
-    "guestWaiterWillConfirm": "Le serveur confirmera votre commande"
+    "guestWaiterWillConfirm": "Le serveur confirmera votre commande",
+    "guestNameLabel": "Votre nom (facultatif)",
+    "guestNamePlaceholder": "Entrez votre nom",
+    "guestAll": "Tout",
+    "guestNoMenu": "Aucun article au menu",
+    "guestAddToCart": "Ajouter",
+    "guestItems": "article(s)",
+    "guestYourOrder": "Votre commande",
+    "guestNotesLabel": "Note (facultatif)",
+    "guestNotesPlaceholder": "Demandes spéciales...",
+    "guestTotal": "Total",
+    "guestBack": "Retour",
+    "guestPlaceOrder": "Commander",
+    "guestMessagePlaceholder": "Écrivez un message au serveur...",
+    "guestCancel": "Annuler",
+    "guestError": "Une erreur s'est produite",
+    "guestGuest": "Client",
+    "guestCallingWaiter": "🔔 Appel du serveur",
+    "guestInvalidQr": "Code QR invalide",
+    "guestLanguage": "Langue"
   }
 }

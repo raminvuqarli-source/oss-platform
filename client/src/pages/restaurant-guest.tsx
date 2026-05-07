@@ -1,28 +1,29 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
 import { useParams } from "wouter";
-import { Utensils, MessageSquare, ShoppingCart, Plus, Minus, CheckCircle2, Loader2, Bell } from "lucide-react";
+import { Utensils, MessageSquare, ShoppingCart, Plus, Minus, CheckCircle2, Loader2, Bell, Globe } from "lucide-react";
+import { useCurrency } from "@/lib/useCurrency";
+import { changeLanguage, languages } from "@/lib/i18n";
 
 type Category = { id: string; name: string; sortOrder: number; isActive: boolean };
 type MenuItem = { id: string; name: string; description: string | null; priceCents: number; categoryId: string | null; isAvailable: boolean };
 type CartItem = MenuItem & { quantity: number };
 
-const fmt = (cents: number) => `₼${(cents / 100).toFixed(2)}`;
-
 export default function RestaurantGuestPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { propertyId, tableNumber } = useParams<{ propertyId: string; tableNumber: string }>();
   const { toast } = useToast();
+  const { fmt } = useCurrency();
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [guestName, setGuestName] = useState("");
@@ -45,7 +46,7 @@ export default function RestaurantGuestPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           tableNumber,
-          guestName: guestName || t("restLanding.guestPageTitle"),
+          guestName: guestName || t("restLanding.guestGuest"),
           notes: notes || null,
           items: cart.map(ci => ({
             itemName: ci.name,
@@ -63,7 +64,7 @@ export default function RestaurantGuestPage() {
       setShowCart(false);
       toast({ title: t("restLanding.guestOrderPlaced") });
     },
-    onError: () => toast({ title: "Xəta baş verdi", variant: "destructive" }),
+    onError: () => toast({ title: t("restLanding.guestError"), variant: "destructive" }),
   });
 
   const sendMessage = useMutation({
@@ -71,7 +72,7 @@ export default function RestaurantGuestPage() {
       const res = await fetch(`/api/public/restaurant/${propertyId}/message`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tableNumber, senderName: guestName || "Qonaq", message: msgText }),
+        body: JSON.stringify({ tableNumber, senderName: guestName || t("restLanding.guestGuest"), message: msgText }),
       });
       if (!res.ok) throw new Error("Failed");
       return res.json();
@@ -81,7 +82,7 @@ export default function RestaurantGuestPage() {
       setShowMessage(false);
       toast({ title: t("restLanding.guestMessageSent") });
     },
-    onError: () => toast({ title: "Xəta baş verdi", variant: "destructive" }),
+    onError: () => toast({ title: t("restLanding.guestError"), variant: "destructive" }),
   });
 
   const callWaiter = useMutation({
@@ -89,11 +90,12 @@ export default function RestaurantGuestPage() {
       const res = await fetch(`/api/public/restaurant/${propertyId}/message`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tableNumber, senderName: guestName || "Qonaq", message: "🔔 Qaroson çağırılır" }),
+        body: JSON.stringify({ tableNumber, senderName: guestName || t("restLanding.guestGuest"), message: t("restLanding.guestCallingWaiter") }),
       });
       return res.json();
     },
     onSuccess: () => toast({ title: t("restLanding.guestCallWaiter") }),
+    onError: () => toast({ title: t("restLanding.guestError"), variant: "destructive" }),
   });
 
   const addToCart = (item: MenuItem) => {
@@ -127,7 +129,7 @@ export default function RestaurantGuestPage() {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center p-8">
           <Utensils className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-          <p className="text-muted-foreground">Keçərsiz QR kodu</p>
+          <p className="text-muted-foreground">{t("restLanding.guestInvalidQr")}</p>
         </div>
       </div>
     );
@@ -140,10 +142,12 @@ export default function RestaurantGuestPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
       </Helmet>
       <div className="min-h-screen bg-background" data-testid="restaurant-guest-page">
-        {/* Header */}
+
+        {/* ── Header ── */}
         <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b">
-          <div className="px-4 py-3 flex items-center justify-between max-w-2xl mx-auto">
-            <div className="flex items-center gap-2">
+          <div className="px-3 py-2.5 flex items-center justify-between max-w-2xl mx-auto gap-2">
+            {/* Logo + title */}
+            <div className="flex items-center gap-2 shrink-0">
               <div className="p-1.5 bg-primary rounded-lg">
                 <Utensils className="h-4 w-4 text-primary-foreground" />
               </div>
@@ -152,20 +156,37 @@ export default function RestaurantGuestPage() {
                 <p className="text-xs text-muted-foreground mt-0.5">{t("restaurant.table")} {tableNumber}</p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => setShowMessage(true)} data-testid="btn-guest-message" className="h-8">
+
+            {/* Action buttons + language */}
+            <div className="flex items-center gap-1.5 flex-wrap justify-end">
+              <Button size="sm" variant="outline" onClick={() => setShowMessage(true)} data-testid="btn-guest-message" className="h-8 px-2.5">
                 <MessageSquare className="h-3.5 w-3.5 mr-1" />
-                <span className="text-xs">{t("restLanding.guestSendMessage")}</span>
+                <span className="text-xs hidden sm:inline">{t("restLanding.guestSendMessage")}</span>
               </Button>
-              <Button size="sm" variant="outline" onClick={() => callWaiter.mutate()} disabled={callWaiter.isPending} data-testid="btn-guest-call-waiter" className="h-8">
+              <Button size="sm" variant="outline" onClick={() => callWaiter.mutate()} disabled={callWaiter.isPending} data-testid="btn-guest-call-waiter" className="h-8 px-2.5">
                 <Bell className="h-3.5 w-3.5 mr-1" />
-                <span className="text-xs">{t("restLanding.guestCallWaiter")}</span>
+                <span className="text-xs hidden sm:inline">{t("restLanding.guestCallWaiter")}</span>
               </Button>
+
+              {/* Language selector */}
+              <Select value={i18n.language?.slice(0, 2)} onValueChange={lng => changeLanguage(lng)}>
+                <SelectTrigger className="h-8 w-8 sm:w-auto sm:px-2.5 border-dashed [&>svg]:hidden" data-testid="select-language">
+                  <Globe className="h-3.5 w-3.5 sm:mr-1 shrink-0" />
+                  <SelectValue className="hidden sm:block text-xs" />
+                </SelectTrigger>
+                <SelectContent align="end">
+                  {languages.map(lang => (
+                    <SelectItem key={lang.code} value={lang.code} data-testid={`lang-option-${lang.code}`}>
+                      <span className="text-sm">{lang.nativeName}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
 
-        {/* Order success banner */}
+        {/* ── Order success banner ── */}
         {orderSuccess && (
           <div className="mx-4 mt-4 p-3 rounded-lg border border-emerald-200 bg-emerald-50 dark:bg-emerald-950/30 flex items-center gap-2" data-testid="banner-order-success">
             <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
@@ -176,15 +197,15 @@ export default function RestaurantGuestPage() {
           </div>
         )}
 
-        {/* Main content */}
+        {/* ── Main content ── */}
         <div className="max-w-2xl mx-auto px-4 pb-32">
           {/* Guest name input */}
           <div className="mt-4 mb-4">
-            <Label className="text-xs text-muted-foreground">Adınız (istəyə görə)</Label>
+            <Label className="text-xs text-muted-foreground">{t("restLanding.guestNameLabel")}</Label>
             <Input
               value={guestName}
               onChange={e => setGuestName(e.target.value)}
-              placeholder="Adınızı daxil edin"
+              placeholder={t("restLanding.guestNamePlaceholder")}
               className="mt-1 h-9"
               data-testid="input-guest-name"
             />
@@ -198,8 +219,9 @@ export default function RestaurantGuestPage() {
                 variant={selectedCategoryId === null ? "default" : "outline"}
                 className="shrink-0 h-7 text-xs"
                 onClick={() => setSelectedCategoryId(null)}
+                data-testid="cat-filter-all"
               >
-                Hamısı
+                {t("restLanding.guestAll")}
               </Button>
               {categories.sort((a, b) => a.sortOrder - b.sortOrder).map(cat => (
                 <Button
@@ -219,12 +241,12 @@ export default function RestaurantGuestPage() {
           {/* Menu items */}
           {isLoading ? (
             <div className="grid grid-cols-1 gap-3">
-              {[1,2,3,4].map(i => <div key={i} className="h-24 bg-muted rounded-xl animate-pulse" />)}
+              {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-muted rounded-xl animate-pulse" />)}
             </div>
           ) : filteredItems.length === 0 ? (
             <div className="flex flex-col items-center py-16 text-muted-foreground">
               <Utensils className="h-12 w-12 mb-3 opacity-30" />
-              <p>Menyu hələ əlavə edilməyib</p>
+              <p>{t("restLanding.guestNoMenu")}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-3">
@@ -251,7 +273,7 @@ export default function RestaurantGuestPage() {
                           </div>
                         ) : (
                           <Button size="sm" onClick={() => addToCart(item)} data-testid={`btn-add-${item.id}`} className="h-8">
-                            <Plus className="h-3.5 w-3.5 mr-1" />Əlavə et
+                            <Plus className="h-3.5 w-3.5 mr-1" />{t("restLanding.guestAddToCart")}
                           </Button>
                         )}
                       </div>
@@ -263,7 +285,7 @@ export default function RestaurantGuestPage() {
           )}
         </div>
 
-        {/* Floating cart button */}
+        {/* ── Floating cart button ── */}
         {cartCount > 0 && (
           <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur border-t shadow-lg">
             <Button
@@ -273,20 +295,20 @@ export default function RestaurantGuestPage() {
             >
               <div className="flex items-center gap-2">
                 <ShoppingCart className="h-5 w-5" />
-                <span>{cartCount} məhsul</span>
+                <span>{cartCount} {t("restLanding.guestItems")}</span>
               </div>
               <span>{fmt(cartTotal)}</span>
             </Button>
           </div>
         )}
 
-        {/* Cart Dialog */}
+        {/* ── Cart Dialog ── */}
         <Dialog open={showCart} onOpenChange={setShowCart}>
           <DialogContent className="max-w-md" data-testid="dialog-cart">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <ShoppingCart className="h-5 w-5" />
-                Sifarişiniz
+                {t("restLanding.guestYourOrder")}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-3 max-h-60 overflow-y-auto">
@@ -311,16 +333,16 @@ export default function RestaurantGuestPage() {
             </div>
             <div className="border-t pt-3">
               <div className="space-y-2 mb-3">
-                <Label className="text-xs">Qeyd (istəyə görə)</Label>
-                <Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} placeholder="Xüsusi istəklər..." className="text-sm" data-testid="input-order-notes" />
+                <Label className="text-xs">{t("restLanding.guestNotesLabel")}</Label>
+                <Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} placeholder={t("restLanding.guestNotesPlaceholder")} className="text-sm" data-testid="input-order-notes" />
               </div>
               <div className="flex items-center justify-between mb-3">
-                <span className="font-bold">Cəmi:</span>
+                <span className="font-bold">{t("restLanding.guestTotal")}:</span>
                 <span className="text-xl font-bold text-primary">{fmt(cartTotal)}</span>
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowCart(false)}>Geri</Button>
+              <Button variant="outline" onClick={() => setShowCart(false)} data-testid="btn-cart-back">{t("restLanding.guestBack")}</Button>
               <Button
                 onClick={() => placeOrder.mutate()}
                 disabled={placeOrder.isPending || cart.length === 0}
@@ -328,13 +350,13 @@ export default function RestaurantGuestPage() {
                 data-testid="btn-place-order"
               >
                 {placeOrder.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
-                Sifariş Ver
+                {t("restLanding.guestPlaceOrder")}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* Message Dialog */}
+        {/* ── Message Dialog ── */}
         <Dialog open={showMessage} onOpenChange={setShowMessage}>
           <DialogContent className="max-w-sm" data-testid="dialog-message">
             <DialogHeader>
@@ -347,11 +369,11 @@ export default function RestaurantGuestPage() {
               value={msgText}
               onChange={e => setMsgText(e.target.value)}
               rows={3}
-              placeholder="Qarosona mesaj yazın..."
+              placeholder={t("restLanding.guestMessagePlaceholder")}
               data-testid="input-guest-message"
             />
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowMessage(false)}>Ləğv et</Button>
+              <Button variant="outline" onClick={() => setShowMessage(false)} data-testid="btn-msg-cancel">{t("restLanding.guestCancel")}</Button>
               <Button onClick={() => sendMessage.mutate()} disabled={sendMessage.isPending || !msgText.trim()} data-testid="btn-send-message">
                 {sendMessage.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 {t("restLanding.guestSendMessage")}

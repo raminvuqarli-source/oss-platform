@@ -3270,6 +3270,25 @@
     "guestSendMessage": "Nachricht senden",
     "guestMessageSent": "Nachricht gesendet",
     "guestOrderPlaced": "Bestellung aufgegeben!",
-    "guestWaiterWillConfirm": "Der Kellner bestätigt Ihre Bestellung"
+    "guestWaiterWillConfirm": "Der Kellner bestätigt Ihre Bestellung",
+    "guestNameLabel": "Ihr Name (optional)",
+    "guestNamePlaceholder": "Namen eingeben",
+    "guestAll": "Alle",
+    "guestNoMenu": "Keine Menüpunkte vorhanden",
+    "guestAddToCart": "Hinzufügen",
+    "guestItems": "Artikel",
+    "guestYourOrder": "Ihre Bestellung",
+    "guestNotesLabel": "Notiz (optional)",
+    "guestNotesPlaceholder": "Besondere Wünsche...",
+    "guestTotal": "Gesamt",
+    "guestBack": "Zurück",
+    "guestPlaceOrder": "Bestellen",
+    "guestMessagePlaceholder": "Nachricht an Kellner...",
+    "guestCancel": "Abbrechen",
+    "guestError": "Ein Fehler ist aufgetreten",
+    "guestGuest": "Gast",
+    "guestCallingWaiter": "🔔 Kellner wird gerufen",
+    "guestInvalidQr": "Ungültiger QR-Code",
+    "guestLanguage": "Sprache"
   }
 }
