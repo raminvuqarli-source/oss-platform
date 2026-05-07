@@ -3027,7 +3027,11 @@
     "waiterConfirmed": "Sipariş mutfağa gönderildi",
     "qrScanTitle": "QR Tara",
     "qrDialogTitle": "Masa QR Kodu",
-    "qrDialogDesc": "Müşteri siparişi için bu QR'ı tarar"
+    "qrDialogDesc": "Müşteri siparişi için bu QR'ı tarar",
+    "persons": "kişi",
+    "priceLabel": "Fiyat",
+    "netSalary": "Net maaş",
+    "taxAmount": "Vergi"
   },
   "rcl": {
     "pageTitle": "Temizlik Paneli",

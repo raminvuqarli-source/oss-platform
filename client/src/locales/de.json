@@ -3014,7 +3014,11 @@
     "waiterConfirmed": "Bestellung an Küche gesendet",
     "qrScanTitle": "QR scannen",
     "qrDialogTitle": "Tisch-QR-Code",
-    "qrDialogDesc": "Kunde scannt diesen QR für Bestellung"
+    "qrDialogDesc": "Kunde scannt diesen QR für Bestellung",
+    "persons": "Pers.",
+    "priceLabel": "Preis",
+    "netSalary": "Nettogehalt",
+    "taxAmount": "Steuer"
   },
   "rcl": {
     "pageTitle": "Reinigungsbereich",

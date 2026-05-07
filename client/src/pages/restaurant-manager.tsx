@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTranslation } from "react-i18next";
+import { useCurrency } from "@/lib/useCurrency";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/lib/auth-context";
@@ -58,7 +59,7 @@ type CleaningTask = { id: string; description: string; location: string | null; 
 type RoomGroup = { roomNumber: string; orders: PosOrder[]; totalCents: number };
 type RestaurantTable = { id: string; tableNumber: string; capacity: number | null; status: "empty" | "occupied"; activeOrders: PosOrder[] };
 
-const fmt = (cents: number) => `₼${(cents / 100).toFixed(2)}`;
+// fmt is now provided by useCurrency hook inside the component
 
 const statusColor: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200",
@@ -79,6 +80,7 @@ export default function RestaurantManager() {
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
   const { user: authUser } = useAuth();
+  const { fmt, symbol } = useCurrency();
   const [activeTab, setActiveTab] = useState("orders");
 
   // ── dialog state ──
@@ -539,7 +541,7 @@ export default function RestaurantManager() {
                         </div>
                       </div>
                       {table.capacity && (
-                        <p className="text-xs text-muted-foreground mb-1.5">{table.capacity} nəfər</p>
+                        <p className="text-xs text-muted-foreground mb-1.5">{table.capacity} {t("rm.persons")}</p>
                       )}
                       <Badge
                         className={`text-xs w-full justify-center ${table.status === "occupied" ? "bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200" : "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200"}`}
@@ -733,7 +735,7 @@ export default function RestaurantManager() {
                             <p className="font-medium">{waiter.fullName}</p>
                             <p className="text-xs text-muted-foreground">{waiter.username}</p>
                             <div className="flex flex-wrap gap-3 mt-1 text-xs text-muted-foreground">
-                              {profile?.salaryAmount && profile.salaryAmount !== "0" && <span>💰 {t("rm.salary")}: {profile.salaryAmount} ₼</span>}
+                              {profile?.salaryAmount && profile.salaryAmount !== "0" && <span>💰 {t("rm.salary")}: {profile.salaryAmount} {symbol}</span>}
                               {profile?.taxRate && profile.taxRate !== "0" && <span>🧾 {t("rm.tax")}: {profile.taxRate}%</span>}
                               {assignedTables.length > 0 && (
                                 <div className="flex items-center gap-1 flex-wrap">
@@ -851,7 +853,7 @@ export default function RestaurantManager() {
                         <p className="font-medium text-sm truncate">{member.fullName}</p>
                         <p className="text-xs text-muted-foreground">{member.email || member.username}</p>
                         <div className="flex flex-wrap gap-2 mt-1 text-xs text-muted-foreground">
-                          {profile?.salaryAmount && profile.salaryAmount !== "0" && <span>💰 {profile.salaryAmount} ₼</span>}
+                          {profile?.salaryAmount && profile.salaryAmount !== "0" && <span>💰 {profile.salaryAmount} {symbol}</span>}
                           {profile?.tablesAssigned && member.role === "waiter" && <span>🍽 {profile.tablesAssigned}</span>}
                         </div>
                       </div>
@@ -1457,7 +1459,7 @@ export default function RestaurantManager() {
           <div className="space-y-4">
             <div><Label htmlFor="item-name">{t("rm.name")}</Label><Input id="item-name" value={itemForm.name} onChange={e => setItemForm(f => ({ ...f, name: e.target.value }))} placeholder="məs. Sezar salatı" data-testid="input-item-name" /></div>
             <div><Label htmlFor="item-desc">{t("rm.description")}</Label><Input id="item-desc" value={itemForm.description} onChange={e => setItemForm(f => ({ ...f, description: e.target.value }))} placeholder="İstəyə görə" data-testid="input-item-description" /></div>
-            <div><Label htmlFor="item-price">Qiymət (₼)</Label><Input id="item-price" type="number" min="0" step="0.01" value={itemForm.priceCents} onChange={e => setItemForm(f => ({ ...f, priceCents: e.target.value }))} placeholder="məs. 15.00" data-testid="input-item-price" /></div>
+            <div><Label htmlFor="item-price">{t("rm.priceLabel")} ({symbol})</Label><Input id="item-price" type="number" min="0" step="0.01" value={itemForm.priceCents} onChange={e => setItemForm(f => ({ ...f, priceCents: e.target.value }))} placeholder="15.00" data-testid="input-item-price" /></div>
             <div>
               <Label>{t("rm.categoryLabel")}</Label>
               <Select value={itemForm.categoryId} onValueChange={v => setItemForm(f => ({ ...f, categoryId: v }))}>
@@ -1539,8 +1541,8 @@ export default function RestaurantManager() {
               </div>
               {staffForm.baseSalary && (
                 <p className="text-xs text-muted-foreground">
-                  Xalis maaş: ₼{(parseFloat(staffForm.baseSalary || "0") * (1 - parseFloat(staffForm.employeeTaxRate || "0") / 100)).toFixed(2)}
-                  {" "}· Vergi: ₼{(parseFloat(staffForm.baseSalary || "0") * parseFloat(staffForm.employeeTaxRate || "0") / 100).toFixed(2)}
+                  {t("rm.netSalary")}: {symbol}{(parseFloat(staffForm.baseSalary || "0") * (1 - parseFloat(staffForm.employeeTaxRate || "0") / 100)).toFixed(2)}
+                  {" "}· {t("rm.taxAmount")}: {symbol}{(parseFloat(staffForm.baseSalary || "0") * parseFloat(staffForm.employeeTaxRate || "0") / 100).toFixed(2)}
                 </p>
               )}
             </div>

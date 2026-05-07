@@ -3014,7 +3014,11 @@
     "waiterConfirmed": "Commande envoyée en cuisine",
     "qrScanTitle": "Scanner QR",
     "qrDialogTitle": "QR de la table",
-    "qrDialogDesc": "Le client scanne ce QR pour commander"
+    "qrDialogDesc": "Le client scanne ce QR pour commander",
+    "persons": "pers.",
+    "priceLabel": "Prix",
+    "netSalary": "Salaire net",
+    "taxAmount": "Taxe"
   },
   "rcl": {
     "pageTitle": "Tableau de nettoyage",

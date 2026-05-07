@@ -3114,7 +3114,11 @@
     "waiterConfirmed": "Sifariş mətbəxə göndərildi",
     "qrScanTitle": "QR Skan et",
     "qrDialogTitle": "Masa QR Kodu",
-    "qrDialogDesc": "Müştəri bu QR-ı skan edərək sifariş verə bilər"
+    "qrDialogDesc": "Müştəri bu QR-ı skan edərək sifariş verə bilər",
+    "persons": "nəfər",
+    "priceLabel": "Qiymət",
+    "netSalary": "Xalis maaş",
+    "taxAmount": "Vergi"
   },
   "rcl": {
     "pageTitle": "Temizlik Paneli",

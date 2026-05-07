@@ -3027,7 +3027,11 @@
     "waiterConfirmed": "Заказ отправлен на кухню",
     "qrScanTitle": "Сканировать QR",
     "qrDialogTitle": "QR-код стола",
-    "qrDialogDesc": "Гость сканирует QR для заказа"
+    "qrDialogDesc": "Гость сканирует QR для заказа",
+    "persons": "чел.",
+    "priceLabel": "Цена",
+    "netSalary": "Чистая зарплата",
+    "taxAmount": "Налог"
   },
   "rcl": {
     "pageTitle": "Панель уборки",

@@ -3014,7 +3014,11 @@
     "waiterConfirmed": "Bestelling naar keuken gestuurd",
     "qrScanTitle": "QR scannen",
     "qrDialogTitle": "Tafel QR-code",
-    "qrDialogDesc": "Klant scant dit QR om te bestellen"
+    "qrDialogDesc": "Klant scant dit QR om te bestellen",
+    "persons": "pers.",
+    "priceLabel": "Prijs",
+    "netSalary": "Nettoloon",
+    "taxAmount": "Belasting"
   },
   "rcl": {
     "pageTitle": "Schoonmaakpaneel",

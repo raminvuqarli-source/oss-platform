@@ -3014,7 +3014,11 @@
     "waiterConfirmed": "سفارش به آشپزخانه ارسال شد",
     "qrScanTitle": "اسکن QR",
     "qrDialogTitle": "QR کد میز",
-    "qrDialogDesc": "مشتری این QR را برای سفارش اسکن می‌کند"
+    "qrDialogDesc": "مشتری این QR را برای سفارش اسکن می‌کند",
+    "persons": "نفر",
+    "priceLabel": "قیمت",
+    "netSalary": "حقوق خالص",
+    "taxAmount": "مالیات"
   },
   "rcl": {
     "pageTitle": "پنل نظافت",

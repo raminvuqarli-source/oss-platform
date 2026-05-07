@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useCurrency } from "@/lib/useCurrency";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -118,9 +119,7 @@ type MenuData = {
   items: MenuItem[];
 };
 
-function fmt(cents: number) {
-  return `${(cents / 100).toFixed(2)} ₼`;
-}
+// fmt moved inside component via useCurrency hook
 
 function StatusBadge({ status }: { status: string }) {
   const { t } = useTranslation();
@@ -142,6 +141,7 @@ export default function RestaurantOwnerDashboard() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const { toast } = useToast();
+  const { fmt, symbol } = useCurrency();
   const [activeTab, setActiveTab] = useState("overview");
   const [contactDialog, setContactDialog] = useState<{ open: boolean; subject: string }>({ open: false, subject: "" });
   const [showAddStaffDialog, setShowAddStaffDialog] = useState(false);

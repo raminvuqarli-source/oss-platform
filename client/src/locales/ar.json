@@ -3014,7 +3014,11 @@
     "waiterConfirmed": "تم إرسال الطلب إلى المطبخ",
     "qrScanTitle": "مسح QR",
     "qrDialogTitle": "رمز QR للطاولة",
-    "qrDialogDesc": "يمسح العميل هذا الرمز لتقديم طلب"
+    "qrDialogDesc": "يمسح العميل هذا الرمز لتقديم طلب",
+    "persons": "شخص",
+    "priceLabel": "السعر",
+    "netSalary": "الراتب الصافي",
+    "taxAmount": "الضريبة"
   },
   "rcl": {
     "pageTitle": "لوحة التنظيف",
