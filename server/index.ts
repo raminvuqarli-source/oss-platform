@@ -180,6 +180,104 @@ async function runSafetyPatches(): Promise<void> {
     `);
     await client.query(`CREATE UNIQUE INDEX IF NOT EXISTS idx_restaurant_staff_profiles_user_property ON restaurant_staff_profiles (user_id, property_id)`);
 
+    // Create POS tables if missing
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS pos_menu_categories (
+        id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id varchar NOT NULL,
+        property_id varchar NOT NULL,
+        name varchar NOT NULL,
+        sort_order integer DEFAULT 0,
+        is_active boolean DEFAULT true,
+        created_at timestamp DEFAULT now()
+      )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_pos_menu_categories_property_id ON pos_menu_categories (property_id)`);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS pos_menu_items (
+        id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id varchar NOT NULL,
+        property_id varchar NOT NULL,
+        category_id varchar,
+        name varchar NOT NULL,
+        description text,
+        price_cents integer NOT NULL DEFAULT 0,
+        image_url text,
+        is_available boolean DEFAULT true,
+        created_at timestamp DEFAULT now()
+      )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_pos_menu_items_property_id ON pos_menu_items (property_id)`);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS pos_orders (
+        id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id varchar NOT NULL,
+        property_id varchar NOT NULL,
+        folio_id varchar,
+        booking_id varchar,
+        table_number varchar,
+        room_number varchar,
+        order_type varchar DEFAULT 'dine_in',
+        guest_name varchar,
+        waiter_id varchar,
+        kitchen_status varchar NOT NULL DEFAULT 'pending',
+        settlement_status varchar NOT NULL DEFAULT 'pending',
+        notes text,
+        total_cents integer NOT NULL DEFAULT 0,
+        created_at timestamp DEFAULT now(),
+        ready_at timestamp,
+        delivered_at timestamp,
+        settled_at timestamp
+      )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_pos_orders_property_id ON pos_orders (property_id)`);
+    await client.query(`ALTER TABLE pos_orders ADD COLUMN IF NOT EXISTS items jsonb`);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS pos_order_items (
+        id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+        order_id varchar NOT NULL,
+        menu_item_id varchar,
+        item_name varchar NOT NULL,
+        quantity integer NOT NULL DEFAULT 1,
+        unit_price_cents integer NOT NULL DEFAULT 0,
+        total_cents integer NOT NULL DEFAULT 0
+      )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_pos_order_items_order_id ON pos_order_items (order_id)`);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS waiter_calls (
+        id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id varchar NOT NULL,
+        property_id varchar NOT NULL,
+        booking_id varchar,
+        table_number varchar,
+        room_number varchar,
+        status varchar NOT NULL DEFAULT 'pending',
+        called_at timestamp DEFAULT now(),
+        acknowledged_at timestamp,
+        acknowledged_by varchar
+      )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_waiter_calls_property_id ON waiter_calls (property_id)`);
+
+    // Create restaurant_guest_messages table if missing
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS restaurant_guest_messages (
+        id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+        property_id varchar NOT NULL,
+        table_number varchar NOT NULL,
+        sender_name varchar DEFAULT 'Qonaq',
+        message text NOT NULL,
+        is_read_by_waiter boolean DEFAULT false,
+        created_at timestamp DEFAULT now()
+      )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_restaurant_guest_messages_property_id ON restaurant_guest_messages (property_id)`);
+
     // Create deleted_trial_accounts table if missing
     await client.query(`
       CREATE TABLE IF NOT EXISTS deleted_trial_accounts (
