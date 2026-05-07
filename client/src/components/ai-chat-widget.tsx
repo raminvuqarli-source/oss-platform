@@ -371,7 +371,7 @@ export function AIChatWidget() {
       fireLeadConversion();
       addMessage("assistant", data.type === "message" ? data.content : "Thank you! We'll be in touch soon. 🎉");
     } catch {
-      addMessage("assistant", "Sorry, something went wrong saving your information. Please email us at support@ossaiproapp.com");
+      addMessage("assistant", "Sorry, something went wrong saving your information. Please email us at Ramin.v@orange-studio.az");
     } finally {
       setIsSubmittingLead(false);
     }

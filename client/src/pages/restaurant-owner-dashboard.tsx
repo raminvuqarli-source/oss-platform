@@ -25,7 +25,7 @@ import {
 import { SiWhatsapp } from "react-icons/si";
 import { useAuth } from "@/lib/auth-context";
 
-const CONTACT_EMAIL = "support@ossaiproapp.com";
+const CONTACT_EMAIL = "Ramin.v@orange-studio.az";
 
 function RestaurantContactDialog({ open, onClose, subject }: { open: boolean; onClose: () => void; subject: string }) {
   const { t } = useTranslation();
@@ -64,7 +64,7 @@ function RestaurantContactDialog({ open, onClose, subject }: { open: boolean; on
             </Button>
           </div>
           <a
-            href={`https://wa.me/994502888402?text=${encodeURIComponent(subject)}`}
+            href={`https://wa.me/994504449292?text=${encodeURIComponent(subject)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 p-3 rounded-lg border bg-green-500/5 border-green-500/30 hover:bg-green-500/10 transition-colors"

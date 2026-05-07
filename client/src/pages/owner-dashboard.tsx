@@ -5687,8 +5687,8 @@ function OwnerOverview({ analytics, analyticsLoading, allProperties }: {
 }
 
 // ===================== BILLING ADDONS VIEW =====================
-const CONTACT_EMAIL = "support@ossaiproapp.com";
-const CONTACT_WHATSAPP = "https://wa.me/994XXXXXXXXX";
+const CONTACT_EMAIL = "Ramin.v@orange-studio.az";
+const CONTACT_WHATSAPP = "https://wa.me/994504449292";
 
 export function ContactDialog({ open, onClose, subject }: { open: boolean; onClose: () => void; subject: string }) {
   const { t } = useTranslation();
@@ -5727,7 +5727,7 @@ export function ContactDialog({ open, onClose, subject }: { open: boolean; onClo
             </Button>
           </div>
           <a
-            href={`https://wa.me/994502888402?text=${encodeURIComponent(subject)}`}
+            href={`https://wa.me/994504449292?text=${encodeURIComponent(subject)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 p-3 rounded-lg border bg-green-500/5 border-green-500/30 hover:bg-green-500/10 transition-colors"
