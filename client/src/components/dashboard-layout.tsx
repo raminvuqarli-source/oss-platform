@@ -781,8 +781,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   };
 
+  const startOpen = typeof window !== "undefined" ? window.innerWidth >= 768 : true;
+
   return (
-    <SidebarProvider style={style as React.CSSProperties}>
+    <SidebarProvider defaultOpen={startOpen} style={style as React.CSSProperties}>
       <div className="flex min-h-screen w-full flex-col sm:flex-row">
         <DashboardSidebar />
         <div className="flex flex-col flex-1 min-w-0">
