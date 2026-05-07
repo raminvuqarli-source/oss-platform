@@ -177,30 +177,53 @@ export function registerRestaurantRoutes(app: Express): void {
       const itemSummary = orderItems.slice(0, 3).map(i => `${i.quantity}x ${i.itemName}`).join(", ");
       const orderSummary = `${locationLabel}: ${itemSummary}${orderItems.length > 3 ? ` +${orderItems.length - 3}` : ""}`;
 
-      const kitchenIds = allStaff
-        .filter(u => u.role === "kitchen_staff" || u.role === "restaurant_manager")
-        .map(u => u.id);
+      const kitchenStaff = allStaff.filter(u => u.role === "kitchen_staff" || u.role === "restaurant_manager");
+      const cashierStaff = allStaff.filter(u => u.role === "restaurant_cashier");
+
+      const kitchenIds = kitchenStaff.map(u => u.id);
       if (kitchenIds.length > 0) {
         sendPushNotification({
           userIds: kitchenIds,
-          title: "🍽️ New Order",
+          title: "🍽️ Yeni Sifariş",
           message: orderSummary,
           url: "/restaurant/kitchen",
           data: { type: "RESTAURANT_NEW_ORDER", orderId: order.id },
         }).catch(err => logger.error({ err }, "Kitchen order push failed"));
+
+        for (const u of kitchenStaff) {
+          storage.createNotification({
+            userId: u.id,
+            tenantId: u.tenantId || "",
+            title: "🍽️ Yeni Sifariş",
+            message: orderSummary,
+            type: "restaurant_order",
+            read: false,
+            actionUrl: "/restaurant/kitchen",
+          }).catch(err => logger.error({ err, userId: u.id }, "Kitchen in-app notif failed"));
+        }
       }
 
-      const cashierIds = allStaff
-        .filter(u => u.role === "restaurant_cashier")
-        .map(u => u.id);
+      const cashierIds = cashierStaff.map(u => u.id);
       if (cashierIds.length > 0) {
         sendPushNotification({
           userIds: cashierIds,
-          title: "💰 New Order",
+          title: "💰 Yeni Sifariş",
           message: orderSummary,
           url: "/restaurant/cashier",
           data: { type: "RESTAURANT_NEW_ORDER", orderId: order.id },
         }).catch(err => logger.error({ err }, "Cashier order push failed"));
+
+        for (const u of cashierStaff) {
+          storage.createNotification({
+            userId: u.id,
+            tenantId: u.tenantId || "",
+            title: "💰 Yeni Sifariş",
+            message: orderSummary,
+            type: "restaurant_order",
+            read: false,
+            actionUrl: "/restaurant/cashier",
+          }).catch(err => logger.error({ err, userId: u.id }, "Cashier in-app notif failed"));
+        }
       }
 
       logger.info({ orderId: order.id, propertyId }, "New restaurant order created");
@@ -488,6 +511,37 @@ export function registerRestaurantRoutes(app: Express): void {
         roomNumber,
         timestamp: new Date().toISOString(),
       });
+
+      // Push + in-app notifications for waiters and managers
+      const allStaff = await storage.getUsersByProperty(propertyId);
+      const waiterAndManagers = allStaff.filter(u =>
+        u.role === "waiter" || u.role === "restaurant_manager"
+      );
+      const locationLabel = tableNumber ? `Masa ${tableNumber}` : roomNumber ? `Otaq ${roomNumber}` : "Qonaq";
+      const callerName = user.fullName || "Qonaq";
+      const notifMessage = `${locationLabel} — ${callerName} garson çağırır`;
+
+      if (waiterAndManagers.length > 0) {
+        sendPushNotification({
+          userIds: waiterAndManagers.map(u => u.id),
+          title: "🔔 Garson Çağırışı",
+          message: notifMessage,
+          url: "/restaurant/waiter",
+          data: { type: "RESTAURANT_CALL_WAITER", callId: call.id },
+        }).catch(err => logger.error({ err }, "Waiter call push failed"));
+
+        for (const u of waiterAndManagers) {
+          storage.createNotification({
+            userId: u.id,
+            tenantId: u.tenantId || "",
+            title: "🔔 Garson Çağırışı",
+            message: notifMessage,
+            type: "waiter_call",
+            read: false,
+            actionUrl: "/restaurant/waiter",
+          }).catch(err => logger.error({ err, userId: u.id }, "Waiter call in-app notif failed"));
+        }
+      }
 
       res.status(201).json(call);
     } catch (err) {
