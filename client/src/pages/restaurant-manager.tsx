@@ -22,7 +22,8 @@ import {
   Users, UserPlus, Loader2, Shield, Utensils, LayoutGrid,
   Sparkles, TrendingUp, Banknote, Wallet, CreditCard as CardIcon,
   ClipboardList, CheckSquare, Camera, MapPin, BarChart2, Trophy, Star,
-  AlertTriangle, BadgeCheck, CalendarClock, RefreshCw, PhoneCall
+  AlertTriangle, BadgeCheck, CalendarClock, RefreshCw, PhoneCall,
+  MessageSquare, Send, ArrowLeft,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { Locale } from "date-fns";
@@ -101,6 +102,9 @@ export default function RestaurantManager() {
   const [tableForm, setTableForm] = useState({ tableNumber: "", capacity: "" });
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [qrTableNumber, setQrTableNumber] = useState<string | null>(null);
+  const [selectedDmStaffId, setSelectedDmStaffId] = useState<string | null>(null);
+  const [dmText, setDmText] = useState("");
+  const dmEndRef = useRef<HTMLDivElement | null>(null);
 
   // ── WebSocket for real-time updates ──
   const wsRef = useRef<WebSocket | null>(null);
@@ -167,6 +171,36 @@ export default function RestaurantManager() {
   const { data: cleaningTasks = [] } = useQuery<CleaningTask[]>({ queryKey: ["/api/restaurant/cleaning-tasks"] });
   const { data: roomOrders = [] } = useQuery<RoomGroup[]>({ queryKey: ["/api/restaurant/room-orders"], refetchInterval: 20000, enabled: isHotelTenant });
   const { data: restaurantTables = [] } = useQuery<RestaurantTable[]>({ queryKey: ["/api/restaurant/tables"], refetchInterval: 20000 });
+
+  const { data: dmConversations = [] } = useQuery<any[]>({
+    queryKey: ["/api/chat/staff-dm/conversations"],
+    refetchInterval: 15000,
+    enabled: activeTab === "messages",
+  });
+  const { data: dmMessages = [] } = useQuery<any[]>({
+    queryKey: ["/api/chat/staff-dm", selectedDmStaffId],
+    queryFn: async () => {
+      if (!selectedDmStaffId) return [];
+      const res = await apiRequest("GET", `/api/chat/staff-dm/${selectedDmStaffId}`);
+      return res.json();
+    },
+    enabled: !!selectedDmStaffId,
+    refetchInterval: selectedDmStaffId ? 5000 : false,
+  });
+
+  const sendDmMutation = useMutation({
+    mutationFn: async ({ staffId, message }: { staffId: string; message: string }) => {
+      const res = await apiRequest("POST", `/api/chat/staff-dm/${staffId}`, { message });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/chat/staff-dm", selectedDmStaffId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/chat/staff-dm/conversations"] });
+      setDmText("");
+      setTimeout(() => dmEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    },
+    onError: () => toast({ title: "Xəta", description: "Mesaj göndərilmədi", variant: "destructive" }),
+  });
 
   const categories = menu?.categories || [];
   const items = menu?.items || [];
@@ -349,6 +383,7 @@ export default function RestaurantManager() {
     { value: "staff", label: t("rm.tabStaff"), icon: <Users className="h-4 w-4" />, badge: myRestaurantStaff.length, hotelOnly: false },
     { value: "performance", label: t("rm.tabPerformance"), icon: <BarChart2 className="h-4 w-4" />, badge: 0, hotelOnly: false },
     { value: "finance", label: t("rm.tabFinance"), icon: <TrendingUp className="h-4 w-4" />, badge: 0, hotelOnly: false },
+    { value: "messages", label: "Mesajlar", icon: <MessageSquare className="h-4 w-4" />, badge: 0, hotelOnly: false },
     { value: "billing", label: "Abunəlik", icon: <CreditCard className="h-4 w-4" />, badge: (subStatus?.isTrial && (subStatus?.remainingDays ?? 99) <= 5) ? 1 : 0, hotelOnly: false },
   ];
   const tabs = allTabs.filter(tab => !tab.hotelOnly || isHotelTenant);
@@ -1044,6 +1079,143 @@ export default function RestaurantManager() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* ── Messages Tab ── */}
+          <TabsContent value="messages" className="mt-4">
+            <div className="flex h-[600px] border rounded-xl overflow-hidden">
+              {/* Left panel — staff list / conversation list */}
+              <div className={`flex flex-col border-r bg-muted/20 ${selectedDmStaffId ? "hidden sm:flex w-72" : "flex w-full sm:w-72"}`}>
+                <div className="p-3 border-b">
+                  <h3 className="font-semibold text-sm">İşçilər</h3>
+                  <p className="text-xs text-muted-foreground">Mesaj göndərmək üçün seçin</p>
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                  {myRestaurantStaff.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-center p-4">
+                      <Users className="h-8 w-8 mb-2 opacity-30" />
+                      <p className="text-sm">Hələ işçi yoxdur</p>
+                    </div>
+                  ) : (
+                    myRestaurantStaff.map((s: any) => {
+                      const conv = dmConversations.find((c: any) => c.peerId === s.id);
+                      const isSelected = selectedDmStaffId === s.id;
+                      return (
+                        <button
+                          key={s.id}
+                          onClick={() => setSelectedDmStaffId(s.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-3 text-left hover:bg-muted/60 transition-colors border-b border-border/40 ${isSelected ? "bg-primary/10 border-l-2 border-l-primary" : ""}`}
+                          data-testid={`button-dm-staff-${s.id}`}
+                        >
+                          <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
+                            {s.fullName?.[0]?.toUpperCase() || "?"}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium truncate">{s.fullName}</p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {conv?.lastMessage || s.role.replace(/_/g, " ")}
+                            </p>
+                          </div>
+                          {conv && <div className="h-2 w-2 rounded-full bg-primary shrink-0" />}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              {/* Right panel — chat view */}
+              {selectedDmStaffId ? (
+                <div className="flex flex-col flex-1 min-w-0">
+                  {/* Chat header */}
+                  {(() => {
+                    const peer = myRestaurantStaff.find((s: any) => s.id === selectedDmStaffId);
+                    return (
+                      <div className="flex items-center gap-3 px-4 py-3 border-b bg-background">
+                        <button
+                          onClick={() => setSelectedDmStaffId(null)}
+                          className="sm:hidden p-1 rounded hover:bg-muted"
+                          data-testid="button-back-dm"
+                        >
+                          <ArrowLeft className="h-4 w-4" />
+                        </button>
+                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
+                          {peer?.fullName?.[0]?.toUpperCase() || "?"}
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm">{peer?.fullName || "İşçi"}</p>
+                          <p className="text-xs text-muted-foreground capitalize">{peer?.role?.replace(/_/g, " ")}</p>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Messages */}
+                  <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                    {dmMessages.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-center">
+                        <MessageSquare className="h-10 w-10 mb-3 opacity-30" />
+                        <p className="text-sm">Hələ mesaj yoxdur</p>
+                        <p className="text-xs mt-1">Aşağıdan mesaj göndərin</p>
+                      </div>
+                    ) : (
+                      dmMessages.map((msg: any, i: number) => {
+                        const isMine = msg.senderId !== selectedDmStaffId;
+                        return (
+                          <div key={msg.id || i} className={`flex ${isMine ? "justify-end" : "justify-start"}`} data-testid={`msg-${msg.id || i}`}>
+                            <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${isMine ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-muted rounded-bl-sm"}`}>
+                              <p>{msg.message}</p>
+                              <p className={`text-[10px] mt-1 ${isMine ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                                {new Date(msg.createdAt).toLocaleTimeString("az-AZ", { hour: "2-digit", minute: "2-digit" })}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                    <div ref={dmEndRef} />
+                  </div>
+
+                  {/* Input */}
+                  <div className="flex items-end gap-2 p-3 border-t bg-background">
+                    <Textarea
+                      value={dmText}
+                      onChange={e => setDmText(e.target.value)}
+                      placeholder="Mesaj yazın..."
+                      className="resize-none min-h-[40px] max-h-[120px]"
+                      rows={1}
+                      data-testid="input-dm-message"
+                      onKeyDown={e => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          if (dmText.trim() && selectedDmStaffId && !sendDmMutation.isPending) {
+                            sendDmMutation.mutate({ staffId: selectedDmStaffId, message: dmText.trim() });
+                          }
+                        }
+                      }}
+                    />
+                    <Button
+                      size="sm"
+                      disabled={!dmText.trim() || sendDmMutation.isPending}
+                      onClick={() => {
+                        if (dmText.trim() && selectedDmStaffId) {
+                          sendDmMutation.mutate({ staffId: selectedDmStaffId, message: dmText.trim() });
+                        }
+                      }}
+                      data-testid="button-send-dm"
+                      className="shrink-0 h-10 w-10 p-0"
+                    >
+                      {sendDmMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="hidden sm:flex flex-1 items-center justify-center text-muted-foreground flex-col gap-2">
+                  <MessageSquare className="h-12 w-12 opacity-20" />
+                  <p className="text-sm">Sol paneldən işçi seçin</p>
+                </div>
+              )}
+            </div>
           </TabsContent>
 
           {/* ── Billing / Subscription Tab ── */}
