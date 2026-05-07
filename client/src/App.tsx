@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Lock as LockIcon } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import { AIChatWidget } from "@/components/ai-chat-widget";
+import { RadioWidget } from "@/components/radio-widget";
 import '@/lib/i18n';
 
 const Home = lazy(() => import("@/pages/home"));
@@ -261,11 +262,18 @@ function Router() {
 function AppContent() {
   const [location] = useLocation();
   const hideChat = location.startsWith("/restaurant/guest/");
+  const isPublicPage = location === "/" || location === "/hotel" || location === "/restaurant" ||
+    location.startsWith("/login") || location.startsWith("/register") ||
+    location.startsWith("/forgot") || location.startsWith("/reset") ||
+    location.startsWith("/demo") || location.startsWith("/join-team") ||
+    location.startsWith("/privacy") || location.startsWith("/terms") ||
+    location.startsWith("/restaurant/guest/");
   return (
     <>
       <Toaster />
       <Router />
       {!hideChat && <AIChatWidget />}
+      {!isPublicPage && <RadioWidget />}
     </>
   );
 }

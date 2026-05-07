@@ -37,6 +37,32 @@ const deviceConnections = new Map<string, { ws: WebSocket; deviceId: string; ten
 const ownerConnections = new Map<string, Set<WebSocket>>();
 const userConnections = new Map<string, Set<WebSocket>>();
 
+// Radio rooms: tenantId → userId → {ws, userId, name, role}
+const radioRooms = new Map<string, Map<string, { ws: WebSocket; userId: string; name: string; role: string }>>();
+// Current speaker per channel: tenantId → userId | null
+const radioChannelState = new Map<string, string | null>();
+
+function broadcastRadioUserList(tenantId: string) {
+  const room = radioRooms.get(tenantId);
+  if (!room) return;
+  const users = Array.from(room.values()).map(u => ({ userId: u.userId, name: u.name, role: u.role }));
+  const msg = JSON.stringify({ type: "RADIO_USER_LIST", users });
+  room.forEach(u => { if (u.ws.readyState === WebSocket.OPEN) u.ws.send(msg); });
+}
+
+function broadcastRadioPTT(tenantId: string, speakerId: string | null) {
+  const room = radioRooms.get(tenantId);
+  if (!room) return;
+  const speaker = speakerId ? room.get(speakerId) : null;
+  const msg = JSON.stringify({
+    type: "RADIO_PTT",
+    speakerId,
+    speakerName: speaker?.name ?? null,
+    speakerRole: speaker?.role ?? null,
+  });
+  room.forEach(u => { if (u.ws.readyState === WebSocket.OPEN) u.ws.send(msg); });
+}
+
 function broadcastToOwner(ownerId: string, message: any) {
   const clients = ownerConnections.get(ownerId);
   if (clients) {
@@ -201,7 +227,63 @@ export function initWebSocket(httpServer: Server, app: Express): void {
       try {
         const message = JSON.parse(data.toString());
         
+        const uid = String(user.id);
         switch (message.type) {
+          // ── Radio signaling ──────────────────────────────────────────
+          case "RADIO_JOIN": {
+            if (!authenticatedTenantId) break;
+            if (!radioRooms.has(authenticatedTenantId)) radioRooms.set(authenticatedTenantId, new Map());
+            radioRooms.get(authenticatedTenantId)!.set(uid, {
+              ws,
+              userId: uid,
+              name: user.fullName || user.username || uid,
+              role: user.role,
+            });
+            broadcastRadioUserList(authenticatedTenantId);
+            break;
+          }
+          case "RADIO_LEAVE": {
+            if (!authenticatedTenantId) break;
+            radioRooms.get(authenticatedTenantId)?.delete(uid);
+            if (radioRooms.get(authenticatedTenantId)?.size === 0) radioRooms.delete(authenticatedTenantId);
+            if (radioChannelState.get(authenticatedTenantId) === uid) {
+              radioChannelState.set(authenticatedTenantId, null);
+              broadcastRadioPTT(authenticatedTenantId, null);
+            }
+            broadcastRadioUserList(authenticatedTenantId);
+            break;
+          }
+          case "RADIO_OFFER":
+          case "RADIO_ANSWER":
+          case "RADIO_ICE": {
+            if (!authenticatedTenantId || !message.targetUserId) break;
+            const room = radioRooms.get(authenticatedTenantId);
+            const target = room?.get(String(message.targetUserId));
+            if (target?.ws.readyState === WebSocket.OPEN) {
+              target.ws.send(JSON.stringify({ ...message, fromUserId: uid }));
+            }
+            break;
+          }
+          case "RADIO_PTT_START": {
+            if (!authenticatedTenantId) break;
+            const currentSpeaker = radioChannelState.get(authenticatedTenantId);
+            if (currentSpeaker && currentSpeaker !== uid) {
+              ws.send(JSON.stringify({ type: "RADIO_CHANNEL_BUSY", speakerId: currentSpeaker }));
+              break;
+            }
+            radioChannelState.set(authenticatedTenantId, uid);
+            broadcastRadioPTT(authenticatedTenantId, uid);
+            break;
+          }
+          case "RADIO_PTT_STOP": {
+            if (!authenticatedTenantId) break;
+            if (radioChannelState.get(authenticatedTenantId) === uid) {
+              radioChannelState.set(authenticatedTenantId, null);
+              broadcastRadioPTT(authenticatedTenantId, null);
+            }
+            break;
+          }
+          // ── Device messages ─────────────────────────────────────────
           case "device_telemetry":
             if (deviceId && authenticatedTenantId) {
               await storage.createDeviceTelemetry({
@@ -245,6 +327,20 @@ export function initWebSocket(httpServer: Server, app: Express): void {
     });
 
     ws.on("close", () => {
+      // Clean up radio room on disconnect
+      if (authenticatedTenantId) {
+        const radioUid = String(user.id);
+        const radioRoom = radioRooms.get(authenticatedTenantId);
+        if (radioRoom?.has(radioUid)) {
+          radioRoom.delete(radioUid);
+          if (radioRoom.size === 0) radioRooms.delete(authenticatedTenantId);
+          if (radioChannelState.get(authenticatedTenantId) === radioUid) {
+            radioChannelState.set(authenticatedTenantId, null);
+            broadcastRadioPTT(authenticatedTenantId, null);
+          }
+          broadcastRadioUserList(authenticatedTenantId);
+        }
+      }
       if (clientType === "device" && deviceId) {
         deviceConnections.delete(deviceId);
         storage.updateDevice(deviceId, { status: "offline" }).catch(() => {});
