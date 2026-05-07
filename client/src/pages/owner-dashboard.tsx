@@ -5767,9 +5767,9 @@ function BillingAddonsView() {
   }>({ queryKey: ["/api/subscription/status"] });
 
   const ALL_WHATSAPP_PACKAGES = [
-    { id: "wa_500", name: t("billing.wa.starter", "Starter"), messages: 500, priceUsd: 15, priceAZN: 26, description: t("billing.wa.starterDesc", "Perfect for small properties"), planCode: "CORE_STARTER" },
-    { id: "wa_1000", name: t("billing.wa.growth", "Growth"), messages: 1000, priceUsd: 25, priceAZN: 43, description: t("billing.wa.growthDesc", "For growing hotels"), planCode: "CORE_GROWTH" },
-    { id: "wa_3000", name: t("billing.wa.pro", "Pro"), messages: 3000, priceUsd: 60, priceAZN: 102, description: t("billing.wa.proDesc", "High-volume operations"), planCode: "CORE_PRO" },
+    { id: "wa_500", name: "500 Mesaj", messages: 500, priceUsd: 15, priceAZN: 26, description: t("billing.wa.starterDesc", "Kiçik otellər üçün"), planCode: "CORE_STARTER" },
+    { id: "wa_1000", name: "1,000 Mesaj", messages: 1000, priceUsd: 25, priceAZN: 43, description: t("billing.wa.growthDesc", "Orta həcmli otellər üçün"), planCode: "CORE_GROWTH" },
+    { id: "wa_3000", name: "3,000 Mesaj", messages: 3000, priceUsd: 60, priceAZN: 102, description: t("billing.wa.proDesc", "Böyük həcmli əməliyyatlar"), planCode: "CORE_PRO" },
   ];
 
   const { data: addonData, isLoading } = useQuery<{
@@ -5854,12 +5854,12 @@ function BillingAddonsView() {
         const isTrial = subStatus.isTrial;
         const statusLabel = isTrial
           ? t("billing.core.trial", "Sınaq dövrü")
-          : subStatus.status === "active"
-          ? t("billing.active", "Aktiv")
           : subStatus.status === "past_due"
           ? t("billing.core.pastDue", "Gecikmiş")
-          : t("billing.core.expired", "Müddəti bitmiş");
-        const statusVariant: "default" | "secondary" | "destructive" = isTrial ? "secondary" : subStatus.status === "active" ? "default" : "destructive";
+          : subStatus.isExpired
+          ? t("billing.core.expired", "Müddəti bitmiş")
+          : t("billing.active", "Aktiv");
+        const statusVariant: "default" | "secondary" | "destructive" = isTrial ? "secondary" : subStatus.status === "past_due" ? "secondary" : subStatus.isExpired ? "destructive" : "default";
         const nextDate = subStatus.nextBillingDate
           ? new Date(subStatus.nextBillingDate).toLocaleDateString()
           : subStatus.trialEndsAt
