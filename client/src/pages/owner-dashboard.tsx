@@ -6049,37 +6049,6 @@ function BillingAddonsView() {
         </Card>
       </div>
 
-      {/* WhatsApp Package Purchase — only matching plan package */}
-      <div>
-        <h3 className="text-lg font-semibold mb-1">{t("billing.wa.purchaseTitle", "Purchase WhatsApp Package")}</h3>
-        <p className="text-sm text-muted-foreground mb-4">{t("billing.wa.purchaseSubtitle", "Top up your WhatsApp message balance")}</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg">
-          {visibleWhatsappPackages.map((pkg) => (
-            <Card key={pkg.id} className="border-primary ring-1 ring-primary" data-testid={`card-package-${pkg.id}`}>
-              <CardContent className="p-5 text-center space-y-3">
-                <div>
-                  <h4 className="font-bold text-base">{pkg.name}</h4>
-                  <p className="text-xs text-muted-foreground">{pkg.description}</p>
-                </div>
-                <div>
-                  <span className="text-3xl font-bold">{pkg.priceAZN} ₼</span>
-                  <p className="text-xs text-muted-foreground">(≈ ${pkg.priceUsd})</p>
-                  <p className="text-sm text-muted-foreground mt-0.5">{pkg.messages.toLocaleString()} {t("billing.wa.messages", "messages")}</p>
-                </div>
-                <Button
-                  className="w-full"
-                  onClick={() => purchaseMutation.mutate(pkg.id)}
-                  disabled={purchaseMutation.isPending}
-                  data-testid={`button-purchase-${pkg.id}`}
-                >
-                  {purchaseMutation.isPending ? t("common.loading", "Processing...") : t("billing.wa.buyNow", "Buy Now")}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
       {/* Recent billing history */}
       {logs.length > 0 && (
         <div>
