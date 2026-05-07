@@ -5754,6 +5754,18 @@ function BillingAddonsView() {
     setContactDialog({ open: true, subject });
   }
 
+  const PLAN_PRICES: Record<string, { nameAz: string; priceAZN: number; priceUSD: number }> = {
+    CORE_STARTER: { nameAz: "Core Starter", priceAZN: 134.30, priceUSD: 79 },
+    CORE_GROWTH:  { nameAz: "Core Growth",  priceAZN: 219.30, priceUSD: 129 },
+    CORE_PRO:     { nameAz: "Core Pro",     priceAZN: 338.30, priceUSD: 199 },
+  };
+
+  const { data: subStatus } = useQuery<{
+    planType: string; planCode: string; status: string; isTrial: boolean;
+    trialEndsAt: string | null; remainingDays: number; isExpired: boolean;
+    isActive: boolean; daysUntilRenewal: number | null; nextBillingDate: string | null; autoRenew: boolean;
+  }>({ queryKey: ["/api/subscription/status"] });
+
   const ALL_WHATSAPP_PACKAGES = [
     { id: "wa_500", name: t("billing.wa.starter", "Starter"), messages: 500, priceUsd: 15, priceAZN: 26, description: t("billing.wa.starterDesc", "Perfect for small properties"), planCode: "CORE_STARTER" },
     { id: "wa_1000", name: t("billing.wa.growth", "Growth"), messages: 1000, priceUsd: 25, priceAZN: 43, description: t("billing.wa.growthDesc", "For growing hotels"), planCode: "CORE_GROWTH" },
@@ -5834,6 +5846,82 @@ function BillingAddonsView() {
         <h2 className="text-2xl font-bold">{t("billing.addons.title", "Subscription & Add-ons")}</h2>
         <p className="text-muted-foreground mt-1">{t("billing.addons.subtitle", "Manage your active add-ons and purchase new services")}</p>
       </div>
+
+      {/* Core Subscription Card */}
+      {subStatus && (() => {
+        const pc = subStatus.planCode ?? planCode;
+        const planInfo = PLAN_PRICES[pc];
+        const isTrial = subStatus.isTrial;
+        const statusLabel = isTrial
+          ? t("billing.core.trial", "Sınaq dövrü")
+          : subStatus.status === "active"
+          ? t("billing.active", "Aktiv")
+          : subStatus.status === "past_due"
+          ? t("billing.core.pastDue", "Gecikmiş")
+          : t("billing.core.expired", "Müddəti bitmiş");
+        const statusVariant: "default" | "secondary" | "destructive" = isTrial ? "secondary" : subStatus.status === "active" ? "default" : "destructive";
+        const nextDate = subStatus.nextBillingDate
+          ? new Date(subStatus.nextBillingDate).toLocaleDateString()
+          : subStatus.trialEndsAt
+          ? new Date(subStatus.trialEndsAt).toLocaleDateString()
+          : null;
+        return (
+          <Card className="border-primary/30 bg-primary/5" data-testid="card-core-subscription">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Crown className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-base">{t("billing.core.title", "Core Abunəlik")}</h3>
+                    <p className="text-xs text-muted-foreground">{planInfo?.nameAz ?? pc}</p>
+                  </div>
+                </div>
+                <Badge variant={statusVariant} data-testid="badge-sub-status">{statusLabel}</Badge>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm border-t pt-3">
+                <div>
+                  <p className="text-muted-foreground text-xs">{t("billing.core.monthlyFee", "Aylıq ödəniş")}</p>
+                  {planInfo ? (
+                    <p className="font-bold text-lg text-primary">{planInfo.priceAZN.toFixed(2)} ₼</p>
+                  ) : (
+                    <p className="font-bold text-lg text-primary">—</p>
+                  )}
+                  {planInfo && <p className="text-xs text-muted-foreground">(≈ ${planInfo.priceUSD})</p>}
+                </div>
+                <div>
+                  {isTrial ? (
+                    <>
+                      <p className="text-muted-foreground text-xs">{t("billing.core.trialEnds", "Sınaq biter")}</p>
+                      <p className="font-semibold">{nextDate ?? "—"}</p>
+                      <p className="text-xs text-orange-500">{subStatus.remainingDays} {t("billing.core.daysLeft", "gün qalıb")}</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-muted-foreground text-xs">{t("billing.core.nextBilling", "Növbəti ödəniş")}</p>
+                      <p className="font-semibold">{nextDate ?? "—"}</p>
+                      {subStatus.daysUntilRenewal !== null && (
+                        <p className="text-xs text-muted-foreground">{subStatus.daysUntilRenewal} {t("billing.core.daysLeft", "gün qalıb")}</p>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+              {(subStatus.isExpired || isTrial) && (
+                <Button
+                  className="w-full mt-3 bg-primary hover:bg-primary/90 text-white"
+                  onClick={() => openContact(isTrial ? "Plan Upgrade Request" : "Subscription Renewal Request")}
+                  data-testid="button-core-pay"
+                >
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  {isTrial ? t("billing.core.upgrade", "Plana keç") : t("billing.core.renew", "Ödənişi et")}
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {/* Active Subscriptions — 3-column grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
