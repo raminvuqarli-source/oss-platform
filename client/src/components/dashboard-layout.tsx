@@ -731,7 +731,7 @@ function MobileBottomNav({ user, t }: { user: NonNullable<ReturnType<typeof useA
       case "owner_admin":
         return [
           { icon: LayoutDashboard, label: t("common.dashboard"), url: "/dashboard", view: undefined },
-          { icon: CalendarDays, label: t("nav.calendar", "Calendar"), url: "/dashboard", view: "calendar" },
+          { icon: CreditCard, label: t("nav.billingAddons", "Billing"), url: "/dashboard", view: "billing-addons" },
           { icon: BedDouble, label: t("nav.properties", "Rooms"), url: "/dashboard", view: "properties" },
           { icon: Bell, label: t("common.notifications"), url: "/notifications" },
           { icon: Settings, label: t("common.settings"), url: "/settings" },
