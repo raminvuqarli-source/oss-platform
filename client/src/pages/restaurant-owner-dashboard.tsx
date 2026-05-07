@@ -166,7 +166,7 @@ export default function RestaurantOwnerDashboard() {
       return res.json();
     },
     onSuccess: async (newUser: any) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users/staff"] });
       if (staffForm.role === "waiter" && staffForm.tablesAssigned && newUser?.id) {
         try {
           await apiRequest("PUT", `/api/restaurant/staff-profiles/${newUser.id}`, {
@@ -200,7 +200,7 @@ export default function RestaurantOwnerDashboard() {
   });
 
   const { data: staffData, isLoading: staffLoading } = useQuery<{ users: Array<{ id: string; fullName: string; role: string; email?: string }> }>({
-    queryKey: ["/api/staff"],
+    queryKey: ["/api/users/staff"],
   });
 
   const { data: subscriptionData } = useQuery<{ planType: string; planCode: string; status: string; trialEndsAt?: string; isTrial?: boolean; remainingDays?: number }>({
