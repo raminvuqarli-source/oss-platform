@@ -353,6 +353,7 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
     restaurant_cleaner: "demo_restaurant_cleaner",
     restaurant_cashier: "demo_restaurant_cashier",
     restaurant_owner: "demo_restaurant_owner",
+    restaurant_guest: "demo_restaurant_guest",
   };
 
   app.post("/api/auth/demo-login", authRateLimiter, async (req, res) => {
@@ -370,6 +371,18 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
       }
 
       const { seedDemoData, ensureDemoUser, seedRestaurantOwnerDemoData } = await import("../seed");
+
+      // ─── Restaurant Guest demo — public page, no session needed ─────────
+      if (role === "restaurant_guest") {
+        await seedRestaurantOwnerDemoData();
+        const restOwnerUser = await storage.getUserByUsername("demo_restaurant_owner");
+        if (!restOwnerUser || !restOwnerUser.propertyId) {
+          return res.status(500).json({ message: "Failed to prepare restaurant guest demo" });
+        }
+        return res.json({
+          redirectUrl: `/restaurant/guest/${restOwnerUser.propertyId}/table/3`,
+        });
+      }
 
       // ─── Restaurant Owner demo is fully isolated from hotel demo ─────────
       if (role === "restaurant_owner") {

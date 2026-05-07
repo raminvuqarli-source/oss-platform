@@ -17,7 +17,7 @@ import {
   UtensilsCrossed, TrendingUp, ShoppingBag, Users, CreditCard,
   BarChart3, Clock, CheckCircle, ChefHat, Wallet, LogOut,
   RefreshCw, Plus, Utensils, Settings, Package,
-  PhoneCall, Mail, Copy, ExternalLink, UserPlus, Loader2,
+  PhoneCall, Mail, Copy, ExternalLink, UserPlus, Loader2, QrCode,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { useAuth } from "@/lib/auth-context";
@@ -470,16 +470,24 @@ export default function RestaurantOwnerDashboard() {
                   <CardDescription>{t("restaurantOwner.quickAccessDesc", "Direct links to role-based views")}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                     {[
                       { href: "/restaurant/manager", icon: Settings, label: t("restaurantOwner.managerView", "Manager View"), color: "text-primary" },
                       { href: "/restaurant/kitchen", icon: ChefHat, label: t("restaurantOwner.kitchenView", "Kitchen Display"), color: "text-orange-500" },
                       { href: "/restaurant/waiter", icon: Utensils, label: t("restaurantOwner.waiterView", "Waiter View"), color: "text-blue-500" },
                       { href: "/restaurant/cashier", icon: Wallet, label: t("restaurantOwner.cashierView", "Cashier View"), color: "text-green-500" },
+                      ...(user?.propertyId ? [{
+                        href: `/restaurant/guest/${user.propertyId}/table/3`,
+                        icon: QrCode,
+                        label: t("restaurantOwner.guestView", "Müştəri Görünüşü"),
+                        color: "text-pink-500",
+                      }] : []),
                     ].map(link => (
                       <a
                         key={link.href}
                         href={link.href}
+                        target={link.href.startsWith("/restaurant/guest") ? "_blank" : undefined}
+                        rel={link.href.startsWith("/restaurant/guest") ? "noopener noreferrer" : undefined}
                         className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:bg-muted/50 transition-colors text-center"
                         data-testid={`link-${link.href.replace("/", "").replace("/", "-")}`}
                       >

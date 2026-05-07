@@ -16,7 +16,7 @@ import {
   Monitor, QrCode, BarChart3, Cloud, Layers, Users,
   Activity, HeadphonesIcon, MessageCircle, Star, Phone,
   ShoppingBag, ChefHat, Wallet, RefreshCw, Play, Loader2,
-  Sparkles, CreditCard,
+  Sparkles, CreditCard, ShoppingCart,
 } from "lucide-react";
 
 const WHATSAPP_LINK = "https://wa.me/994508880089";
@@ -202,6 +202,17 @@ const DEMO_ROLES = [
     descKey: "restLanding.demoCashierDesc",
     desc: "Settle bills, process payments and view daily revenue",
   },
+  {
+    id: "restaurant_guest",
+    icon: ShoppingCart,
+    color: "text-pink-500",
+    bg: "bg-pink-500/10",
+    border: "hover:border-pink-500/40",
+    titleKey: "restLanding.demoGuest",
+    title: "Restoran Müştərisi",
+    descKey: "restLanding.demoGuestDesc",
+    desc: "QR menyu ilə sifariş ver, qarosonu çağır — müştəri təcrübəsi",
+  },
 ];
 
 function AnimatedSection({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -230,6 +241,10 @@ export default function RestaurantLanding() {
     try {
       const response = await apiRequest("POST", "/api/auth/demo-login", { role });
       const data = await response.json();
+      if (data.redirectUrl) {
+        navigate(data.redirectUrl);
+        return;
+      }
       if (data._demoToken) {
         setDemoToken(data._demoToken);
       }
