@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,6 +19,7 @@ import {
   BarChart3, Clock, CheckCircle, ChefHat, Wallet, LogOut,
   RefreshCw, Plus, Utensils, Settings, Package,
   PhoneCall, Mail, Copy, ExternalLink, UserPlus, Loader2, QrCode,
+  MessageSquare, Send,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { useAuth } from "@/lib/auth-context";
@@ -144,6 +146,8 @@ export default function RestaurantOwnerDashboard() {
   const [contactDialog, setContactDialog] = useState<{ open: boolean; subject: string }>({ open: false, subject: "" });
   const [showAddStaffDialog, setShowAddStaffDialog] = useState(false);
   const [staffForm, setStaffForm] = useState({ fullName: "", username: "", password: "", email: "", role: "waiter", baseSalary: "", employeeTaxRate: "", tablesAssigned: "" });
+  const [showBroadcastDialog, setShowBroadcastDialog] = useState(false);
+  const [broadcastText, setBroadcastText] = useState("");
 
   const payNowMutation = useMutation({
     mutationFn: async (planCode: string) => {
@@ -183,6 +187,25 @@ export default function RestaurantOwnerDashboard() {
       toast({ title: t("rm.staffCreated", "Staff member created!") });
     },
     onError: (err: any) => showErrorToast(toast, err),
+  });
+
+  const broadcastMutation = useMutation({
+    mutationFn: async (messageText: string) => {
+      const res = await apiRequest("POST", "/api/staff-messages/broadcast", { messageText });
+      return res.json();
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/staff-messages/hotel"] });
+      setShowBroadcastDialog(false);
+      setBroadcastText("");
+      toast({ title: t("restaurantOwner.messageSent", "Message sent!"), description: t("restaurantOwner.messageSentDesc", "{{count}} staff members notified", { count: data?.recipientCount ?? 0 }) });
+    },
+    onError: (err: any) => showErrorToast(toast, err),
+  });
+
+  const { data: staffMessages = [] } = useQuery<any[]>({
+    queryKey: ["/api/staff-messages/hotel"],
+    refetchInterval: 30000,
   });
 
   const { data: analytics, isLoading: analyticsLoading, refetch: refetchAnalytics } = useQuery<Analytics>({
@@ -598,45 +621,83 @@ export default function RestaurantOwnerDashboard() {
 
           {/* STAFF TAB */}
           <TabsContent value="staff">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-3">
-                <div>
-                  <CardTitle className="text-base">{t("restaurantOwner.staffTitle", "Restaurant Team")}</CardTitle>
-                  <CardDescription>{t("restaurantOwner.staffDesc", "Manage your restaurant staff members")}</CardDescription>
-                </div>
-                <Button size="sm" onClick={() => setShowAddStaffDialog(true)} data-testid="button-manage-staff">
-                  <UserPlus className="h-3.5 w-3.5 mr-1.5" /> {t("restaurantOwner.addStaff", "Add Staff")}
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {staffLoading ? (
-                  <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
-                ) : restaurantStaff.length === 0 ? (
-                  <div className="text-center py-10 text-muted-foreground">
-                    <Users className="h-10 w-10 mx-auto mb-2 opacity-30" />
-                    <p>{t("restaurantOwner.noStaff", "No staff members yet")}</p>
-                    <p className="text-xs mt-1">{t("restaurantOwner.addStaffHint", "Click \"Add Staff\" above to create your first team member")}</p>
+            <div className="space-y-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-3">
+                  <div>
+                    <CardTitle className="text-base">{t("restaurantOwner.staffTitle", "Restaurant Team")}</CardTitle>
+                    <CardDescription>{t("restaurantOwner.staffDesc", "Manage your restaurant staff members")}</CardDescription>
                   </div>
-                ) : (
-                  <div className="space-y-2">
-                    {restaurantStaff.map((member: any) => (
-                      <div key={member.id} className="flex items-center justify-between p-3 rounded-lg border" data-testid={`row-staff-${member.id}`}>
-                        <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
-                            {member.fullName?.[0]?.toUpperCase() || "?"}
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="outline" onClick={() => setShowBroadcastDialog(true)} data-testid="button-send-staff-message">
+                      <MessageSquare className="h-3.5 w-3.5 mr-1.5" /> {t("restaurantOwner.sendMessage", "Send Message")}
+                    </Button>
+                    <Button size="sm" onClick={() => setShowAddStaffDialog(true)} data-testid="button-manage-staff">
+                      <UserPlus className="h-3.5 w-3.5 mr-1.5" /> {t("restaurantOwner.addStaff", "Add Staff")}
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {staffLoading ? (
+                    <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+                  ) : restaurantStaff.length === 0 ? (
+                    <div className="text-center py-10 text-muted-foreground">
+                      <Users className="h-10 w-10 mx-auto mb-2 opacity-30" />
+                      <p>{t("restaurantOwner.noStaff", "No staff members yet")}</p>
+                      <p className="text-xs mt-1">{t("restaurantOwner.addStaffHint", "Click \"Add Staff\" above to create your first team member")}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {restaurantStaff.map((member: any) => (
+                        <div key={member.id} className="flex items-center justify-between p-3 rounded-lg border" data-testid={`row-staff-${member.id}`}>
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
+                              {member.fullName?.[0]?.toUpperCase() || "?"}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">{member.fullName}</p>
+                              <p className="text-xs text-muted-foreground">{member.email || "—"}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-medium">{member.fullName}</p>
-                            <p className="text-xs text-muted-foreground">{member.email || "—"}</p>
+                          <Badge variant="secondary" className="text-xs capitalize">{member.role.replace(/_/g, " ")}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Sent Messages History */}
+              {staffMessages.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4 text-primary" />
+                      {t("restaurantOwner.sentMessages", "Sent Messages")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {staffMessages.slice(0, 10).map((msg: any) => (
+                        <div key={msg.id} className="p-3 rounded-lg border bg-muted/20" data-testid={`row-staff-message-${msg.id}`}>
+                          <p className="text-sm">{msg.messageText}</p>
+                          <div className="flex items-center justify-between mt-1.5">
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(msg.createdAt).toLocaleString()}
+                            </p>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span className="text-green-600">{msg.readCount ?? 0} {t("restaurantOwner.read", "read")}</span>
+                              <span>·</span>
+                              <span>{msg.unreadCount ?? 0} {t("restaurantOwner.unread", "unread")}</span>
+                            </div>
                           </div>
                         </div>
-                        <Badge variant="secondary" className="text-xs capitalize">{member.role.replace("_", " ")}</Badge>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </TabsContent>
 
           {/* BILLING TAB */}
@@ -741,6 +802,47 @@ export default function RestaurantOwnerDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Broadcast Message Dialog */}
+      <Dialog open={showBroadcastDialog} onOpenChange={setShowBroadcastDialog}>
+        <DialogContent className="sm:max-w-md" data-testid="dialog-broadcast-message">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              {t("restaurantOwner.broadcastTitle", "Send Message to All Staff")}
+            </DialogTitle>
+            <DialogDescription>
+              {t("restaurantOwner.broadcastDesc", "This message will be sent to all your restaurant staff members and appear in their notifications.")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <Textarea
+              placeholder={t("restaurantOwner.broadcastPlaceholder", "Write your message here...")}
+              value={broadcastText}
+              onChange={e => setBroadcastText(e.target.value)}
+              rows={4}
+              className="resize-none"
+              data-testid="textarea-broadcast-message"
+            />
+            <p className="text-xs text-muted-foreground">
+              {broadcastText.length}/500 {t("restaurantOwner.characters", "characters")}
+            </p>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => { setShowBroadcastDialog(false); setBroadcastText(""); }} data-testid="button-cancel-broadcast">
+              {t("rm.cancel", "Cancel")}
+            </Button>
+            <Button
+              onClick={() => { if (broadcastText.trim()) broadcastMutation.mutate(broadcastText.trim()); }}
+              disabled={!broadcastText.trim() || broadcastMutation.isPending}
+              data-testid="button-confirm-broadcast"
+            >
+              {broadcastMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Send className="h-4 w-4 mr-1.5" />}
+              {t("restaurantOwner.sendToAll", "Send to All Staff")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
