@@ -3448,7 +3448,22 @@
     "guestGuest": "Guest",
     "guestCallingWaiter": "🔔 Calling waiter",
     "guestInvalidQr": "Invalid QR code",
-    "guestLanguage": "Language"
+    "guestLanguage": "Language",
+    "featStaff10": "Up to 10 staff",
+    "featMenuMgmt": "Menu management",
+    "featOrdersKds": "Orders & KDS",
+    "featCashier": "Cashier",
+    "featStaff30": "Up to 30 staff",
+    "featAnalytics": "Analytics dashboard",
+    "featWhatsapp": "WhatsApp integration",
+    "featAllStandard": "All Standard features",
+    "planProfessional": "Professional",
+    "planProfessionalDesc": "For growing restaurants with more needs",
+    "contactForPricing": "Contact for Pricing",
+    "demoRestOwner": "Restaurant Owner",
+    "demoRestOwnerDesc": "Full restaurant management: orders, staff, menu, finance & analytics",
+    "demoGuest": "Guest",
+    "demoGuestDesc": "QR menu ordering experience — scan, browse and order from your phone"
   },
   "radio": {
     "title": "Walkie-Talkie",
