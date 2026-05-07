@@ -3307,5 +3307,35 @@
     "guestCallingWaiter": "🔔 Llamando al camarero",
     "guestInvalidQr": "Código QR inválido",
     "guestLanguage": "Idioma"
+  },
+  "radio": {
+    "title": "Walkie-Talkie",
+    "joinChannel": "Unirse al canal",
+    "leaveChannel": "Salir del canal",
+    "connecting": "Conectando...",
+    "connectionError": "Error de conexión",
+    "connectionFailed": "Conexión fallida",
+    "channelBusy": "Canal ocupado",
+    "youAreSpeaking": "Estás hablando...",
+    "isSpeaking": "{{name}} está hablando...",
+    "holdToSpeak": "Mantén presionado — Habla",
+    "usersInChannel": "{{count}} persona(s) en el canal",
+    "noOtherUsers": "No hay otros usuarios en el canal",
+    "micPermissionDenied": "Permiso de micrófono denegado",
+    "micError": "No se pudo abrir el micrófono",
+    "roles": {
+      "owner_admin": "Propietario",
+      "reception": "Recepción",
+      "waiter": "Camarero",
+      "kitchen_staff": "Cocinero",
+      "restaurant_manager": "Gerente Rest.",
+      "restaurant_cleaner": "Limpiador",
+      "restaurant_cashier": "Cajero",
+      "housekeeping": "Limpieza",
+      "property_manager": "Gerente",
+      "maintenance": "Mantenimiento",
+      "admin": "Admin",
+      "marketing_staff": "Marketing"
+    }
   }
 }

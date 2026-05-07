@@ -3409,5 +3409,35 @@
     "guestCallingWaiter": "🔔 Qaroson çağırılır",
     "guestInvalidQr": "Keçərsiz QR kodu",
     "guestLanguage": "Dil"
+  },
+  "radio": {
+    "title": "Ratsiya",
+    "joinChannel": "Kanala qoşul",
+    "leaveChannel": "Kanaldan çıx",
+    "connecting": "Qoşulur...",
+    "connectionError": "Bağlantı xətası",
+    "connectionFailed": "Bağlantı uğursuz oldu",
+    "channelBusy": "Kanal məşğuldur",
+    "youAreSpeaking": "Siz danışırsınız...",
+    "isSpeaking": "{{name}} danışır...",
+    "holdToSpeak": "Basılı tutun — Danış",
+    "usersInChannel": "{{count}} nəfər kanalda",
+    "noOtherUsers": "Kanalda başqa istifadəçi yoxdur",
+    "micPermissionDenied": "Mikrofon icazəsi verilmədi",
+    "micError": "Mikrofon açıla bilmədi",
+    "roles": {
+      "owner_admin": "Sahibkar",
+      "reception": "Resepsiya",
+      "waiter": "Qarson",
+      "kitchen_staff": "Aşpaz",
+      "restaurant_manager": "Rest. Müdiri",
+      "restaurant_cleaner": "Təmizlikçi",
+      "restaurant_cashier": "Kassir",
+      "housekeeping": "Xidmətçi",
+      "property_manager": "Mülk Müdiri",
+      "maintenance": "Texniki",
+      "admin": "Admin",
+      "marketing_staff": "Marketinq"
+    }
   }
 }

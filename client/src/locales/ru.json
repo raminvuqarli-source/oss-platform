@@ -3320,5 +3320,35 @@
     "guestCallingWaiter": "🔔 Вызов официанта",
     "guestInvalidQr": "Недействительный QR-код",
     "guestLanguage": "Язык"
+  },
+  "radio": {
+    "title": "Рация",
+    "joinChannel": "Войти в канал",
+    "leaveChannel": "Выйти из канала",
+    "connecting": "Подключение...",
+    "connectionError": "Ошибка соединения",
+    "connectionFailed": "Подключение не удалось",
+    "channelBusy": "Канал занят",
+    "youAreSpeaking": "Вы говорите...",
+    "isSpeaking": "{{name}} говорит...",
+    "holdToSpeak": "Удерживайте — Говорите",
+    "usersInChannel": "{{count}} чел. в канале",
+    "noOtherUsers": "В канале нет других пользователей",
+    "micPermissionDenied": "Доступ к микрофону запрещён",
+    "micError": "Не удалось открыть микрофон",
+    "roles": {
+      "owner_admin": "Владелец",
+      "reception": "Ресепшн",
+      "waiter": "Официант",
+      "kitchen_staff": "Повар",
+      "restaurant_manager": "Менеджер рест.",
+      "restaurant_cleaner": "Уборщик",
+      "restaurant_cashier": "Кассир",
+      "housekeeping": "Горничная",
+      "property_manager": "Управляющий",
+      "maintenance": "Технический",
+      "admin": "Админ",
+      "marketing_staff": "Маркетинг"
+    }
   }
 }

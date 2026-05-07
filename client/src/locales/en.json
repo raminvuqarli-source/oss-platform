@@ -3449,5 +3449,35 @@
     "guestCallingWaiter": "🔔 Calling waiter",
     "guestInvalidQr": "Invalid QR code",
     "guestLanguage": "Language"
+  },
+  "radio": {
+    "title": "Walkie-Talkie",
+    "joinChannel": "Join Channel",
+    "leaveChannel": "Leave Channel",
+    "connecting": "Connecting...",
+    "connectionError": "Connection error",
+    "connectionFailed": "Connection failed",
+    "channelBusy": "Channel busy",
+    "youAreSpeaking": "You are speaking...",
+    "isSpeaking": "{{name}} is speaking...",
+    "holdToSpeak": "Hold to speak",
+    "usersInChannel": "{{count}} in channel",
+    "noOtherUsers": "No other users in channel",
+    "micPermissionDenied": "Microphone permission denied",
+    "micError": "Microphone could not be opened",
+    "roles": {
+      "owner_admin": "Owner",
+      "reception": "Reception",
+      "waiter": "Waiter",
+      "kitchen_staff": "Chef",
+      "restaurant_manager": "Rest. Manager",
+      "restaurant_cleaner": "Cleaner",
+      "restaurant_cashier": "Cashier",
+      "housekeeping": "Housekeeping",
+      "property_manager": "Property Mgr",
+      "maintenance": "Maintenance",
+      "admin": "Admin",
+      "marketing_staff": "Marketing"
+    }
   }
 }

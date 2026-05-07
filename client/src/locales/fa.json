@@ -3307,5 +3307,35 @@
     "guestCallingWaiter": "🔔 در حال صدا زدن گارسون",
     "guestInvalidQr": "QR کد نامعتبر",
     "guestLanguage": "زبان"
+  },
+  "radio": {
+    "title": "بی‌سیم",
+    "joinChannel": "ورود به کانال",
+    "leaveChannel": "خروج از کانال",
+    "connecting": "در حال اتصال...",
+    "connectionError": "خطای اتصال",
+    "connectionFailed": "اتصال ناموفق",
+    "channelBusy": "کانال مشغول است",
+    "youAreSpeaking": "شما در حال صحبت هستید...",
+    "isSpeaking": "{{name}} در حال صحبت است...",
+    "holdToSpeak": "نگه دارید — صحبت کنید",
+    "usersInChannel": "{{count}} نفر در کانال",
+    "noOtherUsers": "هیچ کاربر دیگری در کانال نیست",
+    "micPermissionDenied": "دسترسی به میکروفون رد شد",
+    "micError": "میکروفون باز نشد",
+    "roles": {
+      "owner_admin": "صاحب",
+      "reception": "پذیرش",
+      "waiter": "گارسون",
+      "kitchen_staff": "آشپز",
+      "restaurant_manager": "مدیر رستوران",
+      "restaurant_cleaner": "نظافتچی",
+      "restaurant_cashier": "صندوقدار",
+      "housekeeping": "خدمه",
+      "property_manager": "مدیر ملک",
+      "maintenance": "تعمیرات",
+      "admin": "ادمین",
+      "marketing_staff": "بازاریابی"
+    }
   }
 }

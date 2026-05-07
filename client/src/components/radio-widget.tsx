@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { useTranslation } from "react-i18next";
 import { Mic, MicOff, Radio, Users, X, Volume2 } from "lucide-react";
 
 interface RadioUser {
@@ -19,23 +20,9 @@ const ICE_SERVERS = [
   { urls: "stun:stun1.l.google.com:19302" },
 ];
 
-const ROLE_LABELS: Record<string, string> = {
-  owner_admin: "Sahibkar",
-  reception: "Resepsiya",
-  waiter: "Qarson",
-  kitchen_staff: "Aşpaz",
-  restaurant_manager: "Rest. Müdiri",
-  restaurant_cleaner: "Təmizlikçi",
-  restaurant_cashier: "Kassir",
-  housekeeping: "Xidmətçi",
-  property_manager: "Mülk Müdiri",
-  maintenance: "Texniki",
-  admin: "Admin",
-  marketing_staff: "Marketinq",
-};
-
 export function RadioWidget() {
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const [isOpen, setIsOpen] = useState(false);
   const [isJoined, setIsJoined] = useState(false);
@@ -176,11 +163,11 @@ export function RadioWidget() {
       };
 
       ws.onerror = () => {
-        setMicError("Bağlantı xətası");
+        setMicError(t("radio.connectionError"));
         setIsConnecting(false);
       };
     } catch {
-      setMicError("Bağlantı uğursuz oldu");
+      setMicError(t("radio.connectionFailed"));
       setIsConnecting(false);
     }
   }
@@ -219,7 +206,9 @@ export function RadioWidget() {
         wsRef.current?.send(JSON.stringify({ type: "RADIO_OFFER", targetUserId: remoteUser.userId, sdp: offer }));
       }
     } catch (e: any) {
-      const msg = e?.name === "NotAllowedError" ? "Mikrofon icazəsi verilmədi" : "Mikrofon açıla bilmədi";
+      const msg = e?.name === "NotAllowedError"
+        ? t("radio.micPermissionDenied")
+        : t("radio.micError");
       setMicError(msg);
       speakingRef.current = false;
       setIsSpeaking(false);
@@ -228,7 +217,7 @@ export function RadioWidget() {
 
   function stopSpeaking() {
     if (!speakingRef.current) return;
-    localStreamRef.current?.getTracks().forEach(t => t.stop());
+    localStreamRef.current?.getTracks().forEach(track => track.stop());
     localStreamRef.current = null;
     peersRef.current.forEach(pc => pc.close());
     peersRef.current.clear();
@@ -251,6 +240,12 @@ export function RadioWidget() {
   const iSpeaking = pttState.speakerId === myUserId;
   const someoneElseSpeaking = !!pttState.speakerId && pttState.speakerId !== myUserId;
 
+  function roleLabel(role: string) {
+    const key = `radio.roles.${role}`;
+    const translated = t(key);
+    return translated === key ? role : translated;
+  }
+
   return (
     <div className="fixed bottom-24 right-4 z-40 flex flex-col items-end gap-2" data-testid="radio-widget">
       {/* Expanded panel */}
@@ -259,35 +254,49 @@ export function RadioWidget() {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Radio className="h-4 w-4 text-orange-500" />
-              <span className="font-semibold text-sm">Ratsiya</span>
+              <span className="font-semibold text-sm">{t("radio.title")}</span>
               {isJoined && <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />}
             </div>
-            <button onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-foreground" data-testid="button-radio-close">
+            <button
+              onClick={() => setIsOpen(false)}
+              className="text-muted-foreground hover:text-foreground"
+              data-testid="button-radio-close"
+            >
               <X className="h-4 w-4" />
             </button>
           </div>
 
           {/* Speaking indicator */}
           {pttState.speakerId && (
-            <div className={`flex items-center gap-2 p-2.5 rounded-xl mb-3 text-xs font-medium ${
-              iSpeaking
-                ? "bg-orange-500/15 text-orange-700 dark:text-orange-400"
-                : "bg-green-500/15 text-green-700 dark:text-green-400"
-            }`} data-testid="radio-speaking-indicator">
+            <div
+              className={`flex items-center gap-2 p-2.5 rounded-xl mb-3 text-xs font-medium ${
+                iSpeaking
+                  ? "bg-orange-500/15 text-orange-700 dark:text-orange-400"
+                  : "bg-green-500/15 text-green-700 dark:text-green-400"
+              }`}
+              data-testid="radio-speaking-indicator"
+            >
               <Volume2 className="h-3.5 w-3.5 animate-pulse shrink-0" />
-              <span>{iSpeaking ? "Siz danışırsınız..." : `${pttState.speakerName} danışır...`}</span>
+              <span>
+                {iSpeaking
+                  ? t("radio.youAreSpeaking")
+                  : t("radio.isSpeaking", { name: pttState.speakerName })}
+              </span>
             </div>
           )}
 
           {/* Channel busy */}
           {isChannelBusy && !pttState.speakerId && (
-            <div className="flex items-center gap-2 p-2.5 rounded-xl mb-3 bg-destructive/10 text-destructive text-xs" data-testid="radio-channel-busy">
+            <div
+              className="flex items-center gap-2 p-2.5 rounded-xl mb-3 bg-destructive/10 text-destructive text-xs"
+              data-testid="radio-channel-busy"
+            >
               <Radio className="h-3.5 w-3.5 shrink-0" />
-              <span>Kanal məşğuldur</span>
+              <span>{t("radio.channelBusy")}</span>
             </div>
           )}
 
-          {/* Connect button */}
+          {/* Connect / Disconnect button */}
           <button
             onClick={isJoined ? disconnectRadio : connectRadio}
             disabled={isConnecting}
@@ -298,10 +307,14 @@ export function RadioWidget() {
             }`}
             data-testid="button-radio-connect"
           >
-            {isConnecting ? "Qoşulur..." : isJoined ? "Kanaldan çıx" : "Kanala qoşul"}
+            {isConnecting
+              ? t("radio.connecting")
+              : isJoined
+              ? t("radio.leaveChannel")
+              : t("radio.joinChannel")}
           </button>
 
-          {/* PTT button in panel */}
+          {/* PTT button */}
           {isJoined && (
             <button
               className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 select-none transition-all ${
@@ -319,8 +332,8 @@ export function RadioWidget() {
               data-testid="button-ptt"
             >
               {iSpeaking
-                ? <><Mic className="h-4 w-4 animate-pulse" /> Danışırsınız...</>
-                : <><MicOff className="h-4 w-4" /> Basılı tutun — Danış</>
+                ? <><Mic className="h-4 w-4 animate-pulse" />{t("radio.youAreSpeaking")}</>
+                : <><MicOff className="h-4 w-4" />{t("radio.holdToSpeak")}</>
               }
             </button>
           )}
@@ -330,22 +343,32 @@ export function RadioWidget() {
             <div className="mt-3">
               <p className="text-[11px] text-muted-foreground mb-2 flex items-center gap-1">
                 <Users className="h-3 w-3" />
-                {users.length > 0 ? `${users.length} nəfər kanalda` : "Kanalda başqa istifadəçi yoxdur"}
+                {users.length > 0
+                  ? t("radio.usersInChannel", { count: users.length })
+                  : t("radio.noOtherUsers")}
               </p>
               {users.map(u => (
-                <div key={u.userId} className="flex items-center gap-2 py-1 text-xs" data-testid={`radio-user-${u.userId}`}>
+                <div
+                  key={u.userId}
+                  className="flex items-center gap-2 py-1 text-xs"
+                  data-testid={`radio-user-${u.userId}`}
+                >
                   <div className={`h-2 w-2 rounded-full shrink-0 ${
-                    pttState.speakerId === u.userId ? "bg-green-500 animate-pulse" : "bg-muted-foreground/40"
+                    pttState.speakerId === u.userId
+                      ? "bg-green-500 animate-pulse"
+                      : "bg-muted-foreground/40"
                   }`} />
                   <span className="font-medium truncate">{u.name}</span>
-                  <span className="text-muted-foreground shrink-0">{ROLE_LABELS[u.role] ?? u.role}</span>
+                  <span className="text-muted-foreground shrink-0">{roleLabel(u.role)}</span>
                 </div>
               ))}
             </div>
           )}
 
           {micError && (
-            <p className="text-xs text-destructive mt-2 text-center" data-testid="radio-mic-error">{micError}</p>
+            <p className="text-xs text-destructive mt-2 text-center" data-testid="radio-mic-error">
+              {micError}
+            </p>
           )}
         </div>
       )}
@@ -364,12 +387,16 @@ export function RadioWidget() {
               : "bg-background border-2 text-muted-foreground hover:text-foreground hover:border-primary"
           }`}
           data-testid="button-radio-toggle"
-          title="Ratsiya"
+          title={t("radio.title")}
         >
           <Radio className="h-5 w-5" />
         </button>
+
         {isJoined && (
-          <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-green-500 border-2 border-background" data-testid="radio-online-dot" />
+          <span
+            className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-green-500 border-2 border-background"
+            data-testid="radio-online-dot"
+          />
         )}
         {someoneElseSpeaking && (
           <span className="absolute -bottom-1 -left-1 h-3.5 w-3.5 rounded-full bg-green-500 border-2 border-background animate-pulse" />

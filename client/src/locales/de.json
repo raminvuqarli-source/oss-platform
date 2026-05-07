@@ -3307,5 +3307,35 @@
     "guestCallingWaiter": "🔔 Kellner wird gerufen",
     "guestInvalidQr": "Ungültiger QR-Code",
     "guestLanguage": "Sprache"
+  },
+  "radio": {
+    "title": "Walkie-Talkie",
+    "joinChannel": "Kanal beitreten",
+    "leaveChannel": "Kanal verlassen",
+    "connecting": "Verbinden...",
+    "connectionError": "Verbindungsfehler",
+    "connectionFailed": "Verbindung fehlgeschlagen",
+    "channelBusy": "Kanal besetzt",
+    "youAreSpeaking": "Sie sprechen...",
+    "isSpeaking": "{{name}} spricht...",
+    "holdToSpeak": "Halten — Sprechen",
+    "usersInChannel": "{{count}} Person(en) im Kanal",
+    "noOtherUsers": "Keine anderen Benutzer im Kanal",
+    "micPermissionDenied": "Mikrofonzugriff verweigert",
+    "micError": "Mikrofon konnte nicht geöffnet werden",
+    "roles": {
+      "owner_admin": "Inhaber",
+      "reception": "Rezeption",
+      "waiter": "Kellner",
+      "kitchen_staff": "Koch",
+      "restaurant_manager": "Rest. Manager",
+      "restaurant_cleaner": "Reiniger",
+      "restaurant_cashier": "Kassierer",
+      "housekeeping": "Hauswirtschaft",
+      "property_manager": "Objektmanager",
+      "maintenance": "Wartung",
+      "admin": "Admin",
+      "marketing_staff": "Marketing"
+    }
   }
 }

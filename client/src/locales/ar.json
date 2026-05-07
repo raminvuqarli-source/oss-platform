@@ -3307,5 +3307,35 @@
     "guestCallingWaiter": "🔔 استدعاء النادل",
     "guestInvalidQr": "رمز QR غير صالح",
     "guestLanguage": "اللغة"
+  },
+  "radio": {
+    "title": "جهاز اتصال",
+    "joinChannel": "الانضمام إلى القناة",
+    "leaveChannel": "مغادرة القناة",
+    "connecting": "جارٍ الاتصال...",
+    "connectionError": "خطأ في الاتصال",
+    "connectionFailed": "فشل الاتصال",
+    "channelBusy": "القناة مشغولة",
+    "youAreSpeaking": "أنت تتحدث...",
+    "isSpeaking": "{{name}} يتحدث...",
+    "holdToSpeak": "اضغط مع الاستمرار للتحدث",
+    "usersInChannel": "{{count}} شخص في القناة",
+    "noOtherUsers": "لا يوجد مستخدمون آخرون في القناة",
+    "micPermissionDenied": "تم رفض إذن الميكروفون",
+    "micError": "تعذر فتح الميكروفون",
+    "roles": {
+      "owner_admin": "المالك",
+      "reception": "الاستقبال",
+      "waiter": "النادل",
+      "kitchen_staff": "الطاهي",
+      "restaurant_manager": "مدير المطعم",
+      "restaurant_cleaner": "عامل النظافة",
+      "restaurant_cashier": "الصراف",
+      "housekeeping": "خدمة الغرف",
+      "property_manager": "مدير العقار",
+      "maintenance": "الصيانة",
+      "admin": "مدير",
+      "marketing_staff": "التسويق"
+    }
   }
 }

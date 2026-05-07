@@ -3320,5 +3320,35 @@
     "guestCallingWaiter": "🔔 Garson çağrılıyor",
     "guestInvalidQr": "Geçersiz QR kodu",
     "guestLanguage": "Dil"
+  },
+  "radio": {
+    "title": "Telsiz",
+    "joinChannel": "Kanala katıl",
+    "leaveChannel": "Kanaldan çık",
+    "connecting": "Bağlanıyor...",
+    "connectionError": "Bağlantı hatası",
+    "connectionFailed": "Bağlantı başarısız",
+    "channelBusy": "Kanal meşgul",
+    "youAreSpeaking": "Siz konuşuyorsunuz...",
+    "isSpeaking": "{{name}} konuşuyor...",
+    "holdToSpeak": "Basılı tutun — Konuş",
+    "usersInChannel": "Kanalda {{count}} kişi",
+    "noOtherUsers": "Kanalda başka kullanıcı yok",
+    "micPermissionDenied": "Mikrofon izni reddedildi",
+    "micError": "Mikrofon açılamadı",
+    "roles": {
+      "owner_admin": "Sahip",
+      "reception": "Resepsiyon",
+      "waiter": "Garson",
+      "kitchen_staff": "Aşçı",
+      "restaurant_manager": "Rest. Müdürü",
+      "restaurant_cleaner": "Temizlikçi",
+      "restaurant_cashier": "Kasiyer",
+      "housekeeping": "Kat Hizmetleri",
+      "property_manager": "Mülk Müdürü",
+      "maintenance": "Teknik",
+      "admin": "Admin",
+      "marketing_staff": "Pazarlama"
+    }
   }
 }

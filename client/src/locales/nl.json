@@ -3307,5 +3307,35 @@
     "guestCallingWaiter": "🔔 Ober wordt geroepen",
     "guestInvalidQr": "Ongeldige QR-code",
     "guestLanguage": "Taal"
+  },
+  "radio": {
+    "title": "Walkie-Talkie",
+    "joinChannel": "Kanaal betreden",
+    "leaveChannel": "Kanaal verlaten",
+    "connecting": "Verbinden...",
+    "connectionError": "Verbindingsfout",
+    "connectionFailed": "Verbinding mislukt",
+    "channelBusy": "Kanaal bezet",
+    "youAreSpeaking": "U spreekt...",
+    "isSpeaking": "{{name}} spreekt...",
+    "holdToSpeak": "Ingedrukt houden — Spreken",
+    "usersInChannel": "{{count}} persoon/personen in kanaal",
+    "noOtherUsers": "Geen andere gebruikers in het kanaal",
+    "micPermissionDenied": "Microfoontoestemming geweigerd",
+    "micError": "Microfoon kon niet worden geopend",
+    "roles": {
+      "owner_admin": "Eigenaar",
+      "reception": "Receptie",
+      "waiter": "Ober",
+      "kitchen_staff": "Kok",
+      "restaurant_manager": "Rest. Manager",
+      "restaurant_cleaner": "Schoonmaker",
+      "restaurant_cashier": "Kassier",
+      "housekeeping": "Huishouding",
+      "property_manager": "Vastgoedbeheerder",
+      "maintenance": "Onderhoud",
+      "admin": "Admin",
+      "marketing_staff": "Marketing"
+    }
   }
 }

@@ -3307,5 +3307,35 @@
     "guestCallingWaiter": "🔔 Appel du serveur",
     "guestInvalidQr": "Code QR invalide",
     "guestLanguage": "Langue"
+  },
+  "radio": {
+    "title": "Talkie-Walkie",
+    "joinChannel": "Rejoindre le canal",
+    "leaveChannel": "Quitter le canal",
+    "connecting": "Connexion...",
+    "connectionError": "Erreur de connexion",
+    "connectionFailed": "Connexion échouée",
+    "channelBusy": "Canal occupé",
+    "youAreSpeaking": "Vous parlez...",
+    "isSpeaking": "{{name}} parle...",
+    "holdToSpeak": "Maintenir — Parler",
+    "usersInChannel": "{{count}} personne(s) dans le canal",
+    "noOtherUsers": "Aucun autre utilisateur dans le canal",
+    "micPermissionDenied": "Permission du microphone refusée",
+    "micError": "Impossible d'ouvrir le microphone",
+    "roles": {
+      "owner_admin": "Propriétaire",
+      "reception": "Réception",
+      "waiter": "Serveur",
+      "kitchen_staff": "Chef",
+      "restaurant_manager": "Resp. Rest.",
+      "restaurant_cleaner": "Agent nettoyage",
+      "restaurant_cashier": "Caissier",
+      "housekeeping": "Femme de chambre",
+      "property_manager": "Directeur",
+      "maintenance": "Maintenance",
+      "admin": "Admin",
+      "marketing_staff": "Marketing"
+    }
   }
 }
