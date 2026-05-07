@@ -137,6 +137,21 @@ RESTAURANT ROLES & DASHBOARDS:
 9. REAL-TIME EVENTS (WebSocket)
    New orders, status changes, waiter calls, and cleaning task updates all push in real time via WebSocket. No manual page refresh needed.
 
+10. MENU ITEM IMAGES
+    Restaurant managers can upload a photo for each menu item directly from the Menu tab. Images are stored and displayed to guests on the digital menu (QR ordering screen). Helps guests visually identify dishes before ordering.
+
+11. PUSH-TO-TALK STAFF RADIO (Walkie-Talkie)
+    All staff members (hotel and restaurant) have access to a real-time voice walkie-talkie built into the dashboard — no external app needed.
+    - A radio icon floats in the bottom-right corner of every staff dashboard.
+    - Staff tap "Kanala qoşul" (Join Channel) to enter the voice channel.
+    - They hold the PTT (Push-to-Talk) button to speak; others hear them instantly.
+    - Only one person can speak at a time — channel locking prevents overlap, just like a real walkie-talkie.
+    - Active speaker's name is shown live to all channel members.
+    - Uses WebRTC for direct browser-to-browser audio (no server audio relay — low latency).
+    - Automatically scoped per tenant: staff only hear colleagues from the same property/account.
+    - Works on desktop and mobile (touchscreen supported).
+    - Not available for guests or super-admin accounts.
+
 RESTAURANT PLANS & PRICING:
 - Standard (REST_CAFE) — $29/month (≈49.30 AZN) — Up to 10 staff, Menu, Orders & KDS, Cashier
 - Professional (REST_BISTRO) — $49/month (≈83.30 AZN) — Up to 30 staff, Analytics dashboard, WhatsApp integration, all Standard features

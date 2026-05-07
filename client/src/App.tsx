@@ -262,18 +262,12 @@ function Router() {
 function AppContent() {
   const [location] = useLocation();
   const hideChat = location.startsWith("/restaurant/guest/");
-  const isPublicPage = location === "/" || location === "/hotel" || location === "/restaurant" ||
-    location.startsWith("/login") || location.startsWith("/register") ||
-    location.startsWith("/forgot") || location.startsWith("/reset") ||
-    location.startsWith("/demo") || location.startsWith("/join-team") ||
-    location.startsWith("/privacy") || location.startsWith("/terms") ||
-    location.startsWith("/restaurant/guest/");
   return (
     <>
       <Toaster />
       <Router />
       {!hideChat && <AIChatWidget />}
-      {!isPublicPage && <RadioWidget />}
+      <RadioWidget />
     </>
   );
 }
