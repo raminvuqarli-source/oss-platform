@@ -20,31 +20,47 @@ const ICE_SERVERS = [
   { urls: "stun:stun1.l.google.com:19302" },
 ];
 
-// Silent audio buffer played in a loop to keep AudioContext alive in background
-function createSilentAudioLoop(): { start: () => void; stop: () => void } {
+// Keeps the browser audio session alive so the OS does not suspend JS when
+// the screen locks. Strategy: route a near-silent oscillator through an
+// AudioContext → MediaStreamDestination → real HTMLAudioElement.
+// Real <audio> playback prevents iOS/Android from throttling the tab.
+function createSilentAudioLoop(): { start: () => void; stop: () => void; resume: () => void } {
   let ctx: AudioContext | null = null;
-  let source: AudioBufferSourceNode | null = null;
+  let audioEl: HTMLAudioElement | null = null;
 
   function start() {
     try {
       ctx = new AudioContext();
-      const buf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
-      source = ctx.createBufferSource();
-      source.buffer = buf;
-      source.loop = true;
-      source.connect(ctx.destination);
-      source.start();
+      const dest = ctx.createMediaStreamDestination();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      gain.gain.value = 0.001; // inaudible but non-zero keeps session alive
+      osc.connect(gain);
+      gain.connect(dest);
+      osc.start();
+
+      audioEl = new Audio();
+      audioEl.srcObject = dest.stream;
+      audioEl.loop = true;
+      (audioEl as any).playsinline = true; // iOS: don't fullscreen
+      audioEl.play().catch(() => {});
     } catch {}
   }
 
+  // Call after the page returns to foreground to unfreeze a suspended context
+  function resume() {
+    try { ctx?.resume(); } catch {}
+    try { audioEl?.play().catch(() => {}); } catch {}
+  }
+
   function stop() {
-    try { source?.stop(); } catch {}
+    try { audioEl?.pause(); } catch {}
+    audioEl = null;
     try { ctx?.close(); } catch {}
-    source = null;
     ctx = null;
   }
 
-  return { start, stop };
+  return { start, stop, resume };
 }
 
 export function RadioWidget() {
@@ -312,10 +328,14 @@ export function RadioWidget() {
     setIsSpeaking(false);
   }
 
-  // When page comes back to foreground: re-request WakeLock and reconnect if dropped
+  // When page comes back to foreground (screen unlocked / tab re-focused):
+  // 1. Resume the silent audio loop (OS may have suspended AudioContext)
+  // 2. Re-request WakeLock (it is automatically released on screen lock)
+  // 3. Reconnect WebSocket if it dropped while screen was off
   useEffect(() => {
     function handleVisibilityChange() {
       if (document.visibilityState === "visible" && isJoinedRef.current) {
+        silentLoopRef.current.resume();
         requestWakeLock();
         if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
           connectRadio();
@@ -323,7 +343,12 @@ export function RadioWidget() {
       }
     }
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    // Also handle pageshow (iOS fires this when coming back from background)
+    window.addEventListener("pageshow", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("pageshow", handleVisibilityChange);
+    };
   }, [connectRadio]);
 
   useEffect(() => {
