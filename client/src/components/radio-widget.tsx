@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "react-i18next";
 import { Mic, MicOff, Radio, Users, X, Volume2 } from "lucide-react";
@@ -20,6 +20,33 @@ const ICE_SERVERS = [
   { urls: "stun:stun1.l.google.com:19302" },
 ];
 
+// Silent audio buffer played in a loop to keep AudioContext alive in background
+function createSilentAudioLoop(): { start: () => void; stop: () => void } {
+  let ctx: AudioContext | null = null;
+  let source: AudioBufferSourceNode | null = null;
+
+  function start() {
+    try {
+      ctx = new AudioContext();
+      const buf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+      source = ctx.createBufferSource();
+      source.buffer = buf;
+      source.loop = true;
+      source.connect(ctx.destination);
+      source.start();
+    } catch {}
+  }
+
+  function stop() {
+    try { source?.stop(); } catch {}
+    try { ctx?.close(); } catch {}
+    source = null;
+    ctx = null;
+  }
+
+  return { start, stop };
+}
+
 export function RadioWidget() {
   const { user } = useAuth();
   const { t } = useTranslation();
@@ -40,11 +67,50 @@ export function RadioWidget() {
   const speakingRef = useRef(false);
   const usersRef = useRef<RadioUser[]>([]);
   const myUserIdRef = useRef<string>("");
+  const isJoinedRef = useRef(false);
+  const silentLoopRef = useRef(createSilentAudioLoop());
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => { usersRef.current = users; }, [users]);
   useEffect(() => {
     if (user) myUserIdRef.current = String(user.id);
   }, [user]);
+  useEffect(() => { isJoinedRef.current = isJoined; }, [isJoined]);
+
+  // Request WakeLock to keep screen on while radio is active
+  async function requestWakeLock() {
+    try {
+      if ("wakeLock" in navigator) {
+        wakeLockRef.current = await (navigator as any).wakeLock.request("screen");
+      }
+    } catch {}
+  }
+
+  function releaseWakeLock() {
+    try { wakeLockRef.current?.release(); } catch {}
+    wakeLockRef.current = null;
+  }
+
+  // Register MediaSession so OS treats app as active media (prevents suspension)
+  function registerMediaSession() {
+    if (!("mediaSession" in navigator)) return;
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: "O.S.S Ratsiya",
+        artist: "O.S.S Komandası",
+      });
+      navigator.mediaSession.playbackState = "playing";
+    } catch {}
+  }
+
+  function clearMediaSession() {
+    if (!("mediaSession" in navigator)) return;
+    try {
+      navigator.mediaSession.metadata = null;
+      navigator.mediaSession.playbackState = "none";
+    } catch {}
+  }
 
   function getOrCreateAudio(userId: string) {
     if (!audiosRef.current.has(userId)) {
@@ -134,8 +200,8 @@ export function RadioWidget() {
     };
   }
 
-  async function connectRadio() {
-    if (isConnecting || isJoined) return;
+  const connectRadio = useCallback(async () => {
+    if (isConnecting || wsRef.current?.readyState === WebSocket.OPEN) return;
     setIsConnecting(true);
     setMicError("");
     try {
@@ -149,6 +215,10 @@ export function RadioWidget() {
         ws.send(JSON.stringify({ type: "RADIO_JOIN" }));
         setIsJoined(true);
         setIsConnecting(false);
+        // Start background-keepalive techniques
+        silentLoopRef.current.start();
+        registerMediaSession();
+        requestWakeLock();
       };
 
       ws.onmessage = buildWsHandler();
@@ -160,6 +230,13 @@ export function RadioWidget() {
         setIsSpeaking(false);
         setIsConnecting(false);
         speakingRef.current = false;
+
+        // Auto-reconnect if still "joined" intent (user didn't manually disconnect)
+        if (isJoinedRef.current) {
+          reconnectTimerRef.current = setTimeout(() => {
+            if (isJoinedRef.current) connectRadio();
+          }, 3000);
+        }
       };
 
       ws.onerror = () => {
@@ -170,9 +247,14 @@ export function RadioWidget() {
       setMicError(t("radio.connectionFailed"));
       setIsConnecting(false);
     }
-  }
+  }, [isConnecting, t]);
 
   function disconnectRadio() {
+    isJoinedRef.current = false;
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = null;
+    }
     stopSpeaking();
     wsRef.current?.send(JSON.stringify({ type: "RADIO_LEAVE" }));
     wsRef.current?.close();
@@ -180,10 +262,14 @@ export function RadioWidget() {
     setIsJoined(false);
     setUsers([]);
     setPttState({ speakerId: null, speakerName: null, speakerRole: null });
+    // Stop background-keepalive
+    silentLoopRef.current.stop();
+    clearMediaSession();
+    releaseWakeLock();
   }
 
   async function startSpeaking() {
-    if (speakingRef.current || !isJoined) return;
+    if (speakingRef.current || !isJoinedRef.current) return;
     if (pttState.speakerId && pttState.speakerId !== myUserIdRef.current) {
       setIsChannelBusy(true);
       setTimeout(() => setIsChannelBusy(false), 2000);
@@ -226,11 +312,30 @@ export function RadioWidget() {
     setIsSpeaking(false);
   }
 
+  // When page comes back to foreground: re-request WakeLock and reconnect if dropped
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible" && isJoinedRef.current) {
+        requestWakeLock();
+        if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+          connectRadio();
+        }
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [connectRadio]);
+
   useEffect(() => {
     return () => {
+      isJoinedRef.current = false;
+      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
       stopSpeaking();
       wsRef.current?.close();
       audiosRef.current.forEach(a => { a.srcObject = null; });
+      silentLoopRef.current.stop();
+      clearMediaSession();
+      releaseWakeLock();
     };
   }, []);
 
@@ -265,6 +370,13 @@ export function RadioWidget() {
               <X className="h-4 w-4" />
             </button>
           </div>
+
+          {/* Background mode notice */}
+          {isJoined && (
+            <div className="text-[10px] text-muted-foreground bg-muted/40 rounded-lg px-2.5 py-1.5 mb-3 text-center">
+              {t("radio.backgroundActive", "Fon rejimi aktiv — minimizə etdikdə işləyir")}
+            </div>
+          )}
 
           {/* Speaking indicator */}
           {pttState.speakerId && (
