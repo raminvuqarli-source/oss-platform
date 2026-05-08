@@ -2541,7 +2541,13 @@
       "year": "yr",
       "save17": "Save ~17%",
       "popular": "Most Popular",
-      "preview": "Estimated Cost"
+      "preview": "Estimated Cost",
+      "starter": "Starter",
+      "growth": "Growth",
+      "pro": "Pro",
+      "recommended": "Recommended",
+      "selected": "Selected",
+      "desc": "After the trial period, you'll switch to a paid plan"
     },
     "review": {
       "title": "Review & Activate",

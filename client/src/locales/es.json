@@ -2367,7 +2367,13 @@
       "year": "año",
       "save17": "Ahorre ~17%",
       "popular": "Más popular",
-      "preview": "Costo estimado"
+      "preview": "Costo estimado",
+      "starter": "Inicial",
+      "growth": "Crecimiento",
+      "pro": "Pro",
+      "recommended": "Recomendado",
+      "selected": "Seleccionado",
+      "desc": "Después del período de prueba, cambiará a un plan de pago"
     },
     "review": {
       "title": "Revisar y activar",

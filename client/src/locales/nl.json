@@ -2367,7 +2367,13 @@
       "year": "jr",
       "save17": "Bespaar ~17%",
       "popular": "Meest Populair",
-      "preview": "Geschatte Kosten"
+      "preview": "Geschatte Kosten",
+      "starter": "Starter",
+      "growth": "Groei",
+      "pro": "Pro",
+      "recommended": "Aanbevolen",
+      "selected": "Geselecteerd",
+      "desc": "Na de proefperiode gaat u over op een betaald plan"
     },
     "review": {
       "title": "Beoordelen & Activeren",

@@ -2367,7 +2367,13 @@
       "year": "Jr",
       "save17": "~17% sparen",
       "popular": "Am beliebtesten",
-      "preview": "Geschätzte Kosten"
+      "preview": "Geschätzte Kosten",
+      "starter": "Starter",
+      "growth": "Wachstum",
+      "pro": "Pro",
+      "recommended": "Empfohlen",
+      "selected": "Ausgewählt",
+      "desc": "Nach der Testphase wechseln Sie zu einem kostenpflichtigen Plan"
     },
     "review": {
       "title": "Überprüfen & Aktivieren",

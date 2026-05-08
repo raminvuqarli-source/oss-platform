@@ -2536,7 +2536,13 @@
       "year": "il",
       "save17": "~17% qənaət edin",
       "popular": "Ən Populyar",
-      "preview": "Təxmini Xərc"
+      "preview": "Təxmini Xərc",
+      "starter": "Başlanğıc",
+      "growth": "Böyümə",
+      "pro": "Pro",
+      "recommended": "Tövsiyə",
+      "selected": "Seçildi",
+      "desc": "Trial müddətindən sonra ödənişli plana keçəcəksiniz"
     },
     "review": {
       "title": "Nəzərdən Keçir və Aktivləşdir",

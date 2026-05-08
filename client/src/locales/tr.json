@@ -2380,7 +2380,13 @@
       "year": "yıl",
       "save17": "~%17 tasarruf edin",
       "popular": "En Popüler",
-      "preview": "Tahmini Maliyet"
+      "preview": "Tahmini Maliyet",
+      "starter": "Başlangıç",
+      "growth": "Büyüme",
+      "pro": "Pro",
+      "recommended": "Önerilen",
+      "selected": "Seçildi",
+      "desc": "Deneme süresi sonunda ücretli plana geçeceksiniz"
     },
     "review": {
       "title": "İncele ve Etkinleştir",

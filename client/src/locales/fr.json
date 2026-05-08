@@ -2367,7 +2367,13 @@
       "year": "an",
       "save17": "Économisez ~17%",
       "popular": "Le plus populaire",
-      "preview": "Coût estimé"
+      "preview": "Coût estimé",
+      "starter": "Débutant",
+      "growth": "Croissance",
+      "pro": "Pro",
+      "recommended": "Recommandé",
+      "selected": "Sélectionné",
+      "desc": "Après l'essai, vous passerez à un plan payant"
     },
     "review": {
       "title": "Vérifier et activer",

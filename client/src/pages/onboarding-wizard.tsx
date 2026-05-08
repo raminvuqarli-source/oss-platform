@@ -356,10 +356,24 @@ export default function OnboardingWizard() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {([
-                { code: "CORE_STARTER", label: "Starter", price: "$79/ay", icon: Star, features: ["1 əmlak", "20 otaq", "5 işçi"], color: "border-border" },
-                { code: "CORE_GROWTH", label: "Growth", price: "$129/ay", icon: Rocket, features: ["3 əmlak", "30 otaq/əmlak", "20 işçi", "Analitika"], color: "border-blue-500" },
-                { code: "CORE_PRO", label: "Pro", price: "$199/ay", icon: Crown, features: ["Limitsiz əmlak", "Limitsiz otaq", "Limitsiz işçi", "Tam analitika"], color: "border-primary", badge: "Tövsiyə" },
-              ] as const).map(({ code, label, price, icon: Icon, features, color, badge }) => (
+                { code: "CORE_STARTER", labelKey: "starter", price: "$79/ay", icon: Star, featKeys: ["starterF1","starterF2","starterF3"], color: "border-border" },
+                { code: "CORE_GROWTH", labelKey: "growth", price: "$129/ay", icon: Rocket, featKeys: ["growthF1","growthF2","growthF3","growthF4"], color: "border-blue-500" },
+                { code: "CORE_PRO", labelKey: "pro", price: "$199/ay", icon: Crown, featKeys: ["proF1","proF2","proF3","proF4"], color: "border-primary", badge: true },
+              ] as const).map(({ code, labelKey, price, icon: Icon, featKeys, color, badge }) => {
+                const featureMap: Record<string, string> = {
+                  starterF1: t("onboarding.plan.feat.starterF1", "1 əmlak"),
+                  starterF2: t("onboarding.plan.feat.starterF2", "20 otaq"),
+                  starterF3: t("onboarding.plan.feat.starterF3", "5 işçi"),
+                  growthF1: t("onboarding.plan.feat.growthF1", "3 əmlak"),
+                  growthF2: t("onboarding.plan.feat.growthF2", "30 otaq/əmlak"),
+                  growthF3: t("onboarding.plan.feat.growthF3", "20 işçi"),
+                  growthF4: t("onboarding.plan.feat.growthF4", "Analitika"),
+                  proF1: t("onboarding.plan.feat.proF1", "Limitsiz əmlak"),
+                  proF2: t("onboarding.plan.feat.proF2", "Limitsiz otaq"),
+                  proF3: t("onboarding.plan.feat.proF3", "Limitsiz işçi"),
+                  proF4: t("onboarding.plan.feat.proF4", "Tam analitika"),
+                };
+                return (
                 <button
                   key={code}
                   type="button"
@@ -370,22 +384,23 @@ export default function OnboardingWizard() {
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-1.5">
                       <Icon className={`h-4 w-4 ${selectedPlanCode === code ? "text-primary" : "text-muted-foreground"}`} />
-                      <span className="font-semibold text-sm">{label}</span>
+                      <span className="font-semibold text-sm">{t(`onboarding.plan.${labelKey}`, labelKey)}</span>
                     </div>
-                    {badge && <Badge className="bg-primary text-primary-foreground text-xs px-1.5 py-0">{badge}</Badge>}
+                    {badge && <Badge className="bg-primary text-primary-foreground text-xs px-1.5 py-0">{t("onboarding.plan.recommended", "Tövsiyə")}</Badge>}
                   </div>
                   <p className="text-xs font-medium text-primary mb-2">{price}</p>
                   <ul className="space-y-0.5">
-                    {features.map(f => (
-                      <li key={f} className="text-xs text-muted-foreground flex items-center gap-1">
+                    {featKeys.map(fk => (
+                      <li key={fk} className="text-xs text-muted-foreground flex items-center gap-1">
                         <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
-                        {f}
+                        {featureMap[fk]}
                       </li>
                     ))}
                   </ul>
                   {selectedPlanCode === code && <p className="mt-2 text-xs font-medium text-primary">{t("onboarding.plan.selected", "Seçildi")}</p>}
                 </button>
-              ))}
+                );
+              })}
             </div>
           </div>
           <Card data-testid="step-property-info">
