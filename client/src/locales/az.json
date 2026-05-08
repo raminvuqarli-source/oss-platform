@@ -548,7 +548,8 @@
       "desc": "Booking.com, Airbnb və s. ilə OTA sinxronizasiyası",
       "rooms": "Qoşulmuş otaqlar",
       "monthlyFee": "Aylıq ödəniş",
-      "contactUs": "Kanalı aktivləşdirmək üçün bizimlə əlaqə saxlayın."
+      "contactUs": "Kanalı aktivləşdirmək üçün bizimlə əlaqə saxlayın.",
+      "requestActivation": "Aktivasiya Tələb Et"
     },
     "wa": {
       "title": "WhatsApp Bildirişləri",
@@ -568,12 +569,38 @@
       "msgs": "msg",
       "purchaseSuccess": "Paket aktivləşdirildi",
       "purchaseSuccessDesc": "WhatsApp mesajlarınız əlavə olundu.",
-      "purchaseError": "Paket alınmadı. Yenidən cəhd edin."
+      "purchaseError": "Paket alınmadı. Yenidən cəhd edin.",
+      "purchaseToActivate": "WhatsApp bildirişlərini aktivləşdirmək üçün paket alın."
     },
     "contact": {
       "title": "Fərdi paket lazımdır?",
       "desc": "Korporativ qiymətlər, Channex aktivləşdirmə və ya fərdi inteqrasiyalar üçün komandamızla əlaqə saxlayın.",
-      "cta": "Satış ilə əlaqə"
+      "cta": "Satış ilə əlaqə",
+      "copyManually": "Yuxarıdakı e-poçt ünvanını kopyalayın",
+      "dialogTitle": "O.S.S Komandası ilə Əlaqə",
+      "dialogDesc": "Mesaj göndərin, 24 saat ərzində xidmətinizi aktivləşdirəcəyik.",
+      "subject": "Mövzu",
+      "whatsapp": "WhatsApp-da mesaj göndərin"
+    },
+    "addon": "Əlavə",
+    "smartRoom": {
+      "title": "Ağıllı Otaq",
+      "desc": "IoT idarəetməsi: işıqlandırma, pərdələr, HVAC və s.",
+      "pricingTitle": "49.30 ₼-dan / otaq / ay",
+      "pricingDesc": "Smart Lite plan — temperatur, işıqlandırma, pərdələr",
+      "requestActivation": "Ağıllı Otaq Tələb Et"
+    },
+    "core": {
+      "title": "Core Abunəlik",
+      "trial": "Sınaq dövrü",
+      "pastDue": "Gecikmiş",
+      "expired": "Müddəti bitmiş",
+      "monthlyFee": "Aylıq ödəniş",
+      "trialEnds": "Sınaq biter",
+      "daysLeft": "gün qalıb",
+      "nextBilling": "Növbəti ödəniş",
+      "upgrade": "Plana keç",
+      "renew": "Ödənişi et"
     },
     "report": {
       "overview": "Gəlir icmalı",

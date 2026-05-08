@@ -543,7 +543,8 @@
       "desc": "Booking.com, Airbnb vb. ile OTA senkronizasyonu",
       "rooms": "Bağlı Odalar",
       "monthlyFee": "Aylık Ücret",
-      "contactUs": "Kanal Yöneticisi aktivasyonu için bizimle iletişime geçin."
+      "contactUs": "Kanal Yöneticisi aktivasyonu için bizimle iletişime geçin.",
+      "requestActivation": "Aktivasyon Talebi"
     },
     "wa": {
       "title": "WhatsApp Bildirimleri",
@@ -563,12 +564,38 @@
       "msgs": "msg",
       "purchaseSuccess": "Paket Aktive Edildi",
       "purchaseSuccessDesc": "WhatsApp mesajlarınız eklendi.",
-      "purchaseError": "Paket satın alınamadı. Tekrar deneyin."
+      "purchaseError": "Paket satın alınamadı. Tekrar deneyin.",
+      "purchaseToActivate": "WhatsApp bildirimlerini etkinleştirmek için paket satın alın."
     },
     "contact": {
       "title": "Özel paket mi lazım?",
       "desc": "Kurumsal fiyatlandırma veya Channex aktivasyonu için ekibimizle iletişime geçin.",
-      "cta": "Satış ile İletişim"
+      "cta": "Satış ile İletişim",
+      "copyManually": "Yukarıdaki e-posta adresini kopyalayın",
+      "dialogTitle": "O.S.S Ekibiyle İletişim",
+      "dialogDesc": "Bize mesaj gönderin, 24 saat içinde hizmetinizi etkinleştireceğiz.",
+      "subject": "Konu",
+      "whatsapp": "WhatsApp'tan mesaj gönderin"
+    },
+    "addon": "Eklenti",
+    "smartRoom": {
+      "title": "Akıllı Oda",
+      "desc": "IoT kontrolleri: aydınlatma, perdeler, HVAC ve daha fazlası",
+      "pricingTitle": "49.30 ₼'dan / oda / ay",
+      "pricingDesc": "Smart Lite plan — sıcaklık, aydınlatma, perdeler",
+      "requestActivation": "Akıllı Oda Talep Et"
+    },
+    "core": {
+      "title": "Core Abonelik",
+      "trial": "Deneme dönemi",
+      "pastDue": "Gecikmiş",
+      "expired": "Süresi dolmuş",
+      "monthlyFee": "Aylık ödeme",
+      "trialEnds": "Deneme bitiyor",
+      "daysLeft": "gün kaldı",
+      "nextBilling": "Sonraki ödeme",
+      "upgrade": "Plana geç",
+      "renew": "Ödeme yap"
     },
     "report": {
       "overview": "Gelir Özeti",

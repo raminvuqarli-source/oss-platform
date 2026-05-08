@@ -536,7 +536,8 @@
       "desc": "OTA-synchronisatie met Booking.com, Airbnb, enz.",
       "rooms": "Verbonden kamers",
       "monthlyFee": "Maandelijkse vergoeding",
-      "contactUs": "Neem contact met ons op om de Kanaalmanager te activeren."
+      "contactUs": "Neem contact met ons op om de Kanaalmanager te activeren.",
+      "requestActivation": "Activatie aanvragen"
     },
     "wa": {
       "title": "WhatsApp-meldingen",
@@ -556,12 +557,38 @@
       "msgs": "ber.",
       "purchaseSuccess": "Pakket geactiveerd",
       "purchaseSuccessDesc": "Uw WhatsApp-berichten zijn toegevoegd.",
-      "purchaseError": "Pakket kon niet worden gekocht. Probeer het opnieuw."
+      "purchaseError": "Pakket kon niet worden gekocht. Probeer het opnieuw.",
+      "purchaseToActivate": "Koop een pakket om WhatsApp-meldingen te activeren."
     },
     "contact": {
       "title": "Aangepast pakket nodig?",
       "desc": "Neem contact op met ons team voor bedrijfstarieven of Channex-activering.",
-      "cta": "Verkoop contacteren"
+      "cta": "Verkoop contacteren",
+      "copyManually": "Kopieer het bovenstaande e-mailadres",
+      "dialogTitle": "Contact O.S.S Team",
+      "dialogDesc": "Stuur ons een bericht en we activeren uw service binnen 24 uur.",
+      "subject": "Onderwerp",
+      "whatsapp": "Stuur ons een bericht via WhatsApp"
+    },
+    "addon": "Add-on",
+    "smartRoom": {
+      "title": "Slimme Kamer",
+      "desc": "IoT-besturing: verlichting, gordijnen, HVAC en meer",
+      "pricingTitle": "Vanaf 49,30 ₼ / kamer / maand",
+      "pricingDesc": "Smart Lite plan — temperatuur, verlichting, gordijnen",
+      "requestActivation": "Slimme kamer aanvragen"
+    },
+    "core": {
+      "title": "Core Abonnement",
+      "trial": "Proefperiode",
+      "pastDue": "Achterstallig",
+      "expired": "Verlopen",
+      "monthlyFee": "Maandelijkse betaling",
+      "trialEnds": "Proef eindigt",
+      "daysLeft": "dagen resterend",
+      "nextBilling": "Volgende facturering",
+      "upgrade": "Overstappen naar plan",
+      "renew": "Betaling uitvoeren"
     },
     "report": {
       "overview": "Inkomstenoverzicht",

@@ -548,7 +548,8 @@
       "desc": "OTA sync with Booking.com, Airbnb & more",
       "rooms": "Connected Rooms",
       "monthlyFee": "Monthly Fee",
-      "contactUs": "Contact us to activate Channel Manager for your property."
+      "contactUs": "Contact us to activate Channel Manager for your property.",
+      "requestActivation": "Request Activation"
     },
     "wa": {
       "title": "WhatsApp Notifications",
@@ -568,12 +569,38 @@
       "msgs": "msgs",
       "purchaseSuccess": "Package Activated",
       "purchaseSuccessDesc": "Your WhatsApp messages have been added.",
-      "purchaseError": "Failed to purchase package. Please try again."
+      "purchaseError": "Failed to purchase package. Please try again.",
+      "purchaseToActivate": "Purchase a package to activate WhatsApp notifications."
     },
     "contact": {
       "title": "Need a custom package?",
       "desc": "Contact our team to discuss enterprise pricing, Channex activation, or custom integrations.",
-      "cta": "Contact Sales"
+      "cta": "Contact Sales",
+      "copyManually": "Copy the email address above",
+      "dialogTitle": "Contact O.S.S Team",
+      "dialogDesc": "Send us a message and we'll activate your service within 24 hours.",
+      "subject": "Subject",
+      "whatsapp": "Message us on WhatsApp"
+    },
+    "addon": "Add-on",
+    "smartRoom": {
+      "title": "Smart Room",
+      "desc": "IoT controls: lighting, curtains, HVAC & more",
+      "pricingTitle": "From 49.30 ₼ / room / mo",
+      "pricingDesc": "Smart Lite plan — temperature, lighting, curtains",
+      "requestActivation": "Request Smart Room"
+    },
+    "core": {
+      "title": "Core Subscription",
+      "trial": "Trial",
+      "pastDue": "Past Due",
+      "expired": "Expired",
+      "monthlyFee": "Monthly Fee",
+      "trialEnds": "Trial ends",
+      "daysLeft": "days left",
+      "nextBilling": "Next billing",
+      "upgrade": "Switch to Plan",
+      "renew": "Make Payment"
     },
     "report": {
       "overview": "Revenue Overview",

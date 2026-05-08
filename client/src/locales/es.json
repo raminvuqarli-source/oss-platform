@@ -536,7 +536,8 @@
       "desc": "Sincronización OTA con Booking.com, Airbnb, etc.",
       "rooms": "Habitaciones conectadas",
       "monthlyFee": "Tarifa mensual",
-      "contactUs": "Contáctenos para activar el Channel Manager."
+      "contactUs": "Contáctenos para activar el Channel Manager.",
+      "requestActivation": "Solicitar activación"
     },
     "wa": {
       "title": "Notificaciones de WhatsApp",
@@ -556,12 +557,38 @@
       "msgs": "msg",
       "purchaseSuccess": "Paquete activado",
       "purchaseSuccessDesc": "Sus mensajes de WhatsApp han sido añadidos.",
-      "purchaseError": "No se pudo comprar el paquete. Inténtelo de nuevo."
+      "purchaseError": "No se pudo comprar el paquete. Inténtelo de nuevo.",
+      "purchaseToActivate": "Compre un paquete para activar las notificaciones de WhatsApp."
     },
     "contact": {
       "title": "¿Necesita un paquete personalizado?",
       "desc": "Contacte a nuestro equipo para precios empresariales o activación de Channex.",
-      "cta": "Contactar con ventas"
+      "cta": "Contactar con ventas",
+      "copyManually": "Copie la dirección de correo electrónico de arriba",
+      "dialogTitle": "Contactar al equipo O.S.S",
+      "dialogDesc": "Envíenos un mensaje y activaremos su servicio en 24 horas.",
+      "subject": "Asunto",
+      "whatsapp": "Envíenos un mensaje por WhatsApp"
+    },
+    "addon": "Complemento",
+    "smartRoom": {
+      "title": "Habitación Inteligente",
+      "desc": "Controles IoT: iluminación, cortinas, HVAC y más",
+      "pricingTitle": "Desde 49,30 ₼ / habitación / mes",
+      "pricingDesc": "Plan Smart Lite — temperatura, iluminación, cortinas",
+      "requestActivation": "Solicitar habitación inteligente"
+    },
+    "core": {
+      "title": "Suscripción Core",
+      "trial": "Período de prueba",
+      "pastDue": "Vencido",
+      "expired": "Expirado",
+      "monthlyFee": "Pago mensual",
+      "trialEnds": "Fin de la prueba",
+      "daysLeft": "días restantes",
+      "nextBilling": "Próxima facturación",
+      "upgrade": "Cambiar al plan",
+      "renew": "Realizar pago"
     },
     "report": {
       "overview": "Resumen de ingresos",

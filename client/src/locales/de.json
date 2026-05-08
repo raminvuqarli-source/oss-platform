@@ -536,7 +536,8 @@
       "desc": "OTA-Synchronisation mit Booking.com, Airbnb usw.",
       "rooms": "Verbundene Zimmer",
       "monthlyFee": "Monatliche Gebühr",
-      "contactUs": "Kontaktieren Sie uns zur Aktivierung des Channel Managers."
+      "contactUs": "Kontaktieren Sie uns zur Aktivierung des Channel Managers.",
+      "requestActivation": "Aktivierung anfordern"
     },
     "wa": {
       "title": "WhatsApp-Benachrichtigungen",
@@ -556,12 +557,38 @@
       "msgs": "Msg",
       "purchaseSuccess": "Paket aktiviert",
       "purchaseSuccessDesc": "Ihre WhatsApp-Nachrichten wurden hinzugefügt.",
-      "purchaseError": "Paket konnte nicht gekauft werden. Bitte erneut versuchen."
+      "purchaseError": "Paket konnte nicht gekauft werden. Bitte erneut versuchen.",
+      "purchaseToActivate": "Kaufen Sie ein Paket, um WhatsApp-Benachrichtigungen zu aktivieren."
     },
     "contact": {
       "title": "Individuelles Paket benötigt?",
       "desc": "Kontaktieren Sie unser Team für Enterprise-Preise oder Channex-Aktivierung.",
-      "cta": "Vertrieb kontaktieren"
+      "cta": "Vertrieb kontaktieren",
+      "copyManually": "Kopieren Sie die obige E-Mail-Adresse",
+      "dialogTitle": "O.S.S Team kontaktieren",
+      "dialogDesc": "Senden Sie uns eine Nachricht und wir aktivieren Ihren Dienst innerhalb von 24 Stunden.",
+      "subject": "Betreff",
+      "whatsapp": "WhatsApp Nachricht senden"
+    },
+    "addon": "Erweiterung",
+    "smartRoom": {
+      "title": "Smart Room",
+      "desc": "IoT-Steuerung: Beleuchtung, Vorhänge, HVAC und mehr",
+      "pricingTitle": "Ab 49,30 ₼ / Zimmer / Monat",
+      "pricingDesc": "Smart Lite Plan — Temperatur, Beleuchtung, Vorhänge",
+      "requestActivation": "Smart Room anfragen"
+    },
+    "core": {
+      "title": "Core Abonnement",
+      "trial": "Testzeitraum",
+      "pastDue": "Überfällig",
+      "expired": "Abgelaufen",
+      "monthlyFee": "Monatliche Zahlung",
+      "trialEnds": "Testphase endet",
+      "daysLeft": "Tage verbleibend",
+      "nextBilling": "Nächste Abrechnung",
+      "upgrade": "Zum Plan wechseln",
+      "renew": "Zahlung vornehmen"
     },
     "report": {
       "overview": "Umsatzübersicht",
