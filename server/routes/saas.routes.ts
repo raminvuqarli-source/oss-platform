@@ -526,16 +526,32 @@ export function registerSaasRoutes(app: Express): void {
         return res.status(400).json({ message: "Invalid plan code" });
       }
 
-      const sub = await storage.getSubscriptionByOwner(user.ownerId);
-      if (!sub) return res.status(404).json({ message: "No subscription found" });
+      let sub = await storage.getSubscriptionByOwner(user.ownerId);
 
       const planTypeEntry = Object.entries(PLAN_TYPE_TO_CODE).find(([, v]) => v === planCode);
       const resolvedPlanType = planTypeEntry ? planTypeEntry[0] : "starter";
 
-      await storage.updateSubscription(sub.id, {
-        planCode,
-        planType: resolvedPlanType as any,
-      } as any);
+      if (!sub) {
+        // New owner has no subscription yet — create a 14-day trial automatically
+        const trialEndsAt = new Date();
+        trialEndsAt.setDate(trialEndsAt.getDate() + 14);
+        const planDefaults = applyPlanFeatures(resolvedPlanType as PlanType);
+        sub = await storage.createSubscription({
+          ownerId: user.ownerId,
+          planType: "trial" as PlanType,
+          planCode,
+          ...planDefaults,
+          trialEndsAt,
+          isActive: true,
+          status: "trial",
+        } as any);
+        logger.info({ ownerId: user.ownerId, planCode }, "Trial subscription created during onboarding");
+      } else {
+        await storage.updateSubscription(sub.id, {
+          planCode,
+          planType: resolvedPlanType as any,
+        } as any);
+      }
 
       logger.info({ ownerId: user.ownerId, planCode }, "Plan selected during onboarding");
       res.json({ planCode });
