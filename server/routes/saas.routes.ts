@@ -547,10 +547,16 @@ export function registerSaasRoutes(app: Express): void {
         } as any);
         logger.info({ ownerId: user.ownerId, planCode }, "Trial subscription created during onboarding");
       } else {
-        await storage.updateSubscription(sub.id, {
-          planCode,
-          planType: resolvedPlanType as any,
-        } as any);
+        // Only update planCode so the owner can pick their preferred plan.
+        // Never overwrite planType here — a trial subscription must stay as
+        // planType="trial" until they actually pay. Overwriting it would cause
+        // the billing UI to show "Active" even though no payment has been made.
+        const updateData: Record<string, any> = { planCode };
+        if ((sub as any).status !== "trial" && sub.planType !== "trial") {
+          // Non-trial subscription: also update planType (e.g. plan change mid-cycle)
+          updateData.planType = resolvedPlanType;
+        }
+        await storage.updateSubscription(sub.id, updateData as any);
       }
 
       logger.info({ ownerId: user.ownerId, planCode }, "Plan selected during onboarding");
