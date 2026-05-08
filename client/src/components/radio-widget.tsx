@@ -83,7 +83,11 @@ export function RadioWidget() {
   const speakingRef = useRef(false);
   const usersRef = useRef<RadioUser[]>([]);
   const myUserIdRef = useRef<string>("");
-  const isJoinedRef = useRef(false);
+  // wantJoinedRef = user INTENT (true after "Join" click, false after "Disconnect" click).
+  // Never driven by connection state — this is what guards auto-reconnect.
+  const wantJoinedRef = useRef(false);
+  // isConnectingRef mirrors isConnecting state so callbacks always see fresh value.
+  const isConnectingRef = useRef(false);
   const silentLoopRef = useRef(createSilentAudioLoop());
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -92,7 +96,6 @@ export function RadioWidget() {
   useEffect(() => {
     if (user) myUserIdRef.current = String(user.id);
   }, [user]);
-  useEffect(() => { isJoinedRef.current = isJoined; }, [isJoined]);
 
   // Request WakeLock to keep screen on while radio is active
   async function requestWakeLock() {
@@ -216,8 +219,13 @@ export function RadioWidget() {
     };
   }
 
+  // connectRadio uses only refs (no state deps) so the function reference is
+  // stable and callbacks always call the latest version without stale closure.
   const connectRadio = useCallback(async () => {
-    if (isConnecting || wsRef.current?.readyState === WebSocket.OPEN) return;
+    if (isConnectingRef.current || wsRef.current?.readyState === WebSocket.OPEN) return;
+    // Mark intent BEFORE any async work so ws.onclose always sees it correctly
+    wantJoinedRef.current = true;
+    isConnectingRef.current = true;
     setIsConnecting(true);
     setMicError("");
     try {
@@ -230,8 +238,8 @@ export function RadioWidget() {
       ws.onopen = () => {
         ws.send(JSON.stringify({ type: "RADIO_JOIN" }));
         setIsJoined(true);
+        isConnectingRef.current = false;
         setIsConnecting(false);
-        // Start background-keepalive techniques
         silentLoopRef.current.start();
         registerMediaSession();
         requestWakeLock();
@@ -244,29 +252,37 @@ export function RadioWidget() {
         setUsers([]);
         setPttState({ speakerId: null, speakerName: null, speakerRole: null });
         setIsSpeaking(false);
+        isConnectingRef.current = false;
         setIsConnecting(false);
         speakingRef.current = false;
 
-        // Auto-reconnect if still "joined" intent (user didn't manually disconnect)
-        if (isJoinedRef.current) {
+        // Auto-reconnect only if the user INTENDED to stay connected.
+        // wantJoinedRef is only set false by explicit disconnectRadio() call —
+        // it is never touched by connection-state changes, so it stays true
+        // while the app is minimised / screen is locked.
+        if (wantJoinedRef.current) {
+          if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
           reconnectTimerRef.current = setTimeout(() => {
-            if (isJoinedRef.current) connectRadio();
+            if (wantJoinedRef.current) connectRadio();
           }, 3000);
         }
       };
 
       ws.onerror = () => {
         setMicError(t("radio.connectionError"));
+        isConnectingRef.current = false;
         setIsConnecting(false);
       };
     } catch {
       setMicError(t("radio.connectionFailed"));
+      isConnectingRef.current = false;
       setIsConnecting(false);
     }
-  }, [isConnecting, t]);
+  }, [t]); // no isConnecting dep — guarded by isConnectingRef instead
 
   function disconnectRadio() {
-    isJoinedRef.current = false;
+    // Mark intent first so ws.onclose doesn't schedule a reconnect
+    wantJoinedRef.current = false;
     if (reconnectTimerRef.current) {
       clearTimeout(reconnectTimerRef.current);
       reconnectTimerRef.current = null;
@@ -275,17 +291,18 @@ export function RadioWidget() {
     wsRef.current?.send(JSON.stringify({ type: "RADIO_LEAVE" }));
     wsRef.current?.close();
     wsRef.current = null;
+    isConnectingRef.current = false;
     setIsJoined(false);
+    setIsConnecting(false);
     setUsers([]);
     setPttState({ speakerId: null, speakerName: null, speakerRole: null });
-    // Stop background-keepalive
     silentLoopRef.current.stop();
     clearMediaSession();
     releaseWakeLock();
   }
 
   async function startSpeaking() {
-    if (speakingRef.current || !isJoinedRef.current) return;
+    if (speakingRef.current || wsRef.current?.readyState !== WebSocket.OPEN) return;
     if (pttState.speakerId && pttState.speakerId !== myUserIdRef.current) {
       setIsChannelBusy(true);
       setTimeout(() => setIsChannelBusy(false), 2000);
@@ -334,7 +351,7 @@ export function RadioWidget() {
   // 3. Reconnect WebSocket if it dropped while screen was off
   useEffect(() => {
     function handleVisibilityChange() {
-      if (document.visibilityState === "visible" && isJoinedRef.current) {
+      if (document.visibilityState === "visible" && wantJoinedRef.current) {
         silentLoopRef.current.resume();
         requestWakeLock();
         if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
@@ -343,7 +360,7 @@ export function RadioWidget() {
       }
     }
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    // Also handle pageshow (iOS fires this when coming back from background)
+    // pageshow fires on iOS when returning from background / bfcache
     window.addEventListener("pageshow", handleVisibilityChange);
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
@@ -353,7 +370,7 @@ export function RadioWidget() {
 
   useEffect(() => {
     return () => {
-      isJoinedRef.current = false;
+      wantJoinedRef.current = false;
       if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
       stopSpeaking();
       wsRef.current?.close();
