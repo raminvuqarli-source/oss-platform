@@ -1737,7 +1737,8 @@
     "waiterView": "Waiter View",
     "waiterOrders": "Orders",
     "cleaningTasks": "Cleaning Tasks",
-    "cashierTables": "Tables & Bills"
+    "cashierTables": "Tables & Bills",
+    "restaurantFinance": "Restaurant Finance"
   },
   "staffPerformance": {
     "title": "Staff Performance",

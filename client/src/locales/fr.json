@@ -1712,7 +1712,8 @@
     "waiterView": "Vue serveur",
     "waiterOrders": "Commandes",
     "cleaningTasks": "Tâches de nettoyage",
-    "cashierTables": "Tables & Factures"
+    "cashierTables": "Tables & Factures",
+    "restaurantFinance": "Finances du Restaurant"
   },
   "smartExtras": {
     "title": "Extras Intelligents",

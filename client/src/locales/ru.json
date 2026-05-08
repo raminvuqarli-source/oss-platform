@@ -1719,7 +1719,8 @@
     "waiterView": "Вид официанта",
     "waiterOrders": "Заказы",
     "cleaningTasks": "Задачи по уборке",
-    "cashierTables": "Столики и счета"
+    "cashierTables": "Столики и счета",
+    "restaurantFinance": "Финансы ресторана"
   },
   "smartExtras": {
     "title": "Умные дополнения",

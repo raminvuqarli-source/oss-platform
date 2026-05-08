@@ -1712,7 +1712,8 @@
     "waiterView": "نمای گارسون",
     "waiterOrders": "سفارش‌ها",
     "cleaningTasks": "وظایف نظافت",
-    "cashierTables": "میزها و صورتحساب‌ها"
+    "cashierTables": "میزها و صورتحساب‌ها",
+    "restaurantFinance": "مالی رستوران"
   },
   "smartExtras": {
     "title": "امکانات هوشمند",

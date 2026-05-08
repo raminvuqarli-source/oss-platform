@@ -1712,7 +1712,8 @@
     "waiterView": "عرض النادل",
     "waiterOrders": "الطلبات",
     "cleaningTasks": "مهام التنظيف",
-    "cashierTables": "الطاولات والفواتير"
+    "cashierTables": "الطاولات والفواتير",
+    "restaurantFinance": "مالية المطعم"
   },
   "smartExtras": {
     "title": "الإضافات الذكية",

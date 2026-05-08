@@ -1719,7 +1719,8 @@
     "waiterView": "Garson Görünümü",
     "waiterOrders": "Siparişler",
     "cleaningTasks": "Temizlik Görevleri",
-    "cashierTables": "Masalar & Hesaplar"
+    "cashierTables": "Masalar & Hesaplar",
+    "restaurantFinance": "Restoran Finansı"
   },
   "smartExtras": {
     "title": "Akıllı Ekstralar",

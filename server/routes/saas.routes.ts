@@ -240,9 +240,13 @@ export function registerSaasRoutes(app: Express): void {
       const now = new Date();
 
       if (isTrial && sub.trialEndsAt) {
-        const diff = new Date(sub.trialEndsAt).getTime() - now.getTime();
-        remainingDays = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-        isExpired = diff <= 0;
+        const trialEnd = new Date(sub.trialEndsAt);
+        // Calendar-day countdown: compare date portions only so the count drops at midnight
+        const endMidnight = new Date(trialEnd.getFullYear(), trialEnd.getMonth(), trialEnd.getDate());
+        const nowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const calDiff = endMidnight.getTime() - nowMidnight.getTime();
+        remainingDays = Math.max(0, Math.round(calDiff / (1000 * 60 * 60 * 24)));
+        isExpired = trialEnd.getTime() <= now.getTime();
       } else if (!isTrial && (sub as any).currentPeriodEnd) {
         const periodEnd = new Date((sub as any).currentPeriodEnd);
         const diff = periodEnd.getTime() - now.getTime();

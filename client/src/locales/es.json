@@ -1712,7 +1712,8 @@
     "waiterView": "Vista camarero",
     "waiterOrders": "Pedidos",
     "cleaningTasks": "Tareas de limpieza",
-    "cashierTables": "Mesas & Cuentas"
+    "cashierTables": "Mesas & Cuentas",
+    "restaurantFinance": "Finanzas del Restaurante"
   },
   "smartExtras": {
     "title": "Extras Inteligentes",

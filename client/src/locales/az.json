@@ -1724,7 +1724,8 @@
     "waiterView": "Qarson Görünüşü",
     "waiterOrders": "Sifarişlər",
     "cleaningTasks": "Temizlik Tapşırıqları",
-    "cashierTables": "Masalar & Hesablar"
+    "cashierTables": "Masalar & Hesablar",
+    "restaurantFinance": "Restoran Maliyyəsi"
   },
   "roomStatus": {
     "ready": "Hazır",
