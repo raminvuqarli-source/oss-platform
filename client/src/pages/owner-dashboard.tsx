@@ -5772,7 +5772,6 @@ function PaymentIframeModal({ paymentUrl, onSuccess, onDeclined, onClose }: {
     <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent className="max-w-lg w-full p-0 overflow-hidden" style={{ height: "600px" }}>
         <div className="relative w-full h-full flex flex-col">
-          {/* Our branded header bar */}
           <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/30">
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
@@ -5783,60 +5782,21 @@ function PaymentIframeModal({ paymentUrl, onSuccess, onDeclined, onClose }: {
               SSL
             </div>
           </div>
-
-          {/* Loading spinner — covers iframe area while page loads */}
           {loading && (
-            <div className="absolute inset-0 top-[45px] flex items-center justify-center bg-background z-20">
+            <div className="absolute inset-0 top-[52px] flex items-center justify-center bg-background z-10">
               <div className="flex flex-col items-center gap-3">
                 <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
                 <p className="text-sm text-muted-foreground">Ödəniş səhifəsi yüklənir...</p>
               </div>
             </div>
           )}
-
-          {/* Iframe wrapper — position:relative so overlay is anchored to it */}
-          <div className="relative flex-1 w-full overflow-hidden">
-            <iframe
-              src={paymentUrl}
-              className="w-full h-full border-0"
-              onLoad={() => setLoading(false)}
-              sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-top-navigation-by-user-activation"
-              title="Epoint Payment"
-            />
-
-            {/* Overlay covering the "Ödəniş təfərrüatları" heading inside the Epoint page.
-                Epoint layout: logo+phone header ≈ 60px tall, then the heading ≈ 45px.
-                Overlay is positioned from top:58px, height:48px, full width.
-                Background matches Epoint page background (#ffffff).
-                Z-index keeps it above iframe content but below our spinner. */}
-            {!loading && (
-              <div
-                className="custom-header-overlay"
-                style={{
-                  position: "absolute",
-                  top: "58px",
-                  left: 0,
-                  right: 0,
-                  height: "48px",
-                  backgroundColor: "#ffffff",
-                  zIndex: 10,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  pointerEvents: "none",
-                }}
-              >
-                <span style={{
-                  fontSize: "20px",
-                  fontWeight: 700,
-                  color: "#1a1a1a",
-                  letterSpacing: "-0.3px",
-                }}>
-                  Abunəlik ödənişi
-                </span>
-              </div>
-            )}
-          </div>
+          <iframe
+            src={paymentUrl}
+            className="w-full flex-1 border-0"
+            onLoad={() => setLoading(false)}
+            sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-top-navigation-by-user-activation"
+            title="Epoint Payment"
+          />
         </div>
       </DialogContent>
     </Dialog>
