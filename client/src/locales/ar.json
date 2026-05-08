@@ -520,6 +520,8 @@
       "allTypes": "كل الأنواع",
       "entries": "سجلات"
     },
+    "planActivated": "تم تفعيل الخطة",
+    "planActivatedDesc": "اشتراكك نشط الآن.",
     "payWithCard": "ادفع بالبطاقة",
     "active": "نشط",
     "inactive": "غير نشط",

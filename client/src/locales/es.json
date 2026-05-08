@@ -520,6 +520,8 @@
       "allTypes": "Todos los tipos",
       "entries": "registros"
     },
+    "planActivated": "Plan activado",
+    "planActivatedDesc": "Su suscripción ahora está activa.",
     "payWithCard": "Pagar con tarjeta",
     "active": "Activo",
     "inactive": "Inactivo",

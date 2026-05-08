@@ -525,6 +525,8 @@
       "allTypes": "Bütün Növlər",
       "entries": "qeyd"
     },
+    "planActivated": "Plan Aktivləşdirildi",
+    "planActivatedDesc": "Abunəliyiniz artıq aktivdir.",
     "payWithCard": "Kartla Ödə",
     "paymentSummary": "Ödəniş Xülasəsi",
     "corePlan": "Əsas Plan",

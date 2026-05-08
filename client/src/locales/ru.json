@@ -520,6 +520,8 @@
       "allTypes": "Все типы",
       "entries": "записей"
     },
+    "planActivated": "План активирован",
+    "planActivatedDesc": "Ваша подписка теперь активна.",
     "payWithCard": "Оплатить картой",
     "paymentSummary": "Сводка платежа",
     "corePlan": "Основной план",

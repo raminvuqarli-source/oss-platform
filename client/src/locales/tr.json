@@ -520,6 +520,8 @@
       "allTypes": "Tüm Türler",
       "entries": "kayıt"
     },
+    "planActivated": "Plan Aktive Edildi",
+    "planActivatedDesc": "Aboneliğiniz artık aktif.",
     "payWithCard": "Kartla Öde",
     "paymentSummary": "Ödeme Özeti",
     "corePlan": "Ana Plan",

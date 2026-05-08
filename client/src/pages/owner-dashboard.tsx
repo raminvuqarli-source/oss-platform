@@ -5787,6 +5787,11 @@ function BillingAddonsView() {
       toast({ title: t("billing.wa.purchaseSuccess", "Package Activated"), description: t("billing.wa.purchaseSuccessDesc", "Your WhatsApp messages have been added.") });
       queryClient.invalidateQueries({ queryKey: ["/api/billing/addons"] });
       window.history.replaceState({}, "", window.location.pathname + "?view=billing-addons");
+    } else if (payment === "sub_success") {
+      toast({ title: t("billing.planActivated", "Plan Activated"), description: t("billing.planActivatedDesc", "Your subscription is now active.") });
+      queryClient.invalidateQueries({ queryKey: ["/api/subscription/status"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/billing/addons"] });
+      window.history.replaceState({}, "", window.location.pathname + "?view=billing-addons");
     } else if (payment === "declined") {
       toast({ title: t("common.error", "Payment Declined"), description: t("billing.wa.purchaseError", "Payment was not completed. Please try again."), variant: "destructive" });
       window.history.replaceState({}, "", window.location.pathname + "?view=billing-addons");
@@ -5807,6 +5812,23 @@ function BillingAddonsView() {
     },
     onError: () => {
       toast({ title: t("common.error", "Error"), description: t("billing.wa.purchaseError", "Failed to purchase package. Please try again."), variant: "destructive" });
+    },
+  });
+
+  const subPayMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/billing/subscription/epoint-order", {});
+      return res.json();
+    },
+    onSuccess: (data) => {
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+      } else {
+        toast({ title: t("common.error", "Error"), description: t("billing.checkoutError", "Failed to create payment. Please try again."), variant: "destructive" });
+      }
+    },
+    onError: () => {
+      toast({ title: t("common.error", "Error"), description: t("billing.checkoutError", "Failed to create payment. Please try again."), variant: "destructive" });
     },
   });
 
@@ -5908,14 +5930,19 @@ function BillingAddonsView() {
                   )}
                 </div>
               </div>
-              {(subStatus.isExpired || isTrial) && (
+              {(subStatus.isExpired || isTrial || subStatus.status === "past_due") && (
                 <Button
                   className="w-full mt-3 bg-primary hover:bg-primary/90 text-white"
-                  onClick={() => openContact(isTrial ? "Plan Upgrade Request" : "Subscription Renewal Request")}
+                  onClick={() => subPayMutation.mutate()}
+                  disabled={subPayMutation.isPending}
                   data-testid="button-core-pay"
                 >
                   <CreditCard className="h-4 w-4 mr-2" />
-                  {isTrial ? t("billing.core.upgrade", "Plana keç") : t("billing.core.renew", "Ödənişi et")}
+                  {subPayMutation.isPending
+                    ? t("billing.loading", "Yüklənir...")
+                    : isTrial
+                    ? t("billing.core.upgrade", "Plana keç")
+                    : t("billing.core.renew", "Ödənişi et")}
                 </Button>
               )}
             </CardContent>

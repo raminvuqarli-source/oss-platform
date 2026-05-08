@@ -520,6 +520,8 @@
       "allTypes": "همه انواع",
       "entries": "مورد"
     },
+    "planActivated": "پلن فعال شد",
+    "planActivatedDesc": "اشتراک شما اکنون فعال است.",
     "payWithCard": "پرداخت با کارت",
     "active": "فعال",
     "inactive": "غیرفعال",

@@ -936,6 +936,113 @@ export function registerEpointRoutes(app: Express): void {
     }
   });
 
+  // ============== SUBSCRIPTION PLAN PAYMENT (Trial → Paid or Renewal) ==============
+  app.post("/api/billing/subscription/epoint-order", requireAuth, async (req, res) => {
+    try {
+      const privateKey = env.EPOINT_PRIVATE_KEY;
+      const publicKey = env.EPOINT_PUBLIC_KEY;
+      const merchantId = env.EPOINT_MERCHANT_ID;
+      const baseUrl = env.BASE_URL;
+
+      if (!privateKey || !publicKey) {
+        return res.status(503).json({ message: "Epoint payment is not configured." });
+      }
+
+      const user = await storage.getUser(req.session.userId!);
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      if (!["owner_admin", "admin", "property_manager"].includes(user.role)) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const ownerId = user.ownerId || user.id;
+      const tenantId = req.session.demoSessionTenantId || user.tenantId || user.ownerId || null;
+
+      const sub = await storage.getSubscriptionByOwner(ownerId);
+      if (!sub) return res.status(404).json({ message: "No subscription found" });
+
+      const planCode = (sub as any).planCode as PlanCode;
+      const planConfig = PLAN_CODE_FEATURES[planCode];
+      if (!planConfig) return res.status(400).json({ message: "Invalid plan code" });
+
+      const planType = PLAN_CODE_TO_TYPE[planCode] || "pro";
+      const totalAZN = planConfig.priceMonthlyAZN;
+      const isSplit = totalAZN > EPOINT_MAX_AZN;
+      const splitTotal = isSplit ? Math.ceil(totalAZN / EPOINT_MAX_AZN) : 1;
+      const splitGroupId = isSplit ? crypto.randomUUID() : null;
+      const firstSplitAZN = isSplit ? Math.min(EPOINT_MAX_AZN, totalAZN) : totalAZN;
+      const totalCents = Math.round(totalAZN * 100);
+      const firstSplitCents = Math.round(firstSplitAZN * 100);
+
+      const customerNote = isSplit
+        ? JSON.stringify({ splitGroupId, splitIndex: 1, splitTotal, planCode, totalAmountAZN: totalAZN })
+        : `Subscription payment - ${planCode}`;
+
+      const order = await storage.createPaymentOrder({
+        ownerId,
+        tenantId,
+        planType: planType as any,
+        orderType: "subscription_new",
+        amount: isSplit ? firstSplitCents : totalCents,
+        currency: "AZN",
+        status: "pending",
+        paymentMethodId: null,
+        customerNote,
+        transferReference: null,
+      } as any);
+
+      const successUrl = isSplit
+        ? `${baseUrl}/dashboard?view=billing-addons&payment=split_pending&orderId=${order.id}`
+        : `${baseUrl}/dashboard?view=billing-addons&payment=sub_success&orderId=${order.id}`;
+
+      const epointData = {
+        public_key: publicKey,
+        merchant_id: merchantId,
+        amount: firstSplitAZN.toFixed(2),
+        currency: "AZN",
+        language: "az",
+        order_id: order.id,
+        description: `OSS ${planCode}` + (isSplit ? ` p1of${splitTotal}` : ""),
+        success_redirect_url: successUrl,
+        error_redirect_url: `${baseUrl}/dashboard?view=billing-addons&payment=declined&orderId=${order.id}`,
+        callback_url: `${baseUrl}/api/epoint/webhook`,
+      };
+
+      logger.info({ orderId: order.id, planCode, amount: firstSplitAZN, isSplit }, "Creating Epoint subscription order");
+
+      const { data, signature } = signData(privateKey, epointData);
+      const requestBody = new URLSearchParams({ data, signature }).toString();
+
+      const epointRes = await fetch(EPOINT_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: requestBody,
+      });
+
+      const epointResponse = await epointRes.json() as any;
+
+      if (epointResponse.status !== "success" || !epointResponse.redirect_url) {
+        const errorReason = epointResponse.message || epointResponse.error || epointResponse.status || "Unknown error";
+        logger.error({ errorReason, response: epointResponse }, "Epoint subscription order creation failed");
+        await storage.updatePaymentOrder(order.id, { status: "rejected", adminNote: `Epoint API error: ${errorReason}` });
+        return res.status(502).json({ message: `Payment gateway error: ${errorReason}` });
+      }
+
+      await storage.updatePaymentOrder(order.id, {
+        transferReference: epointResponse.transaction || null,
+      });
+
+      return res.json({
+        paymentUrl: epointResponse.redirect_url,
+        orderId: order.id,
+        isSplit,
+        splitTotal: isSplit ? splitTotal : 1,
+      });
+    } catch (error: any) {
+      logger.error({ err: error }, "Create Epoint subscription order error");
+      res.status(500).json({ message: `Failed to create payment: ${error?.message || "Unknown error"}` });
+    }
+  });
+
   app.post("/api/epoint/webhook", async (req, res) => {
     try {
       const privateKey = env.EPOINT_PRIVATE_KEY;

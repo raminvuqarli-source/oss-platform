@@ -525,6 +525,8 @@
       "allTypes": "All Types",
       "entries": "entries"
     },
+    "planActivated": "Plan Activated",
+    "planActivatedDesc": "Your subscription is now active.",
     "payWithCard": "Pay with Card",
     "paymentSummary": "Payment Summary",
     "corePlan": "Core Plan",

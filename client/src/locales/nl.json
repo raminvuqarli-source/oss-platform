@@ -520,6 +520,8 @@
       "allTypes": "Alle typen",
       "entries": "vermeldingen"
     },
+    "planActivated": "Plan geactiveerd",
+    "planActivatedDesc": "Uw abonnement is nu actief.",
     "payWithCard": "Betalen met kaart",
     "active": "Actief",
     "inactive": "Inactief",
