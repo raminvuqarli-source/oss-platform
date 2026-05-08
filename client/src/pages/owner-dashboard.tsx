@@ -5745,10 +5745,69 @@ export function ContactDialog({ open, onClose, subject }: { open: boolean; onClo
   );
 }
 
+function PaymentIframeModal({ paymentUrl, onSuccess, onDeclined, onClose }: {
+  paymentUrl: string;
+  onSuccess: (orderId?: string) => void;
+  onDeclined: () => void;
+  onClose: () => void;
+}) {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    function handleMessage(event: MessageEvent) {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type !== "EPOINT_PAYMENT_RESULT") return;
+      const { payment, orderId } = event.data;
+      if (payment === "sub_success" || payment === "success") {
+        onSuccess(orderId);
+      } else {
+        onDeclined();
+      }
+    }
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [onSuccess, onDeclined]);
+
+  return (
+    <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="max-w-lg w-full p-0 overflow-hidden" style={{ height: "600px" }}>
+        <div className="relative w-full h-full flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/30">
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-sm font-medium">Epoint.az — Təhlükəsiz Ödəniş</span>
+            </div>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              SSL
+            </div>
+          </div>
+          {loading && (
+            <div className="absolute inset-0 top-[52px] flex items-center justify-center bg-background z-10">
+              <div className="flex flex-col items-center gap-3">
+                <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+                <p className="text-sm text-muted-foreground">Ödəniş səhifəsi yüklənir...</p>
+              </div>
+            </div>
+          )}
+          <iframe
+            src={paymentUrl}
+            className="w-full flex-1 border-0"
+            onLoad={() => setLoading(false)}
+            sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-top-navigation-by-user-activation"
+            title="Epoint Payment"
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function BillingAddonsView() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [contactDialog, setContactDialog] = useState<{ open: boolean; subject: string }>({ open: false, subject: "" });
+  const [paymentModal, setPaymentModal] = useState<{ open: boolean; paymentUrl: string }>({ open: false, paymentUrl: "" });
 
   function openContact(subject: string) {
     setContactDialog({ open: true, subject });
@@ -5822,7 +5881,7 @@ function BillingAddonsView() {
     },
     onSuccess: (data) => {
       if (data.paymentUrl) {
-        window.location.href = data.paymentUrl;
+        setPaymentModal({ open: true, paymentUrl: data.paymentUrl });
       } else {
         toast({ title: t("common.error", "Error"), description: t("billing.checkoutError", "Failed to create payment. Please try again."), variant: "destructive" });
       }
@@ -5862,6 +5921,23 @@ function BillingAddonsView() {
       onClose={() => setContactDialog({ open: false, subject: "" })}
       subject={contactDialog.subject}
     />
+
+    {paymentModal.open && (
+      <PaymentIframeModal
+        paymentUrl={paymentModal.paymentUrl}
+        onSuccess={() => {
+          setPaymentModal({ open: false, paymentUrl: "" });
+          toast({ title: t("billing.planActivated", "Plan Activated"), description: t("billing.planActivatedDesc", "Your subscription is now active.") });
+          queryClient.invalidateQueries({ queryKey: ["/api/subscription/status"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/billing/addons"] });
+        }}
+        onDeclined={() => {
+          setPaymentModal({ open: false, paymentUrl: "" });
+          toast({ title: t("common.error", "Payment Declined"), description: t("billing.wa.purchaseError", "Payment was not completed. Please try again."), variant: "destructive" });
+        }}
+        onClose={() => setPaymentModal({ open: false, paymentUrl: "" })}
+      />
+    )}
 
     <div className="space-y-6 p-1" data-testid="billing-addons-view">
       <div>

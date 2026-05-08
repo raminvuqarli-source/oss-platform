@@ -50,6 +50,7 @@ const RestaurantCashier = lazy(() => import("@/pages/restaurant-cashier-dashboar
 const DemoLogin = lazy(() => import("@/pages/demo-login"));
 const RestaurantRegister = lazy(() => import("@/pages/restaurant-register"));
 const RestaurantGuestPage = lazy(() => import("@/pages/restaurant-guest"));
+const PaymentReturn = lazy(() => import("@/pages/payment-return"));
 
 class ErrorBoundary extends Component<{ children: React.ReactNode }, { hasError: boolean; errorMessage: string }> {
   constructor(props: { children: React.ReactNode }) {
@@ -206,6 +207,7 @@ const publicRoutes = [
   { path: "/join-team", component: JoinTeam },
   { path: "/privacy-policy", component: PrivacyPolicy },
   { path: "/terms-of-service", component: TermsOfService },
+  { path: "/payment-return", component: PaymentReturn },
 ] as const;
 
 // Protected routes requiring authentication, wrapped in DashboardLayout

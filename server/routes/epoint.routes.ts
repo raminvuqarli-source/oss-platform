@@ -991,8 +991,8 @@ export function registerEpointRoutes(app: Express): void {
       } as any);
 
       const successUrl = isSplit
-        ? `${baseUrl}/dashboard?view=billing-addons&payment=split_pending&orderId=${order.id}`
-        : `${baseUrl}/dashboard?view=billing-addons&payment=sub_success&orderId=${order.id}`;
+        ? `${baseUrl}/payment-return?payment=split_pending&orderId=${order.id}`
+        : `${baseUrl}/payment-return?payment=sub_success&orderId=${order.id}`;
 
       const epointData = {
         public_key: publicKey,
@@ -1003,7 +1003,7 @@ export function registerEpointRoutes(app: Express): void {
         order_id: order.id,
         description: `OSS ${planCode}` + (isSplit ? ` p1of${splitTotal}` : ""),
         success_redirect_url: successUrl,
-        error_redirect_url: `${baseUrl}/dashboard?view=billing-addons&payment=declined&orderId=${order.id}`,
+        error_redirect_url: `${baseUrl}/payment-return?payment=declined&orderId=${order.id}`,
         callback_url: `${baseUrl}/api/epoint/webhook`,
       };
 
