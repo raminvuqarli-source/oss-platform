@@ -10,16 +10,26 @@ import { validateBody } from "../middleware/validateBody";
 import { updateBookingSchema, arrivalInfoSchema, precheckSchema, roomSettingsSchema, doorControlSchema, unitStatusSchema } from "../validators/booking.validators";
 import { autoOpenFolio, autoCloseFolio } from "./folio.routes";
 import { applyCancellationPolicy } from "../services/cancellationPolicyEngine";
+import { resolveHotelContext } from "../utils/resolveHotelContext";
 
 export function registerBookingRoutes(app: Express): void {
-  // Bookings Routes - filtered by hotel
+  // Bookings Routes - filtered by hotel or tenant
   app.get("/api/bookings", requireRole("admin", "reception", "owner_admin", "property_manager", "staff"), async (req, res) => {
     const user = await storage.getUser(req.session.userId!);
-    if (!user?.hotelId) {
-      return res.status(400).json({ message: "No hotel assigned" });
+    if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+    // owner_admin / property_manager may not have a hotelId — fall back to tenant-wide query
+    if (user.hotelId) {
+      const bookingList = await storage.getBookingsByHotel(user.hotelId, req.tenantId!);
+      return res.json(bookingList);
     }
-    const bookings = await storage.getBookingsByHotel(user.hotelId, req.tenantId!);
-    res.json(bookings);
+
+    if (req.tenantId) {
+      const bookingList = await storage.getAllBookings(req.tenantId);
+      return res.json(bookingList);
+    }
+
+    return res.status(400).json({ message: "No hotel or tenant assigned" });
   });
 
   app.get("/api/bookings/current", requireAuth, async (req, res) => {
@@ -497,22 +507,28 @@ export function registerBookingRoutes(app: Express): void {
 
   // Get door action logs (admin only) - filtered by hotel
   app.get("/api/door-logs", requireRole("admin", "owner_admin", "property_manager"), requireTenant, async (req, res) => {
-    const user = await storage.getUser(req.session.userId!);
-    if (!user?.hotelId) {
-      return res.status(400).json({ message: "No hotel assigned" });
+    const { hotelIds, user } = await resolveHotelContext(req.session.userId!);
+    if (!user) return res.status(401).json({ message: "Unauthorized" });
+    if (hotelIds.length === 0) return res.json([]);
+    const all: any[] = [];
+    for (const hid of hotelIds) {
+      const logs = await storage.getDoorActionLogsByHotel(hid, req.tenantId!);
+      all.push(...logs);
     }
-    const logs = await storage.getDoorActionLogsByHotel(user.hotelId, req.tenantId!);
-    res.json(logs);
+    res.json(all);
   });
 
   app.get("/api/door-logs/:roomNumber", requireRole("admin", "reception", "owner_admin", "property_manager"), requireTenant, async (req, res) => {
-    const user = await storage.getUser(req.session.userId!);
-    if (!user?.hotelId) {
-      return res.status(400).json({ message: "No hotel assigned" });
+    const { hotelIds, user } = await resolveHotelContext(req.session.userId!);
+    if (!user) return res.status(401).json({ message: "Unauthorized" });
+    if (hotelIds.length === 0) return res.json([]);
+    const roomNum = asString(req.params.roomNumber);
+    const all: any[] = [];
+    for (const hid of hotelIds) {
+      const logs = await storage.getDoorActionLogsByHotel(hid, req.tenantId!);
+      all.push(...logs.filter(log => log.roomNumber === roomNum));
     }
-    const allLogs = await storage.getDoorActionLogsByHotel(user.hotelId, req.tenantId!);
-    const roomLogs = allLogs.filter(log => log.roomNumber === asString(req.params.roomNumber));
-    res.json(roomLogs);
+    res.json(all);
   });
 
   app.get("/api/door-activity/:propertyId", requireRole("owner_admin", "admin", "property_manager"), async (req, res) => {

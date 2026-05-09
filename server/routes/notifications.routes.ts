@@ -2,6 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { storage } from "../storage";
 import { asString } from "../utils/request";
 import { requireAuth, requireRole } from "../middleware";
+import { resolveHotelContext } from "../utils/resolveHotelContext";
 
 export function registerNotificationRoutes(app: Express): void {
   // Notifications Routes
@@ -11,12 +12,20 @@ export function registerNotificationRoutes(app: Express): void {
   });
 
   app.get("/api/notifications/all", requireRole("admin", "owner_admin", "property_manager"), async (req, res) => {
-    const user = await storage.getUser(req.session.userId!);
-    if (!user?.hotelId) {
-      return res.status(400).json({ message: "No hotel assigned" });
+    const { hotelIds, user } = await resolveHotelContext(req.session.userId!);
+    if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+    if (hotelIds.length === 0) {
+      return res.json([]);
     }
-    const notifications = await storage.getNotificationsByHotel(user.hotelId, req.tenantId!);
-    res.json(notifications);
+
+    const all: any[] = [];
+    for (const hid of hotelIds) {
+      const notes = await storage.getNotificationsByHotel(hid, req.tenantId!);
+      all.push(...notes);
+    }
+    all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    res.json(all);
   });
 
   app.patch("/api/notifications/:id/read", requireAuth, async (req, res) => {

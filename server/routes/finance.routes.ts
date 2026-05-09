@@ -3,6 +3,7 @@ import { storage } from "../storage";
 import { asString } from "../utils/request";
 import { requireAuth, requireRole } from "../middleware";
 import { logger } from "../utils/logger";
+import { resolveHotelContext } from "../utils/resolveHotelContext";
 
 export function registerFinanceRoutes(app: Express): void {
 
@@ -11,20 +12,16 @@ export function registerFinanceRoutes(app: Express): void {
   // Reception: Get all transactions (for their hotel)
   app.get("/api/finance/transactions", requireRole("reception", "admin", "owner_admin", "property_manager"), async (req, res) => {
     try {
-      const user = await storage.getUser(req.session.userId!);
-      let hotelId = user?.hotelId;
-      if (!hotelId && user?.propertyId) {
-        const matchingHotel = await storage.getHotelByPropertyId(user.propertyId);
-        if (matchingHotel) {
-          hotelId = matchingHotel.id;
-          await storage.updateUser(user.id, { hotelId });
-        }
+      const { hotelIds, user } = await resolveHotelContext(req.session.userId!);
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      if (hotelIds.length === 0) return res.json([]);
+      const all: any[] = [];
+      for (const hid of hotelIds) {
+        const txns = await storage.getFinancialTransactionsByHotel(hid, req.tenantId!);
+        all.push(...txns);
       }
-      if (!hotelId) {
-        return res.status(400).json({ message: "No hotel assigned" });
-      }
-      const transactions = await storage.getFinancialTransactionsByHotel(hotelId, req.tenantId!);
-      res.json(transactions);
+      all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      res.json(all);
     } catch (error) {
       logger.error({ err: error }, "Error fetching transactions");
       res.status(500).json({ message: "Failed to fetch transactions" });
@@ -238,18 +235,9 @@ export function registerFinanceRoutes(app: Express): void {
   // Admin: Get financial analytics
   app.get("/api/finance/analytics", requireRole("admin", "owner_admin", "property_manager"), async (req, res) => {
     try {
-      const user = await storage.getUser(req.session.userId!);
-      let hotelId = user?.hotelId;
-      if (!hotelId && user?.propertyId) {
-        const matchingHotel = await storage.getHotelByPropertyId(user.propertyId);
-        if (matchingHotel) {
-          hotelId = matchingHotel.id;
-          await storage.updateUser(user.id, { hotelId });
-        }
-      }
-      if (!hotelId) {
-        return res.status(400).json({ message: "No hotel assigned" });
-      }
+      const { hotelId, user } = await resolveHotelContext(req.session.userId!);
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      if (!hotelId) return res.status(400).json({ message: "No hotel assigned" });
 
       const now = new Date();
       const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -338,15 +326,9 @@ export function registerFinanceRoutes(app: Express): void {
   // Backfill: Create financial transactions for existing paid bookings without one
   app.post("/api/finance/backfill", requireRole("admin", "owner_admin", "property_manager"), async (req, res) => {
     try {
-      const user = await storage.getUser(req.session.userId!);
-      let hotelId = user?.hotelId;
-      if (!hotelId && user?.propertyId) {
-        const matchingHotel = await storage.getHotelByPropertyId(user!.propertyId);
-        if (matchingHotel) hotelId = matchingHotel.id;
-      }
-      if (!hotelId) {
-        return res.status(400).json({ message: "No hotel assigned" });
-      }
+      const { hotelId, user } = await resolveHotelContext(req.session.userId!);
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      if (!hotelId) return res.status(400).json({ message: "No hotel assigned" });
 
       const allBookings = await storage.getBookingsByHotel(hotelId, req.tenantId!);
       const existingTransactions = await storage.getFinancialTransactionsByHotel(hotelId, req.tenantId!);
@@ -424,20 +406,16 @@ export function registerFinanceRoutes(app: Express): void {
   // Admin: Get audit logs
   app.get("/api/finance/audit-logs", requireRole("admin", "owner_admin", "property_manager"), async (req, res) => {
     try {
-      const user = await storage.getUser(req.session.userId!);
-      let hotelId = user?.hotelId;
-      if (!hotelId && user?.propertyId) {
-        const matchingHotel = await storage.getHotelByPropertyId(user.propertyId);
-        if (matchingHotel) {
-          hotelId = matchingHotel.id;
-          await storage.updateUser(user.id, { hotelId });
-        }
+      const { hotelIds, user } = await resolveHotelContext(req.session.userId!);
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      if (hotelIds.length === 0) return res.json([]);
+      const all: any[] = [];
+      for (const hid of hotelIds) {
+        const logs = await storage.getFinancialAuditLogs(hid, req.tenantId!);
+        all.push(...logs);
       }
-      if (!hotelId) {
-        return res.status(400).json({ message: "No hotel assigned" });
-      }
-      const logs = await storage.getFinancialAuditLogs(hotelId, req.tenantId!);
-      res.json(logs);
+      all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      res.json(all);
     } catch (error) {
       logger.error({ err: error }, "Error fetching audit logs");
       res.status(500).json({ message: "Failed to fetch audit logs" });

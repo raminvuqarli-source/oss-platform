@@ -115,19 +115,25 @@ export function registerChatRoutes(app: Express): void {
   app.get("/api/chat/messages/:guestId", requireRole("reception", "admin", "owner_admin", "property_manager"), async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
-      if (!user?.hotelId) {
-        return res.status(400).json({ message: "No hotel assigned" });
-      }
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
       
       const guestId = asString(req.params.guestId);
       
-      // Verify the guest belongs to the same hotel
+      // Verify the guest belongs to the same hotel/tenant
       const guest = await storage.getUser(guestId);
-      if (!guest || guest.hotelId !== user.hotelId) {
+      if (!guest) return res.status(403).json({ message: "Guest not found" });
+
+      // For owner_admin without hotelId: allow access by tenantId match
+      const effectiveHotelId = user.hotelId || guest.hotelId;
+      if (!effectiveHotelId) return res.status(400).json({ message: "No hotel assigned" });
+
+      const sameTenant = user.tenantId && guest.tenantId && user.tenantId === guest.tenantId;
+      const sameHotel = user.hotelId && guest.hotelId && user.hotelId === guest.hotelId;
+      if (!sameTenant && !sameHotel) {
         return res.status(403).json({ message: "Guest not found in your hotel" });
       }
       
-      const messages = await storage.getChatMessagesForHotel(user.hotelId, req.tenantId!, guestId);
+      const messages = await storage.getChatMessagesForHotel(effectiveHotelId, req.tenantId!, guestId);
       res.json(messages);
     } catch (error) {
       logger.error({ err: error }, "Error fetching chat messages for guest");
@@ -139,9 +145,7 @@ export function registerChatRoutes(app: Express): void {
   app.post("/api/chat/messages/:guestId", requireRole("reception", "admin", "owner_admin", "property_manager"), async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
-      if (!user?.hotelId) {
-        return res.status(400).json({ message: "No hotel assigned" });
-      }
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
       
       const guestId = asString(req.params.guestId);
       const { message } = req.body;
@@ -150,14 +154,21 @@ export function registerChatRoutes(app: Express): void {
         return res.status(400).json({ message: "Message is required" });
       }
       
-      // Verify the guest belongs to the same hotel
+      // Verify the guest belongs to the same hotel/tenant
       const guest = await storage.getUser(guestId);
-      if (!guest || guest.hotelId !== user.hotelId) {
+      if (!guest) return res.status(403).json({ message: "Guest not found" });
+
+      const effectiveHotelId = user.hotelId || guest.hotelId;
+      if (!effectiveHotelId) return res.status(400).json({ message: "No hotel assigned" });
+
+      const sameTenant = user.tenantId && guest.tenantId && user.tenantId === guest.tenantId;
+      const sameHotel = user.hotelId && guest.hotelId && user.hotelId === guest.hotelId;
+      if (!sameTenant && !sameHotel) {
         return res.status(403).json({ message: "Guest not found in your hotel" });
       }
       
       const chatMessage = await storage.createChatMessage({
-        hotelId: user.hotelId,
+        hotelId: effectiveHotelId,
         guestId: guestId,
         senderId: user.id,
         senderRole: user.role,
@@ -206,25 +217,35 @@ export function registerChatRoutes(app: Express): void {
   app.post("/api/chat/broadcast", requireRole("reception", "admin", "owner_admin", "property_manager"), async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
-      if (!user?.hotelId) {
-        return res.status(400).json({ message: "No hotel assigned" });
-      }
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      const { hotelIds } = await (async () => {
+        if (user.hotelId) return { hotelIds: [user.hotelId] };
+        const { hotelIds: resolved } = await import("../utils/resolveHotelContext").then(m => m.resolveHotelContext(req.session.userId!));
+        return { hotelIds: resolved };
+      })();
+      if (hotelIds.length === 0) return res.status(400).json({ message: "No hotel assigned" });
       const { message } = req.body;
       if (!message || typeof message !== "string" || message.trim().length === 0) {
         return res.status(400).json({ message: "Message is required" });
       }
       const trimmed = message.trim();
       const tenantId = req.tenantId || user.tenantId || null;
-      const guests = await storage.getGuestUsers(user.hotelId, tenantId ?? "");
-      if (guests.length === 0) {
+      const allGuests: any[] = [];
+      for (const hid of hotelIds) {
+        const guests = await storage.getGuestUsers(hid, tenantId ?? "");
+        allGuests.push(...guests);
+      }
+      if (allGuests.length === 0) {
         return res.json({ count: 0, guestNames: [] });
       }
+      const effectiveHotelId = user.hotelId || hotelIds[0];
+      const guests = allGuests;
       const staffName = user.fullName || "Staff";
       const shortMsg = trimmed.length > 50 ? trimmed.substring(0, 50) + "..." : trimmed;
       const results: string[] = [];
       for (const guest of guests) {
         await storage.createChatMessage({
-          hotelId: user.hotelId,
+          hotelId: guest.hotelId || effectiveHotelId,
           guestId: guest.id,
           senderId: user.id,
           senderRole: user.role,
