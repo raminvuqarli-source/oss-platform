@@ -728,6 +728,23 @@ function MobileBottomNav({ user, t }: { user: NonNullable<ReturnType<typeof useA
 
   const getItems = (): NavItem[] => {
     switch (user.role) {
+      case "admin":
+      case "property_manager":
+        // On the main action dashboard (no ?view=), show only 2 utility items
+        if (!currentView) {
+          return [
+            { icon: Bell, label: t("common.notifications"), url: "/notifications" },
+            { icon: Settings, label: t("common.settings"), url: "/settings" },
+          ];
+        }
+        // When a specific view is open, show relevant shortcuts
+        return [
+          { icon: LayoutDashboard, label: t("common.dashboard"), url: "/dashboard", view: undefined },
+          { icon: CalendarDays, label: t("nav.calendar", "Calendar"), url: "/dashboard", view: "calendar" },
+          { icon: Wrench, label: t("nav.serviceRequests", "Requests"), url: "/dashboard", view: "requests" },
+          { icon: Bell, label: t("common.notifications"), url: "/notifications" },
+          { icon: Settings, label: t("common.settings"), url: "/settings" },
+        ];
       case "owner_admin":
         return [
           { icon: LayoutDashboard, label: t("common.dashboard"), url: "/dashboard", view: undefined },
