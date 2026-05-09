@@ -1686,12 +1686,12 @@ export default function RestaurantManager() {
 
       {/* ── Add Staff Dialog ── */}
       <Dialog open={showAddStaffDialog} onOpenChange={setShowAddStaffDialog}>
-        <DialogContent className="sm:max-w-md" data-testid="dialog-add-restaurant-staff">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-md flex flex-col max-h-[90vh]" data-testid="dialog-add-restaurant-staff">
+          <DialogHeader className="shrink-0">
             <DialogTitle className="flex items-center gap-2"><UserPlus className="h-5 w-5" />{t("rm.addStaffTitle")}</DialogTitle>
             <DialogDescription>{t("rm.addStaffSubtitle")}</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-2">
+          <div className="space-y-4 py-2 overflow-y-auto flex-1 pr-1">
             <div className="space-y-1.5"><Label>{t("rm.fullName")}</Label><Input placeholder="Ali Əliyev" value={staffForm.fullName} onChange={e => setStaffForm(f => ({ ...f, fullName: e.target.value }))} data-testid="input-rs-fullname" /></div>
             <div className="space-y-1.5"><Label>{t("rm.username")}</Label><Input placeholder="ali.aliyev" value={staffForm.username} onChange={e => setStaffForm(f => ({ ...f, username: e.target.value }))} data-testid="input-rs-username" /></div>
             <div className="space-y-1.5"><Label>{t("rm.password")}</Label><Input type="password" placeholder="••••••••" value={staffForm.password} onChange={e => setStaffForm(f => ({ ...f, password: e.target.value }))} data-testid="input-rs-password" /></div>
@@ -1711,7 +1711,7 @@ export default function RestaurantManager() {
             </div>
             {/* Salary section */}
             <div className="border-t pt-3 space-y-3">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Əmək haqqı məlumatları</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("rm.salarySection", "Salary Info")}</p>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-sm">{t("rm.salaryLabel")}</Label>
@@ -1753,10 +1753,11 @@ export default function RestaurantManager() {
               </div>
             )}
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAddStaffDialog(false)}>{t("rm.cancel")}</Button>
-            <Button onClick={() => createStaff.mutate(staffForm)} disabled={createStaff.isPending} data-testid="button-create-restaurant-staff">
-              {createStaff.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : t("rm.create")}
+          <DialogFooter className="shrink-0 pt-2 border-t">
+            <Button variant="outline" onClick={() => setShowAddStaffDialog(false)} data-testid="button-cancel-restaurant-staff">{t("rm.cancel")}</Button>
+            <Button onClick={() => createStaff.mutate(staffForm)} disabled={createStaff.isPending || !staffForm.fullName || !staffForm.username || !staffForm.password} data-testid="button-create-restaurant-staff">
+              {createStaff.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <UserPlus className="h-4 w-4 mr-2" />}
+              {t("rm.addStaff", "Add Staff")}
             </Button>
           </DialogFooter>
         </DialogContent>
