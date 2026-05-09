@@ -5827,9 +5827,9 @@ function BillingAddonsView() {
   }>({ queryKey: ["/api/subscription/status"] });
 
   const ALL_WHATSAPP_PACKAGES = [
-    { id: "wa_500", name: "500 Mesaj", messages: 500, priceUsd: 15, priceAZN: 26, description: t("billing.wa.starterDesc", "Kiçik otellər üçün"), planCode: "CORE_STARTER" },
-    { id: "wa_1000", name: "1,000 Mesaj", messages: 1000, priceUsd: 25, priceAZN: 43, description: t("billing.wa.growthDesc", "Orta həcmli otellər üçün"), planCode: "CORE_GROWTH" },
-    { id: "wa_3000", name: "3,000 Mesaj", messages: 3000, priceUsd: 60, priceAZN: 102, description: t("billing.wa.proDesc", "Böyük həcmli əməliyyatlar"), planCode: "CORE_PRO" },
+    { id: "wa_500", name: t("billing.wa.pack500", "500 Messages"), messages: 500, priceUsd: 15, description: t("billing.wa.starterDesc", "For small hotels"), planCode: "CORE_STARTER" },
+    { id: "wa_1000", name: t("billing.wa.pack1000", "1,000 Messages"), messages: 1000, priceUsd: 25, description: t("billing.wa.growthDesc", "For mid-size hotels"), planCode: "CORE_GROWTH" },
+    { id: "wa_3000", name: t("billing.wa.pack3000", "3,000 Messages"), messages: 3000, priceUsd: 60, description: t("billing.wa.proDesc", "For large operations"), planCode: "CORE_PRO" },
   ];
 
   const { data: addonData, isLoading } = useQuery<{
@@ -5983,11 +5983,10 @@ function BillingAddonsView() {
                 <div>
                   <p className="text-muted-foreground text-xs">{t("billing.core.monthlyFee", "Aylıq ödəniş")}</p>
                   {planInfo ? (
-                    <p className="font-bold text-lg text-primary">{planInfo.priceAZN.toFixed(2)} ₼</p>
+                    <p className="font-bold text-lg text-primary">${planInfo.priceUSD}</p>
                   ) : (
                     <p className="font-bold text-lg text-primary">—</p>
                   )}
-                  {planInfo && <p className="text-xs text-muted-foreground">(≈ ${planInfo.priceUSD})</p>}
                 </div>
                 <div>
                   {isTrial ? (
@@ -6112,7 +6111,7 @@ function BillingAddonsView() {
                       disabled={purchaseMutation.isPending}
                       data-testid="button-wa-buy-inline"
                     >
-                      {purchaseMutation.isPending ? "..." : `${visibleWhatsappPackages[0].priceAZN} ₼`}
+                      {purchaseMutation.isPending ? "..." : `$${visibleWhatsappPackages[0].priceUsd}`}
                     </Button>
                   </div>
                 )}
@@ -6137,7 +6136,7 @@ function BillingAddonsView() {
               <Badge variant="secondary">{t("billing.addon", "Add-on")}</Badge>
             </div>
             <div className="text-sm text-muted-foreground space-y-1 pt-1 border-t">
-              <p className="font-medium text-foreground">{t("billing.smartRoom.pricingTitle", "From 49.30 ₼ / room / mo")}</p>
+              <p className="font-medium text-foreground">{t("billing.smartRoom.pricingTitle", "From $29 / room / mo")}</p>
               <p className="text-xs">{t("billing.smartRoom.pricingDesc", "Smart Lite plan — temperature, lighting, curtains")}</p>
             </div>
             <Button
