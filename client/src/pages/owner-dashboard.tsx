@@ -310,9 +310,10 @@ function AddUnitDialog({ propertyId, onSuccess }: { propertyId: string; onSucces
       });
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({ title: t('owner.spaceAdded'), description: t('owner.spaceAddedDesc', { unitNumber }) });
       queryClient.invalidateQueries({ queryKey: ["/api/properties", propertyId, "units"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/properties"] });
       setOpen(false);
       resetForm();
       onSuccess();
@@ -825,7 +826,7 @@ function PropertyUnitsPanel({ propertyId }: { propertyId: string }) {
             );
           })}
         </div>
-        <AddUnitDialog propertyId={propertyId} onSuccess={() => {}} />
+        <AddUnitDialog propertyId={propertyId} onSuccess={() => setFilterGroup("all")} />
       </div>
 
       {displayedGroups.length > 0 ? (

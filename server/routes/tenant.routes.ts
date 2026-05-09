@@ -306,6 +306,7 @@ export function registerTenantRoutes(app: Express): void {
         unitType,
         propertyId: asString(req.params.propertyId),
         ownerId: property.ownerId,
+        tenantId: req.tenantId || property.tenantId || property.ownerId,
       });
       res.status(201).json(unit);
     } catch (error) {
