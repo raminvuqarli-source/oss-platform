@@ -1554,9 +1554,11 @@ export default function Settings() {
             <AuditLogSection />
           </OwnerSettingsSection>
 
-          <OwnerSettingsSection title={t('dynamicPricing.title')} icon={Calculator} testId="settings-dynamic-pricing">
-            <DynamicPricingWrapper />
-          </OwnerSettingsSection>
+          {!isRestaurantOnly && (
+            <OwnerSettingsSection title={t('dynamicPricing.title')} icon={Calculator} testId="settings-dynamic-pricing">
+              <DynamicPricingWrapper />
+            </OwnerSettingsSection>
+          )}
         </>
       )}
 

@@ -1397,6 +1397,7 @@
     "reception": "Receptiemedewerker",
     "admin": "Beheerder",
     "owner_admin": "Accommodatie-eigenaar",
+    "restaurant_owner": "Restauranteigenaar",
     "property_manager": "Accommodatiebeheerder",
     "staff": "Personeel"
   },

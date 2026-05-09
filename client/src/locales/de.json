@@ -1397,6 +1397,7 @@
     "reception": "Rezeptionspersonal",
     "admin": "Administrator",
     "owner_admin": "Objekteigentümer",
+    "restaurant_owner": "Restaurantinhaber",
     "property_manager": "Objektmanager",
     "staff": "Personal"
   },

@@ -1422,6 +1422,7 @@
     "reception": "Reception Staff",
     "admin": "Administrator",
     "owner_admin": "Property Owner",
+    "restaurant_owner": "Restaurant Owner",
     "property_manager": "Property Manager",
     "staff": "Staff"
   },

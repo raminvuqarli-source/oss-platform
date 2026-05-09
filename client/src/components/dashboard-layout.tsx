@@ -644,7 +644,7 @@ function DashboardSidebar() {
                     <span className="truncate font-semibold">{user?.fullName}</span>
                     <span className="truncate text-xs text-muted-foreground flex items-center gap-1">
                       {getRoleIcon()}
-                      <span>{user?.role ? getRoleDisplayName(user.role as any, t) : ""}</span>
+                      <span>{user?.role ? (isRestaurantOnly && user.role === "owner_admin" ? t("roles.restaurant_owner", "Restaurant Owner") : getRoleDisplayName(user.role as any, t)) : ""}</span>
                     </span>
                   </div>
                   <ChevronUp className="ml-auto size-4" />

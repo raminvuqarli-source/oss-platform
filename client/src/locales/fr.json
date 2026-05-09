@@ -1397,6 +1397,7 @@
     "reception": "Personnel de réception",
     "admin": "Administrateur",
     "owner_admin": "Propriétaire",
+    "restaurant_owner": "Propriétaire de Restaurant",
     "property_manager": "Gestionnaire d'établissement",
     "staff": "Personnel"
   },
@@ -3402,6 +3403,7 @@
     "micError": "Impossible d'ouvrir le microphone",
     "roles": {
       "owner_admin": "Propriétaire",
+    "restaurant_owner": "Propriétaire de Restaurant",
       "reception": "Réception",
       "waiter": "Serveur",
       "kitchen_staff": "Chef",
