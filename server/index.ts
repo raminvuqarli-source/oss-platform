@@ -101,6 +101,25 @@ async function runSafetyPatches(): Promise<void> {
   startupLog.info("Running safety schema patches...");
   const client = await pool.connect();
   try {
+    // ── hotel_id guard: ensure hotel_id exists on every table that migrations index on ──
+    // This must run BEFORE Drizzle migrations so CREATE INDEX ON ... (hotel_id) never fails.
+    const hotelIdTables = [
+      'billing_logs', 'cancellation_policies', 'cash_accounts', 'chart_of_accounts',
+      'chat_messages', 'cost_centers', 'daily_financial_summaries', 'departments',
+      'escalations', 'expenses', 'external_bookings', 'financial_audit_logs',
+      'financial_transactions', 'folio_adjustments', 'folio_charges', 'folio_payments',
+      'guest_folios', 'journal_entries', 'journal_entry_lines', 'night_audits',
+      'no_show_records', 'payroll_configs', 'payroll_entries', 'recurring_expenses',
+      'revenues', 'room_preparation_orders', 'staff_feedback', 'staff_messages',
+      'staff_performance_scores', 'tax_configurations', 'users', 'white_label_settings',
+      'invoices', 'housekeeping_tasks', 'service_requests', 'analytics_snapshots',
+    ];
+    for (const tbl of hotelIdTables) {
+      await client.query(
+        `ALTER TABLE IF EXISTS "${tbl}" ADD COLUMN IF NOT EXISTS hotel_id varchar`
+      );
+    }
+
     // Patch bookings table: add any missing columns
     await client.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_method text`);
 
@@ -407,8 +426,8 @@ async function gracefulShutdown(signal: string): Promise<void> {
     process.exit(1);
   }
 
-  await runMigrations();
   await runSafetyPatches();
+  await runMigrations();
 
   await registerRoutes(httpServer, app);
   startupLog.info("All routes registered");
