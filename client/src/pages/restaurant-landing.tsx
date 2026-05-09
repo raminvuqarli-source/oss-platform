@@ -11,12 +11,14 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { GetQuoteDialog } from "@/components/get-quote-dialog";
 import { apiRequest, queryClient, setDemoToken } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { usePWAInstall } from "@/hooks/use-pwa-install";
+import { SiApple, SiAndroid } from "react-icons/si";
 import {
   UtensilsCrossed, Check, ArrowRight, ChevronLeft, Zap,
   Monitor, QrCode, BarChart3, Cloud, Layers, Users,
   Activity, HeadphonesIcon, MessageCircle, Star, Phone,
   ShoppingBag, ChefHat, Wallet, RefreshCw, Play, Loader2,
-  Sparkles, CreditCard, ShoppingCart,
+  Sparkles, CreditCard, ShoppingCart, Download, CheckCircle, ExternalLink, Share,
 } from "lucide-react";
 
 const WHATSAPP_LINK = "https://wa.me/994508880089";
@@ -235,6 +237,24 @@ export default function RestaurantLanding() {
   const { toast } = useToast();
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
+  const [installStatus, setInstallStatus] = useState<"idle" | "accepted" | "needs_browser" | "use_menu">("idle");
+  const pwa = usePWAInstall();
+  const isInIframe = window.self !== window.top;
+  const isIOSSafari = (() => {
+    const ua = navigator.userAgent;
+    return /iPhone|iPad|iPod/.test(ua) && !/CriOS|FxiOS|OPiOS|mercury/.test(ua);
+  })();
+  const triggerInstall = async () => {
+    const prompt = (window as any).__pwaInstallPrompt;
+    if (!prompt) { setInstallStatus(isInIframe ? "needs_browser" : "use_menu"); return; }
+    try {
+      await prompt.prompt();
+      const { outcome } = await prompt.userChoice;
+      (window as any).__pwaInstallPrompt = null;
+      if (outcome === "accepted") setInstallStatus("accepted");
+    } catch { setInstallStatus(isInIframe ? "needs_browser" : "use_menu"); }
+  };
+  const openInBrowser = () => window.open(window.location.href.split("?")[0], "_blank", "noopener");
 
   const handleDemoLogin = async (role: string) => {
     setDemoLoading(role);
@@ -552,6 +572,107 @@ export default function RestaurantLanding() {
           </AnimatedSection>
         </section>
       </main>
+
+      {/* PWA INSTALL SECTION */}
+      <section id="download" className="py-20 px-6 border-t border-border/20" data-testid="section-download-app-restaurant">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12 space-y-3">
+            <Badge variant="secondary" className="px-3 py-1 text-xs font-medium gap-1.5">
+              <Download className="h-3 w-3" />
+              {t('landing.pwaProgressiveWebApp', 'Progressive Web App')}
+            </Badge>
+            <h2 className="font-bold text-3xl md:text-4xl tracking-tight">
+              {t('landing.pwaTitle', 'Install OSS on Your Device')}
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              {t('landing.pwaSubtitle', 'No app store needed. Install directly from your browser — works on all platforms, offline-ready.')}
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {/* Windows */}
+            <Card className={`relative overflow-hidden transition-all duration-200 ${pwa.deviceType === "windows" ? "border-orange-400/60 shadow-md shadow-orange-500/10" : "border-border/40 hover:border-border/70"}`} data-testid="card-rest-platform-windows">
+              {pwa.deviceType === "windows" && <div className="absolute top-2 right-2"><Badge className="text-[10px] px-1.5 py-0.5 bg-orange-500/10 text-orange-500 border-orange-300/30">{t('landing.pwaYourDevice', 'Your device')}</Badge></div>}
+              <CardContent className="p-5 space-y-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center"><Monitor className="text-blue-500 h-5 w-5" /></div>
+                  <div><p className="font-semibold text-sm">Windows</p><p className="text-xs text-muted-foreground">Chrome / Edge</p></div>
+                </div>
+                {installStatus === "accepted" ? (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm font-medium"><CheckCircle className="h-4 w-4 flex-shrink-0" /> OSS installed successfully</div>
+                ) : installStatus === "needs_browser" ? (
+                  <div className="space-y-2"><p className="text-xs text-muted-foreground">Open OSS directly in Chrome or Edge.</p><Button variant="outline" className="w-full rounded-lg" onClick={openInBrowser} data-testid="button-rest-open-browser-windows"><ExternalLink className="h-4 w-4 mr-2" /> Open in New Tab</Button></div>
+                ) : installStatus === "use_menu" ? (
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2 p-2.5 rounded-lg bg-muted/60 border border-border/30"><div className="w-5 h-5 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-orange-500 mt-0.5">1</div><p className="text-xs text-muted-foreground">Look for <span className="font-medium text-foreground">⊕</span> icon in the address bar</p></div>
+                    <div className="flex items-start gap-2 p-2.5 rounded-lg bg-muted/60 border border-border/30"><div className="w-5 h-5 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-orange-500 mt-0.5">2</div><p className="text-xs text-muted-foreground">Or Chrome menu <span className="font-medium text-foreground">⋮</span> → <span className="font-medium text-foreground">Install OSS</span></p></div>
+                  </div>
+                ) : (
+                  <Button className="w-full rounded-lg bg-orange-500 hover:bg-orange-600 border-0" onClick={triggerInstall} data-testid="button-rest-install-windows"><Download className="h-4 w-4 mr-2" /> {t('landing.pwaInstallNow', 'Install Now')}</Button>
+                )}
+              </CardContent>
+            </Card>
+            {/* Mac */}
+            <Card className={`relative overflow-hidden transition-all duration-200 ${pwa.deviceType === "mac" ? "border-orange-400/60 shadow-md shadow-orange-500/10" : "border-border/40 hover:border-border/70"}`} data-testid="card-rest-platform-mac">
+              {pwa.deviceType === "mac" && <div className="absolute top-2 right-2"><Badge className="text-[10px] px-1.5 py-0.5 bg-orange-500/10 text-orange-500 border-orange-300/30">{t('landing.pwaYourDevice', 'Your device')}</Badge></div>}
+              <CardContent className="p-5 space-y-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-slate-500/10 flex items-center justify-center"><SiApple className="text-slate-600 dark:text-slate-300 text-xl" /></div>
+                  <div><p className="font-semibold text-sm">Mac</p><p className="text-xs text-muted-foreground">Chrome / Safari</p></div>
+                </div>
+                {installStatus === "accepted" ? (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm font-medium"><CheckCircle className="h-4 w-4 flex-shrink-0" /> OSS installed successfully</div>
+                ) : installStatus === "use_menu" ? (
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2 p-2.5 rounded-lg bg-muted/60 border border-border/30"><div className="w-5 h-5 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-orange-500 mt-0.5">1</div><p className="text-xs text-muted-foreground">Look for <span className="font-medium text-foreground">⊕</span> icon in the address bar</p></div>
+                    <div className="flex items-start gap-2 p-2.5 rounded-lg bg-muted/60 border border-border/30"><div className="w-5 h-5 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-orange-500 mt-0.5">2</div><p className="text-xs text-muted-foreground">Or Chrome menu <span className="font-medium text-foreground">⋮</span> → <span className="font-medium text-foreground">Install OSS</span></p></div>
+                  </div>
+                ) : (
+                  <Button className="w-full rounded-lg bg-orange-500 hover:bg-orange-600 border-0" onClick={triggerInstall} data-testid="button-rest-install-mac"><Download className="h-4 w-4 mr-2" /> {t('landing.pwaInstallNow', 'Install Now')}</Button>
+                )}
+              </CardContent>
+            </Card>
+            {/* Android */}
+            <Card className={`relative overflow-hidden transition-all duration-200 ${pwa.deviceType === "android" ? "border-orange-400/60 shadow-md shadow-orange-500/10" : "border-border/40 hover:border-border/70"}`} data-testid="card-rest-platform-android">
+              {pwa.deviceType === "android" && <div className="absolute top-2 right-2"><Badge className="text-[10px] px-1.5 py-0.5 bg-orange-500/10 text-orange-500 border-orange-300/30">{t('landing.pwaYourDevice', 'Your device')}</Badge></div>}
+              <CardContent className="p-5 space-y-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center"><SiAndroid className="text-green-500 text-xl" /></div>
+                  <div><p className="font-semibold text-sm">Android</p><p className="text-xs text-muted-foreground">Chrome browser</p></div>
+                </div>
+                {installStatus === "accepted" ? (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm font-medium"><CheckCircle className="h-4 w-4 flex-shrink-0" /> OSS installed successfully</div>
+                ) : installStatus === "use_menu" ? (
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2 p-2.5 rounded-lg bg-muted/60 border border-border/30"><div className="w-5 h-5 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-orange-500 mt-0.5">1</div><p className="text-xs text-muted-foreground">Look for <span className="font-medium text-foreground">⊕</span> icon in the address bar</p></div>
+                    <div className="flex items-start gap-2 p-2.5 rounded-lg bg-muted/60 border border-border/30"><div className="w-5 h-5 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-orange-500 mt-0.5">2</div><p className="text-xs text-muted-foreground">Or Chrome menu <span className="font-medium text-foreground">⋮</span> → <span className="font-medium text-foreground">Install OSS</span></p></div>
+                  </div>
+                ) : (
+                  <Button className="w-full rounded-lg bg-orange-500 hover:bg-orange-600 border-0" onClick={triggerInstall} data-testid="button-rest-install-android"><Download className="h-4 w-4 mr-2" /> {t('landing.pwaInstallNow', 'Install Now')}</Button>
+                )}
+              </CardContent>
+            </Card>
+            {/* iPhone / iPad */}
+            <Card className={`relative overflow-hidden transition-all duration-200 ${pwa.deviceType === "ios" ? "border-orange-400/60 shadow-md shadow-orange-500/10" : "border-border/40 hover:border-border/70"}`} data-testid="card-rest-platform-ios">
+              {pwa.deviceType === "ios" && <div className="absolute top-2 right-2"><Badge className="text-[10px] px-1.5 py-0.5 bg-orange-500/10 text-orange-500 border-orange-300/30">{t('landing.pwaYourDevice', 'Your device')}</Badge></div>}
+              <CardContent className="p-5 space-y-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-slate-500/10 flex items-center justify-center"><SiApple className="text-slate-600 dark:text-slate-300 text-xl" /></div>
+                  <div><p className="font-semibold text-sm">iPhone / iPad</p><p className="text-xs text-muted-foreground">{isIOSSafari ? "You're in Safari ✓" : "Safari browser"}</p></div>
+                </div>
+                {isIOSSafari ? (
+                  <div className="space-y-2.5">
+                    <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-muted/60 border border-border/30"><div className="w-6 h-6 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0 text-[11px] font-bold text-orange-500">1</div><div className="flex items-center gap-1.5 text-sm"><span>Tap</span><Share className="h-4 w-4 text-blue-500" /><span className="font-medium">Share</span><span className="text-muted-foreground text-xs">(bottom bar)</span></div></div>
+                    <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-muted/60 border border-border/30"><div className="w-6 h-6 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0 text-[11px] font-bold text-orange-500">2</div><p className="text-xs text-muted-foreground">Tap <span className="font-medium text-foreground">Add to Home Screen</span></p></div>
+                  </div>
+                ) : (
+                  <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20"><p className="text-xs text-amber-600 dark:text-amber-400">Open this page in <span className="font-medium">Safari</span> to install on your iPhone or iPad.</p></div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+          <p className="text-center text-xs text-muted-foreground">{t('landing.pwaNote', 'Works offline · No app store required · Always up to date')}</p>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="border-t border-border/30 py-10 px-6">

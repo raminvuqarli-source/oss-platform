@@ -502,7 +502,7 @@ export default function RestaurantOwnerDashboard() {
                       ...(user?.propertyId ? [{
                         href: `/restaurant/guest/${user.propertyId}/table/3`,
                         icon: QrCode,
-                        label: t("restaurantOwner.guestView", "Müştəri Görünüşü"),
+                        label: t("restaurantOwner.guestView", "Customer View"),
                         color: "text-pink-500",
                       }] : []),
                     ].map(link => (
