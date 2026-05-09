@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { authenticateRequest } from "../middleware";
 import { storage } from "../storage";
+import { resolveHotelContext } from "../utils/resolveHotelContext";
 import { getJobQueue } from "../services/jobQueue";
 import { BOOKING_SYNC_QUEUE, type BookingSyncJobData } from "../workers/bookingSyncWorker";
 import { logger } from "../utils/logger";
@@ -66,12 +67,30 @@ export function registerIntegrationRoutes(app: Express) {
         return res.status(400).json({ message: "Tenant not resolved" });
       }
 
-      const hotelId = req.query.hotelId as string;
-      if (!hotelId) {
-        return res.status(400).json({ message: "hotelId query parameter is required" });
+      const queryHotelId = req.query.hotelId as string | undefined;
+
+      if (queryHotelId) {
+        const bookings = await storage.getExternalBookingsByHotel(queryHotelId, tenantId);
+        return res.json(bookings);
       }
 
-      const bookings = await storage.getExternalBookingsByHotel(hotelId, tenantId);
+      // No hotelId in query — resolve from session user (owner_admin / property_manager)
+      const sessionUserId = (req as any).session?.userId;
+      if (sessionUserId) {
+        const { hotelIds } = await resolveHotelContext(sessionUserId);
+        if (hotelIds.length > 0) {
+          const all: any[] = [];
+          for (const hid of hotelIds) {
+            const bookings = await storage.getExternalBookingsByHotel(hid, tenantId);
+            all.push(...bookings);
+          }
+          all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          return res.json(all);
+        }
+      }
+
+      // Final fallback: all external bookings for this tenant
+      const bookings = await storage.getExternalBookingsByTenant(tenantId);
       res.json(bookings);
     } catch (error: any) {
       logger.error({ err: error }, "Get calendar bookings error");

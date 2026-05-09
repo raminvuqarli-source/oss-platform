@@ -611,6 +611,7 @@ export interface IStorage {
   getExternalBooking(id: string): Promise<ExternalBooking | undefined>;
   getExternalBookingByExternalId(externalId: string, hotelId: string): Promise<ExternalBooking | undefined>;
   getExternalBookingsByHotel(hotelId: string, tenantId: string): Promise<ExternalBooking[]>;
+  getExternalBookingsByTenant(tenantId: string): Promise<ExternalBooking[]>;
   createExternalBooking(booking: InsertExternalBooking): Promise<ExternalBooking>;
   updateExternalBooking(id: string, updates: Partial<ExternalBooking>): Promise<ExternalBooking | undefined>;
   deleteExternalBooking(id: string): Promise<void>;
@@ -2717,6 +2718,12 @@ export class DatabaseStorage implements IStorage {
   async getExternalBookingsByHotel(hotelId: string, tenantId: string): Promise<ExternalBooking[]> {
     return db.select().from(externalBookings)
       .where(and(eq(externalBookings.hotelId, hotelId), eq(externalBookings.tenantId, tenantId)))
+      .orderBy(desc(externalBookings.createdAt));
+  }
+
+  async getExternalBookingsByTenant(tenantId: string): Promise<ExternalBooking[]> {
+    return db.select().from(externalBookings)
+      .where(eq(externalBookings.tenantId, tenantId))
       .orderBy(desc(externalBookings.createdAt));
   }
 
