@@ -6083,8 +6083,8 @@ function BillingAddonsView() {
                   <p className="text-xs text-muted-foreground">{t("billing.wa.desc", "Send automated guest messages via WhatsApp")}</p>
                 </div>
               </div>
-              <Badge variant={hotel?.isWhatsappEnabled ? "default" : "secondary"} data-testid="badge-whatsapp-status">
-                {hotel?.isWhatsappEnabled ? t("billing.active", "Active") : t("billing.inactive", "Inactive")}
+              <Badge variant={hotel?.isWhatsappEnabled ? "default" : "outline"} className={!hotel?.isWhatsappEnabled ? "border-amber-400 text-amber-500" : ""} data-testid="badge-whatsapp-status">
+                {hotel?.isWhatsappEnabled ? t("billing.active", "Active") : "Coming Soon"}
               </Badge>
             </div>
             {hotel?.isWhatsappEnabled ? (
@@ -6096,25 +6096,8 @@ function BillingAddonsView() {
                 <Progress value={balancePercent} className="h-2" data-testid="progress-whatsapp-balance" />
               </div>
             ) : (
-              <div className="pt-2 border-t space-y-2">
-                <p className="text-xs text-muted-foreground">{t("billing.wa.purchaseToActivate", "Purchase a package to activate WhatsApp notifications.")}</p>
-                {visibleWhatsappPackages.length > 0 && (
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-muted/40">
-                    <div>
-                      <p className="text-sm font-semibold">{visibleWhatsappPackages[0].name}</p>
-                      <p className="text-xs text-muted-foreground">{visibleWhatsappPackages[0].messages.toLocaleString()} {t("billing.wa.messages", "messages")}</p>
-                    </div>
-                    <Button
-                      size="sm"
-                      className="bg-green-600 hover:bg-green-700 text-white"
-                      onClick={() => purchaseMutation.mutate(visibleWhatsappPackages[0].id)}
-                      disabled={purchaseMutation.isPending}
-                      data-testid="button-wa-buy-inline"
-                    >
-                      {purchaseMutation.isPending ? "..." : `$${visibleWhatsappPackages[0].priceUsd}`}
-                    </Button>
-                  </div>
-                )}
+              <div className="pt-2 border-t">
+                <p className="text-xs text-muted-foreground">{t("billing.wa.comingSoonDesc", "WhatsApp automated guest messaging will be available soon. Stay tuned!")}</p>
               </div>
             )}
           </CardContent>
