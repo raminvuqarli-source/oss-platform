@@ -1548,7 +1548,11 @@
       "biweekly": "Zweiwöchentlich",
       "weekly": "Wöchentlich",
       "daily": "Täglich",
-      "summary": "Zusammenfassung"
+      "summary": "Zusammenfassung",
+      "autoExpensesBreakdown": "Automatisch berechnete Ausgaben:",
+      "utility": "Nebenkosten",
+      "tax": "Steuer",
+      "cleaning": "Reinigung"
     },
     "staffManagement": {
       "invite": "Personal einladen",

@@ -1548,7 +1548,11 @@
       "biweekly": "Bimensuel",
       "weekly": "Hebdomadaire",
       "daily": "Quotidien",
-      "summary": "Résumé"
+      "summary": "Résumé",
+      "autoExpensesBreakdown": "Dépenses calculées automatiquement :",
+      "utility": "Services publics",
+      "tax": "Taxe",
+      "cleaning": "Nettoyage"
     },
     "staffManagement": {
       "invite": "Inviter du personnel",

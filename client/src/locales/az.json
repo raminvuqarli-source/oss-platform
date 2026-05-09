@@ -1560,7 +1560,11 @@
       "biweekly": "İki həftəlik",
       "weekly": "Həftəlik",
       "daily": "Günlük",
-      "summary": "Xülasə"
+      "summary": "Xülasə",
+      "autoExpensesBreakdown": "Avtomatik hesablanmış xərclər:",
+      "utility": "Kommunal",
+      "tax": "Vergi",
+      "cleaning": "Təmizlik"
     },
     "staffManagement": {
       "invite": "Personalı Dəvət Et",

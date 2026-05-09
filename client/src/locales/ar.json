@@ -1548,7 +1548,11 @@
       "biweekly": "نصف شهري",
       "weekly": "أسبوعي",
       "daily": "يومي",
-      "summary": "الملخص"
+      "summary": "الملخص",
+      "autoExpensesBreakdown": "المصروفات المحسوبة تلقائياً:",
+      "utility": "المرافق",
+      "tax": "الضريبة",
+      "cleaning": "التنظيف"
     },
     "staffManagement": {
       "invite": "دعوة موظف",

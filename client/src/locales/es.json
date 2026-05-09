@@ -1548,7 +1548,11 @@
       "biweekly": "Quincenal",
       "weekly": "Semanal",
       "daily": "Diario",
-      "summary": "Resumen"
+      "summary": "Resumen",
+      "autoExpensesBreakdown": "Gastos calculados automáticamente:",
+      "utility": "Servicios",
+      "tax": "Impuesto",
+      "cleaning": "Limpieza"
     },
     "staffManagement": {
       "invite": "Invitar Personal",

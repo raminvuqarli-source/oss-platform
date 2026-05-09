@@ -1573,7 +1573,11 @@
       "biweekly": "Bi-weekly",
       "weekly": "Weekly",
       "daily": "Daily",
-      "summary": "Summary"
+      "summary": "Summary",
+      "autoExpensesBreakdown": "Auto-calculated expenses:",
+      "utility": "Utility",
+      "tax": "Tax",
+      "cleaning": "Cleaning"
     },
     "staffManagement": {
       "invite": "Invite Staff",

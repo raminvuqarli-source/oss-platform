@@ -1555,7 +1555,11 @@
       "biweekly": "İki Haftada Bir",
       "weekly": "Haftalık",
       "daily": "Günlük",
-      "summary": "Özet"
+      "summary": "Özet",
+      "autoExpensesBreakdown": "Otomatik hesaplanan giderler:",
+      "utility": "Faturalar",
+      "tax": "Vergi",
+      "cleaning": "Temizlik"
     },
     "staffManagement": {
       "invite": "Personel Davet Et",

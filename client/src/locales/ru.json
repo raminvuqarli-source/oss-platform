@@ -1555,7 +1555,11 @@
       "biweekly": "Раз в две недели",
       "weekly": "Еженедельно",
       "daily": "Ежедневно",
-      "summary": "Итог"
+      "summary": "Итог",
+      "autoExpensesBreakdown": "Авторасчётные расходы:",
+      "utility": "Коммунальные",
+      "tax": "Налог",
+      "cleaning": "Уборка"
     },
     "staffManagement": {
       "invite": "Пригласить сотрудника",

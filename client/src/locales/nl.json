@@ -1548,7 +1548,11 @@
       "biweekly": "Tweewekelijks",
       "weekly": "Wekelijks",
       "daily": "Dagelijks",
-      "summary": "Samenvatting"
+      "summary": "Samenvatting",
+      "autoExpensesBreakdown": "Automatisch berekende kosten:",
+      "utility": "Nutsvoorzieningen",
+      "tax": "Belasting",
+      "cleaning": "Schoonmaak"
     },
     "staffManagement": {
       "invite": "Personeel Uitnodigen",

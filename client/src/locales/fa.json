@@ -1548,7 +1548,11 @@
       "biweekly": "دو هفته‌ای",
       "weekly": "هفتگی",
       "daily": "روزانه",
-      "summary": "خلاصه"
+      "summary": "خلاصه",
+      "autoExpensesBreakdown": "هزینه‌های محاسبه‌شده خودکار:",
+      "utility": "آب و برق",
+      "tax": "مالیات",
+      "cleaning": "نظافت"
     },
     "staffManagement": {
       "invite": "دعوت کارکنان",
