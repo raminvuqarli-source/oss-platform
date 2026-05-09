@@ -1,11 +1,12 @@
-import { lazy } from "react";
-import { Redirect } from "wouter";
+import { lazy, Suspense } from "react";
+import { Redirect, useSearch } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { useQuery } from "@tanstack/react-query";
 
 const GuestDashboard = lazy(() => import("@/pages/guest-dashboard"));
 const ReceptionDashboard = lazy(() => import("@/pages/reception-dashboard"));
 const AdminDashboard = lazy(() => import("@/pages/admin-dashboard"));
+const AdminActionDashboard = lazy(() => import("@/pages/admin-action-dashboard"));
 const HousekeepingDashboard = lazy(() => import("@/pages/housekeeping-dashboard"));
 const OwnerDashboard = lazy(() => import("@/pages/owner-dashboard"));
 const OnboardingWizard = lazy(() => import("@/pages/onboarding-wizard"));
@@ -51,6 +52,27 @@ function OwnerDashboardRouter() {
   return <OwnerDashboardWithOnboarding />;
 }
 
+function AdminDashboardRouter() {
+  const searchString = useSearch();
+  const hasView = new URLSearchParams(searchString).has("view");
+
+  if (hasView) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <AdminDashboard />
+      </Suspense>
+    );
+  }
+
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <div className="flex flex-col h-full">
+        <AdminActionDashboard />
+      </div>
+    </Suspense>
+  );
+}
+
 export function DashboardRouter() {
   const { user } = useAuth();
 
@@ -63,7 +85,7 @@ export function DashboardRouter() {
       return <HousekeepingDashboard />;
     case "admin":
     case "property_manager":
-      return <AdminDashboard />;
+      return <AdminDashboardRouter />;
     case "owner_admin":
       return <OwnerDashboardRouter />;
     case "oss_super_admin":
