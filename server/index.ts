@@ -283,12 +283,14 @@ async function runSafetyPatches(): Promise<void> {
       CREATE TABLE IF NOT EXISTS deleted_trial_accounts (
         id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
         email text NOT NULL,
-        username text NOT NULL,
-        full_name text,
+        hotel_name varchar,
         deleted_at timestamp DEFAULT now(),
-        reason text
+        reason varchar DEFAULT 'trial_expired'
       )
     `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_deleted_trial_email ON deleted_trial_accounts (email)`);
+    // Ensure hotel_name column exists (for DBs created with old schema)
+    await client.query(`ALTER TABLE deleted_trial_accounts ADD COLUMN IF NOT EXISTS hotel_name varchar`);
 
     // Fix standalone restaurant owners whose tenant_type incorrectly defaults to "hotel"
     // Approach 1: owner whose ALL properties are of type "restaurant"
