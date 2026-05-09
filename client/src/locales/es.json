@@ -1507,7 +1507,8 @@
       "title": "Rendimiento",
       "occupancy": "Ocupación",
       "revenue": "Ingresos",
-      "guests": "Huéspedes"
+      "guests": "Huéspedes",
+      "transactions": "Transacciones"
     },
     "financeCenter": {
       "title": "Centro Financiero",
@@ -1676,7 +1677,10 @@
     "recurringVendorPlaceholder": "Ej. Compañía Eléctrica",
     "financialOverview": "Resumen Financiero (Este Mes)",
     "revenueByProperty": "Ingresos por Propiedad",
+    "revenueThisProperty": "Ingresos de esta Propiedad",
     "occupancyByProperty": "Ocupación por Propiedad",
+    "occupancyThisProperty": "Ocupación de esta Propiedad",
+    "transactions": "transacciones",
     "noRevenueData": "Sin datos de ingresos aún",
     "noOccupancyData": "Sin datos de ocupación aún",
     "performanceSubtitle": "Monitoriza el rendimiento de tus propiedades",

@@ -1507,7 +1507,8 @@
       "title": "الأداء",
       "occupancy": "الإشغال",
       "revenue": "الإيرادات",
-      "guests": "الضيوف"
+      "guests": "الضيوف",
+      "transactions": "المعاملات"
     },
     "financeCenter": {
       "title": "المركز المالي",
@@ -1676,7 +1677,10 @@
     "recurringVendorPlaceholder": "مثال: شركة المرافق",
     "financialOverview": "النظرة المالية العامة (هذا الشهر)",
     "revenueByProperty": "الإيرادات حسب العقار",
+    "revenueThisProperty": "إيرادات هذا العقار",
     "occupancyByProperty": "الإشغال حسب العقار",
+    "occupancyThisProperty": "إشغال هذا العقار",
+    "transactions": "معاملات",
     "noRevenueData": "لا توجد بيانات إيرادات بعد",
     "noOccupancyData": "لا توجد بيانات إشغال بعد",
     "performanceSubtitle": "تتبع أداء عقاراتك",

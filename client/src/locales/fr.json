@@ -1507,7 +1507,8 @@
       "title": "Performance",
       "occupancy": "Occupation",
       "revenue": "Revenus",
-      "guests": "Clients"
+      "guests": "Clients",
+      "transactions": "Transactions"
     },
     "financeCenter": {
       "title": "Centre Financier",
@@ -1676,7 +1677,10 @@
     "recurringVendorPlaceholder": "ex. Fournisseur d'énergie",
     "financialOverview": "Aperçu financier (Ce mois-ci)",
     "revenueByProperty": "Revenus par établissement",
+    "revenueThisProperty": "Revenus de cet établissement",
     "occupancyByProperty": "Taux d'occupation par établissement",
+    "occupancyThisProperty": "Taux d'occupation de cet établissement",
+    "transactions": "transactions",
     "noRevenueData": "Aucune donnée de revenu pour l'instant",
     "noOccupancyData": "Aucune donnée d'occupation pour l'instant",
     "performanceSubtitle": "Suivez la performance de vos établissements",

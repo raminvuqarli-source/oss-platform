@@ -1507,7 +1507,8 @@
       "title": "عملکرد",
       "occupancy": "اشغال",
       "revenue": "درآمد",
-      "guests": "مهمانان"
+      "guests": "مهمانان",
+      "transactions": "تراکنش‌ها"
     },
     "financeCenter": {
       "title": "مرکز مالی",
@@ -1676,7 +1677,10 @@
     "recurringVendorPlaceholder": "مثلاً شرکت خدمات",
     "financialOverview": "نمای کلی مالی (این ماه)",
     "revenueByProperty": "درآمد بر اساس ملک",
+    "revenueThisProperty": "درآمد این ملک",
     "occupancyByProperty": "اشغال بر اساس ملک",
+    "occupancyThisProperty": "اشغال این ملک",
+    "transactions": "تراکنش‌ها",
     "noRevenueData": "هنوز داده درآمدی وجود ندارد",
     "noOccupancyData": "هنوز داده اشغالی وجود ندارد",
     "performanceSubtitle": "عملکرد املاک خود را پیگیری کنید",

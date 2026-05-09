@@ -1507,7 +1507,8 @@
       "title": "Prestaties",
       "occupancy": "Bezetting",
       "revenue": "Omzet",
-      "guests": "Gasten"
+      "guests": "Gasten",
+      "transactions": "Transacties"
     },
     "financeCenter": {
       "title": "Financieel Centrum",
@@ -1676,7 +1677,10 @@
     "recurringVendorPlaceholder": "bijv. Nutsbedrijf",
     "financialOverview": "Financieel Overzicht (Deze Maand)",
     "revenueByProperty": "Omzet per Accommodatie",
+    "revenueThisProperty": "Omzet van deze Accommodatie",
     "occupancyByProperty": "Bezetting per Accommodatie",
+    "occupancyThisProperty": "Bezetting van deze Accommodatie",
+    "transactions": "transacties",
     "noRevenueData": "Nog geen omzetgegevens",
     "noOccupancyData": "Nog geen bezettingsgegevens",
     "performanceSubtitle": "Volg hoe uw accommodaties presteren",

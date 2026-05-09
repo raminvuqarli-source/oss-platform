@@ -1519,7 +1519,8 @@
       "title": "Performans",
       "occupancy": "Doluluk",
       "revenue": "Gəlir",
-      "guests": "Qonaqlar"
+      "guests": "Qonaqlar",
+      "transactions": "Əməliyyatlar"
     },
     "financeCenter": {
       "title": "Maliyyə Mərkəzi",
@@ -1688,7 +1689,10 @@
     "recurringVendorPlaceholder": "məs. Kommunal şirkət",
     "financialOverview": "Maliyyə icmalı (Bu ay)",
     "revenueByProperty": "Əmlaka görə gəlir",
+    "revenueThisProperty": "Bu Mülkün Gəliri",
     "occupancyByProperty": "Əmlaka görə doluluk",
+    "occupancyThisProperty": "Bu Mülkün Tutumu",
+    "transactions": "əməliyyat",
     "noRevenueData": "Hələ gəlir məlumatı yoxdur",
     "noOccupancyData": "Hələ doluluk məlumatı yoxdur",
     "performanceSubtitle": "Əmlaklarınızın necə işlədiyini izləyin",

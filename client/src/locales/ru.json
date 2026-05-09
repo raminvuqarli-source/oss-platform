@@ -1512,6 +1512,7 @@
     },
     "performance": {
       "title": "Показатели",
+      "transactions": "Транзакции",
       "occupancy": "Заполняемость",
       "revenue": "Доход",
       "guests": "Гости"
@@ -1683,7 +1684,10 @@
     "recurringVendorPlaceholder": "напр. Коммунальная компания",
     "financialOverview": "Финансовый обзор (Этот месяц)",
     "revenueByProperty": "Доход по объектам",
+    "revenueThisProperty": "Доход этого объекта",
     "occupancyByProperty": "Заполняемость по объектам",
+    "occupancyThisProperty": "Заполняемость этого объекта",
+    "transactions": "транзакции",
     "noRevenueData": "Данные о доходах пока отсутствуют",
     "noOccupancyData": "Данные о заполняемости пока отсутствуют",
     "performanceSubtitle": "Отслеживайте показатели ваших объектов",

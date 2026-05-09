@@ -1512,6 +1512,7 @@
     },
     "performance": {
       "title": "Performans",
+      "transactions": "İşlemler",
       "occupancy": "Doluluk",
       "revenue": "Gelir",
       "guests": "Misafirler"
@@ -1683,7 +1684,10 @@
     "recurringVendorPlaceholder": "ör. Hizmet Şirketi",
     "financialOverview": "Finansal Genel Bakış (Bu Ay)",
     "revenueByProperty": "Mülke Göre Gelir",
+    "revenueThisProperty": "Bu Mülkün Geliri",
     "occupancyByProperty": "Mülke Göre Doluluk",
+    "occupancyThisProperty": "Bu Mülkün Doluluk Oranı",
+    "transactions": "işlem",
     "noRevenueData": "Henüz gelir verisi yok",
     "noOccupancyData": "Henüz doluluk verisi yok",
     "performanceSubtitle": "Mülklerinizin performansını takip edin",

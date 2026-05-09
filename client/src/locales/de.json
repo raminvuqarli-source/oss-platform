@@ -1507,7 +1507,8 @@
       "title": "Leistung",
       "occupancy": "Auslastung",
       "revenue": "Umsatz",
-      "guests": "Gäste"
+      "guests": "Gäste",
+      "transactions": "Transaktionen"
     },
     "financeCenter": {
       "title": "Finanzzentrum",
@@ -1676,7 +1677,10 @@
     "recurringVendorPlaceholder": "z. B. Versorgungsunternehmen",
     "financialOverview": "Finanzübersicht (Dieser Monat)",
     "revenueByProperty": "Umsatz nach Objekt",
+    "revenueThisProperty": "Umsatz dieses Objekts",
     "occupancyByProperty": "Auslastung nach Objekt",
+    "occupancyThisProperty": "Auslastung dieses Objekts",
+    "transactions": "Transaktionen",
     "noRevenueData": "Noch keine Umsatzdaten",
     "noOccupancyData": "Noch keine Auslastungsdaten",
     "performanceSubtitle": "Verfolgen Sie die Leistung Ihrer Objekte",

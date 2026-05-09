@@ -1532,7 +1532,8 @@
       "title": "Performance",
       "occupancy": "Occupancy",
       "revenue": "Revenue",
-      "guests": "Guests"
+      "guests": "Guests",
+      "transactions": "Transactions"
     },
     "financeCenter": {
       "title": "Finance Center",
@@ -1701,7 +1702,10 @@
     "recurringVendorPlaceholder": "e.g. Utility Company",
     "financialOverview": "Financial Overview (This Month)",
     "revenueByProperty": "Revenue by Property",
+    "revenueThisProperty": "This Property's Revenue",
     "occupancyByProperty": "Occupancy by Property",
+    "occupancyThisProperty": "This Property's Occupancy",
+    "transactions": "transactions",
     "noRevenueData": "No revenue data yet",
     "noOccupancyData": "No occupancy data yet",
     "performanceSubtitle": "Track how your properties are doing",
