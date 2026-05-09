@@ -101,8 +101,10 @@ async function runSafetyPatches(): Promise<void> {
   startupLog.info("Running safety schema patches...");
   const client = await pool.connect();
   try {
-    // ── hotel_id guard: ensure hotel_id exists on every table that migrations index on ──
-    // This must run BEFORE Drizzle migrations so CREATE INDEX ON ... (hotel_id) never fails.
+    // ── Column guards: run BEFORE Drizzle migrations so CREATE INDEX never fails ──
+    // All statements use ALTER TABLE IF EXISTS + ADD COLUMN IF NOT EXISTS — fully idempotent.
+
+    // hotel_id guard
     const hotelIdTables = [
       'billing_logs', 'cancellation_policies', 'cash_accounts', 'chart_of_accounts',
       'chat_messages', 'cost_centers', 'daily_financial_summaries', 'departments',
@@ -115,9 +117,31 @@ async function runSafetyPatches(): Promise<void> {
       'invoices', 'housekeeping_tasks', 'service_requests', 'analytics_snapshots',
     ];
     for (const tbl of hotelIdTables) {
-      await client.query(
-        `ALTER TABLE IF EXISTS "${tbl}" ADD COLUMN IF NOT EXISTS hotel_id varchar`
-      );
+      await client.query(`ALTER TABLE IF EXISTS "${tbl}" ADD COLUMN IF NOT EXISTS hotel_id varchar`);
+    }
+
+    // tenant_id guard (multi-tenant isolation column — present in 69 tables)
+    const tenantIdTables = [
+      'analytics_snapshots', 'api_usage_logs', 'audit_logs', 'billing_info', 'billing_logs',
+      'bookings', 'cancellation_policies', 'cash_accounts', 'chart_of_accounts',
+      'chat_messages', 'contract_acceptances', 'cost_centers', 'credential_logs',
+      'daily_financial_summaries', 'departments', 'device_telemetry', 'devices',
+      'door_action_logs', 'escalation_replies', 'escalations', 'expenses',
+      'external_bookings', 'feature_flag_overrides', 'financial_audit_logs',
+      'financial_transactions', 'folio_adjustments', 'folio_charges', 'folio_payments',
+      'guest_folios', 'hotels', 'housekeeping_tasks', 'invoices', 'journal_entries',
+      'journal_entry_lines', 'night_audits', 'no_show_records', 'notifications',
+      'onboarding_progress', 'ota_conflicts', 'ota_integrations', 'ota_sync_logs',
+      'payment_orders', 'payroll_configs', 'payroll_entries', 'pos_menu_categories',
+      'pos_menu_items', 'pos_orders', 'pricing_rules', 'properties', 'rate_plans',
+      'recurring_expenses', 'refund_requests', 'restaurant_cleaning_tasks', 'revenues',
+      'room_nights', 'room_preparation_orders', 'room_settings', 'service_requests',
+      'staff_feedback', 'staff_invitations', 'staff_messages', 'staff_performance_scores',
+      'subscriptions', 'tax_configurations', 'units', 'usage_meters', 'users',
+      'waiter_calls', 'white_label_settings',
+    ];
+    for (const tbl of tenantIdTables) {
+      await client.query(`ALTER TABLE IF EXISTS "${tbl}" ADD COLUMN IF NOT EXISTS tenant_id varchar`);
     }
 
     // Patch bookings table: add any missing columns
