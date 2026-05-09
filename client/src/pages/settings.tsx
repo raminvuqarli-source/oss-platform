@@ -30,6 +30,9 @@ import {
   Smartphone,
   LogOut,
   Save,
+  KeyRound,
+  Eye,
+  EyeOff,
   Loader2,
   CreditCard,
   Activity,
@@ -1374,6 +1377,47 @@ export default function Settings() {
 
   const isOwner = user?.role === "owner_admin";
 
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
+
+  const changePasswordMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/auth/change-password", { currentPassword, newPassword });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Failed to change password");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: t('settings.passwordChanged', 'Password changed'), description: t('settings.passwordChangedDesc', 'Your password has been updated successfully.') });
+      setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
+    },
+    onError: (err: Error) => {
+      toast({ title: t('toast.error', 'Error'), description: err.message, variant: "destructive" });
+    },
+  });
+
+  const handleChangePassword = () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast({ title: t('toast.error', 'Error'), description: t('settings.fillAllFields', 'Please fill all fields.'), variant: "destructive" });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: t('toast.error', 'Error'), description: t('settings.passwordMismatch', 'New passwords do not match.'), variant: "destructive" });
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast({ title: t('toast.error', 'Error'), description: t('settings.passwordTooShort', 'Password must be at least 6 characters.'), variant: "destructive" });
+      return;
+    }
+    changePasswordMutation.mutate();
+  };
+
   const { data: ownerMeSettings } = useQuery<{ tenantType?: string }>({
     queryKey: ["/api/owners/me"],
     enabled: isOwner,
@@ -1567,6 +1611,86 @@ export default function Settings() {
           )}
         </>
       )}
+
+      {/* Change Password */}
+      <Card data-testid="card-change-password">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <KeyRound className="h-5 w-5 text-muted-foreground" />
+            {t('settings.changePassword', 'Change Password')}
+          </CardTitle>
+          <CardDescription>{t('settings.changePasswordDesc', 'Update your account password. You will need your current password to proceed.')}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="current-password">{t('settings.currentPassword', 'Current Password')}</Label>
+            <div className="relative">
+              <Input
+                id="current-password"
+                type={showCurrentPw ? "text" : "password"}
+                value={currentPassword}
+                onChange={e => setCurrentPassword(e.target.value)}
+                placeholder="••••••••"
+                data-testid="input-current-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPw(v => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                data-testid="button-toggle-current-pw"
+              >
+                {showCurrentPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="new-password">{t('settings.newPassword', 'New Password')}</Label>
+            <div className="relative">
+              <Input
+                id="new-password"
+                type={showNewPw ? "text" : "password"}
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                placeholder="••••••••"
+                data-testid="input-new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPw(v => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                data-testid="button-toggle-new-pw"
+              >
+                {showNewPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirm-password">{t('settings.confirmPassword', 'Confirm New Password')}</Label>
+            <div className="relative">
+              <Input
+                id="confirm-password"
+                type={showConfirmPw ? "text" : "password"}
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                data-testid="input-confirm-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPw(v => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                data-testid="button-toggle-confirm-pw"
+              >
+                {showConfirmPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+          <Button onClick={handleChangePassword} disabled={changePasswordMutation.isPending} data-testid="button-change-password">
+            {changePasswordMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}
+            {t('settings.changePassword', 'Change Password')}
+          </Button>
+        </CardContent>
+      </Card>
 
       <Card className="border-destructive/50">
         <CardHeader>

@@ -1170,6 +1170,30 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
     }
   });
 
+  app.post("/api/auth/change-password", authenticateRequest, async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Current and new password are required" });
+      }
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: "New password must be at least 6 characters" });
+      }
+      const user = await storage.getUser(req.session.userId!);
+      if (!user) return res.status(404).json({ message: "User not found" });
+      const valid = await verifyPassword(currentPassword, user.password);
+      if (!valid) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+      const hashed = await hashPassword(newPassword);
+      await storage.updateUserPassword(user.id, hashed);
+      res.json({ message: "Password changed successfully" });
+    } catch (error) {
+      logger.error({ err: error }, "Error changing password");
+      res.status(500).json({ message: "Failed to change password" });
+    }
+  });
+
   app.post("/api/auth/register-hotel", authRateLimiter, async (req, res) => {
     try {
       const validatedData = hotelRegistrationSchema.parse(req.body);
