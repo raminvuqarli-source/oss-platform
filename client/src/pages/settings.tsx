@@ -1374,6 +1374,12 @@ export default function Settings() {
 
   const isOwner = user?.role === "owner_admin";
 
+  const { data: ownerMeSettings } = useQuery<{ tenantType?: string }>({
+    queryKey: ["/api/owners/me"],
+    enabled: isOwner,
+  });
+  const isRestaurantOnly = ownerMeSettings?.tenantType === "restaurant_only";
+
   const handleSaveProfile = async () => {
     setIsLoading(true);
     try {
