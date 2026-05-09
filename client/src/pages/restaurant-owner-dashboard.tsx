@@ -258,15 +258,15 @@ export default function RestaurantOwnerDashboard() {
 
       {/* Add Staff Dialog */}
       <Dialog open={showAddStaffDialog} onOpenChange={setShowAddStaffDialog}>
-        <DialogContent className="sm:max-w-md" data-testid="dialog-owner-add-staff">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-md flex flex-col max-h-[90vh]" data-testid="dialog-owner-add-staff">
+          <DialogHeader className="shrink-0">
             <DialogTitle className="flex items-center gap-2">
               <UserPlus className="h-5 w-5" />
               {t("rm.addStaffTitle", "Add Staff Member")}
             </DialogTitle>
             <DialogDescription>{t("rm.addStaffSubtitle", "Create a new login for your restaurant team")}</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-2">
+          <div className="space-y-4 py-2 overflow-y-auto flex-1 pr-1">
             <div className="space-y-1.5">
               <Label>{t("rm.fullName", "Full Name")}</Label>
               <Input placeholder="Ali Əliyev" value={staffForm.fullName} onChange={e => setStaffForm(f => ({ ...f, fullName: e.target.value }))} data-testid="input-owner-rs-fullname" />
@@ -338,14 +338,15 @@ export default function RestaurantOwnerDashboard() {
               </div>
             )}
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAddStaffDialog(false)}>{t("rm.cancel", "Cancel")}</Button>
+          <DialogFooter className="shrink-0 pt-2 border-t">
+            <Button variant="outline" onClick={() => setShowAddStaffDialog(false)} data-testid="button-owner-cancel-staff">{t("rm.cancel", "Cancel")}</Button>
             <Button
               onClick={() => createStaffMutation.mutate(staffForm)}
               disabled={createStaffMutation.isPending || !staffForm.fullName || !staffForm.username || !staffForm.password}
               data-testid="button-owner-create-staff"
             >
-              {createStaffMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : t("rm.create", "Create")}
+              {createStaffMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <UserPlus className="h-4 w-4 mr-2" />}
+              {t("restaurantOwner.addStaff", "Add Staff")}
             </Button>
           </DialogFooter>
         </DialogContent>
