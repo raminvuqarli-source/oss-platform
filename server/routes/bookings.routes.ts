@@ -542,14 +542,14 @@ export function registerBookingRoutes(app: Express): void {
       const propertyId = asString(req.params.propertyId);
 
       const property = await storage.getProperty(propertyId);
-      if (!property) return res.status(404).json({ message: "Property not found" });
+      if (!property) return res.status(200).json({});
 
       if (user.tenantId && property.tenantId !== user.tenantId) {
-        return res.status(403).json({ message: "Forbidden" });
+        return res.status(200).json({});
       }
 
       if (user.role === "owner_admin" && user.ownerId && property.ownerId !== user.ownerId) {
-        return res.status(403).json({ message: "Forbidden" });
+        return res.status(200).json({});
       }
 
       const propertyUnits = await storage.getUnitsByProperty(propertyId);
