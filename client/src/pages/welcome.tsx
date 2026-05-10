@@ -49,7 +49,7 @@ const DEMO_INFO_ROLES = [
 
 const RESTAURANT_DEMO_ROLES = [
   { id: "restaurant_manager", icon: ChefHat, colorClass: "text-red-500 dark:text-red-400", bgClass: "bg-red-500/10", titleKey: "landing.demo.roles.restaurantManager.title", descKey: "landing.demo.roles.restaurantManager.desc" },
-  { id: "kitchen_staff", icon: ChefHat, colorClass: "text-orange-500 dark:text-orange-400", bgClass: "bg-orange-500/10", titleKey: "landing.demo.roles.kitchen.title", descKey: "landing.demo.roles.kitchen.desc" },
+  { id: "kitchen", icon: ChefHat, colorClass: "text-orange-500 dark:text-orange-400", bgClass: "bg-orange-500/10", titleKey: "landing.demo.roles.kitchen.title", descKey: "landing.demo.roles.kitchen.desc" },
   { id: "waiter", icon: Utensils, colorClass: "text-amber-500 dark:text-amber-400", bgClass: "bg-amber-500/10", titleKey: "landing.demo.roles.waiter.title", descKey: "landing.demo.roles.waiter.desc" },
   { id: "restaurant_cleaner", icon: Sparkles, colorClass: "text-cyan-500 dark:text-cyan-400", bgClass: "bg-cyan-500/10", titleKey: "landing.demo.roles.restaurantCleaner.title", descKey: "landing.demo.roles.restaurantCleaner.desc" },
   { id: "restaurant_cashier", icon: Wallet, colorClass: "text-green-500 dark:text-green-400", bgClass: "bg-green-500/10", titleKey: "landing.demo.roles.restaurantCashier.title", descKey: "landing.demo.roles.restaurantCashier.desc" },
