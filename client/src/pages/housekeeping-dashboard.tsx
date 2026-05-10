@@ -505,28 +505,37 @@ export default function HousekeepingDashboard() {
   };
 
   return (
-    <div className="space-y-5">
-      <div className="flex gap-1.5 flex-wrap" data-testid="hk-view-tabs">
-        {VIEWS.map(v => {
-          const Icon = v.icon;
-          const active = currentView === v.id;
-          return (
-            <Button
-              key={v.id}
-              variant={active ? "default" : "outline"}
-              size="sm"
-              className="rounded-xl gap-1.5"
-              onClick={() => setView(v.id)}
-              data-testid={`hk-tab-${v.id}`}
-            >
-              <Icon className="h-3.5 w-3.5" />
-              {t(v.labelKey)}
-            </Button>
-          );
-        })}
+    <div className="min-h-screen bg-background">
+      <div className="flex flex-col items-center py-6 px-4">
+        <nav
+          className="inline-flex items-center gap-1 p-1 rounded-2xl bg-muted/60 border border-border/50 shadow-sm flex-wrap justify-center"
+          data-testid="hk-view-tabs"
+        >
+          {VIEWS.map(v => {
+            const Icon = v.icon;
+            const active = currentView === v.id;
+            return (
+              <button
+                key={v.id}
+                onClick={() => setView(v.id)}
+                data-testid={`hk-tab-${v.id}`}
+                className={`
+                  flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-150
+                  ${active
+                    ? "bg-background text-foreground shadow-sm border border-border/60"
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                  }
+                `}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                <span>{t(v.labelKey)}</span>
+              </button>
+            );
+          })}
+        </nav>
       </div>
 
-      <div data-testid={`hk-view-content-${currentView}`}>
+      <div className="px-4 pb-8 max-w-6xl mx-auto w-full" data-testid={`hk-view-content-${currentView}`}>
         {currentView === "rooms"    && <RoomsView />}
         {currentView === "tasks"    && <HousekeepingView />}
         {currentView === "rating"   && <StaffMyPerformance />}

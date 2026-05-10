@@ -864,7 +864,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   };
 
-  if (user.role === "owner_admin" || user.role === "admin" || user.role === "property_manager") {
+  if (user.role === "owner_admin" || user.role === "admin" || user.role === "property_manager" || user.role === "staff") {
     return (
       <div className="flex flex-col min-h-screen bg-background">
         <header className="flex items-center justify-between gap-2 px-4 py-2.5 border-b shrink-0">
