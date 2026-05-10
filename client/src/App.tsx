@@ -290,7 +290,7 @@ function AppContent() {
   const [location] = useLocation();
   const { user } = useAuth();
   const isPublicPage = PUBLIC_PATHS.some(p => location === p) || location.startsWith("/restaurant/guest/");
-  const hideChat = location.startsWith("/restaurant/guest/");
+  const hideChat = !!user || location.startsWith("/restaurant/guest/");
   return (
     <>
       <Toaster />
