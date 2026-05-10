@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 
 const GuestDashboard = lazy(() => import("@/pages/guest-dashboard"));
 const ReceptionDashboard = lazy(() => import("@/pages/reception-dashboard"));
+const ReceptionActionDashboard = lazy(() => import("@/pages/reception-action-dashboard"));
 const AdminDashboard = lazy(() => import("@/pages/admin-dashboard"));
 const AdminActionDashboard = lazy(() => import("@/pages/admin-action-dashboard"));
 const HousekeepingDashboard = lazy(() => import("@/pages/housekeeping-dashboard"));
@@ -52,6 +53,27 @@ function OwnerDashboardRouter() {
   return <OwnerDashboardWithOnboarding />;
 }
 
+function ReceptionDashboardRouter() {
+  const searchString = useSearch();
+  const hasView = new URLSearchParams(searchString).has("view");
+
+  if (hasView) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <ReceptionDashboard />
+      </Suspense>
+    );
+  }
+
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <div className="flex flex-col h-full">
+        <ReceptionActionDashboard />
+      </div>
+    </Suspense>
+  );
+}
+
 function AdminDashboardRouter() {
   const searchString = useSearch();
   const hasView = new URLSearchParams(searchString).has("view");
@@ -80,7 +102,7 @@ export function DashboardRouter() {
 
   switch (user.role) {
     case "reception":
-      return <ReceptionDashboard />;
+      return <ReceptionDashboardRouter />;
     case "staff":
       return <HousekeepingDashboard />;
     case "admin":
