@@ -121,7 +121,7 @@ export default function RestaurantCashierDashboard() {
   });
 
   const { data: staffUsers = [] } = useQuery<CleaningStaff[]>({ queryKey: ["/api/users/staff"] });
-  const cleaners = staffUsers.filter(u => u.role === "restaurant_cleaner");
+  const cleaners = staffUsers.filter(u => u.role === "restaurant_cleaner" || u.role === "waiter");
 
   const { data: cleaningTasks = [], isLoading: tasksLoading } = useQuery<CleaningTask[]>({
     queryKey: ["/api/restaurant/cleaning-tasks"],
@@ -605,10 +605,17 @@ export default function RestaurantCashierDashboard() {
                 <div className="space-y-1.5">
                   <Label>{t("cashier.assignTo")}</Label>
                   <Select value={taskAssignee} onValueChange={setTaskAssignee}>
-                    <SelectTrigger data-testid="select-task-assignee"><SelectValue placeholder={t("cashier.selectCleaner")} /></SelectTrigger>
+                    <SelectTrigger data-testid="select-task-assignee"><SelectValue placeholder={t("cashier.selectAssignee", "İşçi seçin")} /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="__none__">{t("cashier.noCleaner")}</SelectItem>
-                      {cleaners.map(c => <SelectItem key={c.id} value={c.id}>{c.fullName}</SelectItem>)}
+                      <SelectItem value="__none__">{t("cashier.noAssignee", "Təyin edilməsin")}</SelectItem>
+                      {cleaners.map(c => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.fullName}
+                          <span className="ml-1.5 text-xs text-muted-foreground">
+                            ({c.role === "waiter" ? t("cashier.roleWaiter", "Qarson") : t("cashier.roleCleaner", "Təmizlikçi")})
+                          </span>
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
