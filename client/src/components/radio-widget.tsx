@@ -169,6 +169,12 @@ export function RadioWidget() {
   }
 
   async function handleOffer(fromUserId: string, sdp: RTCSessionDescriptionInit) {
+    // Close stale connection before creating a new one
+    const existing = peersRef.current.get(fromUserId);
+    if (existing) {
+      try { existing.close(); } catch {}
+      peersRef.current.delete(fromUserId);
+    }
     const pc = createPeer(fromUserId);
     await pc.setRemoteDescription(new RTCSessionDescription(sdp));
     const answer = await pc.createAnswer();
@@ -317,13 +323,35 @@ export function RadioWidget() {
 
       wsRef.current?.send(JSON.stringify({ type: "RADIO_PTT_START" }));
 
-      for (const remoteUser of usersRef.current) {
-        const pc = createPeer(remoteUser.userId);
-        stream.getTracks().forEach(track => pc.addTrack(track, stream));
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-        wsRef.current?.send(JSON.stringify({ type: "RADIO_OFFER", targetUserId: remoteUser.userId, sdp: offer }));
-      }
+      // Snapshot the user list so it doesn't change mid-loop
+      const targets = [...usersRef.current];
+
+      // Create all peer connections in PARALLEL — avoids blocking with many users
+      await Promise.allSettled(
+        targets.map(async (remoteUser) => {
+          try {
+            // Close any stale connection for this peer first
+            const stale = peersRef.current.get(remoteUser.userId);
+            if (stale) {
+              try { stale.close(); } catch {}
+              peersRef.current.delete(remoteUser.userId);
+            }
+            const pc = createPeer(remoteUser.userId);
+            stream.getTracks().forEach(track => pc.addTrack(track, stream));
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            if (wsRef.current?.readyState === WebSocket.OPEN) {
+              wsRef.current.send(JSON.stringify({
+                type: "RADIO_OFFER",
+                targetUserId: remoteUser.userId,
+                sdp: offer,
+              }));
+            }
+          } catch {
+            // One failing peer should not block the rest
+          }
+        })
+      );
     } catch (e: any) {
       const msg = e?.name === "NotAllowedError"
         ? t("radio.micPermissionDenied")
