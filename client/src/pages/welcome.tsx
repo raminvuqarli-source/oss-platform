@@ -17,7 +17,7 @@ import {
   Play, Loader2, Crown, UserCog, ConciergeBell, User,
   BrainCircuit, ArrowRight, Zap, Activity, TrendingUp,
   ChevronRight, UtensilsCrossed, Sparkles,
-  ChefHat, Utensils, Wallet, Receipt,
+  ChefHat, Utensils, Wallet, Home,
 } from "lucide-react";
 import { apiRequest, queryClient, setDemoToken } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -688,6 +688,61 @@ export default function Welcome() {
                   ))}
                 </div>
               )}
+
+              {/* Apartment Lite — separate card for individual apartment owners */}
+              <AnimatedSection>
+                <div className="flex items-center gap-4 mt-4">
+                  <div className="flex-1 h-px bg-border/40" />
+                  <span className="text-xs text-muted-foreground/60 uppercase tracking-widest font-medium whitespace-nowrap">{t('pricing.apartmentOwners')}</span>
+                  <div className="flex-1 h-px bg-border/40" />
+                </div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.1 }}
+                  transition={{ duration: 0.5 }}
+                  className="max-w-sm mx-auto mt-4"
+                >
+                  <Card
+                    className="cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border-border/40 hover:border-teal-500/30"
+                    onClick={() => navigateToRegister('APT_LITE')}
+                    data-testid="card-plan-APT_LITE"
+                  >
+                    <CardContent className="p-7 space-y-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-xl bg-teal-500/10 flex items-center justify-center">
+                          <Home className="h-5 w-5 text-teal-500" />
+                        </div>
+                        <div>
+                          <p className="font-heading font-bold text-base">{t('pricing.apartmentLite')}</p>
+                          <p className="text-xs text-muted-foreground">{t('pricing.apartmentLiteSub')}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-bold tracking-tight">$19</span>
+                        <span className="text-muted-foreground text-sm">{t('landing.perMonth')}</span>
+                      </div>
+                      <ul className="space-y-2.5">
+                        {(['guestMgmt', 'smartLock', 'chat', 'doorLogs', 'units'] as const).map((key) => (
+                          <li key={key} className="flex items-center gap-2.5 text-sm">
+                            <CheckCircle className="h-4 w-4 text-teal-500 shrink-0" />
+                            <span>{t(`pricing.apartmentFeatures.${key}`)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <Button
+                        className="w-full rounded-xl"
+                        variant="outline"
+                        onClick={(e) => { e.stopPropagation(); navigateToRegister('APT_LITE'); }}
+                        data-testid="button-plan-trial-APT_LITE"
+                      >
+                        {t('pricing.startFreeTrial')}
+                      </Button>
+                      <p className="text-center text-xs text-muted-foreground">{t('pricing.trialCheckmark', { days: DEFAULT_TRIAL_DAYS })}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </AnimatedSection>
 
               <p className="text-center text-sm text-muted-foreground">{t('landing.allPlansTrialText')}</p>
             </div>
