@@ -100,7 +100,7 @@ import { UpgradeModal } from "@/components/upgrade-modal";
 import { usePlanFeatures } from "@/hooks/use-plan-features";
 import { useChannexRealtime } from "@/hooks/use-channex-realtime";
 import type { ChannexBookingEvent } from "@/hooks/use-channex-realtime";
-import { InventoryPanel } from "@/components/inventory-panel";
+import { InventoryPanel, InventoryExpenseWidget } from "@/components/inventory-panel";
 import type { Property, Unit, Device, Subscription, StaffInvitation, ServiceRequest, ChatMessage, Escalation, EscalationReply } from "@shared/schema";
 import { unitCategoryTypes, unitCategoryLabels, staffRoleLabels, type UnitCategory, type StaffRole, expenseCategories, revenueCategories, type EscalationStatus } from "@shared/schema";
 import { Textarea } from "@/components/ui/textarea";
@@ -4666,6 +4666,8 @@ function FinanceCenterView() {
         </TabsContent>
 
         <TabsContent value="expenses" className="mt-4 space-y-4">
+          {/* ── Inventory Expenses Summary ── */}
+          <InventoryExpenseWidget accentColor="emerald" />
           <div className="flex items-center justify-between flex-wrap gap-3">
             <p className="text-sm text-muted-foreground">{t('owner.financeCenter.expenseRecords', { count: expenses?.length || 0 })}</p>
             <Dialog open={expenseDialogOpen} onOpenChange={setExpenseDialogOpen}>

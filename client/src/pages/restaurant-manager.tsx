@@ -28,7 +28,7 @@ import {
   AlertTriangle, BadgeCheck, CalendarClock, RefreshCw, PhoneCall,
   MessageSquare, Send, ArrowLeft, Printer, Package,
 } from "lucide-react";
-import { InventoryPanel } from "@/components/inventory-panel";
+import { InventoryPanel, InventoryExpenseWidget } from "@/components/inventory-panel";
 import { formatDistanceToNow } from "date-fns";
 import type { Locale } from "date-fns";
 import { az as azLocale, tr as trLocale, ru as ruLocale, ar as arLocale, fr as frLocale, de as deLocale, es as esLocale, nl as nlLocale } from "date-fns/locale";
@@ -1169,6 +1169,11 @@ export default function RestaurantManager() {
               <h3 className="font-semibold">{t("rm.financeTitle")}</h3>
               <p className="text-sm text-muted-foreground">{t("rm.financeSubtitle")}</p>
             </div>
+            {/* ── Inventory Expenses Card ── */}
+            <InventoryExpenseWidget
+              scope={isHotelTenant ? "hotel-restaurant" : "standalone-restaurant"}
+              accentColor="red"
+            />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card>
                 <CardContent className="pt-4">

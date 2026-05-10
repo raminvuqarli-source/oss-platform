@@ -60,9 +60,111 @@ export type InventoryItem = {
   consumptionUnit: string;
   currentStock: number;
   criticalThreshold: number;
+  unitCost?: number;
+};
+
+export type InventoryExpenseEntry = {
+  id: string;
+  date: string;
+  itemName: string;
+  category: string;
+  scope: InventoryScope;
+  quantity: number;
+  unitCost: number;
+  totalCost: number;
 };
 
 const STORAGE_KEY = "oss_inventory_v1";
+const EXPENSES_KEY = "oss_inventory_expenses_v1";
+
+function loadExpenses(): InventoryExpenseEntry[] {
+  try {
+    const raw = localStorage.getItem(EXPENSES_KEY);
+    if (raw) return JSON.parse(raw) as InventoryExpenseEntry[];
+  } catch {}
+  return [];
+}
+
+function saveExpenses(entries: InventoryExpenseEntry[]) {
+  try {
+    localStorage.setItem(EXPENSES_KEY, JSON.stringify(entries));
+  } catch {}
+}
+
+function logExpense(entry: Omit<InventoryExpenseEntry, "id">) {
+  const entries = loadExpenses();
+  entries.unshift({ ...entry, id: `exp_${Date.now()}` });
+  saveExpenses(entries.slice(0, 500));
+}
+
+export function getInventoryExpenseSummary(scope?: InventoryScope) {
+  const entries = loadExpenses();
+  const filtered = scope ? entries.filter(e => e.scope === scope) : entries;
+  const now = new Date();
+  const thisMonth = filtered.filter(e => {
+    const d = new Date(e.date);
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  });
+  return {
+    allTime: filtered.reduce((s, e) => s + e.totalCost, 0),
+    thisMonth: thisMonth.reduce((s, e) => s + e.totalCost, 0),
+    entries: filtered.slice(0, 20),
+  };
+}
+
+export function InventoryExpenseWidget({ scope, accentColor = "emerald" }: { scope?: InventoryScope; accentColor?: "emerald" | "red" }) {
+  const { t } = useTranslation();
+  const [inv, setInv] = useState(() => getInventoryExpenseSummary(scope));
+
+  useEffect(() => {
+    setInv(getInventoryExpenseSummary(scope));
+    const handler = () => setInv(getInventoryExpenseSummary(scope));
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
+  }, [scope]);
+
+  if (inv.allTime <= 0) return null;
+
+  const accent = accentColor === "red"
+    ? { border: "border-red-200 dark:border-red-900/40", bg: "bg-red-50/30 dark:bg-red-950/10", text: "text-red-600", icon: "text-red-600" }
+    : { border: "border-emerald-200 dark:border-emerald-900/40", bg: "bg-emerald-50/40 dark:bg-emerald-950/10", text: "text-emerald-600", icon: "text-emerald-600" };
+
+  return (
+    <Card className={`${accent.border} ${accent.bg}`} data-testid="card-inventory-expenses">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Package className={`h-4 w-4 ${accent.icon}`} />
+          {t("inventory.financeTitle", "Anbar Xərcləri")}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="text-center p-3 rounded-lg bg-background border">
+            <p className="text-xs text-muted-foreground mb-1">{t("inventory.thisMonth", "Bu ay")}</p>
+            <p className={`text-lg font-bold ${accent.text}`}>₼{inv.thisMonth.toFixed(2)}</p>
+          </div>
+          <div className="text-center p-3 rounded-lg bg-background border">
+            <p className="text-xs text-muted-foreground mb-1">{t("inventory.allTime", "Ümumi")}</p>
+            <p className="text-lg font-bold">₼{inv.allTime.toFixed(2)}</p>
+          </div>
+        </div>
+        {inv.entries.length > 0 && (
+          <div className="space-y-0 max-h-40 overflow-y-auto">
+            {inv.entries.slice(0, 5).map(e => (
+              <div key={e.id} className="flex items-center justify-between text-xs py-1.5 border-b last:border-0">
+                <div className="min-w-0 flex-1">
+                  <span className="font-medium truncate">{e.itemName}</span>
+                  <span className="text-muted-foreground ml-2">{new Date(e.date).toLocaleDateString()}</span>
+                </div>
+                <span className="font-semibold text-red-600 shrink-0 ml-2">-₼{e.totalCost.toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 const DEFAULT_ITEMS: InventoryItem[] = [
   { id: "h1", scope: "hotel", name: "Dəsmal", category: "Otaq Ləvazimatları", purchaseUnit: "Bağlama", consumptionUnit: "Ədəd", currentStock: 85, criticalThreshold: 20 },
@@ -100,6 +202,7 @@ type FormState = {
   consumptionUnit: string;
   currentStock: string;
   criticalThreshold: string;
+  unitCost: string;
 };
 
 const EMPTY_FORM: FormState = {
@@ -109,6 +212,7 @@ const EMPTY_FORM: FormState = {
   consumptionUnit: "",
   currentStock: "",
   criticalThreshold: "",
+  unitCost: "",
 };
 
 function StockBar({ current, threshold }: { current: number; threshold: number }) {
@@ -205,6 +309,11 @@ function InventoryItemCard({
             <div className="text-right">
               <p className="text-[10px] text-muted-foreground">{t("inventory.purchaseUnit", "Alış")}</p>
               <p className="text-[11px] font-medium">{item.purchaseUnit}</p>
+              {item.unitCost != null && item.unitCost > 0 && (
+                <p className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5" data-testid={`text-cost-${item.id}`}>
+                  ₼{item.unitCost.toFixed(2)}/{item.consumptionUnit}
+                </p>
+              )}
             </div>
           </div>
         </CardContent>
@@ -244,6 +353,7 @@ function AddProductDialog({
           consumptionUnit: editItem.consumptionUnit,
           currentStock: String(editItem.currentStock),
           criticalThreshold: String(editItem.criticalThreshold),
+          unitCost: editItem.unitCost != null ? String(editItem.unitCost) : "",
         });
       } else {
         setForm(EMPTY_FORM);
@@ -256,14 +366,17 @@ function AddProductDialog({
       toast({ title: t("inventory.productName", "Məhsulun adı"), description: "Ad daxil edin", variant: "destructive" });
       return;
     }
+    const unitCost = parseFloat(form.unitCost) || 0;
+    const qty = parseFloat(form.currentStock) || 0;
     onSave({
       scope,
       name: form.name.trim(),
       category: form.category.trim() || "Ümumi",
       purchaseUnit: form.purchaseUnit.trim() || "Ədəd",
       consumptionUnit: form.consumptionUnit.trim() || "Ədəd",
-      currentStock: parseFloat(form.currentStock) || 0,
+      currentStock: qty,
       criticalThreshold: parseFloat(form.criticalThreshold) || 0,
+      unitCost,
     });
     onOpenChange(false);
   };
@@ -380,6 +493,19 @@ function AddProductDialog({
                   data-testid="input-critical-threshold"
                 />
                 <p className="text-[11px] text-muted-foreground">{t("inventory.criticalThresholdHint", "Bu qiymətdən aşağı düşəndə xəbərdarlıq göstəriləcək")}</p>
+              </div>
+              <div className="col-span-2 space-y-1.5">
+                <Label>{t("inventory.unitCost", "Vahid Qiymət (₼)")}</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  placeholder="0.00"
+                  value={form.unitCost}
+                  onChange={set("unitCost")}
+                  data-testid="input-unit-cost"
+                />
+                <p className="text-[11px] text-muted-foreground">{t("inventory.unitCostHint", "Bir vahidin alış qiyməti — maliyyə hesabatına əks olunacaq")}</p>
               </div>
             </div>
           </div>
@@ -537,6 +663,17 @@ export function InventoryPanel({ mode = "all" }: { mode?: PanelMode }) {
     } else {
       const newItem: InventoryItem = { ...data, id: `inv_${Date.now()}` };
       setItems(prev => [...prev, newItem]);
+      if (data.unitCost && data.unitCost > 0 && data.currentStock > 0) {
+        logExpense({
+          date: new Date().toISOString(),
+          itemName: data.name,
+          category: data.category,
+          scope: data.scope,
+          quantity: data.currentStock,
+          unitCost: data.unitCost,
+          totalCost: data.unitCost * data.currentStock,
+        });
+      }
       toast({ title: t("inventory.addProduct", "+ Yeni Məhsul"), description: `"${data.name}" əlavə edildi.` });
     }
     setEditItem(null);
