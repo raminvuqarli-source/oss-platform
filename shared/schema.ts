@@ -1660,6 +1660,7 @@ export const housekeepingTasks = pgTable("housekeeping_tasks", {
   dueDate: timestamp("due_date"),
   createdAt: timestamp("created_at").defaultNow(),
   completedAt: timestamp("completed_at"),
+  completionPhoto: text("completion_photo"),
 }, (table) => [
   index("idx_housekeeping_tasks_tenant_id").on(table.tenantId),
   index("idx_housekeeping_tasks_property_id").on(table.propertyId),

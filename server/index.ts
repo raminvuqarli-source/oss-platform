@@ -334,6 +334,8 @@ async function runSafetyPatches(): Promise<void> {
     await client.query(`CREATE INDEX IF NOT EXISTS idx_deleted_trial_email ON deleted_trial_accounts (email)`);
     // Ensure hotel_name column exists (for DBs created with old schema)
     await client.query(`ALTER TABLE deleted_trial_accounts ADD COLUMN IF NOT EXISTS hotel_name varchar`);
+    // Housekeeping task completion photo
+    await client.query(`ALTER TABLE housekeeping_tasks ADD COLUMN IF NOT EXISTS completion_photo text`);
 
     // Fix standalone restaurant owners whose tenant_type incorrectly defaults to "hotel"
     // Approach 1: owner whose ALL properties are of type "restaurant"

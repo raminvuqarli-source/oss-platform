@@ -62,7 +62,7 @@ export function registerHousekeepingRoutes(app: Express): void {
   app.patch("/api/housekeeping/tasks/:id", requireRole("admin", "reception", "owner_admin", "property_manager", "staff"), async (req, res) => {
     try {
       const taskId = asString(req.params.id);
-      const { status, assignedTo, notes, priority } = req.body;
+      const { status, assignedTo, notes, priority, completionPhoto } = req.body;
       const user = await storage.getUser(req.session.userId!);
       if (!user) return res.status(401).json({ message: "Unauthorized" });
 
@@ -114,6 +114,7 @@ export function registerHousekeepingRoutes(app: Express): void {
         }
         updates.priority = priority;
       }
+      if (completionPhoto !== undefined) updates.completionPhoto = completionPhoto;
 
       const updated = await storage.updateHousekeepingTask(taskId, updates);
 

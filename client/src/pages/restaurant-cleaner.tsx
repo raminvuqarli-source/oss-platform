@@ -99,31 +99,37 @@ export default function RestaurantCleaner() {
     return () => ws.close();
   }, [queryClient, toast]);
 
+  async function compressImage(file: File, maxPx = 1200, quality = 0.72): Promise<string> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        const ratio = Math.min(maxPx / img.width, maxPx / img.height, 1);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(""); };
+      img.src = url;
+    });
+  }
+
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const demoToken = getDemoToken();
-      const uploadHeaders: Record<string, string> = {};
-      if (demoToken) uploadHeaders["X-Demo-Token"] = demoToken;
-      const res = await fetch("/api/upload", { method: "POST", body: formData, credentials: "include", headers: uploadHeaders });
-      if (res.ok) {
-        const data = await res.json();
-        setPhotoUrl(data.url || "");
-      } else {
-        const reader = new FileReader();
-        reader.onload = ev => setPhotoUrl(ev.target?.result as string || "");
-        reader.readAsDataURL(file);
-      }
+      const compressed = await compressImage(file);
+      setPhotoUrl(compressed);
     } catch {
-      const reader = new FileReader();
-      reader.onload = ev => setPhotoUrl(ev.target?.result as string || "");
-      reader.readAsDataURL(file);
+      toast({ title: t("errors.somethingWentWrong"), variant: "destructive" });
     } finally {
       setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
     }
   }
 

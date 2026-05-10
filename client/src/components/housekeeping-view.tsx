@@ -1,4 +1,5 @@
-import { useState } from "react";
+"use client"
+import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -11,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Brush, CheckCheck, Ban, Loader2, UserCheck } from "lucide-react";
+import { Plus, Brush, CheckCheck, Ban, Loader2, UserCheck, Camera, Image as ImageIcon } from "lucide-react";
 import type { HousekeepingTask, User } from "@shared/schema";
 
 interface RoomUnit {
@@ -43,6 +44,25 @@ const nextStatus: Record<string, string> = {
   inspection:  "completed",
 };
 
+async function compressImage(file: File, maxPx = 1200, quality = 0.72): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const ratio = Math.min(maxPx / img.width, maxPx / img.height, 1);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * ratio);
+      canvas.height = Math.round(img.height * ratio);
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL("image/jpeg", quality));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(""); };
+    img.src = url;
+  });
+}
+
 export function HousekeepingView() {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -54,6 +74,12 @@ export function HousekeepingView() {
   const [priority, setPriority] = useState("normal");
   const [assignedTo, setAssignedTo] = useState("unassigned");
   const [notes, setNotes] = useState("");
+
+  const [photoDialogTask, setPhotoDialogTask] = useState<HousekeepingTask | null>(null);
+  const [photoUrl, setPhotoUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const { data: tasks, isLoading: tasksLoading } = useQuery<HousekeepingTask[]>({
     queryKey: ["/api/housekeeping/tasks"],
@@ -87,16 +113,35 @@ export function HousekeepingView() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const res = await apiRequest("PATCH", `/api/housekeeping/tasks/${id}`, { status });
+    mutationFn: async ({ id, status, completionPhoto }: { id: string; status: string; completionPhoto?: string }) => {
+      const body: Record<string, unknown> = { status };
+      if (completionPhoto !== undefined) body.completionPhoto = completionPhoto;
+      const res = await apiRequest("PATCH", `/api/housekeeping/tasks/${id}`, body);
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/housekeeping/tasks"] });
       toast({ title: t("housekeeping.taskUpdated", "Task updated") });
+      setPhotoDialogTask(null);
+      setPhotoUrl("");
     },
     onError: () => toast({ title: t("common.error"), variant: "destructive" }),
   });
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const compressed = await compressImage(file);
+      setPhotoUrl(compressed);
+    } catch {
+      toast({ title: t("common.error"), variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
 
   const handleCreate = () => {
     if (!unitId) {
@@ -272,11 +317,12 @@ export function HousekeepingView() {
           {filtered.map((task) => {
             const assignedStaff = cleaners.find((c) => c.id === task.assignedTo);
             const next = nextStatus[task.status];
+            const isCompletionStep = next === "completed";
             return (
               <Card key={task.id} data-testid={`hk-task-${task.id}`} className="overflow-visible">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-3 flex-wrap">
-                    <div className="space-y-1 min-w-0">
+                    <div className="space-y-1 min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold text-sm" data-testid={`hk-room-${task.id}`}>
                           {t("common.room", "Room")} {task.roomNumber}
@@ -307,13 +353,32 @@ export function HousekeepingView() {
                         <p className="text-xs text-muted-foreground italic">{t("housekeeping.unassigned", "Unassigned")}</p>
                       )}
                       {task.notes && <p className="text-xs text-muted-foreground">{task.notes}</p>}
+
+                      {task.completionPhoto && (
+                        <div className="mt-2">
+                          <img
+                            src={task.completionPhoto}
+                            alt={t("housekeeping.completionPhoto", "Completion photo")}
+                            className="h-20 w-20 rounded object-cover border cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => setLightboxUrl(task.completionPhoto!)}
+                            data-testid={`img-hk-photo-${task.id}`}
+                          />
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {next && (
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => updateMutation.mutate({ id: task.id, status: next })}
+                          onClick={() => {
+                            if (isCompletionStep) {
+                              setPhotoDialogTask(task);
+                              setPhotoUrl("");
+                            } else {
+                              updateMutation.mutate({ id: task.id, status: next });
+                            }
+                          }}
                           disabled={updateMutation.isPending}
                           data-testid={`hk-advance-${task.id}`}
                         >
@@ -340,6 +405,108 @@ export function HousekeepingView() {
               </Card>
             );
           })}
+        </div>
+      )}
+
+      {/* Photo completion dialog */}
+      <Dialog open={!!photoDialogTask} onOpenChange={() => { setPhotoDialogTask(null); setPhotoUrl(""); }}>
+        <DialogContent data-testid="dialog-hk-complete">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Camera className="h-5 w-5" />
+              {t("housekeeping.completeWithPhoto", "Mark as Completed")}
+            </DialogTitle>
+            <DialogDescription>
+              {t("housekeeping.completePhotoDesc", "Optionally add a completion photo as proof.")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-1">
+            {photoDialogTask && (
+              <p className="text-sm text-muted-foreground">
+                {t("common.room", "Room")} {photoDialogTask.roomNumber} — {t(`housekeeping.taskTypes.${photoDialogTask.taskType}`, photoDialogTask.taskType)}
+              </p>
+            )}
+            <div className="space-y-2">
+              <Label>{t("housekeeping.addPhoto", "Add completion photo (optional)")}</Label>
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading}
+                  data-testid="button-hk-upload-photo"
+                >
+                  {uploading
+                    ? <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                    : <Camera className="h-4 w-4 mr-1" />}
+                  {uploading ? t("rcl.uploading", "Uploading…") : t("rcl.choosePhoto", "Choose photo")}
+                </Button>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                  data-testid="input-hk-photo-file"
+                />
+                {photoUrl && <span className="text-xs text-emerald-600 flex items-center gap-1"><ImageIcon className="h-3.5 w-3.5" />{t("rcl.photoSelected", "Photo selected")}</span>}
+              </div>
+              {photoUrl && (
+                <img
+                  src={photoUrl}
+                  alt={t("housekeeping.completionPhoto", "Completion photo")}
+                  className="h-40 w-full object-cover rounded-lg border"
+                />
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setPhotoDialogTask(null); setPhotoUrl(""); }}>
+              {t("common.cancel")}
+            </Button>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              onClick={() => photoDialogTask && updateMutation.mutate({
+                id: photoDialogTask.id,
+                status: "completed",
+                completionPhoto: photoUrl || undefined,
+              })}
+              disabled={updateMutation.isPending}
+              data-testid="button-hk-confirm-complete"
+            >
+              {updateMutation.isPending
+                ? <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                : <CheckCheck className="h-4 w-4 mr-1" />}
+              {t("housekeeping.confirmComplete", "Mark Completed")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Lightbox */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setLightboxUrl(null)}
+          data-testid="hk-lightbox-overlay"
+        >
+          <div className="relative max-w-3xl max-h-[90vh] w-full flex items-center justify-center" onClick={e => e.stopPropagation()}>
+            <img
+              src={lightboxUrl}
+              alt={t("housekeeping.completionPhoto", "Completion photo")}
+              className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl"
+              data-testid="hk-lightbox-image"
+            />
+            <button
+              className="absolute top-2 right-2 bg-black/60 text-white rounded-full w-9 h-9 flex items-center justify-center text-lg hover:bg-black/80 transition-colors"
+              onClick={() => setLightboxUrl(null)}
+              data-testid="button-hk-close-lightbox"
+            >
+              ✕
+            </button>
+          </div>
         </div>
       )}
     </div>
