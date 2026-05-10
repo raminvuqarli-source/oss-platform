@@ -36,7 +36,7 @@ export function registerBookingRoutes(app: Express): void {
     try {
       const booking = await storage.getCurrentBookingForGuest(req.session.userId!);
       if (!booking) {
-        return res.status(404).json({ message: "No current booking found" });
+        return res.status(200).json(null);
       }
       res.json(booking);
     } catch (error: any) {

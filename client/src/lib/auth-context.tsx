@@ -71,7 +71,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAuthUser(queryUser);
       (async () => {
         await loginOneSignal(queryUser.id);
-        await setOneSignalTags({ role: queryUser.role, hotelId: queryUser.hotelId || "" });
+        const tags: Record<string, string> = { role: queryUser.role };
+        if (queryUser.hotelId) tags.hotelId = queryUser.hotelId;
+        await setOneSignalTags(tags);
         await requestNotificationPermission();
       })();
     }
@@ -91,7 +93,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       (async () => {
         await loginOneSignal(data.id);
-        await setOneSignalTags({ role: data.role, hotelId: data.hotelId || "" });
+        const loginTags: Record<string, string> = { role: data.role };
+        if (data.hotelId) loginTags.hotelId = data.hotelId;
+        await setOneSignalTags(loginTags);
         await requestNotificationPermission();
       })();
     },

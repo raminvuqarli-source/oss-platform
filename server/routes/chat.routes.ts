@@ -8,9 +8,12 @@ import { broadcastToUser, broadcastToTenant } from "../websocket/index";
 
 export function registerChatRoutes(app: Express): void {
 
-  app.get("/api/chat/messages", requireRole("guest"), async (req, res) => {
+  app.get("/api/chat/messages", requireAuth, async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
+      if (user?.role !== "guest") {
+        return res.status(200).json([]);
+      }
       if (!user?.hotelId) {
         return res.status(400).json({ message: "No hotel assigned" });
       }
