@@ -3469,5 +3469,21 @@
     "allClear": "Alles in Ordnung",
     "trial": "Testphase",
     "renewal": "Erneuerung"
+  },
+  "ownerHub": {
+    "ops": "Betrieb",
+    "opsDesc": "Kalender, Aufgaben, Eskalationen",
+    "property": "Objekte & Gäste",
+    "propertyDesc": "Objekte, Gäste, Zimmerstatus",
+    "finance": "Finanzen",
+    "financeDesc": "Umsatz, Abonnement, Analytik",
+    "hr": "Team",
+    "hrDesc": "Personal, Chat, Leistung",
+    "restaurant": "Restaurant",
+    "restaurantDesc": "Verwaltung, Küche",
+    "stats": "Heutige Statistiken",
+    "occupancy": "Belegung",
+    "revenue": "Umsatz",
+    "properties_count": "Objekte"
   }
 }

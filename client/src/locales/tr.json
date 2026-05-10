@@ -3482,5 +3482,21 @@
     "allClear": "Her şey yolunda",
     "trial": "Deneme dönemi",
     "renewal": "Yenileme"
+  },
+  "ownerHub": {
+    "ops": "Operasyonlar",
+    "opsDesc": "Takvim, görevler, eskalasyonlar",
+    "property": "Mülk & Misafirler",
+    "propertyDesc": "Mülkler, misafirler, oda durumu",
+    "finance": "Finans",
+    "financeDesc": "Gelir, abonelik, performans",
+    "hr": "Ekip",
+    "hrDesc": "Personel, sohbet, performans",
+    "restaurant": "Restoran",
+    "restaurantDesc": "Yönetim, mutfak",
+    "stats": "Bugünkü İstatistikler",
+    "occupancy": "Doluluk",
+    "revenue": "Gelir",
+    "properties_count": "Mülk"
   }
 }

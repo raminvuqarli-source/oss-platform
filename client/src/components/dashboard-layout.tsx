@@ -221,33 +221,12 @@ function DashboardSidebar() {
             label: t("nav.group.core", "Core"),
             items: [
               { title: t("common.dashboard"), icon: LayoutDashboard, url: "/dashboard", view: undefined, testId: "nav-dashboard" },
-              { title: t("nav.calendar", "Calendar"), icon: CalendarDays, url: "/dashboard", view: "calendar", testId: "nav-calendar" },
-              { title: t("nav.properties", "Properties"), icon: Building2, url: "/dashboard", view: "properties", testId: "nav-properties" },
-              { title: t("nav.guests", "Guests"), icon: UserCheck, url: "/dashboard", view: "guests-overview", testId: "nav-guests-overview" },
-              { title: t("nav.staff", "Staff"), icon: Users, url: "/dashboard", view: "staff-management", testId: "nav-staff-management", restricted: !isFeatureEnabled("staff_management") },
-            ],
-          },
-          {
-            label: t("nav.group.operations", "Operations"),
-            items: [
-              { title: t("nav.escalations", "Escalations"), icon: AlertTriangle, url: "/dashboard", view: "escalations", testId: "nav-escalations" },
-              { title: t("nav.performance", "Performance"), icon: TrendingUp, url: "/dashboard", view: "performance", testId: "nav-performance", restricted: !isFeatureEnabled("advanced_analytics") },
-              { title: t("nav.staffPerformance", "Staff Performance"), icon: Star, url: "/dashboard", view: "staff-performance", testId: "nav-staff-performance", restricted: !isFeatureEnabled("staff_management") },
-              { title: t("nav.finance", "Finance"), icon: Wallet, url: "/dashboard", view: "finance", testId: "nav-finance" },
-              { title: t("nav.restaurantFinance", "Restoran Maliyyəsi"), icon: UtensilsCrossed, url: "/dashboard", view: "restaurant-finance", testId: "nav-restaurant-finance" },
-            ],
-          },
-          {
-            label: t("nav.group.communication", "Communication"),
-            items: [
-              { title: t("nav.staffChat", "Staff Chat"), icon: MessageSquare, url: "/dashboard", view: "staff-chat", testId: "nav-staff-chat" },
               { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-notifications" },
             ],
           },
           {
             label: t("nav.group.system", "System"),
             items: [
-              { title: t("nav.billingAddons", "Billing & Add-ons"), icon: CreditCard, url: "/dashboard", view: "billing-addons", testId: "nav-billing-addons" },
               { title: t("common.settings"), icon: Settings, url: "/settings", view: undefined, testId: "nav-settings" },
             ],
           },
@@ -746,11 +725,14 @@ function MobileBottomNav({ user, t }: { user: NonNullable<ReturnType<typeof useA
           { icon: Settings, label: t("common.settings"), url: "/settings" },
         ];
       case "owner_admin":
+        if (!currentView) {
+          return [
+            { icon: Bell, label: t("common.notifications"), url: "/notifications" },
+            { icon: Settings, label: t("common.settings"), url: "/settings" },
+          ];
+        }
         return [
           { icon: LayoutDashboard, label: t("common.dashboard"), url: "/dashboard", view: undefined },
-          { icon: CalendarDays, label: t("nav.calendar", "Calendar"), url: "/dashboard", view: "calendar" },
-          { icon: CreditCard, label: t("nav.billingAddons", "Billing"), url: "/dashboard", view: "billing-addons" },
-          { icon: BedDouble, label: t("nav.properties", "Rooms"), url: "/dashboard", view: "properties" },
           { icon: Bell, label: t("common.notifications"), url: "/notifications" },
           { icon: Settings, label: t("common.settings"), url: "/settings" },
         ];

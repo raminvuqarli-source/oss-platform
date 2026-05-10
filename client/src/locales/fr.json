@@ -3470,5 +3470,21 @@
     "allClear": "All clear",
     "trial": "Trial period",
     "renewal": "Renewal"
+  },
+  "ownerHub": {
+    "ops": "Operations",
+    "opsDesc": "Calendar, tasks, escalations",
+    "property": "Property & Guests",
+    "propertyDesc": "Properties, guests, room status",
+    "finance": "Finance",
+    "financeDesc": "Revenue, subscription, performance",
+    "hr": "Team",
+    "hrDesc": "Staff, chat, performance",
+    "restaurant": "Restaurant",
+    "restaurantDesc": "Management, kitchen",
+    "stats": "Today's Stats",
+    "occupancy": "Occupancy",
+    "revenue": "Revenue",
+    "properties_count": "Properties"
   }
 }

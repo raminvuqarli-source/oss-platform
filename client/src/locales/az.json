@@ -3571,5 +3571,21 @@
     "allClear": "Hər şey qaydasındadır",
     "trial": "Sınaq dövrü",
     "renewal": "Yenilənmə"
+  },
+  "ownerHub": {
+    "ops": "Əməliyyatlar",
+    "opsDesc": "Təqvim, tapşırıqlar, eskalasiyalar",
+    "property": "Mülk & Qonaqlar",
+    "propertyDesc": "Mülklər, qonaqlar, otaq statusu",
+    "finance": "Maliyyə",
+    "financeDesc": "Gəlir, abunəlik, performans",
+    "hr": "Komanda",
+    "hrDesc": "Heyət, söhbət, performans",
+    "restaurant": "Restoran",
+    "restaurantDesc": "İdarəetmə, mətbəx",
+    "stats": "Bugünkü Statistika",
+    "occupancy": "Doluluq",
+    "revenue": "Gəlir",
+    "properties_count": "Mülk"
   }
 }

@@ -6296,94 +6296,155 @@ export default function OwnerDashboard() {
   function OwnerActionGrid() {
     const propertiesCount = allProperties?.length ?? 0;
     const occupancyRate = analytics?.occupancyRate ?? 0;
-    const trialBadge = trialStatus?.isTrial
-      ? (trialStatus.isExpired ? t("trial.expired") : `${trialStatus.remainingDays}g`)
-      : (trialStatus?.daysUntilRenewal !== null && trialStatus?.daysUntilRenewal !== undefined && trialStatus.daysUntilRenewal <= 5)
-        ? `${trialStatus.daysUntilRenewal}g`
-        : undefined;
+    const trialActive = trialStatus?.isTrial && !trialStatus.isExpired;
+    const trialExpired = trialStatus?.isTrial && trialStatus.isExpired;
+    const renewalSoon = !trialStatus?.isTrial && trialStatus?.daysUntilRenewal !== null && trialStatus?.daysUntilRenewal !== undefined && trialStatus.daysUntilRenewal <= 5;
+
+    type HubItem = {
+      icon: React.ElementType;
+      label: string;
+      badge?: string | number;
+      iconBg: string;
+      iconColor: string;
+      action: () => void;
+      testId: string;
+    };
+
+    type HubGroup = {
+      label: string;
+      desc: string;
+      headerIcon: React.ElementType;
+      headerColor: string;
+      items: HubItem[];
+    };
+
+    const groups: HubGroup[] = [
+      {
+        label: t("ownerHub.ops", "Əməliyyatlar"),
+        desc: t("ownerHub.opsDesc", "Təqvim, tapşırıqlar, eskalasiyalar"),
+        headerIcon: Activity,
+        headerColor: "text-blue-500",
+        items: [
+          { icon: CalendarDays, label: t("nav.calendar", "Təqvim"), iconBg: "bg-blue-500/10", iconColor: "text-blue-500", action: () => navigate("/dashboard?view=calendar"), testId: "hub-calendar" },
+          { icon: CheckSquare, label: t("nav.tasks", "Tapşırıqlar"), iconBg: "bg-violet-500/10", iconColor: "text-violet-500", action: () => navigate("/dashboard?view=tasks"), testId: "hub-tasks" },
+          { icon: AlertTriangle, label: t("nav.escalations", "Eskalasiyalar"), iconBg: "bg-red-500/10", iconColor: "text-red-500", action: () => navigate("/dashboard?view=escalations"), testId: "hub-escalations" },
+          { icon: MessageCircle, label: t("nav.staffChat", "Heyət Söhbəti"), iconBg: "bg-emerald-500/10", iconColor: "text-emerald-500", action: () => navigate("/dashboard?view=staff-chat"), testId: "hub-staff-chat" },
+        ],
+      },
+      {
+        label: t("ownerHub.property", "Mülk & Qonaqlar"),
+        desc: t("ownerHub.propertyDesc", "Mülklər, qonaqlar, otaq statusu"),
+        headerIcon: Building2,
+        headerColor: "text-orange-500",
+        items: [
+          { icon: Building2, label: t("nav.properties", "Mülklər"), badge: propertiesCount > 0 ? propertiesCount : undefined, iconBg: "bg-orange-500/10", iconColor: "text-orange-500", action: () => setOpenOwnerPanel("properties"), testId: "hub-properties" },
+          { icon: UserCheck, label: t("nav.guests", "Qonaqlar"), iconBg: "bg-cyan-500/10", iconColor: "text-cyan-500", action: () => navigate("/dashboard?view=guests-overview"), testId: "hub-guests" },
+          { icon: Users, label: t("nav.staff", "Heyət"), iconBg: "bg-indigo-500/10", iconColor: "text-indigo-500", action: () => setOpenOwnerPanel("management"), testId: "hub-staff" },
+          { icon: BedDouble, label: t("nav.roomStatus", "Otaq Statusu"), iconBg: "bg-amber-500/10", iconColor: "text-amber-500", action: () => navigate("/dashboard?view=properties"), testId: "hub-room-status" },
+        ],
+      },
+      {
+        label: t("ownerHub.finance", "Maliyyə"),
+        desc: t("ownerHub.financeDesc", "Gəlir, abunəlik, performans"),
+        headerIcon: DollarSign,
+        headerColor: "text-emerald-500",
+        items: [
+          { icon: BarChart2, label: t("ownerActionDash.overview", "Analitika"), iconBg: "bg-emerald-500/10", iconColor: "text-emerald-500", action: () => setOpenOwnerPanel("overview"), testId: "hub-analytics" },
+          { icon: CreditCard, label: t("nav.billingAddons", "Abunəlik"), badge: trialActive ? `${trialStatus!.remainingDays}g` : trialExpired ? "!" : renewalSoon ? `${trialStatus!.daysUntilRenewal}g` : undefined, iconBg: "bg-blue-500/10", iconColor: "text-blue-500", action: () => setOpenOwnerPanel("finance"), testId: "hub-billing" },
+          { icon: TrendingUp, label: t("nav.performance", "Performans"), iconBg: "bg-violet-500/10", iconColor: "text-violet-500", action: () => navigate("/dashboard?view=performance"), testId: "hub-performance" },
+          { icon: Wallet, label: t("nav.finance", "Maliyyə Mərkəzi"), iconBg: "bg-teal-500/10", iconColor: "text-teal-500", action: () => navigate("/dashboard?view=finance"), testId: "hub-finance" },
+        ],
+      },
+      {
+        label: t("ownerHub.hr", "Komanda"),
+        desc: t("ownerHub.hrDesc", "Heyət, söhbət, performans"),
+        headerIcon: Users,
+        headerColor: "text-indigo-500",
+        items: [
+          { icon: Users, label: t("nav.staff", "Personal İdarəsi"), iconBg: "bg-indigo-500/10", iconColor: "text-indigo-500", action: () => navigate("/dashboard?view=staff-management"), testId: "hub-staff-mgmt" },
+          { icon: MessageSquare, label: t("nav.staffChat", "Heyət Söhbəti"), iconBg: "bg-emerald-500/10", iconColor: "text-emerald-500", action: () => navigate("/dashboard?view=staff-chat"), testId: "hub-staff-chat2" },
+          { icon: Star, label: t("nav.staffPerformance", "Heyət Performansı"), iconBg: "bg-amber-500/10", iconColor: "text-amber-500", action: () => navigate("/dashboard?view=staff-performance"), testId: "hub-staff-perf" },
+          { icon: UtensilsCrossed, label: t("nav.restaurantFinance", "Rest. Maliyyəsi"), iconBg: "bg-rose-500/10", iconColor: "text-rose-500", action: () => navigate("/dashboard?view=restaurant-finance"), testId: "hub-rest-finance" },
+        ],
+      },
+      {
+        label: t("ownerHub.restaurant", "Restoran"),
+        desc: t("ownerHub.restaurantDesc", "İdarəetmə, mətbəx"),
+        headerIcon: UtensilsCrossed,
+        headerColor: "text-rose-500",
+        items: [
+          { icon: UtensilsCrossed, label: t("nav.restaurantManagement", "İdarəetmə"), iconBg: "bg-rose-500/10", iconColor: "text-rose-500", action: () => navigate("/restaurant/manager"), testId: "hub-rest-manager" },
+          { icon: ChefHat, label: t("nav.kitchenDisplay", "Mətbəx (KDS)"), iconBg: "bg-orange-500/10", iconColor: "text-orange-500", action: () => navigate("/restaurant/kitchen"), testId: "hub-rest-kitchen" },
+          { icon: Utensils, label: t("nav.waiterView", "Qarson Görünüşü"), iconBg: "bg-amber-500/10", iconColor: "text-amber-500", action: () => navigate("/restaurant/waiter"), testId: "hub-rest-waiter" },
+          { icon: Wallet, label: t("nav.cashierTables", "Kassa"), iconBg: "bg-green-500/10", iconColor: "text-green-500", action: () => navigate("/restaurant/cashier"), testId: "hub-rest-cashier" },
+        ],
+      },
+    ];
 
     return (
-      <div className="space-y-5">
-        {/* 2×2 Action Grid */}
+      <div className="space-y-2 pb-4">
+        {/* Inline KPI strip */}
         <motion.div
-          className="grid grid-cols-2 gap-3"
-          initial={{ opacity: 0, y: 16 }}
+          className="grid grid-cols-3 gap-2 mb-4"
+          initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
-        >
-          {/* Card 1 — Bugünkü Vəziyyət */}
-          <ActionCard
-            icon={BarChart2}
-            label={t("ownerActionDash.overview", "Bugünkü Vəziyyət")}
-            sublabel={analyticsLoading ? "..." : `${occupancyRate}% doluluq`}
-            badge={occupancyRate > 0 ? `${occupancyRate}%` : undefined}
-            color="orange"
-            onClick={() => setOpenOwnerPanel("overview")}
-            data-testid="card-owner-overview"
-          />
-
-          {/* Card 2 — Maliyyə & Abunəlik */}
-          <ActionCard
-            icon={CreditCard}
-            label={t("ownerActionDash.finance", "Maliyyə & Abunəlik")}
-            sublabel={t("ownerActionDash.financeDesc", "Billing, ödənişlər, plan")}
-            badge={trialBadge}
-            color="blue"
-            onClick={() => setOpenOwnerPanel("finance")}
-            data-testid="card-owner-finance"
-          />
-
-          {/* Card 3 — Mülklərim & Otaqlar */}
-          <ActionCard
-            icon={Building2}
-            label={t("ownerActionDash.properties", "Mülklərim & Otaqlar")}
-            sublabel={`${propertiesCount} ${t("owner.properties", "mülk")}`}
-            badge={propertiesCount > 0 ? String(propertiesCount) : undefined}
-            color="green"
-            onClick={() => setOpenOwnerPanel("properties")}
-            data-testid="card-owner-properties"
-          />
-
-          {/* Card 4 — İdarəetmə & İnteqrasiya */}
-          <ActionCard
-            icon={Settings}
-            label={t("ownerActionDash.management", "İdarəetmə")}
-            sublabel={t("ownerActionDash.managementDesc", "Personal, WhatsApp, inteqrasiya")}
-            color="purple"
-            onClick={() => setOpenOwnerPanel("management")}
-            data-testid="card-owner-management"
-          />
-        </motion.div>
-
-        {/* Quick nav row */}
-        <motion.div
-          className="flex gap-2 overflow-x-auto pb-1 scrollbar-none"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.3 }}
+          transition={{ duration: 0.3 }}
         >
           {[
-            { label: t("nav.calendar", "Təqvim"), icon: <CalendarDays className="h-3.5 w-3.5" />, view: "calendar" },
-            { label: t("nav.tasks", "Tapşırıqlar"), icon: <CheckSquare className="h-3.5 w-3.5" />, view: "tasks" },
-            { label: t("nav.messages", "Mesajlar"), icon: <MessageCircle className="h-3.5 w-3.5" />, view: "messages" },
-            { label: t("nav.escalations", "Eskalasiyalar"), icon: <AlertTriangle className="h-3.5 w-3.5" />, view: "escalations" },
-            { label: t("nav.performance", "Performans"), icon: <TrendingUp className="h-3.5 w-3.5" />, view: "performance" },
-          ].map((item) => (
-            <Button
-              key={item.view}
-              variant="outline"
-              size="sm"
-              className="shrink-0 h-8 gap-1.5 text-xs rounded-full border-border/60"
-              onClick={() => navigate(`/dashboard?view=${item.view}`)}
-              data-testid={`button-nav-${item.view}`}
-            >
-              {item.icon}
-              {item.label}
-            </Button>
+            { label: t("ownerHub.occupancy", "Doluluq"), value: analyticsLoading ? "—" : `${occupancyRate}%`, color: "text-orange-500" },
+            { label: t("ownerHub.properties_count", "Mülk"), value: analyticsLoading ? "—" : String(propertiesCount), color: "text-blue-500" },
+            { label: t("ownerHub.stats", "Status"), value: trialExpired ? "⚠️" : trialActive ? `${trialStatus!.remainingDays}g` : "✓", color: trialExpired ? "text-destructive" : trialActive ? "text-amber-500" : "text-emerald-500" },
+          ].map((stat) => (
+            <div key={stat.label} className="rounded-xl border border-border/50 bg-card px-3 py-2.5 text-center">
+              <p className={`text-base font-bold ${stat.color}`}>{stat.value}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5 leading-none">{stat.label}</p>
+            </div>
           ))}
         </motion.div>
 
-        {/* BottomSheet — Bugünkü Vəziyyət */}
+        {/* Category groups */}
+        {groups.map((group, gi) => (
+          <motion.div
+            key={group.label}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28, delay: gi * 0.06 }}
+            className="rounded-2xl border border-border/50 bg-card overflow-hidden"
+          >
+            {/* Group header */}
+            <div className="flex items-center gap-2.5 px-4 py-3 border-b border-border/40 bg-muted/30">
+              <group.headerIcon className={`h-4 w-4 ${group.headerColor} shrink-0`} />
+              <div className="min-w-0">
+                <p className="font-semibold text-sm leading-none">{group.label}</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{group.desc}</p>
+              </div>
+            </div>
+
+            {/* Items grid */}
+            <div className="grid grid-cols-2 divide-x divide-y divide-border/30">
+              {group.items.map((item, ii) => (
+                <button
+                  key={item.testId}
+                  onClick={item.action}
+                  data-testid={item.testId}
+                  className="relative flex items-center gap-2.5 px-3.5 py-3 text-left hover:bg-muted/50 active:bg-muted transition-colors group"
+                >
+                  <div className={`${item.iconBg} p-2 rounded-lg shrink-0`}>
+                    <item.icon className={`h-4 w-4 ${item.iconColor}`} />
+                  </div>
+                  <span className="text-[12.5px] font-medium text-foreground leading-tight line-clamp-2 flex-1">{item.label}</span>
+                  {item.badge !== undefined && (
+                    <span className="absolute top-2 right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center shadow-sm">
+                      {typeof item.badge === "number" && item.badge > 99 ? "99+" : item.badge}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        ))}
+
+        {/* BottomSheet — Analitika & Performans */}
         <BottomSheet
           open={openOwnerPanel === "overview"}
           onClose={() => setOpenOwnerPanel(null)}
@@ -6391,11 +6452,7 @@ export default function OwnerDashboard() {
           height="full"
         >
           <div className="px-1 pb-8 space-y-6">
-            <OwnerOverview
-              analytics={analytics}
-              analyticsLoading={analyticsLoading}
-              allProperties={allProperties}
-            />
+            <OwnerOverview analytics={analytics} analyticsLoading={analyticsLoading} allProperties={allProperties} />
             <div className="border-t pt-4">
               <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-primary" />
@@ -6425,7 +6482,7 @@ export default function OwnerDashboard() {
           </div>
         </BottomSheet>
 
-        {/* BottomSheet — Mülklərim & Otaqlar */}
+        {/* BottomSheet — Mülklər */}
         <BottomSheet
           open={openOwnerPanel === "properties"}
           onClose={() => setOpenOwnerPanel(null)}
@@ -6445,7 +6502,7 @@ export default function OwnerDashboard() {
           </div>
         </BottomSheet>
 
-        {/* BottomSheet — İdarəetmə & İnteqrasiya */}
+        {/* BottomSheet — İdarəetmə */}
         <BottomSheet
           open={openOwnerPanel === "management"}
           onClose={() => setOpenOwnerPanel(null)}
@@ -6459,37 +6516,17 @@ export default function OwnerDashboard() {
                 <Wifi className="h-4 w-4 text-primary" />
                 {t("owner.integrations", "İnteqrasiyalar")}
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Card
-                  className="cursor-pointer hover:border-primary/50 transition-colors"
-                  onClick={() => { setOpenOwnerPanel(null); navigate("/dashboard?view=billing-addons"); }}
-                  data-testid="card-whatsapp-addon"
-                >
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <div className="p-2 rounded-md bg-green-500/10">
-                      <SiWhatsapp className="h-5 w-5 text-green-500" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">WhatsApp</p>
-                      <p className="text-xs text-muted-foreground">{t("billing.whatsapp", "Bildiriş paketi")}</p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto" />
+              <div className="grid grid-cols-2 gap-3">
+                <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => { setOpenOwnerPanel(null); navigate("/dashboard?view=billing-addons"); }} data-testid="card-whatsapp-addon">
+                  <CardContent className="p-3 flex items-center gap-2">
+                    <div className="p-1.5 rounded-md bg-green-500/10"><SiWhatsapp className="h-4 w-4 text-green-500" /></div>
+                    <div><p className="font-medium text-xs">WhatsApp</p><p className="text-[10px] text-muted-foreground">{t("billing.whatsapp", "Bildiriş")}</p></div>
                   </CardContent>
                 </Card>
-                <Card
-                  className="cursor-pointer hover:border-primary/50 transition-colors"
-                  onClick={() => { setOpenOwnerPanel(null); navigate("/dashboard?view=billing-addons"); }}
-                  data-testid="card-channex-addon"
-                >
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <div className="p-2 rounded-md bg-blue-500/10">
-                      <Globe className="h-5 w-5 text-blue-500" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">Channel Manager</p>
-                      <p className="text-xs text-muted-foreground">{t("billing.channex", "OTA kanalları")}</p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto" />
+                <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => { setOpenOwnerPanel(null); navigate("/dashboard?view=billing-addons"); }} data-testid="card-channex-addon">
+                  <CardContent className="p-3 flex items-center gap-2">
+                    <div className="p-1.5 rounded-md bg-blue-500/10"><Globe className="h-4 w-4 text-blue-500" /></div>
+                    <div><p className="font-medium text-xs">Channel Manager</p><p className="text-[10px] text-muted-foreground">{t("billing.channex", "OTA")}</p></div>
                   </CardContent>
                 </Card>
               </div>
