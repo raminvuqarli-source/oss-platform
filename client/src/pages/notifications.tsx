@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { navigate } from "wouter/use-browser-location";
+import { ChevronRight } from "lucide-react";
 import {
   Bell,
   BellOff,
@@ -227,6 +228,15 @@ export default function Notifications() {
 
   return (
     <div className="space-y-6">
+      <button
+        onClick={() => navigate("/dashboard")}
+        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+        data-testid="button-back-from-notifications"
+      >
+        <ChevronRight className="h-4 w-4 rotate-180 group-hover:-translate-x-0.5 transition-transform" />
+        {t('common.back', 'Back')}
+      </button>
+
       <Card className="bg-gradient-to-br from-primary/10 via-background to-accent/10 border-primary/20">
         <CardContent className="p-6">
           <div className="flex items-center justify-between gap-4 flex-wrap">

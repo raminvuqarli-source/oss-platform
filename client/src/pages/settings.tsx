@@ -1383,8 +1383,17 @@ export default function Settings() {
   const [showNewPw, setShowNewPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
 
-  const search = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : new URLSearchParams();
-  const currentView = search.get("view") || "";
+  const [currentView, setCurrentView] = useState(() =>
+    typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("view") || "" : ""
+  );
+
+  useEffect(() => {
+    const handler = () => {
+      setCurrentView(new URLSearchParams(window.location.search).get("view") || "");
+    };
+    window.addEventListener("popstate", handler);
+    return () => window.removeEventListener("popstate", handler);
+  }, []);
 
   const goToView = (view: string) => {
     const url = view ? `/settings?view=${view}` : "/settings";
