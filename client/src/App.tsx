@@ -53,44 +53,65 @@ const RestaurantRegister = lazy(() => import("@/pages/restaurant-register"));
 const RestaurantGuestPage = lazy(() => import("@/pages/restaurant-guest"));
 const PaymentReturn = lazy(() => import("@/pages/payment-return"));
 
-class ErrorBoundary extends Component<{ children: React.ReactNode }, { hasError: boolean; errorMessage: string }> {
+const AUTO_RELOAD_KEY = "eb_reload_count";
+const AUTO_RELOAD_MAX = 3;
+const AUTO_RELOAD_RESET_MS = 30_000;
+
+function getReloadCount(): number {
+  try {
+    const raw = sessionStorage.getItem(AUTO_RELOAD_KEY);
+    if (!raw) return 0;
+    const { count, ts } = JSON.parse(raw);
+    if (Date.now() - ts > AUTO_RELOAD_RESET_MS) { sessionStorage.removeItem(AUTO_RELOAD_KEY); return 0; }
+    return count ?? 0;
+  } catch { return 0; }
+}
+function incrementReloadCount(): number {
+  const next = getReloadCount() + 1;
+  try { sessionStorage.setItem(AUTO_RELOAD_KEY, JSON.stringify({ count: next, ts: Date.now() })); } catch {}
+  return next;
+}
+
+class ErrorBoundary extends Component<{ children: React.ReactNode }, { hasError: boolean; reloadExhausted: boolean }> {
   constructor(props: { children: React.ReactNode }) {
     super(props);
-    this.state = { hasError: false, errorMessage: "" };
+    this.state = { hasError: false, reloadExhausted: false };
   }
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, errorMessage: error?.message || "Unknown error" };
+  static getDerivedStateFromError() {
+    return { hasError: true };
   }
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error("[ErrorBoundary] caught:", error, info);
-    // Auto-reload for chunk loading failures that happen after a new deployment
-    const msg = error?.message ?? "";
-    const isChunkError =
-      msg.includes("Failed to fetch dynamically imported module") ||
-      msg.includes("Importing a module script failed") ||
-      msg.includes("Unable to preload CSS") ||
-      msg.includes("ChunkLoadError") ||
-      error?.name === "ChunkLoadError";
-    if (isChunkError) {
+    const count = incrementReloadCount();
+    if (count <= AUTO_RELOAD_MAX) {
       window.location.reload();
+    } else {
+      this.setState({ reloadExhausted: true });
     }
   }
   render() {
     if (this.state.hasError) {
-      return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-4">
-          <div className="text-center space-y-4 max-w-sm">
-            <div className="h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
-              <span className="text-destructive text-2xl">!</span>
+      if (this.state.reloadExhausted) {
+        return (
+          <div className="min-h-screen bg-background flex items-center justify-center p-4">
+            <div className="text-center space-y-4 max-w-sm">
+              <div className="h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+                <span className="text-destructive text-2xl">!</span>
+              </div>
+              <p className="text-sm text-muted-foreground">Səhifə yüklənə bilmədi. Yeniləyin.</p>
+              <button
+                onClick={() => { sessionStorage.removeItem(AUTO_RELOAD_KEY); window.location.reload(); }}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm"
+              >
+                Yenilə
+              </button>
             </div>
-            <p className="text-sm text-muted-foreground">Səhifə yüklənə bilmədi. Yeniləyin.</p>
-            <button
-              onClick={() => { this.setState({ hasError: false, errorMessage: "" }); window.location.reload(); }}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm"
-            >
-              Yenilə
-            </button>
           </div>
+        );
+      }
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="h-10 w-10 rounded-full border-4 border-primary border-t-transparent animate-spin" />
         </div>
       );
     }
