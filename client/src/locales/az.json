@@ -3381,7 +3381,8 @@
     "typeTransfer": "Hesaba köçürmə",
     "typeRent": "Arenda (Kirayə)",
     "totalExpenses": "Ümumi xərc",
-    "summaryTitle": "Növlərə görə xərc"
+    "summaryTitle": "Növlərə görə xərc",
+    "refresh": "Yenilə"
   },
   "restaurantRegister": {
     "title": "Restoran Qeydiyyatı",
