@@ -67,7 +67,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (isFetched && queryUser) {
+    if (!isFetched) return;
+    if (queryUser) {
       setAuthUser(queryUser);
       (async () => {
         await loginOneSignal(queryUser.id);
@@ -76,6 +77,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await setOneSignalTags(tags);
         await requestNotificationPermission();
       })();
+    } else {
+      // Session expired — clear auth state so ProtectedRoute redirects to login
+      if (authUser) {
+        clearDemoToken();
+        logoutOneSignal();
+        setAuthUser(null);
+        queryClient.clear();
+      }
     }
   }, [queryUser, isFetched]);
 

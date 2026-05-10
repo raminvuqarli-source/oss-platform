@@ -63,9 +63,32 @@ export const getQueryFn: <T>(options: {
       return null;
     }
 
+    if (res.status === 401) {
+      // Session expired — signal global handler
+      handleSessionExpired();
+      throw createApiError(res, "Session expired");
+    }
+
     await throwIfResNotOk(res);
     return await res.json();
   };
+
+let sessionExpiredHandled = false;
+
+function handleSessionExpired() {
+  if (sessionExpiredHandled) return;
+  sessionExpiredHandled = true;
+
+  // Clear cache and redirect to login after a short delay to avoid React batching issues
+  setTimeout(() => {
+    clearDemoToken();
+    queryClient.clear();
+    sessionExpiredHandled = false;
+    if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+      window.location.href = "/login";
+    }
+  }, 300);
+}
 
 export const queryClient = new QueryClient({
   defaultOptions: {
