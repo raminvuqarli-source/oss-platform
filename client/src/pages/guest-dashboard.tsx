@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearch } from "wouter";
+import { navigate } from "wouter/use-browser-location";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth-context";
@@ -52,6 +53,7 @@ import {
   LightbulbOff,
   XCircle,
   Bell,
+  ArrowLeft,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -216,14 +218,24 @@ export default function GuestDashboard() {
   const servicesRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const roomControlsRef = useRef<HTMLDivElement>(null);
+  const smartExtrasRef = useRef<HTMLDivElement>(null);
+  const restaurantRef = useRef<HTMLDivElement>(null);
+  const roomPrepRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(searchString);
     const view = params.get("view");
+
+    if (view === "checkin") { setOnlineCheckinOpen(true); return; }
+    if (view === "prepare") { setPreCheckDialogOpen(true); return; }
+
     const refMap: Record<string, React.RefObject<HTMLDivElement | null>> = {
       services: servicesRef,
       messages: messagesRef,
       "room-controls": roomControlsRef,
+      "smart-extras": smartExtrasRef,
+      restaurant: restaurantRef,
+      "room-prep": roomPrepRef,
     };
     const ref = view ? refMap[view] : null;
     if (ref?.current) {
@@ -773,6 +785,14 @@ export default function GuestDashboard() {
   if (!booking) {
     return (
       <div className="space-y-6">
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+          data-testid="button-back-to-hub"
+        >
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+          {t("common.backToDashboard", "Back to Dashboard")}
+        </button>
         <Card className="bg-gradient-to-br from-primary/10 via-background to-accent/10 border-primary/20">
           <CardContent className="p-6">
             <div className="space-y-1">
@@ -812,6 +832,14 @@ export default function GuestDashboard() {
 
   return (
     <div className="space-y-6">
+      <button
+        onClick={() => navigate("/dashboard")}
+        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+        data-testid="button-back-to-hub"
+      >
+        <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+        {t("common.backToDashboard", "Back to Dashboard")}
+      </button>
       <Card className="bg-gradient-to-br from-primary/10 via-background to-accent/10 border-primary/20">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -1283,7 +1311,7 @@ export default function GuestDashboard() {
         </div>
       </div>
 
-      <div>
+      <div ref={smartExtrasRef}>
         <div className="flex items-center justify-between gap-4 mb-4">
           <h3 className="text-lg font-semibold">{t('smartExtras.title', 'Smart Extras')}</h3>
           <Badge variant="outline" className="text-xs">
@@ -1398,6 +1426,7 @@ export default function GuestDashboard() {
       </div>
 
       {/* ─── RESTORAN BÖLMƏSI ──────────────────────────────────────── */}
+      <div ref={restaurantRef}>
       <Card className="border-orange-200/60 dark:border-orange-800/40 bg-gradient-to-br from-orange-50/60 to-background dark:from-orange-950/20" data-testid="card-restaurant-section">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
@@ -1462,6 +1491,7 @@ export default function GuestDashboard() {
           )}
         </CardContent>
       </Card>
+      </div>
 
       {/* ─── SİFARİŞ DİALOQU ────────────────────────────────────── */}
       <Dialog open={orderFoodOpen} onOpenChange={(open) => {
@@ -1760,7 +1790,7 @@ export default function GuestDashboard() {
         )}
       </div>
 
-      <div>
+      <div ref={roomPrepRef}>
         <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
           <h3 className="text-lg font-semibold">{t('roomPrep.title')}</h3>
           <Dialog open={prepDialogOpen} onOpenChange={setPrepDialogOpen}>

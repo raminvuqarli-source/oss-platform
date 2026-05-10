@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useQuery } from "@tanstack/react-query";
 
 const GuestDashboard = lazy(() => import("@/pages/guest-dashboard"));
+const GuestActionDashboard = lazy(() => import("@/pages/guest-action-dashboard"));
 const ReceptionDashboard = lazy(() => import("@/pages/reception-dashboard"));
 const ReceptionActionDashboard = lazy(() => import("@/pages/reception-action-dashboard"));
 const AdminDashboard = lazy(() => import("@/pages/admin-dashboard"));
@@ -95,6 +96,25 @@ function AdminDashboardRouter() {
   );
 }
 
+function GuestDashboardRouter() {
+  const searchString = useSearch();
+  const hasView = new URLSearchParams(searchString).has("view");
+
+  if (hasView) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <GuestDashboard />
+      </Suspense>
+    );
+  }
+
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <GuestActionDashboard />
+    </Suspense>
+  );
+}
+
 export function DashboardRouter() {
   const { user } = useAuth();
 
@@ -125,6 +145,6 @@ export function DashboardRouter() {
     case "marketing_staff":
       return <Redirect to="/marketing" />;
     default:
-      return <GuestDashboard />;
+      return <GuestDashboardRouter />;
   }
 }
