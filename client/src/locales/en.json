@@ -169,6 +169,11 @@
       "title": "Trusted by modern hotels",
       "subtitle": "Hotels, guesthouses and resorts use OSS to manage their operations."
     },
+    "otaStrip": "Integrated with the world's leading booking platforms",
+    "heroStatHotels": "Active Hotels",
+    "heroStatUptime": "Uptime",
+    "heroStatSetup": "Min. Setup",
+    "heroStatTrial": "Day Free Trial",
     "faq": {
       "title": "Frequently Asked Questions",
       "q1": "How long does it take to set up OSS?",
@@ -218,7 +223,11 @@
       "analytics": "Real-time Analytics & Automation",
       "analyticsDesc": "Live occupancy tracking, dynamic pricing, automated housekeeping, and financial reporting — all running in real time.",
       "multiProperty": "Multi-property Management",
-      "multiPropertyDesc": "Manage multiple hotels, resorts, or guesthouses from one account. Unified reporting across all your properties."
+      "multiPropertyDesc": "Manage multiple hotels, resorts, or guesthouses from one account. Unified reporting across all your properties.",
+      "aiDynamic": "AI Wake-Up & Dynamic Pricing",
+      "aiDynamicDesc": "A smart wake-up alarm that adapts to each guest's sleep patterns, paired with a dynamic pricing engine that automatically adjusts room rates based on real-time demand and occupancy — maximising revenue without manual effort.",
+      "nightAudit": "Automated Night Audit",
+      "nightAuditDesc": "A fully automated financial engine runs every night to post room charges, close the business day, and reconcile accounts using a double-entry General Ledger — zero manual intervention required."
     },
     "cta": {
       "headline": "Start Running Your Hotel Smarter Today",

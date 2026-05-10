@@ -304,9 +304,34 @@ export default function Welcome() {
   return (
     <div className="bg-background flex flex-col" style={{ minHeight: '100dvh' }}>
       <SEO
-        title="Smart Hotel Management Platform"
-        description="O.S.S Smart Hotel System — Multi-property management with smart room controls, AI assistant, booking management, and seamless guest services. Start from $79/month."
-        path="/"
+        title="O.S.S — Smart Hotel Management Platform | Multi-Property PMS"
+        description="O.S.S Smart Hotel System — Multi-property management with smart room controls, AI assistant, dynamic pricing, booking management, and seamless guest services. Start from $79/month. 14-day free trial."
+        path="/hotel"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          "name": "O.S.S Smart Hotel System",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web Browser",
+          "description": "Multi-property hotel management platform with smart room controls, AI wake-up, dynamic pricing, booking management, night audit automation, and guest services.",
+          "offers": {
+            "@type": "AggregateOffer",
+            "lowPrice": "79",
+            "highPrice": "199",
+            "priceCurrency": "USD",
+            "offerCount": "3"
+          },
+          "featureList": [
+            "Smart Room Controls (IoT)",
+            "Multi-Property Management",
+            "Dynamic Pricing Engine",
+            "Automated Night Audit",
+            "Channel Manager Integration",
+            "Guest Communication System",
+            "Restaurant POS & KDS",
+            "Real-Time Analytics"
+          ]
+        }}
       />
 
       <header className={`flex items-center justify-between gap-4 px-6 py-3 shrink-0 sticky top-0 z-50 transition-all duration-300 ${scrolled ? "bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-sm" : "bg-transparent"}`}>
@@ -349,8 +374,14 @@ export default function Welcome() {
 
         {/* HERO SECTION */}
         <section className="relative overflow-hidden pt-16 pb-24 px-6" data-testid="section-hero">
+          {/* Rich mesh gradient background */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-[100px]" />
+            <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[700px] rounded-full bg-primary/8 blur-[130px]" />
+            <div className="absolute top-1/3 -left-24 w-[320px] h-[320px] rounded-full bg-blue-500/6 blur-[90px]" />
+            <div className="absolute top-1/4 -right-24 w-[320px] h-[320px] rounded-full bg-violet-500/6 blur-[90px]" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] rounded-full bg-primary/4 blur-[80px]" />
+            {/* Subtle grid */}
+            <div className="absolute inset-0 opacity-[0.015] dark:opacity-[0.025]" style={{ backgroundImage: 'linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
           </div>
 
           <div className="relative max-w-5xl mx-auto">
@@ -360,97 +391,137 @@ export default function Welcome() {
               transition={{ duration: 0.5 }}
               className="text-center space-y-6"
             >
-              <Badge variant="secondary" className="text-xs px-4 py-1.5 rounded-full border border-border/50">
+              <Badge variant="secondary" className="text-xs px-4 py-1.5 rounded-full border border-border/50 shadow-sm">
                 <Zap className="h-3 w-3 mr-1.5 text-primary" />
                 {t('landing.trustedBadge')}
               </Badge>
 
               <h1
-                className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.15]"
-                style={{ letterSpacing: "-0.01em" }}
+                className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.1]"
+                style={{ letterSpacing: "-0.02em" }}
               >
-                <span className="font-bold block">
+                <span className="font-extrabold block">
                   {t('landing.heroTitle1')}
                 </span>
-                <span className="font-semibold block text-primary">
+                <span className="font-semibold block bg-gradient-to-r from-primary via-primary/80 to-blue-500 bg-clip-text text-transparent">
                   {t('landing.heroTitle2')}
                 </span>
               </h1>
 
               <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-normal">
-                {t('welcome.subtitle')}
+                {t('landing.heroExtended')}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-                <Button size="lg" asChild className="rounded-xl shadow-md shadow-primary/15" data-testid="button-start-trial">
+                <Button size="lg" asChild className="rounded-xl shadow-lg shadow-primary/20 h-12 px-7 text-base font-semibold" data-testid="button-start-trial">
                   <a href="/register-hotel" onClick={(e) => { if (e.ctrlKey || e.metaKey || e.shiftKey) return; e.preventDefault(); navigateToRegister(); }}>
-                    {t('landing.ctaManage')}
+                    {t('landing.startFreeTrial')}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </a>
                 </Button>
-                <Button size="lg" variant="outline" onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })} className="rounded-xl" data-testid="button-hero-demo">
+                <Button size="lg" variant="outline" onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })} className="rounded-xl h-12 px-7 text-base" data-testid="button-hero-demo">
                   <Play className="mr-2 h-4 w-4" />
                   {t('landing.ctaLiveDemo')}
                 </Button>
               </div>
 
               <p className="text-sm text-muted-foreground/70">
-                {t('pricing.trialDaysLabel', { days: DEFAULT_TRIAL_DAYS })}
+                {t('landing.trialText')}
               </p>
+
+              {/* Mini stats strip */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="flex flex-wrap justify-center gap-8 md:gap-14 pt-3"
+              >
+                {[
+                  { value: "50+", label: t('landing.heroStatHotels') },
+                  { value: "99.9%", label: t('landing.heroStatUptime') },
+                  { value: "10", label: t('landing.heroStatSetup') },
+                  { value: "14", label: t('landing.heroStatTrial') },
+                ].map((s) => (
+                  <div key={s.label} className="text-center" data-testid={`hero-stat-${s.label}`}>
+                    <p className="text-2xl font-bold tracking-tight">{s.value}</p>
+                    <p className="text-xs text-muted-foreground/70 mt-0.5">{s.label}</p>
+                  </div>
+                ))}
+              </motion.div>
             </motion.div>
 
             {/* Dashboard Preview */}
             <motion.div
-              initial={{ opacity: 0, y: 60, scale: 0.95 }}
+              initial={{ opacity: 0, y: 70, scale: 0.94 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+              transition={{ duration: 0.9, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
               className="mt-16 relative"
             >
-              <div className="relative rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm shadow-xl overflow-hidden">
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50 bg-muted/30">
+              {/* Glow behind dashboard */}
+              <div className="absolute inset-x-10 top-4 h-full rounded-3xl bg-primary/10 blur-3xl -z-10" />
+              <div className="relative rounded-2xl border border-border/50 bg-card/90 backdrop-blur-sm shadow-2xl overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50 bg-muted/40">
                   <div className="flex gap-1.5">
                     <div className="w-3 h-3 rounded-full bg-red-400/60" />
                     <div className="w-3 h-3 rounded-full bg-yellow-400/60" />
                     <div className="w-3 h-3 rounded-full bg-green-400/60" />
                   </div>
                   <div className="flex-1 flex justify-center">
-                    <div className="px-4 py-0.5 rounded-md bg-muted/50 text-xs text-muted-foreground">ossaiproapp.com/dashboard</div>
+                    <div className="px-4 py-0.5 rounded-md bg-muted/60 text-xs text-muted-foreground/70 flex items-center gap-1.5">
+                      <div className="w-2 h-2 rounded-full bg-green-500" />
+                      ossaiproapp.com/dashboard
+                    </div>
                   </div>
                 </div>
                 <div className="p-6 md:p-8 space-y-6">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {[
-                      { labelKey: "landing.mockOccupancy", value: "87%", change: "+5%", color: "text-emerald-500" },
-                      { labelKey: "landing.mockRevenue", value: "$12,450", change: "+12%", color: "text-blue-500" },
-                      { labelKey: "landing.mockBookings", value: "24", change: "+3", color: "text-violet-500" },
-                      { labelKey: "landing.mockGuestRating", value: "4.8", change: "+0.2", color: "text-amber-500" },
+                      { labelKey: "landing.mockOccupancy", value: "87%", change: "+5%", color: "text-emerald-500", bg: "bg-emerald-500/8" },
+                      { labelKey: "landing.mockRevenue", value: "$12,450", change: "+12%", color: "text-blue-500", bg: "bg-blue-500/8" },
+                      { labelKey: "landing.mockBookings", value: "24", change: "+3", color: "text-violet-500", bg: "bg-violet-500/8" },
+                      { labelKey: "landing.mockGuestRating", value: "4.8★", change: "+0.2", color: "text-amber-500", bg: "bg-amber-500/8" },
                     ].map((stat) => (
-                      <div key={stat.labelKey} className="p-4 rounded-xl bg-muted/40 border border-border/30 space-y-1">
+                      <div key={stat.labelKey} className={`p-4 rounded-xl ${stat.bg} border border-border/30 space-y-1 hover:scale-[1.02] transition-transform`}>
                         <p className="text-xs text-muted-foreground">{t(stat.labelKey)}</p>
-                        <p className="text-2xl font-bold">{stat.value}</p>
-                        <p className={`text-xs font-medium ${stat.color}`}>{stat.change}</p>
+                        <p className="text-2xl font-bold tracking-tight">{stat.value}</p>
+                        <p className={`text-xs font-semibold ${stat.color}`}>{stat.change}</p>
                       </div>
                     ))}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="md:col-span-2 h-32 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 border border-border/30 flex items-center justify-center">
-                      <div className="flex items-end gap-1.5 h-20">
-                        {[40, 55, 45, 70, 60, 80, 75, 90, 85, 65, 88, 92].map((h, i) => (
-                          <div key={i} className="w-3 md:w-4 rounded-t bg-primary/40 transition-all" style={{ height: `${h}%` }} />
-                        ))}
-                      </div>
+                    <div className="md:col-span-2 h-32 rounded-xl bg-gradient-to-r from-primary/5 to-blue-500/5 border border-border/30 flex items-end justify-around px-4 pb-3 gap-1">
+                      {[40, 55, 45, 70, 60, 80, 75, 90, 85, 65, 88, 92].map((h, i) => (
+                        <div key={i} className="flex-1 rounded-t bg-gradient-to-t from-primary/50 to-primary/20 transition-all" style={{ height: `${h}%` }} />
+                      ))}
                     </div>
-                    <div className="h-32 rounded-xl bg-muted/40 border border-border/30 p-4 space-y-2">
-                      <p className="text-xs font-medium text-muted-foreground">{t('landing.mockRecentActivity')}</p>
+                    <div className="h-32 rounded-xl bg-muted/40 border border-border/30 p-4 space-y-2.5">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('landing.mockRecentActivity')}</p>
                       {[t('landing.mockCheckin'), t('landing.mockNewBooking'), t('landing.mockServiceRequest')].map((item) => (
                         <div key={item} className="flex items-center gap-2 text-xs">
-                          <div className="w-1.5 h-1.5 rounded-full bg-primary/60" />
-                          <span className="text-muted-foreground">{item}</span>
+                          <div className="w-1.5 h-1.5 rounded-full bg-primary/70 shrink-0" />
+                          <span className="text-muted-foreground truncate">{item}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
+              </div>
+            </motion.div>
+
+            {/* OTA Integration strip */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.9 }}
+              className="mt-10 text-center space-y-4"
+            >
+              <p className="text-xs text-muted-foreground/50 uppercase tracking-widest font-medium">{t('landing.otaStrip')}</p>
+              <div className="flex flex-wrap justify-center items-center gap-6 md:gap-10">
+                {["Booking.com", "Airbnb", "Expedia", "Hotels.com", "Agoda", "Vrbo"].map((name) => (
+                  <span key={name} className="text-sm font-semibold text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors duration-300 select-none">
+                    {name}
+                  </span>
+                ))}
               </div>
             </motion.div>
           </div>
@@ -521,21 +592,9 @@ export default function Welcome() {
                   { icon: Cpu, titleKey: 'landing.whyOss.smartRoom', descKey: 'landing.whyOss.smartRoomDesc', iconColor: 'text-emerald-500', iconBg: 'bg-emerald-500/10', borderColor: 'hover:border-emerald-500/30', tid: 'smart-room' },
                   { icon: TrendingUp, titleKey: 'landing.whyOss.analytics', descKey: 'landing.whyOss.analyticsDesc', iconColor: 'text-violet-500', iconBg: 'bg-violet-500/10', borderColor: 'hover:border-violet-500/30', tid: 'analytics' },
                   { icon: Building2, titleKey: 'landing.whyOss.multiProperty', descKey: 'landing.whyOss.multiPropertyDesc', iconColor: 'text-amber-500', iconBg: 'bg-amber-500/10', borderColor: 'hover:border-amber-500/30', tid: 'multi-property' },
-                  {
-                    icon: BrainCircuit,
-                    title: 'AI Wake-Up & Dynamic Pricing',
-                    desc: 'A smart wake-up alarm that adapts to each guest\'s sleep patterns, paired with a dynamic pricing engine that automatically adjusts room rates based on real-time demand and occupancy — maximising revenue without manual effort.',
-                    iconColor: 'text-rose-500', iconBg: 'bg-rose-500/10', borderColor: 'hover:border-rose-500/30', tid: 'ai-dynamic',
-                  },
-                  {
-                    icon: Moon,
-                    title: 'Automated Night Audit',
-                    desc: 'A fully automated financial engine runs every night to post room charges, close the business day, and reconcile accounts using a double-entry General Ledger — zero manual intervention required.',
-                    iconColor: 'text-indigo-500', iconBg: 'bg-indigo-500/10', borderColor: 'hover:border-indigo-500/30', tid: 'night-audit',
-                  },
+                  { icon: BrainCircuit, titleKey: 'landing.whyOss.aiDynamic', descKey: 'landing.whyOss.aiDynamicDesc', iconColor: 'text-rose-500', iconBg: 'bg-rose-500/10', borderColor: 'hover:border-rose-500/30', tid: 'ai-dynamic' },
+                  { icon: Moon, titleKey: 'landing.whyOss.nightAudit', descKey: 'landing.whyOss.nightAuditDesc', iconColor: 'text-indigo-500', iconBg: 'bg-indigo-500/10', borderColor: 'hover:border-indigo-500/30', tid: 'night-audit' },
                 ].map((item) => {
-                  const staticTitle = (item as any).title;
-                  const staticDesc  = (item as any).desc;
                   const Icon = item.icon;
                   return (
                     <motion.div key={item.tid} variants={fadeUp}>
@@ -543,8 +602,8 @@ export default function Welcome() {
                         <div className={`w-12 h-12 rounded-xl ${item.iconBg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
                           <Icon className={`h-6 w-6 ${item.iconColor}`} />
                         </div>
-                        <h3 className="font-heading font-semibold text-lg mb-2">{staticTitle || t((item as any).titleKey)}</h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed">{staticDesc || t((item as any).descKey)}</p>
+                        <h3 className="font-heading font-semibold text-lg mb-2">{t(item.titleKey)}</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{t(item.descKey)}</p>
                       </div>
                     </motion.div>
                   );

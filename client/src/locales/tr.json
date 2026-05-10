@@ -169,6 +169,11 @@
       "title": "Modern oteller tarafından güvenilir",
       "subtitle": "Oteller, pansiyonlar ve tatil köyleri operasyonlarını yönetmek için OSS kullanıyor."
     },
+    "otaStrip": "Dünyanın önde gelen rezervasyon platformlarıyla entegre",
+    "heroStatHotels": "Aktif Otel",
+    "heroStatUptime": "Çalışma Süresi",
+    "heroStatSetup": "Dak. Kurulum",
+    "heroStatTrial": "Gün Ücretsiz Deneme",
     "faq": {
       "title": "Sıkça Sorulan Sorular",
       "q1": "OSS'yi kurmak ne kadar sürer?",
@@ -218,7 +223,11 @@
       "analytics": "Gerçek Zamanlı Analitik ve Otomasyon",
       "analyticsDesc": "Canlı doluluk takibi, dinamik fiyatlandırma, otomatik kat hizmetleri ve mali raporlama.",
       "multiProperty": "Çoklu Mülk Yönetimi",
-      "multiPropertyDesc": "Tek bir hesaptan birden fazla otel, tatil köyü veya pansiyonu yönetin."
+      "multiPropertyDesc": "Tek bir hesaptan birden fazla otel, tatil köyü veya pansiyonu yönetin.",
+      "aiDynamic": "AI Uyandırma & Dinamik Fiyatlandırma",
+      "aiDynamicDesc": "Her misafirin uyku düzenine uyum sağlayan akıllı alarm, gerçek zamanlı talep ve doluluk oranına göre oda fiyatlarını otomatik ayarlayan dinamik fiyatlandırma motoruyla birleştirilmiştir.",
+      "nightAudit": "Otomatik Gece Denetimi",
+      "nightAuditDesc": "Tam otomatik bir finansal motor her gece oda ücretlerini kaydetmek, iş gününü kapatmak ve çift girişli Genel Muhasebe kullanarak hesapları mutabık kılmak için çalışır."
     },
     "cta": {
       "headline": "Otelinizi Daha Akıllı Yönetmeye Başlayın",

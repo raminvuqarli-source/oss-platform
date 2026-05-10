@@ -6,6 +6,7 @@ interface SEOProps {
   path?: string;
   type?: string;
   noindex?: boolean;
+  jsonLd?: Record<string, unknown>;
 }
 
 const BASE_URL = "https://ossaipro.com";
@@ -18,6 +19,7 @@ export function SEO({
   path = "/",
   type = "website",
   noindex = false,
+  jsonLd,
 }: SEOProps) {
   const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
   const canonicalUrl = `${BASE_URL}${path}`;
@@ -39,6 +41,12 @@ export function SEO({
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
+
+      {jsonLd && (
+        <script type="application/ld+json">
+          {JSON.stringify(jsonLd)}
+        </script>
+      )}
     </Helmet>
   );
 }

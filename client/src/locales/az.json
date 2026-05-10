@@ -169,6 +169,11 @@
       "title": "Müasir otellər tərəfindən etibar edilir",
       "subtitle": "Otellər, qonaq evləri və kurortlar əməliyyatlarını idarə etmək üçün OSS istifadə edir."
     },
+    "otaStrip": "Aparıcı bron platformaları ilə inteqrasiya",
+    "heroStatHotels": "Aktiv Otel",
+    "heroStatUptime": "Fəaliyyət Vaxtı",
+    "heroStatSetup": "Dəqiqədə Quraşdırma",
+    "heroStatTrial": "Günlük Pulsuz Sınaq",
     "faq": {
       "title": "Tez-tez Verilən Suallar",
       "q1": "OSS-i qurmaq nə qədər vaxt alır?",
@@ -218,7 +223,11 @@
       "analytics": "Real Vaxt Analitika və Avtomatlaşdırma",
       "analyticsDesc": "Canlı doluluk izləmə, dinamik qiymətləndirmə, avtomatik ev təmizliyi və maliyyə hesabatları.",
       "multiProperty": "Çoxlu Əmlak İdarəetməsi",
-      "multiPropertyDesc": "Bir hesabdan birdən çox otel, kurort və ya qonaq evini idarə edin."
+      "multiPropertyDesc": "Bir hesabdan birdən çox otel, kurort və ya qonaq evini idarə edin.",
+      "aiDynamic": "AI Oyandırma & Dinamik Qiymət",
+      "aiDynamicDesc": "Hər qonağın yuxu rejiminə uyğunlaşan ağıllı oyandırma, real vaxt tələb və doluluga görə avtomatik qiymət tənzimləyən dinamik qiymət mühərriki ilə birləşdirilmişdir — əl müdaxiləsi olmadan gəliri artırır.",
+      "nightAudit": "Avtomatik Gecə Auditi",
+      "nightAuditDesc": "Tam avtomatik maliyyə mühərriki hər gecə otaq ödənişlərini qeyd etmək, iş gününü bağlamaq və ikiqat giriş Baş Kitabçadan istifadə edərək hesabları uzlaşdırmaq üçün işləyir — sıfır əl müdaxiləsi tələb olunur."
     },
     "cta": {
       "headline": "Otelinizi Daha Ağıllı İdarə Etməyə Başlayın",
