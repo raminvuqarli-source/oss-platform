@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useSearch } from "wouter";
+import { navigate } from "wouter/use-browser-location";
 import { useTranslation } from "react-i18next";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { showErrorToast, isPlanLimitError } from "@/lib/error-handler";
@@ -1605,6 +1606,15 @@ export default function ReceptionDashboard() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Back to Hub */}
+      <button
+        onClick={() => navigate("/dashboard")}
+        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+        data-testid="button-back-to-hub"
+      >
+        <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+        {t("common.backToDashboard", "Back to Dashboard")}
+      </button>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="min-w-0 hidden sm:block">
           <h2 className="text-xl sm:text-2xl font-bold truncate">{t('dashboard.reception.title')}</h2>
@@ -2027,9 +2037,41 @@ export default function ReceptionDashboard() {
         <HousekeepingView />
       ) : currentView === "staff-chat" ? (
         <StaffChatView />
+      ) : currentView === "finance" ? (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <CreditCard className="h-5 w-5 text-orange-500" />
+            <h3 className="text-lg font-semibold">{t('finance.title')}</h3>
+          </div>
+          <FinancePanel isReadOnly={false} />
+        </div>
+      ) : currentView === "room-prep" ? (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <PartyPopper className="h-5 w-5 text-orange-500" />
+            <h3 className="text-lg font-semibold">{t('roomPrep.tabLabel', 'Room Prep')}</h3>
+          </div>
+          <ReceptionRoomPrepPanel />
+        </div>
+      ) : currentView === "room-status" ? (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <BedDouble className="h-5 w-5 text-orange-500" />
+            <h3 className="text-lg font-semibold">{t('roomStatus.title', 'Room Status')}</h3>
+          </div>
+          <RoomStatusPanel />
+        </div>
+      ) : currentView === "messages" ? (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Users2 className="h-5 w-5 text-orange-500" />
+            <h3 className="text-lg font-semibold">{t('staffMessages.title', 'Staff Messages')}</h3>
+          </div>
+          <StaffChatView />
+        </div>
       ) : (
       <Tabs key={defaultTab} defaultValue={defaultTab} className="w-full min-w-0">
-          <TabsList className="flex gap-1 h-auto flex-wrap justify-start p-1">
+          <TabsList className="flex gap-1 h-auto overflow-x-auto scrollbar-hide flex-nowrap justify-start p-1 w-full">
             <TabsTrigger value="arrival-info" className="gap-1.5 flex-shrink-0 whitespace-nowrap text-xs sm:text-sm" data-testid="tab-arrival-info">
               <ClipboardList className="h-3.5 w-3.5" />
               {t('dashboard.reception.arrivalInfo', 'Arrival Info')} ({arrivalInfoRequests.length})
