@@ -233,6 +233,38 @@
       "headline": "Start Running Your Hotel Smarter Today",
       "subtext": "Join hundreds of properties already using O.S.S to streamline their operations."
     },
+    "vp": {
+      "title": "4 Core Areas",
+      "subtitle": "Everything your hotel needs to thrive — in one platform",
+      "analytics": {
+        "title": "Revenue & Analytics",
+        "desc": "RevPAR, ADR, occupancy — all in real time. Make decisions backed by data.",
+        "f1": "Real-time occupancy dashboard",
+        "f2": "RevPAR, ADR & revenue tracking",
+        "f3": "Export financial reports"
+      },
+      "bookings": {
+        "title": "Bookings & Guests",
+        "desc": "Full booking lifecycle from arrival to checkout. Online check-in included.",
+        "f1": "Online & walk-in reservations",
+        "f2": "Digital check-in & checkout",
+        "f3": "Guest folio & payment splits"
+      },
+      "smartRooms": {
+        "title": "Smart Room Controls",
+        "desc": "IoT-powered controls for every room — lights, temperature, curtains, locks.",
+        "f1": "Lighting, temperature & curtains",
+        "f2": "AI wake-up & scene automation",
+        "f3": "Remote control from dashboard"
+      },
+      "staff": {
+        "title": "Staff & Operations",
+        "desc": "All roles managed from one place. From owner to front desk, kitchen to cashier.",
+        "f1": "Role-based access control",
+        "f2": "Housekeeping task management",
+        "f3": "Restaurant POS & KDS"
+      }
+    },
     "instantValue": {
       "badge": "Why Hotels Choose O.S.S",
       "title": "Everything You Need to Run Your Property",

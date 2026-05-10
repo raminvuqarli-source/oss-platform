@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
@@ -6,26 +6,19 @@ import { motion } from "framer-motion";
 import { SEO } from "@/components/seo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { GetQuoteDialog } from "@/components/get-quote-dialog";
-import { Switch } from "@/components/ui/switch";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import {
-  Building2, Shield, Lightbulb, MessageSquare, CalendarCheck,
-  Globe, Mail, Phone, CheckCircle, Minus, Plus,
-  BarChart3, Users, Wifi, Smartphone, Clock, HeadphonesIcon,
-  Cpu, Calculator, Play, Loader2, Crown, UserCog, ConciergeBell, User,
-  SunMedium, Gauge, BrainCircuit, ArrowRight, Zap, Activity, LayoutDashboard,
-  BedDouble, MessageCircle, TrendingUp, ChevronRight, Download, Monitor, Share, MoreHorizontal, ExternalLink,
-  Network, UtensilsCrossed, Wrench, Sparkles, Moon, Home,
+  Building2, Globe, Mail, Phone, CheckCircle,
+  BarChart3, Users, CalendarCheck, Lightbulb,
+  Play, Loader2, Crown, UserCog, ConciergeBell, User,
+  BrainCircuit, ArrowRight, Zap, Activity, TrendingUp,
+  ChevronRight, UtensilsCrossed, Sparkles,
   ChefHat, Utensils, Wallet, Receipt,
 } from "lucide-react";
-import { X } from "lucide-react";
-import { SiApple, SiAndroid } from "react-icons/si";
-import { usePWAInstall } from "@/hooks/use-pwa-install";
 import { apiRequest, queryClient, setDemoToken } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { PlanCode } from "@shared/schema";
@@ -40,49 +33,6 @@ interface PlanFromAPI {
   limits: { maxProperties: number; maxUnitsPerProperty: number; maxStaff: number };
 }
 
-interface SmartPlanFromAPI {
-  code: string;
-  displayName: string;
-  priceMonthlyUSD: number;
-  currency: string;
-  popular: boolean;
-  features: string[];
-  available?: boolean;
-}
-
-const SMART_CODE_ICONS: Record<string, typeof Cpu> = {
-  smart_lite: SunMedium,
-  smart_pro: Gauge,
-  smart_ai: BrainCircuit,
-};
-
-const SMART_FEATURE_LABELS: Record<string, string> = {
-  light_control: "pricing.smartFeatures.light",
-  ac_control: "pricing.smartFeatures.ac",
-  smart_lock: "pricing.smartFeatures.lock",
-  pre_checkin: "pricing.smartFeatures.preCheckin",
-  energy_monitoring: "pricing.smartFeatures.energy",
-  smart_scenes: "pricing.smartFeatures.scenes",
-  curtains: "pricing.smartFeatures.mobile",
-  automation_rules: "pricing.smartFeatures.automation",
-  ai_energy_optimization: "pricing.smartFeatures.aiEnergy",
-  behavioral_analytics: "pricing.smartFeatures.behavioral",
-  auto_temperature: "pricing.smartFeatures.autoTemp",
-  advanced_iot: "pricing.smartFeatures.advancedIot",
-};
-
-const CORE_FEATURES_UI: { key: string; featureKey: BusinessFeature }[] = [
-  { key: "pricing.coreFeatures.pms", featureKey: "guest_management" },
-  { key: "pricing.coreFeatures.booking", featureKey: "guest_management" },
-  { key: "pricing.coreFeatures.guest", featureKey: "guest_management" },
-  { key: "pricing.coreFeatures.staff", featureKey: "staff_management" },
-  { key: "pricing.coreFeatures.reports", featureKey: "guest_management" },
-  { key: "pricing.coreFeatures.multiProperty", featureKey: "multi_property" },
-  { key: "pricing.coreFeatures.advancedAnalytics", featureKey: "advanced_analytics" },
-  { key: "pricing.coreFeatures.prioritySupport", featureKey: "priority_support" },
-  { key: "pricing.coreFeatures.customIntegrations", featureKey: "custom_integrations" },
-];
-
 const DEFAULT_TRIAL_DAYS = 14;
 
 const DEMO_ROLES = [
@@ -93,69 +43,17 @@ const DEMO_ROLES = [
 ] as const;
 
 const DEMO_INFO_ROLES = [
-  {
-    id: "housekeeping",
-    icon: Sparkles,
-    colorClass: "text-teal-500 dark:text-teal-400",
-    bgClass: "bg-teal-500/10",
-    titleKey: "landing.demo.housekeeping.title",
-    descKey: "landing.demo.housekeeping.desc",
-  },
-  {
-    id: "maintenance",
-    icon: Wrench,
-    colorClass: "text-slate-500 dark:text-slate-400",
-    bgClass: "bg-slate-500/10",
-    titleKey: "landing.demo.maintenance.title",
-    descKey: "landing.demo.maintenance.desc",
-  },
+  { id: "housekeeping", icon: Sparkles, colorClass: "text-teal-500 dark:text-teal-400", bgClass: "bg-teal-500/10", titleKey: "landing.demo.housekeeping.title", descKey: "landing.demo.housekeeping.desc" },
+  { id: "maintenance", icon: BrainCircuit, colorClass: "text-orange-500 dark:text-orange-400", bgClass: "bg-orange-500/10", titleKey: "landing.demo.maintenance.title", descKey: "landing.demo.maintenance.desc" },
 ];
 
 const RESTAURANT_DEMO_ROLES = [
-  {
-    id: "restaurant_manager",
-    icon: UtensilsCrossed,
-    colorClass: "text-orange-500 dark:text-orange-400",
-    bgClass: "bg-orange-500/10",
-    titleKey: "landing.demo.roles.restaurantManager.title",
-    descKey: "landing.demo.roles.restaurantManager.desc",
-  },
-  {
-    id: "kitchen",
-    icon: ChefHat,
-    colorClass: "text-red-500 dark:text-red-400",
-    bgClass: "bg-red-500/10",
-    titleKey: "landing.demo.roles.kitchen.title",
-    descKey: "landing.demo.roles.kitchen.desc",
-  },
-  {
-    id: "waiter",
-    icon: Utensils,
-    colorClass: "text-amber-500 dark:text-amber-400",
-    bgClass: "bg-amber-500/10",
-    titleKey: "landing.demo.roles.waiter.title",
-    descKey: "landing.demo.roles.waiter.desc",
-  },
-  {
-    id: "restaurant_cleaner",
-    icon: Sparkles,
-    colorClass: "text-cyan-500 dark:text-cyan-400",
-    bgClass: "bg-cyan-500/10",
-    titleKey: "landing.demo.roles.restaurantCleaner.title",
-    descKey: "landing.demo.roles.restaurantCleaner.desc",
-  },
-  {
-    id: "restaurant_cashier",
-    icon: Wallet,
-    colorClass: "text-green-500 dark:text-green-400",
-    bgClass: "bg-green-500/10",
-    titleKey: "landing.demo.roles.restaurantCashier.title",
-    descKey: "landing.demo.roles.restaurantCashier.desc",
-  },
+  { id: "restaurant_manager", icon: ChefHat, colorClass: "text-red-500 dark:text-red-400", bgClass: "bg-red-500/10", titleKey: "landing.demo.roles.restaurantManager.title", descKey: "landing.demo.roles.restaurantManager.desc" },
+  { id: "kitchen_staff", icon: ChefHat, colorClass: "text-orange-500 dark:text-orange-400", bgClass: "bg-orange-500/10", titleKey: "landing.demo.roles.kitchen.title", descKey: "landing.demo.roles.kitchen.desc" },
+  { id: "waiter", icon: Utensils, colorClass: "text-amber-500 dark:text-amber-400", bgClass: "bg-amber-500/10", titleKey: "landing.demo.roles.waiter.title", descKey: "landing.demo.roles.waiter.desc" },
+  { id: "restaurant_cleaner", icon: Sparkles, colorClass: "text-cyan-500 dark:text-cyan-400", bgClass: "bg-cyan-500/10", titleKey: "landing.demo.roles.restaurantCleaner.title", descKey: "landing.demo.roles.restaurantCleaner.desc" },
+  { id: "restaurant_cashier", icon: Wallet, colorClass: "text-green-500 dark:text-green-400", bgClass: "bg-green-500/10", titleKey: "landing.demo.roles.restaurantCashier.title", descKey: "landing.demo.roles.restaurantCashier.desc" },
 ];
-
-const POPULAR_PLAN_CODE = "CORE_GROWTH";
-const BEST_VALUE_PLAN_CODE = "CORE_PRO";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -167,13 +65,13 @@ const staggerContainer = {
   visible: { transition: { staggerChildren: 0.1 } },
 };
 
-function AnimatedSection({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+function AnimatedSection({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.01 }}
-      transition={{ duration: 0.7, ease: "easeOut", delay }}
+      transition={{ duration: 0.7, ease: "easeOut" }}
       className={className}
     >
       {children}
@@ -185,49 +83,9 @@ export default function Welcome() {
   const [, setLocation] = useLocation();
   const { t } = useTranslation();
   const { toast } = useToast();
-  const [quoteDialogOpen, setQuoteDialogOpen] = useState(false);
-  const [roomCount, setRoomCount] = useState(10);
-  const [selectedSmartIdx, setSelectedSmartIdx] = useState(1);
-  const [selectedCorePlanIdx, setSelectedCorePlanIdx] = useState(1);
-  const [smartEnabled, setSmartEnabled] = useState(false);
-  const [channexEnabled, setChannexEnabled] = useState(false);
-  const [channexRoomCount, setChannexRoomCount] = useState(25);
-  const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
-  const [showIOSSteps, setShowIOSSteps] = useState(false);
-  const [installStatus, setInstallStatus] = useState<"idle" | "accepted" | "needs_browser" | "use_menu">("idle");
-  const [showIOSModal, setShowIOSModal] = useState(false);
-
-  const isInIframe = window.self !== window.top;
-
-  const triggerInstall = async () => {
-    const prompt = (window as any).__pwaInstallPrompt;
-    if (!prompt) {
-      setInstallStatus(isInIframe ? "needs_browser" : "use_menu");
-      return;
-    }
-    try {
-      await prompt.prompt();
-      const { outcome } = await prompt.userChoice;
-      (window as any).__pwaInstallPrompt = null;
-      if (outcome === "accepted") {
-        setInstallStatus("accepted");
-      }
-    } catch {
-      setInstallStatus(isInIframe ? "needs_browser" : "use_menu");
-    }
-  };
-
-  const openInBrowser = () => {
-    const url = window.location.href.split("?")[0];
-    window.open(url, "_blank", "noopener");
-  };
-
-  const isIOSSafari = (() => {
-    const ua = navigator.userAgent;
-    return /iPhone|iPad|iPod/.test(ua) && !/CriOS|FxiOS|OPiOS|mercury/.test(ua);
-  })();
-  const pwa = usePWAInstall();
+  const [demoLoading, setDemoLoading] = useState<string | null>(null);
+  const [quoteDialogOpen, setQuoteDialogOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -235,71 +93,82 @@ export default function Welcome() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const { data: plans } = useQuery<PlanFromAPI[]>({
-    queryKey: ["/api/plans"],
-  });
-
-  const { data: smartPlans } = useQuery<SmartPlanFromAPI[]>({
-    queryKey: ["/api/smart-plans"],
-  });
+  const { data: plans } = useQuery<PlanFromAPI[]>({ queryKey: ["/api/plans"] });
+  const corePlans = (plans || []).filter(p => !p.code.startsWith("REST_"));
 
   const handleDemoLogin = async (role: string) => {
     setDemoLoading(role);
     try {
       const response = await apiRequest("POST", "/api/auth/demo-login", { role });
       const data = await response.json();
-      if (data._demoToken) {
-        setDemoToken(data._demoToken);
-      }
+      if (data._demoToken) setDemoToken(data._demoToken);
       const { _demoToken: _t, ...user } = data;
       queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== "/api/auth/me" });
       queryClient.setQueryData(["/api/auth/me"], user);
       setLocation(`/demo?role=${role}`);
-    } catch (error) {
-      toast({
-        title: "Demo login failed",
-        description: "Please try again in a moment.",
-        variant: "destructive",
-      });
+    } catch {
+      toast({ title: "Demo login failed", description: "Please try again.", variant: "destructive" });
     } finally {
       setDemoLoading(null);
     }
   };
 
-  const corePlans = (plans || []).filter(p => !p.code.startsWith("REST_"));
-  const smartPlansList = smartPlans || [];
-  const selectedCore = corePlans[selectedCorePlanIdx] || corePlans[0];
-  const selectedSmart = smartPlansList[selectedSmartIdx] || smartPlansList[0];
-  const corePrice = selectedCore?.priceMonthlyUSD || 0;
-  const smartUnitPrice = selectedSmart?.priceMonthlyUSD || 0;
-  const smartCost = smartEnabled ? smartUnitPrice * roomCount : 0;
-
-  const channexAddonPrice = useMemo(() => {
-    if (!channexEnabled) return 0;
-    const code = selectedCore?.code;
-    if (code === "CORE_PRO") return Math.max(50, 2 * channexRoomCount);
-    if (code === "CORE_GROWTH") return 30;
-    return 20; // CORE_STARTER default
-  }, [channexEnabled, selectedCore?.code, channexRoomCount]);
-
-  const monthlyTotal = useMemo(
-    () => corePrice + (smartEnabled ? smartUnitPrice * roomCount : 0) + channexAddonPrice,
-    [corePrice, smartUnitPrice, roomCount, smartEnabled, channexAddonPrice],
-  );
-
   const navigateToRegister = (planCode?: string) => {
     const params = new URLSearchParams();
-    if (smartEnabled) params.set('smart', '1');
-    if (channexEnabled) {
-      params.set('channex', '1');
-      if (selectedCore?.code === 'CORE_PRO' || planCode === 'CORE_PRO') {
-        params.set('channexRooms', String(channexRoomCount));
-      }
-    }
     if (planCode) params.set('plan', planCode);
-    else if (selectedCore?.code) params.set('plan', selectedCore.code);
     setLocation(`/register-hotel${params.toString() ? '?' + params.toString() : ''}`);
   };
+
+  const VALUE_PROPS = [
+    {
+      icon: TrendingUp,
+      titleKey: "landing.vp.analytics.title",
+      descKey: "landing.vp.analytics.desc",
+      features: ["landing.vp.analytics.f1", "landing.vp.analytics.f2", "landing.vp.analytics.f3"],
+      color: "text-blue-500",
+      bg: "bg-blue-500/10",
+      border: "hover:border-blue-500/25",
+      gradient: "from-blue-500/5 to-transparent",
+      badge: "Analytics",
+      tid: "analytics",
+    },
+    {
+      icon: CalendarCheck,
+      titleKey: "landing.vp.bookings.title",
+      descKey: "landing.vp.bookings.desc",
+      features: ["landing.vp.bookings.f1", "landing.vp.bookings.f2", "landing.vp.bookings.f3"],
+      color: "text-emerald-500",
+      bg: "bg-emerald-500/10",
+      border: "hover:border-emerald-500/25",
+      gradient: "from-emerald-500/5 to-transparent",
+      badge: "PMS",
+      tid: "bookings",
+    },
+    {
+      icon: Lightbulb,
+      titleKey: "landing.vp.smartRooms.title",
+      descKey: "landing.vp.smartRooms.desc",
+      features: ["landing.vp.smartRooms.f1", "landing.vp.smartRooms.f2", "landing.vp.smartRooms.f3"],
+      color: "text-amber-500",
+      bg: "bg-amber-500/10",
+      border: "hover:border-amber-500/25",
+      gradient: "from-amber-500/5 to-transparent",
+      badge: "IoT",
+      tid: "smart-rooms",
+    },
+    {
+      icon: Users,
+      titleKey: "landing.vp.staff.title",
+      descKey: "landing.vp.staff.desc",
+      features: ["landing.vp.staff.f1", "landing.vp.staff.f2", "landing.vp.staff.f3"],
+      color: "text-violet-500",
+      bg: "bg-violet-500/10",
+      border: "hover:border-violet-500/25",
+      gradient: "from-violet-500/5 to-transparent",
+      badge: "Team",
+      tid: "staff",
+    },
+  ];
 
   return (
     <div className="bg-background flex flex-col" style={{ minHeight: '100dvh' }}>
@@ -313,27 +182,12 @@ export default function Welcome() {
           "name": "O.S.S Smart Hotel System",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web Browser",
-          "description": "Multi-property hotel management platform with smart room controls, AI wake-up, dynamic pricing, booking management, night audit automation, and guest services.",
-          "offers": {
-            "@type": "AggregateOffer",
-            "lowPrice": "79",
-            "highPrice": "199",
-            "priceCurrency": "USD",
-            "offerCount": "3"
-          },
-          "featureList": [
-            "Smart Room Controls (IoT)",
-            "Multi-Property Management",
-            "Dynamic Pricing Engine",
-            "Automated Night Audit",
-            "Channel Manager Integration",
-            "Guest Communication System",
-            "Restaurant POS & KDS",
-            "Real-Time Analytics"
-          ]
+          "offers": { "@type": "AggregateOffer", "lowPrice": "79", "highPrice": "199", "priceCurrency": "USD" },
+          "featureList": ["Smart Room Controls", "Multi-Property Management", "Dynamic Pricing", "Automated Night Audit", "Channel Manager Integration", "Restaurant POS & KDS"]
         }}
       />
 
+      {/* HEADER */}
       <header className={`flex items-center justify-between gap-4 px-6 py-3 shrink-0 sticky top-0 z-50 transition-all duration-300 ${scrolled ? "bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-sm" : "bg-transparent"}`}>
         <button onClick={() => setLocation("/")} className="flex items-center gap-3 hover:opacity-80 transition-opacity" data-testid="button-logo-home">
           <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
@@ -342,7 +196,7 @@ export default function Welcome() {
           <span className="text-lg font-bold tracking-tight">O.S.S</span>
         </button>
         <nav className="hidden md:flex items-center gap-1">
-          <Button variant="ghost" size="sm" onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })} data-testid="button-nav-features">
+          <Button variant="ghost" size="sm" onClick={() => document.getElementById("capabilities")?.scrollIntoView({ behavior: "smooth" })} data-testid="button-nav-features">
             {t('landing.features')}
           </Button>
           <Button variant="ghost" size="sm" onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })} data-testid="button-nav-pricing">
@@ -374,13 +228,11 @@ export default function Welcome() {
 
         {/* HERO SECTION */}
         <section className="relative overflow-hidden pt-16 pb-24 px-6" data-testid="section-hero">
-          {/* Rich mesh gradient background */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[700px] rounded-full bg-primary/8 blur-[130px]" />
             <div className="absolute top-1/3 -left-24 w-[320px] h-[320px] rounded-full bg-blue-500/6 blur-[90px]" />
             <div className="absolute top-1/4 -right-24 w-[320px] h-[320px] rounded-full bg-violet-500/6 blur-[90px]" />
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] rounded-full bg-primary/4 blur-[80px]" />
-            {/* Subtle grid */}
             <div className="absolute inset-0 opacity-[0.015] dark:opacity-[0.025]" style={{ backgroundImage: 'linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
           </div>
 
@@ -396,19 +248,14 @@ export default function Welcome() {
                 {t('landing.trustedBadge')}
               </Badge>
 
-              <h1
-                className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.1]"
-                style={{ letterSpacing: "-0.02em" }}
-              >
-                <span className="font-extrabold block">
-                  {t('landing.heroTitle1')}
-                </span>
+              <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.1]" style={{ letterSpacing: "-0.02em" }}>
+                <span className="font-extrabold block">{t('landing.heroTitle1')}</span>
                 <span className="font-semibold block bg-gradient-to-r from-primary via-primary/80 to-blue-500 bg-clip-text text-transparent">
                   {t('landing.heroTitle2')}
                 </span>
               </h1>
 
-              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-normal">
+              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                 {t('landing.heroExtended')}
               </p>
 
@@ -425,9 +272,7 @@ export default function Welcome() {
                 </Button>
               </div>
 
-              <p className="text-sm text-muted-foreground/70">
-                {t('landing.trialText')}
-              </p>
+              <p className="text-sm text-muted-foreground/70">{t('landing.trialText')}</p>
 
               {/* Mini stats strip */}
               <motion.div
@@ -457,7 +302,6 @@ export default function Welcome() {
               transition={{ duration: 0.9, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
               className="mt-16 relative"
             >
-              {/* Glow behind dashboard */}
               <div className="absolute inset-x-10 top-4 h-full rounded-3xl bg-primary/10 blur-3xl -z-10" />
               <div className="relative rounded-2xl border border-border/50 bg-card/90 backdrop-blur-sm shadow-2xl overflow-hidden">
                 <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50 bg-muted/40">
@@ -481,7 +325,7 @@ export default function Welcome() {
                       { labelKey: "landing.mockBookings", value: "24", change: "+3", color: "text-violet-500", bg: "bg-violet-500/8" },
                       { labelKey: "landing.mockGuestRating", value: "4.8★", change: "+0.2", color: "text-amber-500", bg: "bg-amber-500/8" },
                     ].map((stat) => (
-                      <div key={stat.labelKey} className={`p-4 rounded-xl ${stat.bg} border border-border/30 space-y-1 hover:scale-[1.02] transition-transform`}>
+                      <div key={stat.labelKey} className={`p-4 rounded-xl ${stat.bg} border border-border/30 space-y-1`}>
                         <p className="text-xs text-muted-foreground">{t(stat.labelKey)}</p>
                         <p className="text-2xl font-bold tracking-tight">{stat.value}</p>
                         <p className={`text-xs font-semibold ${stat.color}`}>{stat.change}</p>
@@ -491,7 +335,7 @@ export default function Welcome() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="md:col-span-2 h-32 rounded-xl bg-gradient-to-r from-primary/5 to-blue-500/5 border border-border/30 flex items-end justify-around px-4 pb-3 gap-1">
                       {[40, 55, 45, 70, 60, 80, 75, 90, 85, 65, 88, 92].map((h, i) => (
-                        <div key={i} className="flex-1 rounded-t bg-gradient-to-t from-primary/50 to-primary/20 transition-all" style={{ height: `${h}%` }} />
+                        <div key={i} className="flex-1 rounded-t bg-gradient-to-t from-primary/50 to-primary/20" style={{ height: `${h}%` }} />
                       ))}
                     </div>
                     <div className="h-32 rounded-xl bg-muted/40 border border-border/30 p-4 space-y-2.5">
@@ -527,247 +371,74 @@ export default function Welcome() {
           </div>
         </section>
 
-        {/* FEATURES SECTION */}
-        <AnimatedSection>
-          <section id="features" className="py-24 px-6 relative" data-testid="section-features">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute top-1/2 left-[-10%] w-[400px] h-[400px] rounded-full bg-primary/5 blur-[100px]" />
-            </div>
-            <div className="relative max-w-5xl mx-auto space-y-12">
-              <div className="text-center space-y-4">
-                <Badge variant="secondary" className="text-xs px-3 py-1 rounded-full">{t('landing.features')}</Badge>
-                <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.1]">{t('landing.everythingYouNeed')}</h2>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t('landing.everythingYouNeedDesc')}</p>
-              </div>
-              <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {[
-                  { icon: Shield, titleKey: 'landing.featureDetails.secureAccess', descKey: 'landing.featureDetails.secureAccessDesc', tid: 'secure-access' },
-                  { icon: Lightbulb, titleKey: 'landing.featureDetails.smartControls', descKey: 'landing.featureDetails.smartControlsDesc', tid: 'smart-controls' },
-                  { icon: MessageSquare, titleKey: 'landing.featureDetails.guestCommunication', descKey: 'landing.featureDetails.guestCommunicationDesc', tid: 'guest-communication' },
-                  { icon: CalendarCheck, titleKey: 'landing.featureDetails.bookingManagement', descKey: 'landing.featureDetails.bookingManagementDesc', tid: 'booking-management' },
-                  { icon: BarChart3, titleKey: 'landing.featureDetails.financialAnalytics', descKey: 'landing.featureDetails.financialAnalyticsDesc', tid: 'financial-analytics' },
-                  { icon: HeadphonesIcon, titleKey: 'landing.featureDetails.serviceRequests', descKey: 'landing.featureDetails.serviceRequestsDesc', tid: 'service-requests' },
-                  { icon: UtensilsCrossed, titleKey: 'landing.featureDetails.restaurantKds', descKey: 'landing.featureDetails.restaurantKdsDesc', tid: 'restaurant-kds' },
-                ].map((f) => {
-                  const FIcon = f.icon;
-                  return (
-                    <motion.div key={f.tid} variants={fadeUp}>
-                      <div className="group p-6 rounded-2xl bg-card/50 border border-border/40 hover:border-primary/20 hover:bg-card transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 h-full" data-testid={`feature-${f.tid}`}>
-                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/15 group-hover:scale-110 transition-all duration-300">
-                          <FIcon className="h-6 w-6 text-primary" />
-                        </div>
-                        <h3 className="font-heading font-semibold text-base mb-2">{t((f as any).titleKey)}</h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed">{t((f as any).descKey)}</p>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </motion.div>
-            </div>
-          </section>
-        </AnimatedSection>
-
-        {/* WHY OSS SECTION */}
-        <AnimatedSection>
-          <section className="py-24 px-6 relative" data-testid="section-why-oss">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-primary/5 blur-[100px]" />
-            </div>
-            <div className="relative max-w-5xl mx-auto space-y-12">
-              <div className="text-center space-y-4">
-                <Badge variant="secondary" className="text-xs px-3 py-1 rounded-full">
-                  <Zap className="h-3 w-3 mr-1.5" />
-                  {t('landing.whyOss.title')}
-                </Badge>
-                <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.1]" data-testid="text-why-oss-title">
-                  {t('landing.whyOss.title')}
-                </h2>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto" data-testid="text-why-oss-subtitle">
-                  {t('landing.whyOss.subtitle')}
-                </p>
-              </div>
-              <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {[
-                  { icon: LayoutDashboard, titleKey: 'landing.whyOss.allInOne', descKey: 'landing.whyOss.allInOneDesc', iconColor: 'text-blue-500', iconBg: 'bg-blue-500/10', borderColor: 'hover:border-blue-500/30', tid: 'all-in-one' },
-                  { icon: Cpu, titleKey: 'landing.whyOss.smartRoom', descKey: 'landing.whyOss.smartRoomDesc', iconColor: 'text-emerald-500', iconBg: 'bg-emerald-500/10', borderColor: 'hover:border-emerald-500/30', tid: 'smart-room' },
-                  { icon: TrendingUp, titleKey: 'landing.whyOss.analytics', descKey: 'landing.whyOss.analyticsDesc', iconColor: 'text-violet-500', iconBg: 'bg-violet-500/10', borderColor: 'hover:border-violet-500/30', tid: 'analytics' },
-                  { icon: Building2, titleKey: 'landing.whyOss.multiProperty', descKey: 'landing.whyOss.multiPropertyDesc', iconColor: 'text-amber-500', iconBg: 'bg-amber-500/10', borderColor: 'hover:border-amber-500/30', tid: 'multi-property' },
-                  { icon: BrainCircuit, titleKey: 'landing.whyOss.aiDynamic', descKey: 'landing.whyOss.aiDynamicDesc', iconColor: 'text-rose-500', iconBg: 'bg-rose-500/10', borderColor: 'hover:border-rose-500/30', tid: 'ai-dynamic' },
-                  { icon: Moon, titleKey: 'landing.whyOss.nightAudit', descKey: 'landing.whyOss.nightAuditDesc', iconColor: 'text-indigo-500', iconBg: 'bg-indigo-500/10', borderColor: 'hover:border-indigo-500/30', tid: 'night-audit' },
-                ].map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <motion.div key={item.tid} variants={fadeUp}>
-                      <div className={`group p-6 rounded-2xl bg-card/50 border border-border/40 ${item.borderColor} hover:bg-card transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 h-full`} data-testid={`card-why-oss-${item.tid}`}>
-                        <div className={`w-12 h-12 rounded-xl ${item.iconBg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                          <Icon className={`h-6 w-6 ${item.iconColor}`} />
-                        </div>
-                        <h3 className="font-heading font-semibold text-lg mb-2">{t(item.titleKey)}</h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed">{t(item.descKey)}</p>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </motion.div>
-            </div>
-          </section>
-        </AnimatedSection>
-
-        {/* PRODUCT PREVIEW SECTIONS */}
-        <section className="py-24 px-6" data-testid="section-product-preview">
-          <div className="max-w-6xl mx-auto space-y-32">
+        {/* VALUE PROPS — THE BUTTON CONCEPT */}
+        <section id="capabilities" className="py-24 px-6 relative" data-testid="section-capabilities">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-full bg-primary/4 blur-[120px]" />
+          </div>
+          <div className="relative max-w-5xl mx-auto space-y-12">
             <AnimatedSection>
-              <div className="text-center space-y-4">
+              <div className="text-center space-y-3">
                 <Badge variant="secondary" className="text-xs px-3 py-1 rounded-full">
                   <Activity className="h-3 w-3 mr-1.5" />
-                  {t('landing.productPreview.title')}
+                  {t('landing.vp.title')}
                 </Badge>
-                <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.1]">{t('landing.productPreview.subtitle')}</h2>
+                <h2 className="font-heading text-3xl md:text-4xl font-bold tracking-tight leading-[1.1]">
+                  {t('landing.vp.subtitle')}
+                </h2>
               </div>
             </AnimatedSection>
 
-            {[
-              {
-                icon: LayoutDashboard,
-                titleKey: "landing.productPreview.dashboard.title",
-                descKey: "landing.productPreview.dashboard.desc",
-                color: "from-blue-500/10 to-cyan-500/10",
-                iconColor: "text-blue-500",
-                iconBg: "bg-blue-500/10",
-                mockContent: (
-                  <div className="p-5 space-y-4">
-                    <div className="grid grid-cols-3 gap-3">
-                      {[{ v: "87%", l: "Occ." }, { v: "$142", l: "ADR" }, { v: "$123", l: "RevPAR" }].map((s) => (
-                        <div key={s.l} className="p-3 rounded-lg bg-muted/60 border border-border/30 text-center">
-                          <p className="text-lg font-bold">{s.v}</p>
-                          <p className="text-[10px] text-muted-foreground">{s.l}</p>
+            <motion.div
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.01 }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-5"
+            >
+              {VALUE_PROPS.map((vp) => {
+                const Icon = vp.icon;
+                return (
+                  <motion.div key={vp.tid} variants={fadeUp}>
+                    <div
+                      className={`group relative p-8 rounded-2xl border border-border/40 bg-gradient-to-br ${vp.gradient} hover:bg-card ${vp.border} hover:border-opacity-100 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer h-full`}
+                      onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
+                      data-testid={`card-vp-${vp.tid}`}
+                    >
+                      <div className="flex items-start justify-between mb-5">
+                        <div className={`w-14 h-14 rounded-2xl ${vp.bg} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                          <Icon className={`h-7 w-7 ${vp.color}`} />
                         </div>
-                      ))}
-                    </div>
-                    <div className="h-20 rounded-lg bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-border/30 flex items-end justify-around px-3 pb-2">
-                      {[35, 50, 42, 68, 55, 78, 62].map((h, i) => (
-                        <div key={i} className="w-4 rounded-t bg-blue-500/30" style={{ height: `${h}%` }} />
-                      ))}
-                    </div>
-                  </div>
-                ),
-              },
-              {
-                icon: BedDouble,
-                titleKey: "landing.productPreview.smartRoom.title",
-                descKey: "landing.productPreview.smartRoom.desc",
-                color: "from-emerald-500/10 to-teal-500/10",
-                iconColor: "text-emerald-500",
-                iconBg: "bg-emerald-500/10",
-                reverse: true,
-                mockContent: (
-                  <div className="p-5 space-y-3">
-                    {[
-                      { labelKey: "landing.mockLighting", value: "75%", icon: Lightbulb, color: "bg-amber-500" },
-                      { labelKey: "landing.mockTemperature", value: "22°C", icon: Activity, color: "bg-blue-500" },
-                      { labelKey: "landing.mockCurtains", valueKey: "landing.mockCurtainsOpen", icon: Shield, color: "bg-emerald-500" },
-                    ].map((ctrl) => (
-                      <div key={ctrl.labelKey} className="flex items-center gap-3 p-3 rounded-lg bg-muted/40 border border-border/30">
-                        <div className={`w-8 h-8 rounded-lg ${ctrl.color}/10 flex items-center justify-center`}>
-                          <ctrl.icon className={`h-4 w-4 ${ctrl.color === "bg-amber-500" ? "text-amber-500" : ctrl.color === "bg-blue-500" ? "text-blue-500" : "text-emerald-500"}`} />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">{t(ctrl.labelKey)}</p>
-                        </div>
-                        <span className="text-sm text-muted-foreground font-medium">{ctrl.valueKey ? t(ctrl.valueKey) : ctrl.value}</span>
+                        <Badge variant="secondary" className="text-xs rounded-full opacity-60 group-hover:opacity-100 transition-opacity">
+                          {vp.badge}
+                        </Badge>
                       </div>
-                    ))}
-                  </div>
-                ),
-              },
-              {
-                icon: MessageCircle,
-                titleKey: "landing.productPreview.communication.title",
-                descKey: "landing.productPreview.communication.desc",
-                color: "from-violet-500/10 to-purple-500/10",
-                iconColor: "text-violet-500",
-                iconBg: "bg-violet-500/10",
-                mockContent: (
-                  <div className="p-5 space-y-3">
-                    {[
-                      { name: "Guest - Room 301", msgKey: "landing.mockMsgTowels", timeKey: "landing.mock2mAgo", urgent: false },
-                      { name: "VIP - Suite 501", msgKey: "landing.mockMsgCheckout", timeKey: "landing.mock5mAgo", urgent: true },
-                      { name: "Guest - Room 205", msgKey: "landing.mockMsgRoomService", timeKey: "landing.mock12mAgo", urgent: false },
-                    ].map((m) => (
-                      <div key={m.name} className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border/30">
-                        <div className="w-8 h-8 rounded-full bg-violet-500/10 flex items-center justify-center flex-shrink-0">
-                          <User className="h-4 w-4 text-violet-500" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-medium truncate">{m.name}</p>
-                            {m.urgent && <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />}
-                          </div>
-                          <p className="text-xs text-muted-foreground truncate">{t(m.msgKey)}</p>
-                        </div>
-                        <span className="text-[10px] text-muted-foreground flex-shrink-0">{t(m.timeKey)}</span>
-                      </div>
-                    ))}
-                  </div>
-                ),
-              },
-              {
-                icon: TrendingUp,
-                titleKey: "landing.productPreview.analytics.title",
-                descKey: "landing.productPreview.analytics.desc",
-                color: "from-amber-500/10 to-orange-500/10",
-                iconColor: "text-amber-500",
-                iconBg: "bg-amber-500/10",
-                reverse: true,
-                mockContent: (
-                  <div className="p-5 space-y-4">
-                    <div className="grid grid-cols-2 gap-3">
-                      {[{ l: "RevPAR", v: "$123", c: "+8%" }, { l: "ADR", v: "$142", c: "+5%" }, { l: "Sold Nights", v: "186", c: "+12" }, { l: "Revenue", v: "$26.4k", c: "+15%" }].map((s) => (
-                        <div key={s.l} className="p-3 rounded-lg bg-muted/40 border border-border/30">
-                          <p className="text-[10px] text-muted-foreground">{s.l}</p>
-                          <p className="text-base font-bold">{s.v}</p>
-                          <p className="text-[10px] text-emerald-500 font-medium">{s.c}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ),
-              },
-            ].map((section, idx) => {
-              const Icon = section.icon;
-              const isReverse = (section as any).reverse;
-              return (
-                <AnimatedSection key={idx}>
-                  <div className={`flex flex-col ${isReverse ? "lg:flex-row-reverse" : "lg:flex-row"} gap-12 lg:gap-16 items-center`}>
-                    <div className="flex-1 space-y-5">
-                      <div className={`w-12 h-12 rounded-xl ${section.iconBg} flex items-center justify-center`}>
-                        <Icon className={`h-6 w-6 ${section.iconColor}`} />
-                      </div>
-                      <h3 className="font-heading text-2xl md:text-3xl font-bold tracking-tight leading-[1.1]">{t(section.titleKey)}</h3>
-                      <p className="text-base text-muted-foreground leading-relaxed">{t(section.descKey)}</p>
-                      <Button variant="ghost" className="px-0 text-primary font-medium group" onClick={() => navigateToRegister()}>
-                        {t('pricing.startFreeTrial')}
-                        <ChevronRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    </div>
-                    <div className="flex-1 w-full max-w-md lg:max-w-none">
-                      <div className={`rounded-2xl border border-border/40 bg-gradient-to-br ${section.color} overflow-hidden shadow-xl`}>
-                        <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-border/30 bg-card/40">
-                          <div className="w-2.5 h-2.5 rounded-full bg-red-400/50" />
-                          <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/50" />
-                          <div className="w-2.5 h-2.5 rounded-full bg-green-400/50" />
-                        </div>
-                        {section.mockContent}
+
+                      <h3 className="font-heading text-xl font-bold mb-2">{t(vp.titleKey)}</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed mb-5">{t(vp.descKey)}</p>
+
+                      <ul className="space-y-2.5">
+                        {vp.features.map((fKey) => (
+                          <li key={fKey} className="flex items-center gap-2.5 text-sm">
+                            <CheckCircle className={`h-4 w-4 ${vp.color} shrink-0`} />
+                            <span>{t(fKey)}</span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      <div className={`mt-6 flex items-center gap-1 text-sm font-medium ${vp.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}>
+                        {t('landing.ctaLiveDemo')}
+                        <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
-                  </div>
-                </AnimatedSection>
-              );
-            })}
+                  </motion.div>
+                );
+              })}
+            </motion.div>
           </div>
         </section>
 
-        {/* HOW IT WORKS SECTION */}
+        {/* HOW IT WORKS */}
         <AnimatedSection>
           <section className="py-24 px-6 relative" data-testid="section-how-it-works">
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -775,18 +446,16 @@ export default function Welcome() {
             </div>
             <div className="relative max-w-5xl mx-auto space-y-16">
               <div className="text-center space-y-4">
-                <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.1]">
+                <h2 className="font-heading text-3xl md:text-4xl font-bold tracking-tight leading-[1.1]">
                   {t('landing.howItWorks.title')}
                 </h2>
-                <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-                  {t('landing.howItWorks.subtitle')}
-                </p>
+                <p className="text-lg text-muted-foreground max-w-xl mx-auto">{t('landing.howItWorks.subtitle')}</p>
               </div>
               <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
                 {[
-                  { step: 1, icon: Building2, titleKey: 'landing.howItWorks.step1Title', descKey: 'landing.howItWorks.step1Desc', color: 'text-blue-500 dark:text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-                  { step: 2, icon: Users, titleKey: 'landing.howItWorks.step2Title', descKey: 'landing.howItWorks.step2Desc', color: 'text-emerald-500 dark:text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-                  { step: 3, icon: CalendarCheck, titleKey: 'landing.howItWorks.step3Title', descKey: 'landing.howItWorks.step3Desc', color: 'text-violet-500 dark:text-violet-400', bg: 'bg-violet-500/10', border: 'border-violet-500/20' },
+                  { step: 1, icon: Building2, titleKey: 'landing.howItWorks.step1Title', descKey: 'landing.howItWorks.step1Desc', color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+                  { step: 2, icon: Users, titleKey: 'landing.howItWorks.step2Title', descKey: 'landing.howItWorks.step2Desc', color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+                  { step: 3, icon: CalendarCheck, titleKey: 'landing.howItWorks.step3Title', descKey: 'landing.howItWorks.step3Desc', color: 'text-violet-500', bg: 'bg-violet-500/10', border: 'border-violet-500/20' },
                 ].map((item) => {
                   const Icon = item.icon;
                   return (
@@ -811,703 +480,6 @@ export default function Welcome() {
           </section>
         </AnimatedSection>
 
-        {/* TRUST + STATS SECTION */}
-        <AnimatedSection>
-          <section className="py-24 px-6 relative" data-testid="section-trusted-by">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-primary/5 blur-[100px]" />
-            </div>
-            <div className="relative max-w-5xl mx-auto space-y-16">
-              <div className="text-center space-y-4">
-                <h2 className="font-heading text-3xl md:text-4xl font-bold tracking-tight leading-[1.1]">
-                  {t('landing.trustedBy.title')}
-                </h2>
-                <p className="text-muted-foreground text-lg max-w-lg mx-auto">
-                  {t('landing.trustedBy.subtitle')}
-                </p>
-              </div>
-
-              <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-                {[
-                  { value: "50+", label: t('landing.stats.hotels'), icon: Building2 },
-                  { value: "12", label: t('landing.stats.countries'), icon: Globe },
-                  { value: "99.9%", label: t('landing.stats.uptime'), icon: Activity },
-                  { value: "24/7", label: t('landing.stats.support'), icon: HeadphonesIcon },
-                ].map((stat) => {
-                  const SIcon = stat.icon;
-                  return (
-                    <motion.div key={stat.label} variants={fadeUp} className="text-center p-6 rounded-2xl border border-border/40 bg-card/50 hover:bg-card hover:border-primary/20 transition-all duration-300">
-                      <SIcon className="h-6 w-6 text-primary mx-auto mb-3" />
-                      <p className="text-3xl md:text-4xl font-bold tracking-tight">{stat.value}</p>
-                      <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
-                    </motion.div>
-                  );
-                })}
-              </motion.div>
-
-              <div className="flex flex-wrap justify-center gap-4 md:gap-6">
-                {[
-                  { name: "Riverside Hotel", icon: Building2 },
-                  { name: "Green Valley Resort", icon: Globe },
-                  { name: "Mountain Lodge", icon: Shield },
-                  { name: "City Center Suites", icon: Building2 },
-                  { name: "Blue Coast Hotel", icon: Globe },
-                  { name: "Sunset Boutique Hotel", icon: Building2 },
-                ].map((hotel) => {
-                  const Icon = hotel.icon;
-                  return (
-                    <div
-                      key={hotel.name}
-                      className="flex items-center gap-2 px-5 py-3 rounded-xl border border-border/30 bg-card/30 text-muted-foreground/50 select-none hover:border-border/60 hover:text-muted-foreground/70 transition-all duration-300"
-                      data-testid={`trusted-hotel-${hotel.name.toLowerCase().replace(/\s+/g, '-')}`}
-                    >
-                      <Icon className="h-4 w-4 shrink-0" />
-                      <span className="text-sm font-medium whitespace-nowrap">{hotel.name}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </section>
-        </AnimatedSection>
-
-        {/* PRICING SECTION */}
-        <AnimatedSection>
-          <section id="pricing" className="py-24 px-6 relative" data-testid="section-pricing">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute top-[-10%] left-[-5%] w-[400px] h-[400px] rounded-full bg-primary/5 blur-[100px]" />
-              <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] rounded-full bg-primary/5 blur-[100px]" />
-            </div>
-            <div className="relative max-w-6xl mx-auto space-y-16">
-              <div className="text-center space-y-4">
-                <Badge variant="secondary" className="text-xs px-3 py-1 rounded-full">{t('landing.pricing')}</Badge>
-                <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.1]">
-                  {t('pricing.sectionTitle')}
-                </h2>
-                <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-                  {t('pricing.sectionSubtitle')}
-                </p>
-                <Badge variant="outline" className="text-xs rounded-full">
-                  {t('pricing.billedMonthly', 'Billed monthly')}
-                </Badge>
-              </div>
-
-              {/* WHATSAPP NOTIFICATIONS ADD-ON — shown above CORE plans */}
-              <div className="space-y-6" data-testid="pricing-whatsapp">
-                <div className="text-center space-y-3">
-                  <Badge variant="secondary" className="text-xs rounded-full">{t('pricing.optionalAddon')}</Badge>
-                  <div className="flex items-center justify-center gap-2">
-                    <MessageCircle className="h-5 w-5 text-green-500" />
-                    <h3 className="font-heading text-2xl font-bold">{t('landing.whatsapp.title', 'WhatsApp Notifications')}</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground max-w-lg mx-auto">
-                    {t('landing.whatsapp.subtitle')}
-                  </p>
-                </div>
-
-                <div className="max-w-3xl mx-auto">
-                  <Card className="border-green-500/20 bg-gradient-to-br from-green-500/5 via-transparent to-transparent shadow-lg shadow-green-500/5">
-                    <CardContent className="p-8">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        {[
-                          { icon: '📨', titleKey: 'landing.whatsapp.f1Title', descKey: 'landing.whatsapp.f1Desc' },
-                          { icon: '🔔', titleKey: 'landing.whatsapp.f2Title', descKey: 'landing.whatsapp.f2Desc' },
-                          { icon: '🛎️', titleKey: 'landing.whatsapp.f3Title', descKey: 'landing.whatsapp.f3Desc' },
-                          { icon: '✅', titleKey: 'landing.whatsapp.f4Title', descKey: 'landing.whatsapp.f4Desc' },
-                          { icon: '💬', titleKey: 'landing.whatsapp.f5Title', descKey: 'landing.whatsapp.f5Desc' },
-                          { icon: '📊', titleKey: 'landing.whatsapp.f6Title', descKey: 'landing.whatsapp.f6Desc' },
-                        ].map((item) => (
-                          <div key={item.titleKey} className="flex gap-3 items-start">
-                            <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-lg flex-shrink-0">
-                              {item.icon}
-                            </div>
-                            <div>
-                              <p className="font-semibold text-sm">{t(item.titleKey)}</p>
-                              <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{t(item.descKey)}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="mt-6 pt-5 border-t border-green-500/20 flex items-center justify-center gap-2">
-                        <MessageCircle className="h-4 w-4 text-green-500" />
-                        <p className="text-sm text-muted-foreground text-center">
-                          {t('landing.whatsapp.footerNote')}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-
-              <div className="space-y-8" data-testid="pricing-core">
-                <div className="text-center space-y-2">
-                  <div className="flex items-center justify-center gap-2">
-                    <Building2 className="h-5 w-5 text-primary" />
-                    <h3 className="font-heading text-2xl font-bold">{t('pricing.corePlatform')}</h3>
-                  </div>
-                  <p className="text-base font-medium text-foreground/80">
-                    {t('pricing.coreMarketingLine1')}
-                  </p>
-                  <p className="text-sm text-muted-foreground max-w-lg mx-auto">
-                    {t('pricing.coreMarketingLine2')}
-                  </p>
-                </div>
-
-                <motion.div key={`core-grid-${corePlans.length > 0 ? 'ready' : 'loading'}`} variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-6">
-                  {/* Apartment Lite — static card */}
-                  <motion.div variants={fadeUp}>
-                    <Card
-                      className="relative cursor-pointer transition-all duration-300 hover:-translate-y-1 h-full border-border/40 hover:border-primary/20 hover:shadow-lg"
-                      onClick={() => navigateToRegister('APT_LITE')}
-                      data-testid="card-core-APT_LITE"
-                    >
-                      <CardContent className="p-7 space-y-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-teal-500/10">
-                            <Home className="h-5 w-5 text-teal-500" />
-                          </div>
-                          <div>
-                            <span className="font-bold text-lg">Apartment Lite</span>
-                            <p className="text-xs text-muted-foreground/70 mt-0.5">For individual apartment owners</p>
-                            <p className="text-xs text-muted-foreground mt-1">1 unit only</p>
-                          </div>
-                        </div>
-                        <div>
-                          <span className="text-4xl font-bold tracking-tight">$19</span>
-                          <span className="text-muted-foreground text-sm"> /month</span>
-                        </div>
-                        <ul className="space-y-2.5">
-                          {[
-                            'Simplified booking workflow',
-                            'Guest communication',
-                            'Online check-in',
-                            'Basic financial reports',
-                            'Service request tracking',
-                          ].map((feat) => (
-                            <li key={feat} className="flex items-center gap-2.5 text-sm">
-                              <CheckCircle className="h-4 w-4 text-green-500 dark:text-green-400 shrink-0" />
-                              <span>{feat}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        <div className="border-t border-border/50 pt-5 space-y-3">
-                          <Button
-                            className="w-full rounded-xl"
-                            onClick={(e) => { e.stopPropagation(); navigateToRegister('APT_LITE'); }}
-                            data-testid="button-trial-core-APT_LITE"
-                          >
-                            {t('pricing.startFreeTrial')}
-                          </Button>
-                          <Button
-                            className="w-full rounded-xl"
-                            variant="outline"
-                            onClick={(e) => { e.stopPropagation(); navigateToRegister('APT_LITE'); }}
-                            data-testid="button-subscribe-core-APT_LITE"
-                          >
-                            {t('pricing.subscribeNow')}
-                          </Button>
-                        </div>
-                        <div className="space-y-1.5 text-xs text-muted-foreground">
-                          <p className="flex items-center gap-1.5"><CheckCircle className="h-3.5 w-3.5 text-green-500 shrink-0" />{t('pricing.trialCheckmark', { days: DEFAULT_TRIAL_DAYS })}</p>
-                          <p className="flex items-center gap-1.5"><CheckCircle className="h-3.5 w-3.5 text-green-500 shrink-0" />{t('pricing.noCreditCard')}</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-
-                  {corePlans.map((plan, idx) => {
-                    const isPopular = plan.code === POPULAR_PLAN_CODE;
-                    const isBestValue = plan.code === BEST_VALUE_PLAN_CODE;
-                    const isGrowth = isPopular;
-                    return (
-                      <motion.div key={plan.code} variants={fadeUp}>
-                        <Card
-                          className={`relative cursor-pointer transition-all duration-300 hover:-translate-y-1 h-full ${
-                            selectedCorePlanIdx === idx ? "ring-2 ring-primary" : ""
-                          } ${isGrowth
-                            ? "border-primary/40 shadow-xl shadow-primary/10 bg-gradient-to-b from-primary/5 to-transparent scale-[1.02] md:scale-105"
-                            : "border-border/40 hover:border-primary/20 hover:shadow-lg"
-                          }`}
-                          onClick={() => setSelectedCorePlanIdx(idx)}
-                          data-testid={`card-core-${plan.code}`}
-                        >
-                          {isPopular && (
-                            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                              <Badge className="bg-primary text-primary-foreground px-4 py-1 text-xs shadow-lg shadow-primary/30">{t('pricing.mostPopular')}</Badge>
-                            </div>
-                          )}
-                          {isBestValue && !isPopular && (
-                            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                              <Badge className="bg-green-600 text-white px-4 py-1 text-xs">{t('pricing.bestValue')}</Badge>
-                            </div>
-                          )}
-                          <CardContent className="p-7 space-y-6">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${isGrowth ? "bg-primary/15" : "bg-primary/10"}`}>
-                                <Building2 className="h-5 w-5 text-primary" />
-                              </div>
-                              <div>
-                                <span className="font-bold text-lg">{plan.displayName}</span>
-                                <p className="text-xs text-muted-foreground/70 mt-0.5">
-                                  {t(`pricing.planDesc.${plan.code}`)}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  {plan.limits.maxProperties >= 999
-                                    ? t('pricing.unlimitedProperties')
-                                    : plan.limits.maxProperties === 1
-                                      ? t('pricing.upToProperties', { count: plan.limits.maxProperties })
-                                      : t('pricing.upToProperties_plural', { count: plan.limits.maxProperties })}
-                                  {' / '}
-                                  {plan.limits.maxUnitsPerProperty >= 999
-                                    ? t('pricing.unlimitedRooms')
-                                    : t('pricing.upToRooms', { count: plan.limits.maxUnitsPerProperty })}
-                                </p>
-                              </div>
-                            </div>
-                            <div>
-                              <span className="text-4xl font-bold tracking-tight">${plan.priceMonthlyUSD}</span>
-                              <span className="text-muted-foreground text-sm"> {t('pricing.perMonth')}</span>
-                            </div>
-                            <ul className="space-y-2.5">
-                              {CORE_FEATURES_UI.map((feature) => {
-                                const included = plan.features[feature.featureKey];
-                                return (
-                                  <li key={feature.key} className="flex items-center gap-2.5 text-sm">
-                                    {included ? (
-                                      <CheckCircle className="h-4 w-4 text-green-500 dark:text-green-400 shrink-0" />
-                                    ) : (
-                                      <X className="h-4 w-4 text-muted-foreground/30 shrink-0" />
-                                    )}
-                                    <span className={included ? "" : "text-muted-foreground/50"}>{t(feature.key)}</span>
-                                  </li>
-                                );
-                              })}
-                            </ul>
-                            <div className="border-t border-border/50 pt-5 space-y-3">
-                              <Button
-                                className={`w-full rounded-xl ${isGrowth ? "shadow-md shadow-primary/20" : ""}`}
-                                onClick={(e) => { e.stopPropagation(); navigateToRegister(plan.code); }}
-                                data-testid={`button-trial-core-${plan.code}`}
-                              >
-                                {t('pricing.startFreeTrial')}
-                              </Button>
-                              <Button
-                                className="w-full rounded-xl"
-                                variant="outline"
-                                onClick={(e) => { e.stopPropagation(); navigateToRegister(plan.code); }}
-                                data-testid={`button-subscribe-core-${plan.code}`}
-                              >
-                                {t('pricing.subscribeNow')}
-                              </Button>
-                            </div>
-                            <div className="space-y-1.5 text-xs text-muted-foreground">
-                              <p className="flex items-center gap-1.5"><CheckCircle className="h-3.5 w-3.5 text-green-500 shrink-0" />{t('pricing.trialCheckmark', { days: DEFAULT_TRIAL_DAYS })}</p>
-                              <p className="flex items-center gap-1.5"><CheckCircle className="h-3.5 w-3.5 text-green-500 shrink-0" />{t('pricing.noCreditCard')}</p>
-                              <p className="flex items-center gap-1.5"><CheckCircle className="h-3.5 w-3.5 text-green-500 shrink-0" />{t('pricing.setupMinutes')}</p>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    );
-                  })}
-                </motion.div>
-              </div>
-
-              {/* SMART ROOM ADD-ON */}
-              <div className="space-y-8" data-testid="pricing-smart">
-                <div className="text-center space-y-3">
-                  <Badge variant="secondary" className="text-xs rounded-full">{t('pricing.optionalAddon')}</Badge>
-                  <div className="flex items-center justify-center gap-2">
-                    <Cpu className="h-5 w-5 text-primary" />
-                    <h3 className="font-heading text-2xl font-bold">{t('pricing.smartRoomAddon')}</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                    {t('pricing.smartRoomAddonDesc')}
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-center gap-3">
-                  <Switch
-                    id="smart-toggle"
-                    checked={smartEnabled}
-                    onCheckedChange={setSmartEnabled}
-                    data-testid="switch-smart-toggle"
-                  />
-                  <label htmlFor="smart-toggle" className="text-sm font-medium cursor-pointer">
-                    {t('pricing.enableSmartRooms')}
-                  </label>
-                </div>
-
-                {smartEnabled && smartPlansList.length > 0 && (
-                  <>
-                    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {smartPlansList.map((sp, idx) => {
-                        const TierIcon = SMART_CODE_ICONS[sp.code] || Cpu;
-                        const isSelected = selectedSmartIdx === idx;
-                        const isComingSoon = sp.available === false;
-                        return (
-                          <motion.div key={sp.code} variants={fadeUp}>
-                            <Card
-                              className={`relative transition-all duration-300 h-full ${
-                                isComingSoon ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:-translate-y-1 hover:shadow-lg"
-                              } ${isSelected && !isComingSoon ? "ring-2 ring-primary" : "border-border/40"}`}
-                              onClick={() => { if (!isComingSoon) setSelectedSmartIdx(idx); }}
-                              data-testid={`card-smart-${sp.code}`}
-                            >
-                              {isComingSoon && (
-                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                                  <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 border-amber-300 dark:border-amber-700" data-testid={`badge-coming-soon-${sp.code}`}>
-                                    {t('pricing.comingSoon', 'Coming Soon')}
-                                  </Badge>
-                                </div>
-                              )}
-                              {!isComingSoon && sp.popular && (
-                                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                                  <Badge className="bg-primary text-primary-foreground">{t('pricing.popular')}</Badge>
-                                </div>
-                              )}
-                              <CardContent className="p-7 space-y-5">
-                                <div className="flex items-center gap-3">
-                                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${isComingSoon ? "bg-muted" : "bg-primary/10"}`}>
-                                    <TierIcon className={`h-5 w-5 ${isComingSoon ? "text-muted-foreground" : "text-primary"}`} />
-                                  </div>
-                                  <span className="font-bold text-lg">{sp.displayName}</span>
-                                </div>
-                                <div>
-                                  <span className="text-4xl font-bold tracking-tight">${sp.priceMonthlyUSD}</span>
-                                  <span className="text-muted-foreground text-sm"> {t('pricing.perRoomPerMonth')}</span>
-                                </div>
-                                <ul className="space-y-2.5">
-                                  {Object.entries(SMART_FEATURE_LABELS).map(([featureCode, labelKey]) => {
-                                    const included = sp.features.includes(featureCode);
-                                    return (
-                                      <li key={featureCode} className="flex items-center gap-2.5 text-sm">
-                                        {included ? (
-                                          <CheckCircle className="h-4 w-4 text-green-500 dark:text-green-400 shrink-0" />
-                                        ) : (
-                                          <X className="h-4 w-4 text-muted-foreground/30 shrink-0" />
-                                        )}
-                                        <span className={included ? "" : "text-muted-foreground/50"}>{t(labelKey)}</span>
-                                      </li>
-                                    );
-                                  })}
-                                </ul>
-                                <Button
-                                  className="w-full rounded-xl"
-                                  variant={isComingSoon ? "secondary" : isSelected ? "default" : "outline"}
-                                  disabled={isComingSoon}
-                                  onClick={(e) => { e.stopPropagation(); if (!isComingSoon) setSelectedSmartIdx(idx); }}
-                                  data-testid={`button-select-smart-${sp.code}`}
-                                >
-                                  {isComingSoon ? t('pricing.comingSoon', 'Coming Soon') : isSelected ? t('pricing.selected') : t('pricing.selectPlan')}
-                                </Button>
-                              </CardContent>
-                            </Card>
-                          </motion.div>
-                        );
-                      })}
-                    </motion.div>
-                    <p className="text-center text-xs text-muted-foreground">{t('pricing.hardwareNotIncluded')}</p>
-                  </>
-                )}
-              </div>
-
-              {/* CHANNEL MANAGER ADD-ON */}
-              <div className="space-y-6" data-testid="pricing-channex">
-                <div className="text-center space-y-3">
-                  <Badge variant="secondary" className="text-xs rounded-full">{t('pricing.optionalAddon')}</Badge>
-                  <div className="flex items-center justify-center gap-2">
-                    <Network className="h-5 w-5 text-primary" />
-                    <h3 className="font-heading text-2xl font-bold">{t('pricing.channexAddon')}</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                    {t('pricing.channexAddonDesc')}
-                  </p>
-                  <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 text-xs rounded-full">
-                    {t('pricing.channexBadge')}
-                  </Badge>
-                </div>
-
-                <div className="flex items-center justify-center gap-3">
-                  <Switch
-                    id="channex-toggle"
-                    checked={channexEnabled}
-                    onCheckedChange={setChannexEnabled}
-                    data-testid="switch-channex-toggle"
-                  />
-                  <label htmlFor="channex-toggle" className="text-sm font-medium cursor-pointer">
-                    {t('pricing.channexToggle')}
-                  </label>
-                </div>
-
-                {channexEnabled && (
-                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-                    <Card className="max-w-lg mx-auto border-primary/30 bg-primary/5">
-                      <CardContent className="p-6 space-y-3">
-                        <div className="flex items-center gap-2 text-sm font-semibold">
-                          <Network className="h-4 w-4 text-primary" />
-                          {t('pricing.channexPricingTitle')}
-                        </div>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
-                          <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500 shrink-0" />{t('pricing.channexFeature1')}</li>
-                          <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500 shrink-0" />{t('pricing.channexFeature2')}</li>
-                          <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500 shrink-0" />{t('pricing.channexFeature3')}</li>
-                          <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500 shrink-0" />{t('pricing.channexFeature4')}</li>
-                        </ul>
-                        <div className="border-t border-border/50 pt-3">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground">{t('pricing.channexAddonPriceLabel')}</span>
-                            <span className="font-bold text-primary text-lg">
-                              +${channexAddonPrice}
-                              {selectedCore?.code === "CORE_PRO" ? <span className="text-xs font-normal text-muted-foreground"> {t('pricing.channexCalcRooms', { count: channexRoomCount })}</span> : ""}
-                              /mo
-                            </span>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {selectedCore?.code === "CORE_STARTER" && t('pricing.channexStarterNote')}
-                            {selectedCore?.code === "CORE_GROWTH" && t('pricing.channexGrowthNote')}
-                            {selectedCore?.code === "CORE_PRO" && (
-                              <>
-                                {t('pricing.channexProNote')}
-                                {" · "}
-                                {t('pricing.channexMinNote', 'min. $50/mo')}
-                              </>
-                            )}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                )}
-              </div>
-
-              {/* PRICING CALCULATOR */}
-              <AnimatedSection>
-                <div className="max-w-2xl mx-auto" data-testid="pricing-calculator">
-                  <Card className="border-border/40 shadow-xl">
-                    <CardContent className="p-8 space-y-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
-                          <Calculator className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="font-heading text-lg font-bold">{t('pricing.calculator')}</h3>
-                          <p className="text-xs text-muted-foreground">{t('pricing.calculatorSub')}</p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between gap-4 flex-wrap">
-                          <label className="text-sm font-medium">{t('pricing.coreTierLabel')}</label>
-                          <div className="flex gap-2 flex-wrap">
-                            {corePlans.map((plan, idx) => (
-                              <Button
-                                key={plan.code}
-                                size="sm"
-                                variant={selectedCorePlanIdx === idx ? "default" : "outline"}
-                                onClick={() => setSelectedCorePlanIdx(idx)}
-                                className="rounded-lg"
-                                data-testid={`button-calc-core-${plan.code}`}
-                              >
-                                {plan.displayName}
-                              </Button>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between gap-4 flex-wrap">
-                          <label className="text-sm font-medium">{t('pricing.enableSmartRooms')}</label>
-                          <Switch
-                            checked={smartEnabled}
-                            onCheckedChange={setSmartEnabled}
-                            data-testid="switch-calc-smart-toggle"
-                          />
-                        </div>
-
-                        <div className="flex items-center justify-between gap-4 flex-wrap">
-                          <div>
-                            <label className="text-sm font-medium flex items-center gap-1.5">
-                              <Network className="h-4 w-4 text-primary" />
-                              {t('pricing.channexCalcLabel')}
-                            </label>
-                            <p className="text-xs text-muted-foreground mt-0.5">{t('pricing.channexCalcSub')}</p>
-                          </div>
-                          <Switch
-                            checked={channexEnabled}
-                            onCheckedChange={setChannexEnabled}
-                            data-testid="switch-calc-channex-toggle"
-                          />
-                        </div>
-
-                        {channexEnabled && selectedCore?.code === "CORE_PRO" && (
-                          <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
-                            <div className="flex items-center justify-between gap-4 flex-wrap">
-                              <div>
-                                <label className="text-sm font-medium">{t('pricing.channexRoomCountLabel', 'Number of Rooms (Channel Manager)')}</label>
-                                <p className="text-xs text-muted-foreground mt-0.5">{t('pricing.channexRoomCountSub', '$2.00/room · minimum $50/mo')}</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg" onClick={() => setChannexRoomCount((c) => Math.max(1, c - 1))} data-testid="button-channex-rooms-minus">
-                                  <Minus className="h-4 w-4" />
-                                </Button>
-                                <input
-                                  type="number"
-                                  min={1}
-                                  max={999}
-                                  value={channexRoomCount}
-                                  onChange={(e) => {
-                                    const v = parseInt(e.target.value, 10);
-                                    if (!isNaN(v) && v >= 1 && v <= 999) setChannexRoomCount(v);
-                                  }}
-                                  className="w-16 text-center text-lg font-semibold bg-transparent border border-border rounded-lg py-1 focus:outline-none focus:ring-2 focus:ring-primary"
-                                  data-testid="input-channex-room-count"
-                                />
-                                <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg" onClick={() => setChannexRoomCount((c) => Math.min(999, c + 1))} data-testid="button-channex-rooms-plus">
-                                  <Plus className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/40 pt-2">
-                              <span>{t('pricing.channexBreakdown', 'Base $199 + $2.00/room for Channel Manager')}</span>
-                              <span className="font-semibold text-primary">
-                                = ${(corePrice + channexAddonPrice).toLocaleString()}/mo
-                              </span>
-                            </div>
-                            {channexRoomCount < 25 && (
-                              <p className="text-xs text-amber-600 dark:text-amber-400">
-                                {t('pricing.channexMinNote', 'Minimum add-on is $50/mo (covers administrative overhead)')}
-                              </p>
-                            )}
-                          </div>
-                        )}
-
-                        {smartEnabled && (
-                          <>
-                            <div className="flex items-center justify-between gap-4 flex-wrap">
-                              <label className="text-sm font-medium">{t('pricing.smartRoomCount')}</label>
-                              <div className="flex items-center gap-3">
-                                <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg" onClick={() => setRoomCount((c) => Math.max(1, c - 1))} data-testid="button-calc-minus">
-                                  <Minus className="h-4 w-4" />
-                                </Button>
-                                <input
-                                  type="number"
-                                  min={1}
-                                  max={999}
-                                  value={roomCount}
-                                  onChange={(e) => {
-                                    const v = parseInt(e.target.value, 10);
-                                    if (!isNaN(v) && v >= 1 && v <= 999) setRoomCount(v);
-                                  }}
-                                  className="w-16 text-center text-lg font-semibold bg-transparent border border-border rounded-lg py-1 focus:outline-none focus:ring-2 focus:ring-primary"
-                                  data-testid="input-room-count"
-                                />
-                                <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg" onClick={() => setRoomCount((c) => Math.min(999, c + 1))} data-testid="button-calc-plus">
-                                  <Plus className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center justify-between gap-4 flex-wrap">
-                              <label className="text-sm font-medium">{t('pricing.smartTier')}</label>
-                              <div className="flex gap-2 flex-wrap">
-                                {smartPlansList.map((sp, idx) => {
-                                  const isComingSoon = sp.available === false;
-                                  return (
-                                    <Button
-                                      key={sp.code}
-                                      size="sm"
-                                      variant={isComingSoon ? "ghost" : selectedSmartIdx === idx ? "default" : "outline"}
-                                      onClick={() => { if (!isComingSoon) setSelectedSmartIdx(idx); }}
-                                      disabled={isComingSoon}
-                                      className={`rounded-lg ${isComingSoon ? "opacity-50" : ""}`}
-                                      data-testid={`button-calc-tier-${sp.code}`}
-                                    >
-                                      {sp.displayName}{isComingSoon ? ` (${t('pricing.comingSoon', 'Coming Soon')})` : ""}
-                                    </Button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </div>
-
-                      <div className="border-t border-border/50 pt-5 space-y-3">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">{selectedCore?.displayName || "—"}</span>
-                          <span className="font-medium">${corePrice}{t('pricing.perMonth')}</span>
-                        </div>
-                        {smartEnabled && (
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">
-                              {selectedSmart?.displayName || "—"} x {roomCount} {roomCount !== 1 ? t('pricing.rooms') : t('pricing.room')}
-                            </span>
-                            <span className="font-medium">${smartCost.toLocaleString()}</span>
-                          </div>
-                        )}
-                        {channexEnabled && (
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground flex items-center gap-1.5">
-                              <Network className="h-3.5 w-3.5" />
-                              {t('pricing.channexCalcLabel')}
-                              {selectedCore?.code === "CORE_PRO" && <span className="text-xs">{t('pricing.channexCalcRooms', { count: channexRoomCount })}</span>}
-                            </span>
-                            <span className="font-medium">+${channexAddonPrice.toLocaleString()}</span>
-                          </div>
-                        )}
-                        <div className="flex items-center justify-between pt-3 border-t border-border/50">
-                          <span className="font-semibold">{t('pricing.estimatedTotal')}</span>
-                          <span className="text-3xl font-bold text-primary" data-testid="text-calc-total">
-                            ${monthlyTotal.toLocaleString()}
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground text-right">{t('pricing.exclVat')}</p>
-                      </div>
-
-                      <Button size="lg" className="w-full rounded-xl shadow-md shadow-primary/20" onClick={() => navigateToRegister()} data-testid="button-calc-subscribe">
-                        {t('pricing.subscribeNow')}
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </div>
-              </AnimatedSection>
-
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">
-                  {t('pricing.pricesExclVat')}
-                </p>
-              </div>
-            </div>
-          </section>
-        </AnimatedSection>
-
-        {/* FAQ SECTION */}
-        <AnimatedSection>
-          <section className="py-24 px-6" data-testid="section-faq">
-            <div className="max-w-3xl mx-auto space-y-12">
-              <div className="text-center space-y-4">
-                <h2 className="font-heading text-3xl md:text-4xl font-bold tracking-tight leading-[1.1]">
-                  {t('landing.faq.title')}
-                </h2>
-              </div>
-              <Accordion type="single" collapsible className="w-full space-y-3">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <AccordionItem key={i} value={`faq-${i}`} className="border border-border/40 rounded-xl px-6 data-[state=open]:bg-card/50 transition-colors" data-testid={`faq-item-${i}`}>
-                    <AccordionTrigger className="text-left text-base font-medium py-5 hover:no-underline" data-testid={`faq-trigger-${i}`}>
-                      {t(`landing.faq.q${i}`)}
-                    </AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground pb-5 leading-relaxed">
-                      {t(`landing.faq.a${i}`)}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </div>
-          </section>
-        </AnimatedSection>
-
         {/* DEMO SECTION */}
         <AnimatedSection>
           <section id="demo" className="py-24 px-6" data-testid="section-demo">
@@ -1520,9 +492,7 @@ export default function Welcome() {
                 <h2 className="font-heading text-3xl md:text-4xl font-bold tracking-tight leading-[1.1]">
                   {t('landing.demoTitle')}
                 </h2>
-                <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-                  {t('landing.demoSubtitle')}
-                </p>
+                <p className="text-lg text-muted-foreground max-w-xl mx-auto">{t('landing.demoSubtitle')}</p>
               </div>
 
               <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -1543,13 +513,9 @@ export default function Welcome() {
                             <div className={`w-12 h-12 rounded-xl ${role.bgClass} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                               <Icon className={`h-6 w-6 ${role.colorClass}`} />
                             </div>
-                            <div className="min-w-0">
-                              <h3 className="font-heading font-semibold">{t(roleNameKey)}</h3>
-                            </div>
+                            <h3 className="font-heading font-semibold">{t(roleNameKey)}</h3>
                           </div>
-                          <p className="text-sm text-muted-foreground leading-relaxed">
-                            {t(roleDescKey)}
-                          </p>
+                          <p className="text-sm text-muted-foreground leading-relaxed">{t(roleDescKey)}</p>
                           <Button
                             className="w-full rounded-xl"
                             variant="outline"
@@ -1557,25 +523,11 @@ export default function Welcome() {
                             asChild
                             data-testid={`button-demo-${role.id}`}
                           >
-                            <a
-                              href={`/demo?role=${role.id}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-                                e.preventDefault();
-                                if (!demoLoading) handleDemoLogin(role.id);
-                              }}
-                            >
+                            <a href={`/demo?role=${role.id}`} onClick={(e) => { e.stopPropagation(); if (e.ctrlKey || e.metaKey || e.shiftKey) return; e.preventDefault(); if (!demoLoading) handleDemoLogin(role.id); }}>
                               {isLoading ? (
-                                <>
-                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                  {t('landing.demoEntering')}
-                                </>
+                                <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{t('landing.demoEntering')}</>
                               ) : (
-                                <>
-                                  {t('landing.demoExplore', { role: t(roleNameKey) })}
-                                  <ArrowRight className="ml-2 h-3.5 w-3.5" />
-                                </>
+                                <>{t('landing.demoExplore', { role: t(roleNameKey) })}<ArrowRight className="ml-2 h-3.5 w-3.5" /></>
                               )}
                             </a>
                           </Button>
@@ -1586,47 +538,26 @@ export default function Welcome() {
                 })}
               </motion.div>
 
-              {/* Additional demo role cards */}
-              <div className="mt-6 space-y-4">
-                <p className="text-center text-sm text-muted-foreground font-medium">{t('landing.demo.moreRolesIncluded', 'More roles included in your subscription:')}</p>
+              {/* Info roles */}
+              <div className="space-y-4">
+                <p className="text-center text-sm text-muted-foreground font-medium">{t('landing.demo.moreRolesIncluded', 'More roles included:')}</p>
                 <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {DEMO_INFO_ROLES.map((role) => {
                     const Icon = role.icon;
-                    const roleTitle = t(role.titleKey);
-                    const roleDesc = t(role.descKey);
                     return (
                       <motion.div key={role.id} variants={fadeUp}>
-                        <Card
-                          className="group cursor-pointer transition-all duration-300 border-border/40 hover:border-primary/20 hover:shadow-md hover:-translate-y-0.5 h-full"
-                          onClick={() => handleDemoLogin(role.id)}
-                          data-testid={`card-demo-info-${role.id}`}
-                        >
+                        <Card className="group cursor-pointer transition-all duration-300 border-border/40 hover:border-primary/20 hover:shadow-md hover:-translate-y-0.5 h-full" onClick={() => handleDemoLogin(role.id)} data-testid={`card-demo-info-${role.id}`}>
                           <CardContent className="p-5 space-y-3">
                             <div className="flex items-center gap-3">
-                              <div className={`w-10 h-10 rounded-xl ${role.bgClass} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                              <div className={`w-10 h-10 rounded-xl ${role.bgClass} flex items-center justify-center`}>
                                 <Icon className={`h-5 w-5 ${role.colorClass}`} />
                               </div>
-                              <h3 className="font-heading font-semibold text-sm">{roleTitle}</h3>
+                              <h3 className="font-heading font-semibold text-sm">{t(role.titleKey)}</h3>
                             </div>
-                            <p className="text-xs text-muted-foreground leading-relaxed">{roleDesc}</p>
-                            <Button
-                              className="w-full rounded-xl"
-                              variant="outline"
-                              size="sm"
-                              asChild
-                              data-testid={`button-demo-info-${role.id}`}
-                            >
-                              <a
-                                href={`/demo?role=${role.id}`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-                                  e.preventDefault();
-                                  handleDemoLogin(role.id);
-                                }}
-                              >
-                                {t('landing.demo.exploreAs', { role: roleTitle })}
-                                <ArrowRight className="ml-1.5 h-3 w-3" />
+                            <p className="text-xs text-muted-foreground leading-relaxed">{t(role.descKey)}</p>
+                            <Button className="w-full rounded-xl" variant="outline" size="sm" asChild data-testid={`button-demo-info-${role.id}`}>
+                              <a href={`/demo?role=${role.id}`} onClick={(e) => { e.stopPropagation(); if (e.ctrlKey || e.metaKey || e.shiftKey) return; e.preventDefault(); handleDemoLogin(role.id); }}>
+                                {t('landing.demo.exploreAs', { role: t(role.titleKey) })}<ArrowRight className="ml-1.5 h-3 w-3" />
                               </a>
                             </Button>
                           </CardContent>
@@ -1637,8 +568,8 @@ export default function Welcome() {
                 </motion.div>
               </div>
 
-              {/* Restaurant Ecosystem — 5 separate demo roles */}
-              <div className="mt-8 space-y-4">
+              {/* Restaurant Ecosystem */}
+              <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="flex-1 h-px bg-border/50" />
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20">
@@ -1650,41 +581,20 @@ export default function Welcome() {
                 <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {RESTAURANT_DEMO_ROLES.map((role) => {
                     const Icon = role.icon;
-                    const roleTitle = t(role.titleKey);
-                    const roleDesc = t(role.descKey);
                     return (
                       <motion.div key={role.id} variants={fadeUp}>
-                        <Card
-                          className="group cursor-pointer transition-all duration-300 border-border/40 hover:border-orange-500/20 hover:shadow-md hover:-translate-y-0.5 h-full"
-                          onClick={() => handleDemoLogin(role.id)}
-                          data-testid={`card-demo-restaurant-${role.id}`}
-                        >
+                        <Card className="group cursor-pointer transition-all duration-300 border-border/40 hover:border-orange-500/20 hover:shadow-md hover:-translate-y-0.5 h-full" onClick={() => handleDemoLogin(role.id)} data-testid={`card-demo-restaurant-${role.id}`}>
                           <CardContent className="p-5 space-y-3">
                             <div className="flex items-center gap-3">
-                              <div className={`w-10 h-10 rounded-xl ${role.bgClass} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                              <div className={`w-10 h-10 rounded-xl ${role.bgClass} flex items-center justify-center`}>
                                 <Icon className={`h-5 w-5 ${role.colorClass}`} />
                               </div>
-                              <h3 className="font-heading font-semibold text-sm">{roleTitle}</h3>
+                              <h3 className="font-heading font-semibold text-sm">{t(role.titleKey)}</h3>
                             </div>
-                            <p className="text-xs text-muted-foreground leading-relaxed">{roleDesc}</p>
-                            <Button
-                              className="w-full rounded-xl"
-                              variant="outline"
-                              size="sm"
-                              asChild
-                              data-testid={`button-demo-restaurant-${role.id}`}
-                            >
-                              <a
-                                href={`/demo?role=${role.id}`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-                                  e.preventDefault();
-                                  handleDemoLogin(role.id);
-                                }}
-                              >
-                                {t('landing.demo.exploreAs', { role: roleTitle })}
-                                <ArrowRight className="ml-1.5 h-3 w-3" />
+                            <p className="text-xs text-muted-foreground leading-relaxed">{t(role.descKey)}</p>
+                            <Button className="w-full rounded-xl" variant="outline" size="sm" asChild data-testid={`button-demo-restaurant-${role.id}`}>
+                              <a href={`/demo?role=${role.id}`} onClick={(e) => { e.stopPropagation(); if (e.ctrlKey || e.metaKey || e.shiftKey) return; e.preventDefault(); handleDemoLogin(role.id); }}>
+                                {t('landing.demo.exploreAs', { role: t(role.titleKey) })}<ArrowRight className="ml-1.5 h-3 w-3" />
                               </a>
                             </Button>
                           </CardContent>
@@ -1698,7 +608,139 @@ export default function Welcome() {
           </section>
         </AnimatedSection>
 
-        {/* CTA SECTION */}
+        {/* PRICING — SIMPLIFIED */}
+        <AnimatedSection>
+          <section id="pricing" className="py-24 px-6 relative" data-testid="section-pricing">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div className="absolute top-[-10%] left-[-5%] w-[400px] h-[400px] rounded-full bg-primary/5 blur-[100px]" />
+              <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] rounded-full bg-primary/5 blur-[100px]" />
+            </div>
+            <div className="relative max-w-5xl mx-auto space-y-12">
+              <div className="text-center space-y-4">
+                <Badge variant="secondary" className="text-xs px-3 py-1 rounded-full">{t('landing.pricing')}</Badge>
+                <h2 className="font-heading text-3xl md:text-4xl font-bold tracking-tight leading-[1.1]">
+                  {t('landing.simpleTransparentPricing')}
+                </h2>
+                <p className="text-lg text-muted-foreground max-w-xl mx-auto">{t('landing.simpleTransparentPricingDesc')}</p>
+              </div>
+
+              {corePlans.length > 0 ? (
+                <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {corePlans.map((plan, idx) => {
+                    const isPopular = plan.code === "CORE_GROWTH";
+                    const isBest = plan.code === "CORE_PRO";
+                    const keyFeatures: string[] = [];
+                    if (plan.limits.maxProperties >= 999) keyFeatures.push(t('pricing.unlimitedProperties'));
+                    else keyFeatures.push(t('pricing.upToProperties', { count: plan.limits.maxProperties }));
+                    if (plan.limits.maxUnitsPerProperty >= 999) keyFeatures.push(t('pricing.unlimitedRooms'));
+                    else keyFeatures.push(t('pricing.upToRooms', { count: plan.limits.maxUnitsPerProperty }));
+                    if (plan.features.advanced_analytics) keyFeatures.push(t('pricing.coreFeatures.advancedAnalytics'));
+                    if (plan.features.priority_support) keyFeatures.push(t('pricing.coreFeatures.prioritySupport'));
+                    if (plan.features.custom_integrations) keyFeatures.push(t('pricing.coreFeatures.customIntegrations'));
+                    if (!plan.features.advanced_analytics) keyFeatures.push(t('pricing.coreFeatures.reports'));
+                    const displayFeatures = keyFeatures.slice(0, 4);
+
+                    return (
+                      <motion.div key={plan.code} variants={fadeUp} className="relative">
+                        {isPopular && (
+                          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
+                            <Badge className="bg-primary text-primary-foreground shadow-md">{t('landing.mostPopular')}</Badge>
+                          </div>
+                        )}
+                        <Card className={`h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${isPopular ? 'ring-2 ring-primary shadow-lg shadow-primary/10' : 'border-border/40'}`} data-testid={`card-plan-${plan.code}`}>
+                          <CardContent className="p-7 space-y-6 flex flex-col h-full">
+                            <div>
+                              <p className="font-heading text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">{plan.displayName}</p>
+                              <div className="flex items-baseline gap-1">
+                                <span className="text-4xl font-bold tracking-tight">${plan.priceMonthlyUSD}</span>
+                                <span className="text-muted-foreground text-sm">{t('landing.perMonth')}</span>
+                              </div>
+                            </div>
+                            <ul className="space-y-2.5 flex-1">
+                              {displayFeatures.map((f, i) => (
+                                <li key={i} className="flex items-center gap-2.5 text-sm">
+                                  <CheckCircle className="h-4 w-4 text-emerald-500 shrink-0" />
+                                  <span>{f}</span>
+                                </li>
+                              ))}
+                            </ul>
+                            <div className="space-y-2.5 pt-2">
+                              <Button
+                                className="w-full rounded-xl"
+                                variant={isPopular ? "default" : "outline"}
+                                onClick={() => navigateToRegister(plan.code)}
+                                data-testid={`button-plan-trial-${plan.code}`}
+                              >
+                                {t('pricing.startFreeTrial')}
+                              </Button>
+                              <p className="text-center text-xs text-muted-foreground">{t('pricing.trialCheckmark', { days: DEFAULT_TRIAL_DAYS })}</p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    );
+                  })}
+                </motion.div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {[1, 2, 3].map(i => (
+                    <Card key={i} className="h-48 animate-pulse bg-muted/30" />
+                  ))}
+                </div>
+              )}
+
+              <p className="text-center text-sm text-muted-foreground">{t('landing.allPlansTrialText')}</p>
+            </div>
+          </section>
+        </AnimatedSection>
+
+        {/* STATS */}
+        <AnimatedSection>
+          <section className="py-16 px-6" data-testid="section-stats">
+            <div className="max-w-4xl mx-auto">
+              <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.01 }} className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {[
+                  { value: "50+", label: t('landing.stats.hotels'), icon: Building2 },
+                  { value: "12", label: t('landing.stats.countries'), icon: Globe },
+                  { value: "99.9%", label: t('landing.stats.uptime'), icon: Activity },
+                  { value: "24/7", label: t('landing.stats.support'), icon: BarChart3 },
+                ].map((stat) => {
+                  const SIcon = stat.icon;
+                  return (
+                    <motion.div key={stat.label} variants={fadeUp} className="text-center p-6 rounded-2xl border border-border/40 bg-card/50 hover:bg-card hover:border-primary/20 transition-all duration-300">
+                      <SIcon className="h-6 w-6 text-primary mx-auto mb-3" />
+                      <p className="text-3xl md:text-4xl font-bold tracking-tight">{stat.value}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            </div>
+          </section>
+        </AnimatedSection>
+
+        {/* FAQ */}
+        <AnimatedSection>
+          <section className="py-16 px-6" data-testid="section-faq">
+            <div className="max-w-3xl mx-auto space-y-8">
+              <h2 className="font-heading text-2xl md:text-3xl font-bold tracking-tight text-center">{t('landing.faq.title')}</h2>
+              <Accordion type="single" collapsible className="w-full space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <AccordionItem key={i} value={`faq-${i}`} className="border border-border/40 rounded-xl px-6 data-[state=open]:bg-card/50 transition-colors" data-testid={`faq-item-${i}`}>
+                    <AccordionTrigger className="text-left text-base font-medium py-5 hover:no-underline" data-testid={`faq-trigger-${i}`}>
+                      {t(`landing.faq.q${i}`)}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground pb-5 leading-relaxed">
+                      {t(`landing.faq.a${i}`)}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+          </section>
+        </AnimatedSection>
+
+        {/* CTA */}
         <section className="py-24 px-6 relative overflow-hidden" data-testid="section-cta">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-primary/10" />
@@ -1709,16 +751,14 @@ export default function Welcome() {
               <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.1]">{t('landing.readyToTransform')}</h2>
               <p className="text-lg text-muted-foreground max-w-xl mx-auto">{t('landing.readyToTransformDesc')}</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" asChild className="rounded-xl shadow-lg shadow-primary/20" data-testid="button-cta-register">
+                <Button size="lg" asChild className="rounded-xl shadow-lg shadow-primary/20 h-12 px-8 text-base font-semibold" data-testid="button-cta-register">
                   <a href="/register-hotel" onClick={(e) => { if (e.ctrlKey || e.metaKey || e.shiftKey) return; e.preventDefault(); navigateToRegister(); }}>
                     {t('landing.registerYourHotel')}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </a>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="rounded-xl" data-testid="button-cta-login">
-                  <a href="/login" onClick={(e) => { if (e.ctrlKey || e.metaKey || e.shiftKey) return; e.preventDefault(); setLocation("/login"); }}>
-                    {t('auth.signIn')}
-                  </a>
+                <Button size="lg" variant="outline" className="rounded-xl h-12 px-8 text-base" onClick={() => setQuoteDialogOpen(true)} data-testid="button-cta-quote">
+                  {t('landing.contactSales')}
                 </Button>
               </div>
               <p className="text-sm text-muted-foreground/70">

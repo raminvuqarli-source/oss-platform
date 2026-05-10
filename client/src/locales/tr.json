@@ -233,6 +233,38 @@
       "headline": "Otelinizi Daha Akıllı Yönetmeye Başlayın",
       "subtext": "Operasyonlarını kolaylaştırmak için O.S.S kullanan yüzlerce mülke katılın."
     },
+    "vp": {
+      "title": "4 Temel Alan",
+      "subtitle": "Otelinizin başarısı için ihtiyacınız olan her şey — tek platformda",
+      "analytics": {
+        "title": "Gelir & Analitik",
+        "desc": "RevPAR, ADR, doluluk — gerçek zamanlı. Veriye dayalı kararlar alın.",
+        "f1": "Gerçek zamanlı doluluk paneli",
+        "f2": "RevPAR, ADR & gelir takibi",
+        "f3": "Mali raporları dışa aktarın"
+      },
+      "bookings": {
+        "title": "Rezervasyonlar & Misafirler",
+        "desc": "Gelişten çıkışa tam rezervasyon döngüsü. Çevrimiçi check-in dahil.",
+        "f1": "Çevrimiçi & doğrudan rezervasyonlar",
+        "f2": "Dijital giriş & çıkış",
+        "f3": "Misafir folyo & ödeme bölümü"
+      },
+      "smartRooms": {
+        "title": "Akıllı Oda Kontrolü",
+        "desc": "Her oda için IoT tabanlı kontrol — ışık, sıcaklık, perde, kilitler.",
+        "f1": "Aydınlatma, sıcaklık & perdeler",
+        "f2": "AI alarm & sahne otomasyonu",
+        "f3": "Panelden uzaktan kontrol"
+      },
+      "staff": {
+        "title": "Personel & Operasyonlar",
+        "desc": "Tüm roller tek yerden yönetilir. Sahipten resepsiyona, mutfaktan kasaya.",
+        "f1": "Rol tabanlı erişim kontrolü",
+        "f2": "Kat hizmetleri görev yönetimi",
+        "f3": "Restoran POS & KDS"
+      }
+    },
     "instantValue": {
       "badge": "Oteller Neden O.S.S'i Tercih Ediyor",
       "title": "Mülkünüzü Yönetmek İçin İhtiyacınız Olan Her Şey",
