@@ -90,6 +90,21 @@ export default function RestaurantManager() {
     initOneSignal().then(() => requestNotificationPermission());
   }, []);
 
+  // ── role-based redirect: non-manager roles go to their own view ──
+  useEffect(() => {
+    const role = authUser?.role;
+    if (!role) return;
+    const redirectMap: Record<string, string> = {
+      kitchen_staff: "/restaurant/kitchen",
+      waiter: "/restaurant/waiter",
+      restaurant_cashier: "/restaurant/cashier",
+      restaurant_cleaner: "/restaurant/cleaner",
+    };
+    if (redirectMap[role]) {
+      window.location.replace(redirectMap[role]);
+    }
+  }, [authUser?.role]);
+
   // ── dialog state ──
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const [showItemDialog, setShowItemDialog] = useState(false);
@@ -158,6 +173,7 @@ export default function RestaurantManager() {
   const { data: currentUser } = useQuery<{ propertyId?: string | null; tenantType?: string | null; role?: string | null }>({ queryKey: ["/api/auth/me"] });
   const isHotelTenant = currentUser?.tenantType === "hotel";
   const isOwnerAdmin = authUser?.role === "owner_admin";
+  const isManagerOrOwner = authUser?.role === "restaurant_manager" || authUser?.role === "owner_admin";
 
   const { data: subStatus } = useQuery<{
     hasSubscription: boolean;
@@ -175,12 +191,12 @@ export default function RestaurantManager() {
   }>({ queryKey: ["/api/subscription/status"] });
   const { data: menu } = useQuery<{ categories: Category[]; items: MenuItem[] }>({ queryKey: ["/api/restaurant/menu"] });
   const { data: orders = [] } = useQuery<PosOrder[]>({ queryKey: ["/api/restaurant/orders"], refetchInterval: 15000 });
-  const { data: analytics } = useQuery<Analytics>({ queryKey: ["/api/restaurant/analytics"], refetchInterval: 30000 });
-  const { data: restaurantStaff = [] } = useQuery<any[]>({ queryKey: ["/api/users/staff"] });
-  const { data: staffProfiles = [] } = useQuery<StaffProfile[]>({ queryKey: ["/api/restaurant/staff-profiles"] });
-  const { data: cleaningTasks = [] } = useQuery<CleaningTask[]>({ queryKey: ["/api/restaurant/cleaning-tasks"] });
-  const { data: roomOrders = [] } = useQuery<RoomGroup[]>({ queryKey: ["/api/restaurant/room-orders"], refetchInterval: 20000, enabled: isHotelTenant });
-  const { data: restaurantTables = [] } = useQuery<RestaurantTable[]>({ queryKey: ["/api/restaurant/tables"], refetchInterval: 20000 });
+  const { data: analytics } = useQuery<Analytics>({ queryKey: ["/api/restaurant/analytics"], refetchInterval: 30000, enabled: isManagerOrOwner });
+  const { data: restaurantStaff = [] } = useQuery<any[]>({ queryKey: ["/api/users/staff"], enabled: isManagerOrOwner });
+  const { data: staffProfiles = [] } = useQuery<StaffProfile[]>({ queryKey: ["/api/restaurant/staff-profiles"], enabled: isManagerOrOwner });
+  const { data: cleaningTasks = [] } = useQuery<CleaningTask[]>({ queryKey: ["/api/restaurant/cleaning-tasks"], enabled: isManagerOrOwner });
+  const { data: roomOrders = [] } = useQuery<RoomGroup[]>({ queryKey: ["/api/restaurant/room-orders"], refetchInterval: 20000, enabled: isHotelTenant && isManagerOrOwner });
+  const { data: restaurantTables = [] } = useQuery<RestaurantTable[]>({ queryKey: ["/api/restaurant/tables"], refetchInterval: 20000, enabled: isManagerOrOwner });
   const [archiveFilter, setArchiveFilter] = useState<"day" | "week" | "month" | "all">("week");
   const { data: archivedOrders = [], isLoading: archiveLoading } = useQuery<PosOrder[]>({
     queryKey: ["/api/restaurant/orders", "delivered", archiveFilter],
