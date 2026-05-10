@@ -131,6 +131,9 @@ export default function RestaurantCashierDashboard() {
     mutationFn: ({ id, paymentType, roomNumber, customerEmail }: { id: string; paymentType: string; roomNumber?: string; customerEmail?: string }) =>
       apiRequest("POST", `/api/restaurant/orders/${id}/settle`, { paymentType, roomNumber: roomNumber || undefined, customerEmail: customerEmail || undefined }),
     onSuccess: (_data, vars) => {
+      if (settleDialog && vars.paymentType !== "room_charge") {
+        handlePrint(settleDialog);
+      }
       queryClient.invalidateQueries({ queryKey: ["/api/restaurant/orders"] });
       queryClient.invalidateQueries({ queryKey: ["/api/restaurant/analytics"] });
       setSettleDialog(null);
@@ -173,16 +176,15 @@ export default function RestaurantCashierDashboard() {
 
     const receipt = [
       "═══════════════════════════════",
-      "     GRAND RIVIERA RESORT",
-      `    ${t("cashier.receiptTitle")}`,
+      `    ${t("cashier.receiptTitle", "RESTORAN ÇEKİ")}`,
       "═══════════════════════════════",
       location,
-      `${t("cashier.receiptGuest")}: ${order.guestName || "—"}`,
-      `${t("cashier.receiptDate")}: ${new Date(order.createdAt).toLocaleString()}`,
+      `${t("cashier.receiptGuest", "Qonaq")}: ${order.guestName || "—"}`,
+      `${t("cashier.receiptDate", "Tarix")}: ${new Date(order.createdAt).toLocaleString("az-AZ")}`,
       "───────────────────────────────",
-      items,
+      items || `  —`,
       "───────────────────────────────",
-      `${t("cashier.receiptTotal")}:   ${fmt(order.totalCents)}`,
+      `${t("cashier.receiptTotal", "Cəmi")}:   ${fmt(order.totalCents)}`,
       "═══════════════════════════════",
     ].join("\n");
 
@@ -401,8 +403,8 @@ export default function RestaurantCashierDashboard() {
             ) : (
               settledOrders.slice().reverse().map(order => (
                 <Card key={order.id} data-testid={`cashier-history-${order.id}`}>
-                  <CardContent className="p-4 flex items-center justify-between gap-3">
-                    <div className="space-y-1">
+                  <CardContent className="p-4 flex items-center justify-between gap-3 flex-wrap">
+                    <div className="space-y-1 flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         {order.tableNumber && <Badge variant="outline" className="text-xs">{t("cashier.table")} {order.tableNumber}</Badge>}
                         {order.roomNumber && <Badge variant="outline" className="text-xs">{t("cashier.room")} {order.roomNumber}</Badge>}
@@ -410,13 +412,25 @@ export default function RestaurantCashierDashboard() {
                         {order.settlementStatus === "card_paid" && <Badge className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"><CreditCard className="h-3 w-3 mr-1" />{t("cashier.paidCard")}</Badge>}
                         {order.settlementStatus === "posted_to_folio" && <Badge className="text-xs bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"><BedDouble className="h-3 w-3 mr-1" />{t("cashier.debtPosted", "Borc yazıldı")}</Badge>}
                       </div>
+                      {order.items && order.items.length > 0 && (
+                        <div className="text-xs text-muted-foreground space-y-0.5 mt-0.5">
+                          {order.items.map((it, idx) => (
+                            <div key={idx}>{it.quantity}× {it.itemName} — {fmt(it.unitPriceCents * it.quantity)}</div>
+                          ))}
+                        </div>
+                      )}
                       <p className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(order.createdAt), { addSuffix: true, locale: dateFnsLocale })}</p>
                     </div>
-                    <div className="text-right">
+                    <div className="flex flex-col items-end gap-2">
                       <p className="font-bold text-lg">{fmt(order.totalCents)}</p>
-                      <Badge className="text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />{t("cashier.settled")}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Button size="sm" variant="outline" onClick={() => handlePrint(order)} data-testid={`btn-history-print-${order.id}`}>
+                          <Printer className="h-3.5 w-3.5 mr-1" />{t("cashier.print", "Çek")}
+                        </Button>
+                        <Badge className="text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />{t("cashier.settled")}
+                        </Badge>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

@@ -201,7 +201,12 @@ export function StaffDmChat({
                     {messages.map(msg => {
                       const isMe = msg.senderId === currentUser?.id;
                       return (
-                        <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`} data-testid={`dm-msg-${msg.id}`}>
+                        <div key={msg.id} className={`flex flex-col ${isMe ? "items-end" : "items-start"}`} data-testid={`dm-msg-${msg.id}`}>
+                          {!isMe && (
+                            <span className="text-[11px] text-muted-foreground font-medium ml-1 mb-0.5">
+                              {selectedPeer?.fullName || selectedPeer?.username}
+                            </span>
+                          )}
                           <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${isMe ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-muted rounded-bl-sm"}`}>
                             <p>{msg.message}</p>
                             <p className={`text-xs mt-1 ${isMe ? "text-primary-foreground/70" : "text-muted-foreground"}`}>

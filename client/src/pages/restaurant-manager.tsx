@@ -26,7 +26,7 @@ import {
   Sparkles, TrendingUp, Banknote, Wallet, CreditCard as CardIcon,
   ClipboardList, CheckSquare, Camera, MapPin, BarChart2, Trophy, Star,
   AlertTriangle, BadgeCheck, CalendarClock, RefreshCw, PhoneCall,
-  MessageSquare, Send, ArrowLeft,
+  MessageSquare, Send, ArrowLeft, Printer,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { Locale } from "date-fns";
@@ -313,9 +313,38 @@ export default function RestaurantManager() {
     mutationFn: (id: string) => apiRequest("DELETE", `/api/restaurant/menu/items/${id}`, {}),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/restaurant/menu"] }); toast({ title: t("rm.deleted") }); },
   });
+  const handlePrint = (order: PosOrder) => {
+    const items = order.items?.map(i =>
+      `  ${i.quantity}x ${i.itemName}  ${fmt(i.unitPriceCents * i.quantity)}`
+    ).join("\n") ?? "";
+    const location = order.tableNumber
+      ? `${t("rm.table")} ${order.tableNumber}`
+      : order.roomNumber ? `${t("rm.room")} ${order.roomNumber}` : "—";
+    const receipt = [
+      "═══════════════════════════════",
+      `    ${t("cashier.receiptTitle", "RESTORAN ÇEKİ")}`,
+      "═══════════════════════════════",
+      location,
+      `${t("cashier.receiptGuest", "Qonaq")}: ${order.guestName || "—"}`,
+      `${t("cashier.receiptDate", "Tarix")}: ${new Date(order.createdAt).toLocaleString("az-AZ")}`,
+      "───────────────────────────────",
+      items || `  ${t("cashier.noItems", "—")}`,
+      "───────────────────────────────",
+      `${t("cashier.receiptTotal", "Cəmi")}:   ${fmt(order.totalCents)}`,
+      "═══════════════════════════════",
+    ].join("\n");
+    const win = window.open("", "_blank");
+    if (win) {
+      win.document.write(`<pre style="font-family:monospace;font-size:14px;padding:20px;">${receipt}</pre>`);
+      win.document.close();
+      win.print();
+    }
+  };
+
   const settleOrder = useMutation({
     mutationFn: ({ id, paymentType }: { id: string; paymentType: string }) => apiRequest("POST", `/api/restaurant/orders/${id}/settle`, { paymentType }),
     onSuccess: () => {
+      if (showSettleDialog) handlePrint(showSettleDialog);
       queryClient.invalidateQueries({ queryKey: ["/api/restaurant/orders"] });
       queryClient.invalidateQueries({ queryKey: ["/api/restaurant/analytics"] });
       queryClient.invalidateQueries({ queryKey: ["/api/restaurant/room-orders"] });
@@ -740,9 +769,14 @@ export default function RestaurantManager() {
                         <p className="font-semibold">{order.tableNumber ? `${t("rm.table")} ${order.tableNumber}` : order.roomNumber ? `${t("rm.room")} ${order.roomNumber}` : order.guestName || `#${order.id.slice(-6).toUpperCase()}`}</p>
                         <p className="text-sm font-medium text-primary mt-1">{fmt(order.totalCents)}</p>
                       </div>
-                      <Button size="sm" onClick={() => { setShowSettleDialog(order); setSettleType("cash"); }} data-testid={`button-settle-${order.id}`}>
-                        <CreditCard className="h-3 w-3 mr-1" />{t("rm.pay")}
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" onClick={() => handlePrint(order)} data-testid={`button-print-${order.id}`}>
+                          <Printer className="h-3 w-3 mr-1" />{t("cashier.print", "Çek")}
+                        </Button>
+                        <Button size="sm" onClick={() => { setShowSettleDialog(order); setSettleType("cash"); }} data-testid={`button-settle-${order.id}`}>
+                          <CreditCard className="h-3 w-3 mr-1" />{t("rm.pay")}
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -1414,8 +1448,14 @@ export default function RestaurantManager() {
                     ) : (
                       dmMessages.map((msg: any, i: number) => {
                         const isMine = msg.senderId !== selectedDmStaffId;
+                        const peer = myRestaurantStaff.find((s: any) => s.id === selectedDmStaffId);
                         return (
-                          <div key={msg.id || i} className={`flex ${isMine ? "justify-end" : "justify-start"}`} data-testid={`msg-${msg.id || i}`}>
+                          <div key={msg.id || i} className={`flex flex-col ${isMine ? "items-end" : "items-start"}`} data-testid={`msg-${msg.id || i}`}>
+                            {!isMine && (
+                              <span className="text-[11px] text-muted-foreground font-medium ml-1 mb-0.5">
+                                {peer?.fullName || peer?.username || t("rm.staff", "İşçi")}
+                              </span>
+                            )}
                             <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${isMine ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-muted rounded-bl-sm"}`}>
                               <p>{msg.message}</p>
                               <p className={`text-[10px] mt-1 ${isMine ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
@@ -1781,6 +1821,9 @@ export default function RestaurantManager() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSettleDialog(null)}>{t("rm.cancel")}</Button>
+            <Button variant="outline" onClick={() => showSettleDialog && handlePrint(showSettleDialog)} data-testid="button-print-settle">
+              <Printer className="h-4 w-4 mr-1" />{t("cashier.print", "Çek")}
+            </Button>
             <Button onClick={() => showSettleDialog && settleOrder.mutate({ id: showSettleDialog.id, paymentType: settleType })} disabled={settleOrder.isPending} data-testid="button-confirm-settle">
               {settleOrder.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : t("rm.pay")}
             </Button>
