@@ -3469,5 +3469,18 @@
     "statusUpdated": "Статус обновлён",
     "summaryArrivals": "прибытий",
     "summaryDepartures": "отъездов"
+  },
+  "ownerActionDash": {
+    "overview": "Сегодня",
+    "overviewDesc": "Аналитика, загрузка, выручка",
+    "finance": "Финансы & Подписка",
+    "financeDesc": "Биллинг, платежи, план",
+    "properties": "Мои объекты",
+    "propertiesDesc": "Отели, номера, цены",
+    "management": "Управление",
+    "managementDesc": "Персонал, WhatsApp, интеграции",
+    "allClear": "Всё в порядке",
+    "trial": "Пробный период",
+    "renewal": "Обновление"
   }
 }

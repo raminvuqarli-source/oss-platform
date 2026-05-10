@@ -23,6 +23,10 @@ import {
   Cpu,
   Users,
   Plus,
+  BarChart2,
+  CheckSquare,
+  MessageCircle,
+  Settings,
   Pencil,
   MapPin,
   Globe,
@@ -99,6 +103,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import ApartmentLiteDashboard from "@/pages/apartment-lite-dashboard";
 import { StaffPerformanceView } from "@/components/staff-performance-view";
+import { ActionCard } from "@/components/action-card";
+import { BottomSheet } from "@/components/bottom-sheet";
+import { motion } from "framer-motion";
 interface OwnerAnalyticsProperty {
   id: number;
   name: string;
@@ -6193,6 +6200,7 @@ export default function OwnerDashboard() {
   const searchString = useSearch();
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [showPropertyDetail, setShowPropertyDetail] = useState(false);
+  const [openOwnerPanel, setOpenOwnerPanel] = useState<"overview" | "finance" | "properties" | "management" | null>(null);
 
   const params = new URLSearchParams(searchString);
   const currentView = params.get("view");
@@ -6281,15 +6289,216 @@ export default function OwnerDashboard() {
           </div>
         );
       default:
-        return (
-          <OwnerOverview
-            analytics={analytics}
-            analyticsLoading={analyticsLoading}
-            allProperties={allProperties}
-          />
-        );
+        return <OwnerActionGrid />;
     }
   };
+
+  function OwnerActionGrid() {
+    const propertiesCount = allProperties?.length ?? 0;
+    const occupancyRate = analytics?.occupancyRate ?? 0;
+    const trialBadge = trialStatus?.isTrial
+      ? (trialStatus.isExpired ? t("trial.expired") : `${trialStatus.remainingDays}g`)
+      : (trialStatus?.daysUntilRenewal !== null && trialStatus?.daysUntilRenewal !== undefined && trialStatus.daysUntilRenewal <= 5)
+        ? `${trialStatus.daysUntilRenewal}g`
+        : undefined;
+
+    return (
+      <div className="space-y-5">
+        {/* 2×2 Action Grid */}
+        <motion.div
+          className="grid grid-cols-2 gap-3"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+        >
+          {/* Card 1 — Bugünkü Vəziyyət */}
+          <ActionCard
+            icon={BarChart2}
+            label={t("ownerActionDash.overview", "Bugünkü Vəziyyət")}
+            sublabel={analyticsLoading ? "..." : `${occupancyRate}% doluluq`}
+            badge={occupancyRate > 0 ? `${occupancyRate}%` : undefined}
+            color="orange"
+            onClick={() => setOpenOwnerPanel("overview")}
+            data-testid="card-owner-overview"
+          />
+
+          {/* Card 2 — Maliyyə & Abunəlik */}
+          <ActionCard
+            icon={CreditCard}
+            label={t("ownerActionDash.finance", "Maliyyə & Abunəlik")}
+            sublabel={t("ownerActionDash.financeDesc", "Billing, ödənişlər, plan")}
+            badge={trialBadge}
+            color="blue"
+            onClick={() => setOpenOwnerPanel("finance")}
+            data-testid="card-owner-finance"
+          />
+
+          {/* Card 3 — Mülklərim & Otaqlar */}
+          <ActionCard
+            icon={Building2}
+            label={t("ownerActionDash.properties", "Mülklərim & Otaqlar")}
+            sublabel={`${propertiesCount} ${t("owner.properties", "mülk")}`}
+            badge={propertiesCount > 0 ? String(propertiesCount) : undefined}
+            color="green"
+            onClick={() => setOpenOwnerPanel("properties")}
+            data-testid="card-owner-properties"
+          />
+
+          {/* Card 4 — İdarəetmə & İnteqrasiya */}
+          <ActionCard
+            icon={Settings}
+            label={t("ownerActionDash.management", "İdarəetmə")}
+            sublabel={t("ownerActionDash.managementDesc", "Personal, WhatsApp, inteqrasiya")}
+            color="purple"
+            onClick={() => setOpenOwnerPanel("management")}
+            data-testid="card-owner-management"
+          />
+        </motion.div>
+
+        {/* Quick nav row */}
+        <motion.div
+          className="flex gap-2 overflow-x-auto pb-1 scrollbar-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.3 }}
+        >
+          {[
+            { label: t("nav.calendar", "Təqvim"), icon: <CalendarDays className="h-3.5 w-3.5" />, view: "calendar" },
+            { label: t("nav.tasks", "Tapşırıqlar"), icon: <CheckSquare className="h-3.5 w-3.5" />, view: "tasks" },
+            { label: t("nav.messages", "Mesajlar"), icon: <MessageCircle className="h-3.5 w-3.5" />, view: "messages" },
+            { label: t("nav.escalations", "Eskalasiyalar"), icon: <AlertTriangle className="h-3.5 w-3.5" />, view: "escalations" },
+            { label: t("nav.performance", "Performans"), icon: <TrendingUp className="h-3.5 w-3.5" />, view: "performance" },
+          ].map((item) => (
+            <Button
+              key={item.view}
+              variant="outline"
+              size="sm"
+              className="shrink-0 h-8 gap-1.5 text-xs rounded-full border-border/60"
+              onClick={() => navigate(`/dashboard?view=${item.view}`)}
+              data-testid={`button-nav-${item.view}`}
+            >
+              {item.icon}
+              {item.label}
+            </Button>
+          ))}
+        </motion.div>
+
+        {/* BottomSheet — Bugünkü Vəziyyət */}
+        <BottomSheet
+          open={openOwnerPanel === "overview"}
+          onClose={() => setOpenOwnerPanel(null)}
+          title={t("ownerActionDash.overview", "Bugünkü Vəziyyət")}
+          height="full"
+        >
+          <div className="px-1 pb-8 space-y-6">
+            <OwnerOverview
+              analytics={analytics}
+              analyticsLoading={analyticsLoading}
+              allProperties={allProperties}
+            />
+            <div className="border-t pt-4">
+              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-primary" />
+                {t("owner.performance.title", "Performans")}
+              </h3>
+              <PerformanceView selectedPropertyId={selectedPropertyId} />
+            </div>
+          </div>
+        </BottomSheet>
+
+        {/* BottomSheet — Maliyyə & Abunəlik */}
+        <BottomSheet
+          open={openOwnerPanel === "finance"}
+          onClose={() => setOpenOwnerPanel(null)}
+          title={t("ownerActionDash.finance", "Maliyyə & Abunəlik")}
+          height="full"
+        >
+          <div className="px-1 pb-8 space-y-6">
+            <BillingAddonsView />
+            <div className="border-t pt-4">
+              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-primary" />
+                {t("owner.financeCenter", "Maliyyə Mərkəzi")}
+              </h3>
+              <FinanceCenterView />
+            </div>
+          </div>
+        </BottomSheet>
+
+        {/* BottomSheet — Mülklərim & Otaqlar */}
+        <BottomSheet
+          open={openOwnerPanel === "properties"}
+          onClose={() => setOpenOwnerPanel(null)}
+          title={t("ownerActionDash.properties", "Mülklərim & Otaqlar")}
+          height="full"
+        >
+          <div className="px-1 pb-8">
+            <PropertiesView
+              analytics={analytics}
+              analyticsLoading={analyticsLoading}
+              allProperties={allProperties}
+              selectedProperty={selectedProperty}
+              setSelectedPropertyId={setSelectedPropertyId}
+              showPropertyDetail={showPropertyDetail}
+              setShowPropertyDetail={setShowPropertyDetail}
+            />
+          </div>
+        </BottomSheet>
+
+        {/* BottomSheet — İdarəetmə & İnteqrasiya */}
+        <BottomSheet
+          open={openOwnerPanel === "management"}
+          onClose={() => setOpenOwnerPanel(null)}
+          title={t("ownerActionDash.management", "İdarəetmə & İnteqrasiya")}
+          height="full"
+        >
+          <div className="px-1 pb-8 space-y-6">
+            <StaffManagementView />
+            <div className="border-t pt-4 space-y-3">
+              <h3 className="text-sm font-semibold flex items-center gap-2">
+                <Wifi className="h-4 w-4 text-primary" />
+                {t("owner.integrations", "İnteqrasiyalar")}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Card
+                  className="cursor-pointer hover:border-primary/50 transition-colors"
+                  onClick={() => { setOpenOwnerPanel(null); navigate("/dashboard?view=billing-addons"); }}
+                  data-testid="card-whatsapp-addon"
+                >
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <div className="p-2 rounded-md bg-green-500/10">
+                      <SiWhatsapp className="h-5 w-5 text-green-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">WhatsApp</p>
+                      <p className="text-xs text-muted-foreground">{t("billing.whatsapp", "Bildiriş paketi")}</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto" />
+                  </CardContent>
+                </Card>
+                <Card
+                  className="cursor-pointer hover:border-primary/50 transition-colors"
+                  onClick={() => { setOpenOwnerPanel(null); navigate("/dashboard?view=billing-addons"); }}
+                  data-testid="card-channex-addon"
+                >
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <div className="p-2 rounded-md bg-blue-500/10">
+                      <Globe className="h-5 w-5 text-blue-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Channel Manager</p>
+                      <p className="text-xs text-muted-foreground">{t("billing.channex", "OTA kanalları")}</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto" />
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </BottomSheet>
+      </div>
+    );
+  }
 
   const contactOssTeam = () => {
     const propertyName = allProperties?.[0]?.name || "";

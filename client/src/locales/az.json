@@ -3558,5 +3558,18 @@
     "statusUpdated": "Status yeniləndi",
     "summaryArrivals": "gəliş",
     "summaryDepartures": "gediş"
+  },
+  "ownerActionDash": {
+    "overview": "Bugünkü Vəziyyət",
+    "overviewDesc": "Analitika, doluluk, gəlir",
+    "finance": "Maliyyə & Abunəlik",
+    "financeDesc": "Billing, ödənişlər, plan",
+    "properties": "Mülklərim & Otaqlar",
+    "propertiesDesc": "Otellər, otaqlar, qiymətlər",
+    "management": "İdarəetmə",
+    "managementDesc": "Personal, WhatsApp, inteqrasiya",
+    "allClear": "Hər şey qaydasındadır",
+    "trial": "Sınaq dövrü",
+    "renewal": "Yenilənmə"
   }
 }

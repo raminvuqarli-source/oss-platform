@@ -3456,5 +3456,18 @@
     "statusUpdated": "Status aktualisiert",
     "summaryArrivals": "Ankünfte",
     "summaryDepartures": "Abreisen"
+  },
+  "ownerActionDash": {
+    "overview": "Heute",
+    "overviewDesc": "Analytik, Belegung, Umsatz",
+    "finance": "Finanzen & Abo",
+    "financeDesc": "Abrechnung, Zahlungen, Plan",
+    "properties": "Meine Objekte",
+    "propertiesDesc": "Hotels, Zimmer, Preise",
+    "management": "Verwaltung",
+    "managementDesc": "Personal, WhatsApp, Integrationen",
+    "allClear": "Alles in Ordnung",
+    "trial": "Testphase",
+    "renewal": "Erneuerung"
   }
 }

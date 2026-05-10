@@ -3457,5 +3457,18 @@
     "statusUpdated": "Status updated",
     "summaryArrivals": "arrivals",
     "summaryDepartures": "departures"
+  },
+  "ownerActionDash": {
+    "overview": "Today's Status",
+    "overviewDesc": "Analytics, occupancy, revenue",
+    "finance": "Finance & Subscription",
+    "financeDesc": "Billing, payments, plan",
+    "properties": "My Properties",
+    "propertiesDesc": "Hotels, rooms, pricing",
+    "management": "Management",
+    "managementDesc": "Staff, WhatsApp, integrations",
+    "allClear": "All clear",
+    "trial": "Trial period",
+    "renewal": "Renewal"
   }
 }

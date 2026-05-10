@@ -3469,5 +3469,18 @@
     "statusUpdated": "Durum güncellendi",
     "summaryArrivals": "varış",
     "summaryDepartures": "ayrılış"
+  },
+  "ownerActionDash": {
+    "overview": "Bugünkü Durum",
+    "overviewDesc": "Analitik, doluluk, gelir",
+    "finance": "Finans & Abonelik",
+    "financeDesc": "Faturalama, ödemeler, plan",
+    "properties": "Mülklerim",
+    "propertiesDesc": "Oteller, odalar, fiyatlar",
+    "management": "Yönetim",
+    "managementDesc": "Personel, WhatsApp, entegrasyonlar",
+    "allClear": "Her şey yolunda",
+    "trial": "Deneme dönemi",
+    "renewal": "Yenileme"
   }
 }
