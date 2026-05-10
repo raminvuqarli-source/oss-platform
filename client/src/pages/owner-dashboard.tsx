@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, type ElementType } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearch } from "wouter";
 import { navigate } from "wouter/use-browser-location";
@@ -86,6 +86,8 @@ import {
   Radio,
   Copy,
   PhoneCall,
+  UserCheck,
+  ChefHat,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SiWhatsapp } from "react-icons/si";
@@ -6301,7 +6303,7 @@ export default function OwnerDashboard() {
     const renewalSoon = !trialStatus?.isTrial && trialStatus?.daysUntilRenewal !== null && trialStatus?.daysUntilRenewal !== undefined && trialStatus.daysUntilRenewal <= 5;
 
     type HubItem = {
-      icon: React.ElementType;
+      icon: ElementType;
       label: string;
       badge?: string | number;
       iconBg: string;
@@ -6313,7 +6315,7 @@ export default function OwnerDashboard() {
     type HubGroup = {
       label: string;
       desc: string;
-      headerIcon: React.ElementType;
+      headerIcon: ElementType;
       headerColor: string;
       items: HubItem[];
     };
