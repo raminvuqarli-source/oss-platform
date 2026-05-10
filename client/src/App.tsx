@@ -53,6 +53,8 @@ const DemoLogin = lazy(() => import("@/pages/demo-login"));
 const RestaurantRegister = lazy(() => import("@/pages/restaurant-register"));
 const RestaurantGuestPage = lazy(() => import("@/pages/restaurant-guest"));
 const PaymentReturn = lazy(() => import("@/pages/payment-return"));
+const BlogList = lazy(() => import("@/pages/blog-list"));
+const BlogArticle = lazy(() => import("@/pages/blog-article"));
 
 const AUTO_RELOAD_KEY = "eb_reload_count";
 const AUTO_RELOAD_MAX = 3;
@@ -231,6 +233,8 @@ const publicRoutes = [
   { path: "/privacy-policy", component: PrivacyPolicy },
   { path: "/terms-of-service", component: TermsOfService },
   { path: "/payment-return", component: PaymentReturn },
+  { path: "/blog", component: BlogList },
+  { path: "/blog/:slug", component: BlogArticle },
 ] as const;
 
 // Protected routes requiring authentication, wrapped in DashboardLayout
@@ -285,12 +289,12 @@ function Router() {
   );
 }
 
-const PUBLIC_PATHS = ["/", "/hotel", "/restaurant", "/login", "/demo", "/register", "/register-hotel", "/register-restaurant", "/forgot-password", "/reset-password", "/join-team", "/privacy-policy", "/terms-of-service"];
+const PUBLIC_PATHS = ["/", "/hotel", "/restaurant", "/login", "/demo", "/register", "/register-hotel", "/register-restaurant", "/forgot-password", "/reset-password", "/join-team", "/privacy-policy", "/terms-of-service", "/blog"];
 
 function AppContent() {
   const [location] = useLocation();
   const { user } = useAuth();
-  const isPublicPage = PUBLIC_PATHS.some(p => location === p) || location.startsWith("/restaurant/guest/");
+  const isPublicPage = PUBLIC_PATHS.some(p => location === p) || location.startsWith("/restaurant/guest/") || location.startsWith("/blog");
   const hideChat = !!user || location.startsWith("/restaurant/guest/");
   return (
     <>

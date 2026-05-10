@@ -9,7 +9,7 @@ interface SEOProps {
   jsonLd?: Record<string, unknown>;
 }
 
-const BASE_URL = "https://ossaipro.com";
+const BASE_URL = "https://ossaiproapp.com";
 const SITE_NAME = "O.S.S - Smart Hotel System";
 const DEFAULT_DESCRIPTION = "O.S.S Smart Hotel System — Experience the future of hospitality with smart room controls, AI assistant, and seamless guest services. Multi-property management made simple.";
 
