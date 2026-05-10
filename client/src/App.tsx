@@ -9,6 +9,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { DashboardLayout } from "@/components/dashboard-layout";
+
 import { DashboardRouter } from "@/components/dashboard-router";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
@@ -183,14 +184,6 @@ function MarketingProtectedRoute() {
   return <MarketingDashboard />;
 }
 
-// Standalone route: auth check only, NO DashboardLayout (component provides its own full-page layout)
-function StandaloneProtectedRoute({ component: Component }: { component: React.ComponentType }) {
-  const { user, isLoading } = useAuth();
-  if (isLoading) return <PageLoader />;
-  if (!user) return <Redirect to="/login" />;
-  return <Component />;
-}
-
 // Auth guard wrapper: redirects unauthenticated users, wraps content in DashboardLayout
 function ProtectedRoute({ component: Component, guardTrial = false, ownerOnly = false }: { component: React.ComponentType; guardTrial?: boolean; ownerOnly?: boolean }) {
   const { user, isLoading } = useAuth();
@@ -241,7 +234,7 @@ const publicRoutes = [
 ] as const;
 
 // Protected routes requiring authentication, wrapped in DashboardLayout
-const protectedRoutes: { path: string; component: React.ComponentType; guardTrial?: boolean; standalone?: boolean }[] = [
+const protectedRoutes: { path: string; component: React.ComponentType; guardTrial?: boolean }[] = [
   { path: "/dashboard", component: DashboardRouter },
   { path: "/notifications", component: Notifications, guardTrial: true },
   { path: "/settings", component: Settings, guardTrial: true },
@@ -251,7 +244,7 @@ const protectedRoutes: { path: string; component: React.ComponentType; guardTria
   { path: "/restaurant/waiter", component: WaiterView },
   { path: "/restaurant/manager", component: RestaurantManager },
   { path: "/restaurant/cleaner", component: RestaurantCleaner },
-  { path: "/restaurant/cashier", component: RestaurantCashier, standalone: true },
+  { path: "/restaurant/cashier", component: RestaurantCashier },
   { path: "/restaurant/bar", component: BarDashboard },
 ];
 
@@ -269,11 +262,9 @@ function Router() {
         <Route path="/register-restaurant">
           <RestaurantRegister />
         </Route>
-        {protectedRoutes.map(({ path, component: C, guardTrial, standalone }) => (
+        {protectedRoutes.map(({ path, component: C, guardTrial }) => (
           <Route key={path} path={path}>
-            {standalone
-              ? <StandaloneProtectedRoute component={C} />
-              : <ProtectedRoute component={C} guardTrial={guardTrial} />}
+            <ProtectedRoute component={C} guardTrial={guardTrial} />
           </Route>
         ))}
         <Route path="/owner/billing">

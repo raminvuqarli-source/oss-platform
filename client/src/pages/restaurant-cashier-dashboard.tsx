@@ -1,4 +1,4 @@
-import { useState, type ElementType } from "react";
+import { useState, useEffect, type ElementType } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -17,7 +17,7 @@ import {
   Clock, ShoppingBag, Printer, AlertCircle,
   Utensils, TrendingUp, TableProperties, RefreshCw,
   MessageSquare, ClipboardList, Plus, MapPin,
-  Hourglass, Loader2, CheckCheck, Mail, LogOut,
+  Hourglass, Loader2, CheckCheck, Mail,
   ArrowLeft, DollarSign, CheckSquare,
 } from "lucide-react";
 import { StaffDmChat } from "@/components/staff-dm-chat";
@@ -90,7 +90,7 @@ export default function RestaurantCashierDashboard() {
   const { t, i18n } = useTranslation();
   const dateFnsLocale = dateFnsLocaleMap[i18n.language] ?? undefined;
   const { toast } = useToast();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [currentView, setCurrentView] = useState("hub");
 
@@ -702,40 +702,29 @@ export default function RestaurantCashierDashboard() {
       <Helmet><title>{t("cashier.settleTitle")} | O.S.S</title></Helmet>
 
       <div className="min-h-screen bg-background" data-testid="cashier-dashboard">
-        {/* Header */}
-        <header className="border-b bg-card sticky top-0 z-30">
-          <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {currentView !== "hub" && (
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate("hub")} data-testid="btn-header-back">
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-              )}
-              <div className="p-1.5 rounded-lg bg-primary/10">
-                <Wallet className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <h1 className="font-bold text-base leading-tight">{user?.fullName || t("cashier.title", "Kassa")}</h1>
-                <div className="flex items-center gap-1.5">
-                  <Badge variant="outline" className="text-xs h-4 px-1.5">
-                    {currentView !== "hub" ? VIEW_TITLES[currentView] : t("cashier.role", "Kassir")}
-                  </Badge>
-                  {pendingOrders.length > 0 && currentView === "hub" && (
-                    <Badge variant="destructive" className="text-xs h-4 px-1.5">{pendingOrders.length} {t("cashier.pending", "gözləyir")}</Badge>
-                  )}
-                </div>
-              </div>
+        {/* In-content top bar — back button + view title */}
+        <div className="max-w-3xl mx-auto px-4 pt-3 pb-1 flex items-center gap-3">
+          {currentView !== "hub" ? (
+            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => navigate("hub")} data-testid="btn-header-back">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          ) : (
+            <div className="p-1.5 rounded-lg bg-primary/10 shrink-0">
+              <Wallet className="h-5 w-5 text-primary" />
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={() => { refetchOrders(); refetchAnalytics(); }} data-testid="button-refresh">
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" onClick={logout} data-testid="button-logout">
-                <LogOut className="h-4 w-4" />
-              </Button>
-            </div>
+          )}
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <span className="font-semibold text-sm truncate">
+              {currentView !== "hub" ? VIEW_TITLES[currentView] : (user?.fullName || t("cashier.title", "Kassa"))}
+            </span>
+            {pendingOrders.length > 0 && currentView === "hub" && (
+              <Badge variant="destructive" className="text-xs h-5 px-1.5 shrink-0">{pendingOrders.length} {t("cashier.pending", "gözləyir")}</Badge>
+            )}
           </div>
-        </header>
+          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => { refetchOrders(); refetchAnalytics(); }} data-testid="button-refresh">
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </div>
 
         <div className="max-w-3xl mx-auto px-4 py-4">
           <AnimatePresence mode="wait">
