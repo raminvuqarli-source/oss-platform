@@ -169,6 +169,13 @@
       "when": 1778313253916,
       "tag": "0023_consolidated_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1778444000000,
+      "tag": "0024_add_cashier_payments",
+      "breakpoints": true
     }
   ]
 }
