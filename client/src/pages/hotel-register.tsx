@@ -11,8 +11,9 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { showErrorToast } from "@/lib/error-handler";
 import { useAuth } from "@/lib/auth-context";
-import { Building2, User, Mail, MapPin, Lock, ArrowLeft, Home, Star, Sparkles, Globe, Megaphone, Network, Minus, Plus } from "lucide-react";
+import { Building2, User, Mail, MapPin, Lock, ArrowLeft, Home, Star, Sparkles, Globe, Megaphone, Network, Minus, Plus, FileText, ScrollText } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "wouter";
 import { InternationalPhoneInput } from "@/components/phone-input";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -52,6 +53,7 @@ export default function HotelRegister() {
   const [channexEnabled, setChannexEnabled] = useState(channexPreSelected);
   const [channexUuid, setChannexUuid] = useState("");
   const [channexRoomCount, setChannexRoomCount] = useState(channexPreRooms);
+  const [contractAccepted, setContractAccepted] = useState(false);
 
   const channexAddonPrice = useMemo(() => {
     if (!channexEnabled) return 0;
@@ -144,6 +146,15 @@ export default function HotelRegister() {
         title: t('validation.missingFields'), 
         description: t('validation.pleaseFillIn', { fields: missingFields.join(", ") }), 
         variant: "destructive" 
+      });
+      return;
+    }
+
+    if (!contractAccepted) {
+      toast({
+        title: t('contract.agreementRequired', 'Müqavilə Tələb Olunur'),
+        description: t('contract.mustAcceptError', 'Davam etmək üçün xidmət müqaviləsini qəbul etməlisiniz.'),
+        variant: "destructive"
       });
       return;
     }
@@ -514,12 +525,207 @@ export default function HotelRegister() {
               </div>
             </div>
 
+            {/* ── MÜQAVİLƏ BÖLMƏSİ ─────────────────────────────── */}
+            <div className="border-t pt-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <ScrollText className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-lg">{t('contract.title', 'Xidmət Müqaviləsi')}</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">{t('contract.subtitle', 'Qeydiyyatdan keçməzdən əvvəl xidmət müqaviləsini diqqətlə oxuyun.')}</p>
+
+              <div className="border rounded-xl bg-muted/20 p-4 h-72 overflow-y-auto text-sm space-y-4 text-muted-foreground leading-relaxed" data-testid="contract-scroll-area">
+                <div className="text-center border-b pb-3 mb-2">
+                  <p className="font-bold text-foreground text-base">{t('terms.mainTitle', 'OSS XİDMƏT MÜQAVİLƏSİ')}</p>
+                  <p className="text-xs mt-1">{t('terms.serviceProvider', 'Xidmət Təminatçısı')}: <span className="font-medium">{t('terms.company', 'Orange Studio MMC')}</span> — {t('terms.location', 'Bakı, Azərbaycan')}</p>
+                  <p className="text-xs">{t('terms.contractVersion', 'Müqavilə Versiyası: v1.0')} · {t('terms.lastUpdated', 'Son Yenilənmə: 2026')}</p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-foreground">{t('terms.s1_title', '1. Xidmət Təsviri')}</p>
+                  <p className="mt-1">{t('terms.s1_intro')}</p>
+                  <ul className="list-disc ml-5 mt-1 space-y-0.5">
+                    <li>{t('terms.s1_item1')}</li>
+                    <li>{t('terms.s1_item2')}</li>
+                    <li>{t('terms.s1_item3')}</li>
+                    <li>{t('terms.s1_item4')}</li>
+                    <li>{t('terms.s1_item5')}</li>
+                  </ul>
+                  <p className="mt-1">{t('terms.s1_cloud')}</p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-foreground">{t('terms.s2_title', '2. Abunəlik Planları')}</p>
+                  <p className="mt-1">{t('terms.s2_intro')}</p>
+                  <p className="mt-1">{t('terms.s2_pricing')}</p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-foreground">{t('terms.s3_title', '3. Pulsuz Sınaq')}</p>
+                  <p className="mt-1">{t('terms.s3_p1')}</p>
+                  <p className="mt-1">{t('terms.s3_p2')}</p>
+                  <p className="mt-1">{t('terms.s3_p3')}</p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-foreground">{t('terms.s4_title', '4. Ödənişlər')}</p>
+                  <p className="mt-1">{t('terms.s4_p1')}</p>
+                  <p className="mt-1">{t('terms.s4_p2')}</p>
+                  <p className="mt-1">{t('terms.s4_p3')}</p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-foreground">{t('terms.s5_title', '5. Gecikmiş Ödəniş və Dayandırma')}</p>
+                  <p className="mt-1">{t('terms.s5_p1')}</p>
+                  <p className="mt-1">{t('terms.s5_p2')}</p>
+                  <p className="mt-1">{t('terms.s5_p3')}</p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-foreground">{t('terms.s6_title', '6. Avadanlıq Məsuliyyəti')}</p>
+                  <p className="mt-1">{t('terms.s6_intro')}</p>
+                  <ul className="list-disc ml-5 mt-1 space-y-0.5">
+                    <li>{t('terms.s6_item1')}</li>
+                    <li>{t('terms.s6_item2')}</li>
+                    <li>{t('terms.s6_item3')}</li>
+                    <li>{t('terms.s6_item4')}</li>
+                  </ul>
+                  <p className="mt-1">{t('terms.s6_note')}</p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-foreground">{t('terms.s7_title', '7. Xidmət Mövcudluğu')}</p>
+                  <p className="mt-1">{t('terms.s7_p1')}</p>
+                  <p className="mt-1">{t('terms.s7_p2')}</p>
+                  <ul className="list-disc ml-5 mt-1 space-y-0.5">
+                    <li>{t('terms.s7_item1')}</li>
+                    <li>{t('terms.s7_item2')}</li>
+                    <li>{t('terms.s7_item3')}</li>
+                    <li>{t('terms.s7_item4')}</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-foreground">{t('terms.s8_title', '8. Məsuliyyətin Məhdudlaşdırılması')}</p>
+                  <p className="mt-1">{t('terms.s8_intro')}</p>
+                  <ul className="list-disc ml-5 mt-1 space-y-0.5">
+                    <li>{t('terms.s8_item1')}</li>
+                    <li>{t('terms.s8_item2')}</li>
+                    <li>{t('terms.s8_item3')}</li>
+                    <li>{t('terms.s8_item4')}</li>
+                    <li>{t('terms.s8_item5')}</li>
+                  </ul>
+                  <p className="mt-1 font-medium text-foreground">{t('terms.s8_limit')}</p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-foreground">{t('terms.s9_title', '9. Avtomatik Əməliyyat')}</p>
+                  <p className="mt-1">{t('terms.s9_p1')}</p>
+                  <p className="mt-1">{t('terms.s9_p2')}</p>
+                  <ul className="list-disc ml-5 mt-1 space-y-0.5">
+                    <li>{t('terms.s9_item1')}</li>
+                    <li>{t('terms.s9_item2')}</li>
+                    <li>{t('terms.s9_item3')}</li>
+                  </ul>
+                  <p className="mt-1">{t('terms.s9_p3')}</p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-foreground">{t('terms.s10_title', '10. Elektron Müqavilə')}</p>
+                  <p className="mt-1">{t('terms.s10_p1')}</p>
+                  <p className="mt-1">{t('terms.s10_p2')}</p>
+                  <ul className="list-disc ml-5 mt-1 space-y-0.5">
+                    <li>{t('terms.s10_item1')}</li>
+                    <li>{t('terms.s10_item2')}</li>
+                    <li>{t('terms.s10_item3')}</li>
+                  </ul>
+                  <p className="mt-1 font-medium text-foreground">{t('terms.s10_p3')}</p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-foreground">{t('terms.s11_title', '11. Tətbiq Olunan Qanun')}</p>
+                  <p className="mt-1">{t('terms.s11_p1')}</p>
+                  <p className="mt-1">{t('terms.s11_p2')}</p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-foreground">{t('terms.dataResponsibilityTitle', '14. Məlumat Məsuliyyəti')}</p>
+                  <p className="mt-1">{t('terms.dataResponsibilityText')}</p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-foreground">{t('terms.accountTerminationTitle', '15. Hesabın Dayandırılması')}</p>
+                  <p className="mt-1">{t('terms.accountTerminationText')}</p>
+                  <ul className="list-disc ml-5 mt-1 space-y-0.5">
+                    <li>{t('terms.accountTerminationItem1')}</li>
+                    <li>{t('terms.accountTerminationItem2')}</li>
+                    <li>{t('terms.accountTerminationItem3')}</li>
+                    <li>{t('terms.accountTerminationItem4')}</li>
+                  </ul>
+                  <p className="mt-1">{t('terms.accountTerminationNotice')}</p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-foreground">{t('terms.priceChangesTitle', '16. Qiymət Dəyişiklikləri')}</p>
+                  <p className="mt-1">{t('terms.priceChangesText')}</p>
+                  <p className="mt-1">{t('terms.priceChangesNotice')}</p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-foreground">{t('terms.forceMajeureTitle', '17. Fors-major')}</p>
+                  <p className="mt-1">{t('terms.forceMajeureText')}</p>
+                  <ul className="list-disc ml-5 mt-1 space-y-0.5">
+                    <li>{t('terms.forceMajeureItem1')}</li>
+                    <li>{t('terms.forceMajeureItem2')}</li>
+                    <li>{t('terms.forceMajeureItem3')}</li>
+                    <li>{t('terms.forceMajeureItem4')}</li>
+                    <li>{t('terms.forceMajeureItem5')}</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-foreground">{t('terms.s13_title', '13. Rəsmi Dil')}</p>
+                  <p className="mt-1">{t('terms.s13_p1')}</p>
+                  <p className="mt-1">{t('terms.s13_p2')}</p>
+                  <p className="mt-1">{t('terms.s13_p3')}</p>
+                </div>
+              </div>
+
+              <div
+                className={`flex items-start gap-3 p-4 border-2 rounded-xl transition-colors cursor-pointer ${
+                  contractAccepted
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border bg-muted/20 hover:border-primary/50'
+                }`}
+                onClick={() => setContractAccepted(v => !v)}
+                data-testid="contract-accept-area"
+              >
+                <Checkbox
+                  id="contractAccepted"
+                  checked={contractAccepted}
+                  onCheckedChange={(v) => setContractAccepted(!!v)}
+                  className="mt-0.5 shrink-0"
+                  data-testid="checkbox-contract-accept"
+                />
+                <label htmlFor="contractAccepted" className="text-sm leading-relaxed cursor-pointer select-none">
+                  <span className="font-medium text-foreground">{t('contract.readAndAccept', 'OSS Xidmət Müqaviləsinin şərtlərini tam oxudum, başa düşdüm və qəbul edirəm.')}</span>
+                  {' '}<span className="text-muted-foreground">{t('contract.legallyBinding', 'Bu müqavilənin hüquqi bağlayıcı olduğunu anlayıram.')}</span>
+                </label>
+              </div>
+
+              {!contractAccepted && (
+                <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+                  <FileText className="h-3.5 w-3.5 shrink-0" />
+                  {t('contract.scrollHint', 'Müqavilə mətnini oxuyub yuxarıdakı qutuyu işarələyin.')}
+                </p>
+              )}
+            </div>
+
             <div className="flex flex-col gap-4 pt-4">
               <Button 
                 type="submit" 
                 className="w-full" 
                 size="lg"
-                disabled={registerMutation.isPending}
+                disabled={registerMutation.isPending || !contractAccepted}
                 data-testid="button-register-hotel"
               >
                 {registerMutation.isPending ? t('hotel.registering') : t('hotel.registerHotel')}

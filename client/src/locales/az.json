@@ -2724,6 +2724,15 @@
     "forceMajeureItem4": "İnternet infrastrukturu nasazlıqları",
     "forceMajeureItem5": "Elektrik kəsilmələri"
   },
+  "contract": {
+    "title": "Xidmət Müqaviləsi",
+    "subtitle": "Qeydiyyatdan keçməzdən əvvəl xidmət müqaviləsini diqqətlə oxuyun. Qeydiyyat bu müqaviləyə razılığı bildirir.",
+    "readAndAccept": "OSS Xidmət Müqaviləsinin bütün şərtlərini tam oxudum, başa düşdüm və qəbul edirəm.",
+    "legallyBinding": "Bu müqavilənin hüquqi bağlayıcı olduğunu anlayıram.",
+    "agreementRequired": "Müqavilə Tələb Olunur",
+    "mustAcceptError": "Davam etmək üçün xidmət müqaviləsini qəbul etməlisiniz.",
+    "scrollHint": "Müqavilə mətnini oxuyub yuxarıdakı qutuyu işarələyin."
+  },
   "upgrade": {
     "title": "Funksiya Mövcud Deyil",
     "genericMessage": "Bu funksiya cari abunə planınıza daxil deyil. Əldə etmək üçün planınızı yüksəldin.",

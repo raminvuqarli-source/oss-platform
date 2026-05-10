@@ -2619,6 +2619,15 @@
     "selectStaff": "Sohbet başlatmak için bir personel üyesi seçin",
     "startConversation": "Sohbet başlatın"
   },
+  "contract": {
+    "title": "Hizmet Sözleşmesi",
+    "subtitle": "Kayıt olmadan önce hizmet sözleşmesini dikkatlice okuyun. Kayıt, bu sözleşmeyi kabul ettiğiniz anlamına gelir.",
+    "readAndAccept": "OSS Hizmet Sözleşmesi'nin tüm şartlarını tam olarak okudum, anladım ve kabul ettim.",
+    "legallyBinding": "Bu sözleşmenin hukuken bağlayıcı olduğunu anlıyorum.",
+    "agreementRequired": "Sözleşme Gerekli",
+    "mustAcceptError": "Devam etmek için hizmet sözleşmesini kabul etmelisiniz.",
+    "scrollHint": "Lütfen yukarıdaki sözleşmeyi okuyup kutuyu işaretleyin."
+  },
   "upgrade": {
     "title": "Özellik Mevcut Değil",
     "genericMessage": "Bu özellik mevcut abonelik planınıza dahil değildir. Erişim için planınızı yükseltin.",

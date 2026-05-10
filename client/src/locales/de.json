@@ -2606,6 +2606,15 @@
     "selectStaff": "Wählen Sie einen Mitarbeiter zum Chatten",
     "startConversation": "Konversation starten"
   },
+  "contract": {
+    "title": "Dienstleistungsvertrag",
+    "subtitle": "Bitte lesen Sie den Dienstleistungsvertrag sorgfältig durch, bevor Sie sich registrieren. Die Registrierung bedeutet die Annahme dieses Vertrags.",
+    "readAndAccept": "Ich habe alle Bedingungen des OSS-Dienstleistungsvertrags vollständig gelesen, verstanden und akzeptiere sie.",
+    "legallyBinding": "Ich verstehe, dass dieser Vertrag rechtlich bindend ist.",
+    "agreementRequired": "Vertrag erforderlich",
+    "mustAcceptError": "Sie müssen den Dienstleistungsvertrag akzeptieren, um fortzufahren.",
+    "scrollHint": "Bitte lesen Sie den obigen Vertrag und markieren Sie das Kästchen."
+  },
   "upgrade": {
     "title": "Funktion nicht verfügbar",
     "genericMessage": "Diese Funktion ist in Ihrem aktuellen Abonnementplan nicht enthalten. Bitte upgraden Sie für den Zugriff.",

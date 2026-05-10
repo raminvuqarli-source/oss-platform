@@ -2606,6 +2606,15 @@
     "selectStaff": "Selecteer een personeelslid om te chatten",
     "startConversation": "Begin een gesprek"
   },
+  "contract": {
+    "title": "Serviceovereenkomst",
+    "subtitle": "Lees de serviceovereenkomst zorgvuldig door voordat u zich registreert. Registratie impliceert acceptatie van deze overeenkomst.",
+    "readAndAccept": "Ik heb alle voorwaarden van de OSS Serviceovereenkomst volledig gelezen, begrepen en accepteer ze.",
+    "legallyBinding": "Ik begrijp dat deze overeenkomst juridisch bindend is.",
+    "agreementRequired": "Overeenkomst Vereist",
+    "mustAcceptError": "U moet de serviceovereenkomst accepteren om verder te gaan.",
+    "scrollHint": "Lees de bovenstaande overeenkomst en vink het vakje aan."
+  },
   "upgrade": {
     "title": "Functie niet beschikbaar",
     "genericMessage": "Deze functie is niet opgenomen in uw huidige abonnement. Upgrade om toegang te krijgen.",

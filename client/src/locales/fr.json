@@ -2606,6 +2606,15 @@
     "selectStaff": "Sélectionnez un membre du personnel pour commencer",
     "startConversation": "Commencer une conversation"
   },
+  "contract": {
+    "title": "Contrat de Service",
+    "subtitle": "Veuillez lire attentivement le contrat de service avant de vous inscrire. L'inscription implique l'acceptation de ce contrat.",
+    "readAndAccept": "J'ai entièrement lu, compris et j'accepte toutes les conditions du Contrat de Service OSS.",
+    "legallyBinding": "Je comprends que ce contrat est juridiquement contraignant.",
+    "agreementRequired": "Contrat Requis",
+    "mustAcceptError": "Vous devez accepter le contrat de service pour continuer.",
+    "scrollHint": "Veuillez lire le contrat ci-dessus et cocher la case."
+  },
   "upgrade": {
     "title": "Fonctionnalité non disponible",
     "genericMessage": "Cette fonctionnalité n'est pas incluse dans votre plan d'abonnement actuel. Veuillez mettre à niveau pour y accéder.",

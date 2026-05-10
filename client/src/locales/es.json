@@ -2606,6 +2606,15 @@
     "selectStaff": "Seleccione un miembro del personal para chatear",
     "startConversation": "Iniciar una conversación"
   },
+  "contract": {
+    "title": "Acuerdo de Servicio",
+    "subtitle": "Por favor, lea detenidamente el acuerdo de servicio antes de registrarse. El registro implica la aceptación de este acuerdo.",
+    "readAndAccept": "He leído completamente, entendido y acepto todos los términos del Acuerdo de Servicio de OSS.",
+    "legallyBinding": "Entiendo que este acuerdo es legalmente vinculante.",
+    "agreementRequired": "Acuerdo Requerido",
+    "mustAcceptError": "Debe aceptar el acuerdo de servicio para continuar.",
+    "scrollHint": "Por favor, lea el acuerdo anterior y marque la casilla."
+  },
   "upgrade": {
     "title": "Función no disponible",
     "genericMessage": "Esta función no está incluida en su plan de suscripción actual. Por favor, actualice para acceder.",

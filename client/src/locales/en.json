@@ -2729,6 +2729,15 @@
     "forceMajeureItem4": "Internet infrastructure failures",
     "forceMajeureItem5": "Power outages"
   },
+  "contract": {
+    "title": "Service Agreement",
+    "subtitle": "Please read the service agreement carefully before registering. Registration implies acceptance of this agreement.",
+    "readAndAccept": "I have fully read, understood, and accept all terms of the OSS Service Agreement.",
+    "legallyBinding": "I understand that this agreement is legally binding.",
+    "agreementRequired": "Agreement Required",
+    "mustAcceptError": "You must accept the service agreement to proceed.",
+    "scrollHint": "Please read the agreement above and check the box."
+  },
   "upgrade": {
     "title": "Feature Not Available",
     "genericMessage": "This feature is not included in your current subscription plan. Please upgrade to access it.",
