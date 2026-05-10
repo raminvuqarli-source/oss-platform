@@ -18,7 +18,7 @@ import {
   Monitor, QrCode, BarChart3, Cloud, Layers, Users,
   Activity, HeadphonesIcon, MessageCircle, Star, Phone,
   ShoppingBag, ChefHat, Wallet, RefreshCw, Play, Loader2,
-  Sparkles, CreditCard, ShoppingCart, Download, CheckCircle, ExternalLink, Share,
+  Sparkles, CreditCard, ShoppingCart, Download, CheckCircle, ExternalLink, Share, Wine,
 } from "lucide-react";
 
 const WHATSAPP_LINK = "https://wa.me/994508880089";
@@ -203,6 +203,17 @@ const DEMO_ROLES = [
     title: "Cashier",
     descKey: "restLanding.demoCashierDesc",
     desc: "Settle bills, process payments and view daily revenue",
+  },
+  {
+    id: "bar_staff",
+    icon: Wine,
+    color: "text-violet-500",
+    bg: "bg-violet-500/10",
+    border: "hover:border-violet-500/40",
+    titleKey: "restLanding.demoBar",
+    title: "Bar İşçisi",
+    descKey: "restLanding.demoBarDesc",
+    desc: "Sifarişlərə baxın, içkiləri hazırlayın və hazır işarələyin",
   },
   {
     id: "restaurant_guest",

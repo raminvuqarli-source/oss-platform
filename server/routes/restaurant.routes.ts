@@ -7,7 +7,7 @@ import { sendPushNotification } from "../onesignal";
 import { sendRestaurantOrderReceiptEmail } from "../email";
 
 const MANAGER_ROLES = ["restaurant_manager", "owner_admin", "admin", "reception", "property_manager"];
-const KITCHEN_ROLES = ["kitchen_staff", "restaurant_manager", "owner_admin", "admin"];
+const KITCHEN_ROLES = ["kitchen_staff", "bar_staff", "restaurant_manager", "owner_admin", "admin"];
 const WAITER_ROLES = ["waiter", "restaurant_manager", "owner_admin", "admin"];
 const SETTLE_ROLES = ["reception", "restaurant_manager", "owner_admin", "admin", "restaurant_cashier"];
 

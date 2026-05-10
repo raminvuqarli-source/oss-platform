@@ -64,6 +64,7 @@ import {
   UtensilsCrossed,
   Utensils,
   Sparkles,
+  GlassWater,
 } from "lucide-react";
 import type { Notification } from "@shared/schema";
 import { getRoleDisplayName } from "@/lib/permissions";
@@ -365,6 +366,23 @@ function DashboardSidebar() {
           },
         ];
 
+      case "bar_staff":
+        return [
+          {
+            label: t("nav.group.core", "Core"),
+            items: [
+              { title: "Bar Paneli", icon: GlassWater, url: "/restaurant/bar", testId: "nav-bar-panel" },
+              { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-bar-notifications" },
+            ],
+          },
+          {
+            label: t("nav.group.system", "System"),
+            items: [
+              { title: t("common.settings"), icon: Settings, url: "/settings", testId: "nav-settings" },
+            ],
+          },
+        ];
+
       default:
         return [
           {
@@ -404,6 +422,8 @@ function DashboardSidebar() {
         return <Sparkles className="h-3 w-3" />;
       case "restaurant_cashier":
         return <Wallet className="h-3 w-3" />;
+      case "bar_staff":
+        return <GlassWater className="h-3 w-3" />;
       default:
         return <User className="h-3 w-3" />;
     }
@@ -716,6 +736,12 @@ function MobileBottomNav({ user, t }: { user: NonNullable<ReturnType<typeof useA
       case "restaurant_cashier":
         return [
           { icon: Wallet, label: t("nav.cashierTables", "Tables"), url: "/restaurant/cashier" },
+          { icon: Bell, label: t("common.notifications"), url: "/notifications" },
+          { icon: Settings, label: t("common.settings"), url: "/settings" },
+        ];
+      case "bar_staff":
+        return [
+          { icon: GlassWater, label: "Bar", url: "/restaurant/bar" },
           { icon: Bell, label: t("common.notifications"), url: "/notifications" },
           { icon: Settings, label: t("common.settings"), url: "/settings" },
         ];

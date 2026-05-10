@@ -142,6 +142,8 @@ export function DashboardRouter() {
       return <Redirect to="/restaurant/cleaner" />;
     case "restaurant_cashier":
       return <Redirect to="/restaurant/cashier" />;
+    case "bar_staff":
+      return <Redirect to="/restaurant/bar" />;
     case "marketing_staff":
       return <Redirect to="/marketing" />;
     default:

@@ -358,6 +358,7 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
     restaurant_cashier: "demo_restaurant_cashier",
     restaurant_owner: "demo_restaurant_owner",
     restaurant_guest: "demo_restaurant_guest",
+    bar_staff: "demo_bar_staff",
   };
 
   app.post("/api/auth/demo-login", authRateLimiter, async (req, res) => {
@@ -814,6 +815,7 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
             const restaurantRoleUsernames = [
               DEMO_ROLE_MAP.restaurant_manager, DEMO_ROLE_MAP.waiter,
               DEMO_ROLE_MAP.kitchen, DEMO_ROLE_MAP.restaurant_cleaner, DEMO_ROLE_MAP.restaurant_cashier,
+              DEMO_ROLE_MAP.bar_staff,
             ];
 
             // Hotel staff: booking + service request notifications
@@ -899,6 +901,7 @@ export async function registerAuthRoutes(httpServer: Server, app: Express): Prom
               { username: "demo_kitchen", name: "Carlos Mendez", role: "kitchen_staff", salary: 320000, tax: 140 },
               { username: "demo_restaurant_cleaner", name: "Ana Lima", role: "restaurant_cleaner", salary: 220000, tax: 0 },
               { username: "demo_restaurant_cashier", name: "Omar Faruk", role: "restaurant_cashier", salary: 300000, tax: 140 },
+              { username: "demo_bar_staff", name: "Aiden Walsh", role: "bar_staff", salary: 290000, tax: 140 },
             ];
             for (const sp of staffPayrollDefs) {
               const su = await storage.getUserByUsername(sp.username);

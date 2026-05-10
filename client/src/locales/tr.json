@@ -3341,6 +3341,8 @@
     "demoCleanerDesc": "Cleaning tasks with photo verification and status tracking",
     "demoCashier": "Cashier",
     "demoCashierDesc": "Settle bills, process payments and view daily revenue",
+    "demoBar": "Bar Staff",
+    "demoBarDesc": "View orders, prepare drinks and mark them ready for service",
     "demoExplore": "Explore as {{role}}",
     "demoTryLive": "Try Live Demo",
     "guestPageTitle": "Sipariş Ver",

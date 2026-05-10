@@ -33,6 +33,7 @@ export async function ensureDemoUser(role: string) {
     waiter: { username: "demo_waiter", password: "waiter123!", fullName: "Luca Bianchi", email: "luca@grandriviera.com", phone: "+14155550108", dbRole: "waiter" },
     restaurant_cleaner: { username: "demo_restaurant_cleaner", password: "restclean123!", fullName: "Ana Lima", email: "ana@grandriviera.com", phone: "+14155550109", dbRole: "restaurant_cleaner" },
     restaurant_cashier: { username: "demo_restaurant_cashier", password: "cashier123!", fullName: "Omar Faruk", email: "omar@grandriviera.com", phone: "+14155550110", dbRole: "restaurant_cashier" },
+    bar_staff: { username: "demo_bar_staff", password: "bar123!", fullName: "Aiden Walsh", email: "aiden@grandriviera.com", phone: "+14155550111", dbRole: "bar_staff" },
   };
 
   const def = userDefs[role];
@@ -223,6 +224,19 @@ export async function seedDemoData() {
     email: "omar@grandriviera.com",
     phone: "+14155550110",
     role: "restaurant_cashier",
+    hotelId: hotel.id,
+    ownerId: owner.id,
+    propertyId: property.id,
+  });
+
+  const barStaffPassword = await bcrypt.hash("bar123!", BCRYPT_ROUNDS);
+  await storage.createUser({
+    username: "demo_bar_staff",
+    password: barStaffPassword,
+    fullName: "Aiden Walsh",
+    email: "aiden@grandriviera.com",
+    phone: "+14155550111",
+    role: "bar_staff",
     hotelId: hotel.id,
     ownerId: owner.id,
     propertyId: property.id,

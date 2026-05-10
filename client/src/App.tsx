@@ -47,6 +47,7 @@ const RestaurantCleaner = lazy(() => import("@/pages/restaurant-cleaner"));
 const MarketingDashboard = lazy(() => import("@/pages/marketing-dashboard"));
 const HousekeepingDashboard = lazy(() => import("@/pages/housekeeping-dashboard"));
 const RestaurantCashier = lazy(() => import("@/pages/restaurant-cashier-dashboard"));
+const BarDashboard = lazy(() => import("@/pages/bar-dashboard"));
 const DemoLogin = lazy(() => import("@/pages/demo-login"));
 const RestaurantRegister = lazy(() => import("@/pages/restaurant-register"));
 const RestaurantGuestPage = lazy(() => import("@/pages/restaurant-guest"));
@@ -222,6 +223,7 @@ const protectedRoutes: { path: string; component: React.ComponentType; guardTria
   { path: "/restaurant/manager", component: RestaurantManager },
   { path: "/restaurant/cleaner", component: RestaurantCleaner },
   { path: "/restaurant/cashier", component: RestaurantCashier },
+  { path: "/restaurant/bar", component: BarDashboard },
 ];
 
 function Router() {
