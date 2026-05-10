@@ -1736,51 +1736,51 @@ export default function GuestDashboard() {
             </Card>
           ))}
         </div>
-      </div>
 
-      <div>
-        <div className="flex items-center justify-between gap-4 mb-4">
-          <h3 className="text-lg font-semibold">{t('dashboard.guest.requests')}</h3>
-        </div>
-        
-        {requestsLoading ? (
-          <div className="space-y-3">
-            <Skeleton className="h-20" />
-            <Skeleton className="h-20" />
+        <div className="mt-6">
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <h3 className="text-lg font-semibold">{t('dashboard.guest.requests')}</h3>
           </div>
-        ) : requests && requests.length > 0 ? (
-          <div className="space-y-3">
-            {requests.map((request) => (
-              <Card key={request.id} data-testid={`request-item-${request.id}`}>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium capitalize">
-                          {serviceTypes.find(s => s.value === request.requestType)?.label || request.requestType.replace("_", " ")}
-                        </span>
-                        <RequestStatusBadge status={request.status} />
-                      </div>
-                      <p className="text-sm text-muted-foreground">{request.description}</p>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        <span>{new Date(request.createdAt!).toLocaleString()}</span>
+          
+          {requestsLoading ? (
+            <div className="space-y-3">
+              <Skeleton className="h-20" />
+              <Skeleton className="h-20" />
+            </div>
+          ) : requests && requests.length > 0 ? (
+            <div className="space-y-3">
+              {requests.map((request) => (
+                <Card key={request.id} data-testid={`request-item-${request.id}`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium capitalize">
+                            {serviceTypes.find(s => s.value === request.requestType)?.label || request.requestType.replace("_", " ")}
+                          </span>
+                          <RequestStatusBadge status={request.status} />
+                        </div>
+                        <p className="text-sm text-muted-foreground">{request.description}</p>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          <span>{new Date(request.createdAt!).toLocaleString()}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <Card>
-            <CardContent className="p-8 text-center text-muted-foreground">
-              <MessageSquare className="h-10 w-10 mx-auto mb-3 opacity-50" />
-              <p>{t('requests.noRequests', 'No requests yet')}</p>
-              <p className="text-sm">{t('dashboard.guest.useAssistant', 'Use the AI assistant to request services')}</p>
-            </CardContent>
-          </Card>
-        )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="p-8 text-center text-muted-foreground">
+                <MessageSquare className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                <p>{t('requests.noRequests', 'No requests yet')}</p>
+                <p className="text-sm">{t('dashboard.guest.useAssistant', 'Use the AI assistant to request services')}</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
       )}
 
