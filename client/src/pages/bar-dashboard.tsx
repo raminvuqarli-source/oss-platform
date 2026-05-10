@@ -232,7 +232,7 @@ export default function BarDashboard() {
                 data-testid={`button-start-mixing-${order.id}`}
               >
                 <Wine className="h-3.5 w-3.5 mr-1.5" />
-                Hazırlamağa başla
+                {t("bar.startMixing")}
               </Button>
             )}
             {order.kitchenStatus === "cooking" && (
@@ -259,9 +259,9 @@ export default function BarDashboard() {
   }
 
   const mobileTabs = [
-    { key: "pending" as const, label: `⏳ Gözləyir`,    count: pending.length, color: "text-violet-400 border-violet-500", activeColor: "bg-violet-500 text-white border-violet-500" },
-    { key: "cooking" as const, label: `🍹 Hazırlanır`,  count: mixing.length,  color: "text-indigo-400 border-indigo-500", activeColor: "bg-indigo-500 text-white border-indigo-500" },
-    { key: "ready"   as const, label: `✅ Hazırdır`,    count: ready.length,   color: "text-emerald-400 border-emerald-500", activeColor: "bg-emerald-500 text-white border-emerald-500" },
+    { key: "pending" as const, label: `⏳ ${t("bar.pending")}`,  count: pending.length, color: "text-violet-400 border-violet-500", activeColor: "bg-violet-500 text-white border-violet-500" },
+    { key: "cooking" as const, label: `🍹 ${t("bar.mixing")}`,   count: mixing.length,  color: "text-indigo-400 border-indigo-500", activeColor: "bg-indigo-500 text-white border-indigo-500" },
+    { key: "ready"   as const, label: `✅ ${t("bar.ready")}`,    count: ready.length,   color: "text-emerald-400 border-emerald-500", activeColor: "bg-emerald-500 text-white border-emerald-500" },
   ];
 
   const mobileOrders = mobileTab === "pending" ? pending : mobileTab === "cooking" ? mixing : ready;
@@ -280,8 +280,8 @@ export default function BarDashboard() {
                   <GlassWater className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
                 </div>
                 <div className="min-w-0">
-                  <h1 className="text-base sm:text-2xl font-bold text-white truncate">Bar Paneli</h1>
-                  {!isMobile && <p className="text-xs sm:text-sm text-slate-400">Real vaxt sifariş idarəetməsi</p>}
+                  <h1 className="text-base sm:text-2xl font-bold text-white truncate">{t("bar.title")}</h1>
+                  {!isMobile && <p className="text-xs sm:text-sm text-slate-400">{t("bar.subtitle")}</p>}
                 </div>
               </div>
 
@@ -289,15 +289,15 @@ export default function BarDashboard() {
                 <div className="flex gap-3 sm:gap-5 text-center">
                   <div>
                     <p className="text-lg sm:text-2xl font-bold text-violet-400 leading-none" data-testid="text-bar-pending-count">{pending.length}</p>
-                    <p className="text-[10px] sm:text-xs text-slate-400">Gözləyir</p>
+                    <p className="text-[10px] sm:text-xs text-slate-400">{t("bar.pending")}</p>
                   </div>
                   <div>
                     <p className="text-lg sm:text-2xl font-bold text-indigo-400 leading-none" data-testid="text-bar-mixing-count">{mixing.length}</p>
-                    <p className="text-[10px] sm:text-xs text-slate-400">Hazırlanır</p>
+                    <p className="text-[10px] sm:text-xs text-slate-400">{t("bar.mixing")}</p>
                   </div>
                   <div>
                     <p className="text-lg sm:text-2xl font-bold text-emerald-400 leading-none" data-testid="text-bar-ready-count">{ready.length}</p>
-                    <p className="text-[10px] sm:text-xs text-slate-400">Hazırdır</p>
+                    <p className="text-[10px] sm:text-xs text-slate-400">{t("bar.ready")}</p>
                   </div>
                 </div>
 
@@ -344,8 +344,8 @@ export default function BarDashboard() {
           ) : active.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-slate-500">
               <GlassWater className="h-16 w-16 mb-4 opacity-30" />
-              <p className="text-xl font-medium">Aktiv sifariş yoxdur</p>
-              <p className="text-sm">Yeni sifarişlər avtomatik görünəcək</p>
+              <p className="text-xl font-medium">{t("bar.noOrders")}</p>
+              <p className="text-sm">{t("bar.autoRefresh")}</p>
             </div>
           ) : isMobile ? (
             <div className="space-y-3">
@@ -359,9 +359,9 @@ export default function BarDashboard() {
             <>
               <div className="grid grid-cols-3 gap-4 mb-3">
                 {[
-                  { label: "⏳ GÖZLƏYİR",   count: pending.length, color: "text-violet-400 border-violet-600" },
-                  { label: "🍹 HAZIRLANIR",  count: mixing.length,  color: "text-indigo-400 border-indigo-600" },
-                  { label: "✅ HAZIRDIR",    count: ready.length,   color: "text-emerald-400 border-emerald-600" },
+                  { label: `⏳ ${t("bar.pending").toUpperCase()}`,  count: pending.length, color: "text-violet-400 border-violet-600" },
+                  { label: `🍹 ${t("bar.mixing").toUpperCase()}`,   count: mixing.length,  color: "text-indigo-400 border-indigo-600" },
+                  { label: `✅ ${t("bar.ready").toUpperCase()}`,    count: ready.length,   color: "text-emerald-400 border-emerald-600" },
                 ].map(col => (
                   <div key={col.label} className={`text-center py-2 rounded-lg border ${col.color} bg-slate-800/50`}>
                     <span className={`text-sm font-bold ${col.color.split(" ")[0]}`}>{col.label}</span>

@@ -3487,5 +3487,15 @@
     "occupancy": "Occupancy",
     "revenue": "Revenue",
     "properties_count": "Properties"
+  },
+  "bar": {
+    "title": "Barpaneel",
+    "subtitle": "Realtime bestelbeheer",
+    "pending": "Wachtend",
+    "mixing": "In voorbereiding",
+    "ready": "Klaar",
+    "startMixing": "Begin voorbereiding",
+    "noOrders": "Geen actieve bestellingen",
+    "autoRefresh": "Nieuwe bestellingen verschijnen automatisch"
   }
 }

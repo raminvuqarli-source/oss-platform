@@ -3487,5 +3487,15 @@
     "occupancy": "Occupancy",
     "revenue": "Revenue",
     "properties_count": "Properties"
+  },
+  "bar": {
+    "title": "لوحة البار",
+    "subtitle": "إدارة الطلبات في الوقت الفعلي",
+    "pending": "قيد الانتظار",
+    "mixing": "جارٍ التحضير",
+    "ready": "جاهز",
+    "startMixing": "ابدأ التحضير",
+    "noOrders": "لا توجد طلبات نشطة",
+    "autoRefresh": "ستظهر الطلبات الجديدة تلقائياً"
   }
 }

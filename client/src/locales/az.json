@@ -3589,5 +3589,15 @@
     "occupancy": "Doluluq",
     "revenue": "Gəlir",
     "properties_count": "Mülk"
+  },
+  "bar": {
+    "title": "Bar Paneli",
+    "subtitle": "Real-vaxt sifariş idarəetməsi",
+    "pending": "Gözləyir",
+    "mixing": "Hazırlanır",
+    "ready": "Hazırdır",
+    "startMixing": "Hazırlamağa başla",
+    "noOrders": "Aktiv sifariş yoxdur",
+    "autoRefresh": "Yeni sifarişlər avtomatik görünəcək"
   }
 }

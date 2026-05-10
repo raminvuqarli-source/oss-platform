@@ -3617,5 +3617,15 @@
     "occupancy": "Occupancy",
     "revenue": "Revenue",
     "properties_count": "Properties"
+  },
+  "bar": {
+    "title": "Bar Panel",
+    "subtitle": "Real-time order management",
+    "pending": "Waiting",
+    "mixing": "Preparing",
+    "ready": "Ready",
+    "startMixing": "Start Preparing",
+    "noOrders": "No active orders",
+    "autoRefresh": "New orders will appear automatically"
   }
 }

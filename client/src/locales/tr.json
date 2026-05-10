@@ -3500,5 +3500,15 @@
     "occupancy": "Doluluk",
     "revenue": "Gelir",
     "properties_count": "Mülk"
+  },
+  "bar": {
+    "title": "Bar Paneli",
+    "subtitle": "Gerçek zamanlı sipariş yönetimi",
+    "pending": "Bekliyor",
+    "mixing": "Hazırlanıyor",
+    "ready": "Hazır",
+    "startMixing": "Hazırlamaya Başla",
+    "noOrders": "Aktif sipariş yok",
+    "autoRefresh": "Yeni siparişler otomatik görünecek"
   }
 }

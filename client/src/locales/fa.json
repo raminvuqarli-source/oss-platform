@@ -3487,5 +3487,15 @@
     "occupancy": "Occupancy",
     "revenue": "Revenue",
     "properties_count": "Properties"
+  },
+  "bar": {
+    "title": "پنل بار",
+    "subtitle": "مدیریت سفارشات در لحظه",
+    "pending": "در انتظار",
+    "mixing": "در حال تهیه",
+    "ready": "آماده",
+    "startMixing": "شروع تهیه",
+    "noOrders": "هیچ سفارش فعالی وجود ندارد",
+    "autoRefresh": "سفارشات جدید به صورت خودکار نمایش داده می‌شوند"
   }
 }

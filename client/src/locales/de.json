@@ -3487,5 +3487,15 @@
     "occupancy": "Belegung",
     "revenue": "Umsatz",
     "properties_count": "Objekte"
+  },
+  "bar": {
+    "title": "Bar-Panel",
+    "subtitle": "Echtzeit-Auftragsverwaltung",
+    "pending": "Wartend",
+    "mixing": "In Zubereitung",
+    "ready": "Fertig",
+    "startMixing": "Zubereitung starten",
+    "noOrders": "Keine aktiven Bestellungen",
+    "autoRefresh": "Neue Bestellungen erscheinen automatisch"
   }
 }

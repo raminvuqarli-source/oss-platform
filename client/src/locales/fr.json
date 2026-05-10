@@ -3488,5 +3488,15 @@
     "occupancy": "Occupancy",
     "revenue": "Revenue",
     "properties_count": "Properties"
+  },
+  "bar": {
+    "title": "Panneau Bar",
+    "subtitle": "Gestion des commandes en temps réel",
+    "pending": "En attente",
+    "mixing": "En préparation",
+    "ready": "Prêt",
+    "startMixing": "Commencer la préparation",
+    "noOrders": "Aucune commande active",
+    "autoRefresh": "Les nouvelles commandes apparaîtront automatiquement"
   }
 }

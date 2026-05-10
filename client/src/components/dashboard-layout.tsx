@@ -371,7 +371,7 @@ function DashboardSidebar() {
           {
             label: t("nav.group.core", "Core"),
             items: [
-              { title: "Bar Paneli", icon: GlassWater, url: "/restaurant/bar", testId: "nav-bar-panel" },
+              { title: t("bar.title"), icon: GlassWater, url: "/restaurant/bar", testId: "nav-bar-panel" },
               { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-bar-notifications" },
             ],
           },
@@ -741,7 +741,7 @@ function MobileBottomNav({ user, t }: { user: NonNullable<ReturnType<typeof useA
         ];
       case "bar_staff":
         return [
-          { icon: GlassWater, label: "Bar", url: "/restaurant/bar" },
+          { icon: GlassWater, label: t("bar.title"), url: "/restaurant/bar" },
           { icon: Bell, label: t("common.notifications"), url: "/notifications" },
           { icon: Settings, label: t("common.settings"), url: "/settings" },
         ];
