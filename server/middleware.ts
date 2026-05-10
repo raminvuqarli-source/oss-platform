@@ -27,11 +27,16 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
       req.session.demoSessionTenantId = tokenData.demoSessionTenantId;
       return next();
     }
+    // Token sent but not found (e.g. server restarted) — fall through to session check
   }
 
-  // Demo sessions require a valid tab-specific token — if none present, reject
-  if (req.session.demoSessionTenantId) {
+  // If demoSessionTenantId is set but token store lost it (server restart),
+  // clear the stale flag and continue with normal session auth if userId exists
+  if (req.session.demoSessionTenantId && !req.session.userId) {
     return res.status(401).json({ message: "Unauthorized" });
+  }
+  if (req.session.demoSessionTenantId && req.session.userId) {
+    delete req.session.demoSessionTenantId;
   }
 
   if (!req.session.userId) {
@@ -50,11 +55,16 @@ export function authenticateRequest(req: Request, res: Response, next: NextFunct
       req.session.demoSessionTenantId = tokenData.demoSessionTenantId;
       return next();
     }
+    // Token sent but not found (e.g. server restarted) — fall through to session check
   }
 
-  // Demo sessions require a valid tab-specific token — if none present, reject
-  if (req.session.demoSessionTenantId) {
+  // If demoSessionTenantId is set but token store lost it (server restart),
+  // clear the stale flag and continue with normal session auth if userId exists
+  if (req.session.demoSessionTenantId && !req.session.userId) {
     return res.status(401).json({ message: "Unauthorized" });
+  }
+  if (req.session.demoSessionTenantId && req.session.userId) {
+    delete req.session.demoSessionTenantId;
   }
 
   if (req.session.userId) {
