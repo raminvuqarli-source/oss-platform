@@ -62,6 +62,22 @@ export default function Home() {
         title="O.S.S — Smart Management Platform"
         description="O.S.S — Smart management system for hotels and restaurants. Choose your module."
         path="/"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "O.S.S",
+          "url": "https://ossaipro.com",
+          "logo": "https://ossaipro.com/icon-512.png",
+          "description": "Smart management platform for hotels and restaurants. Multi-property PMS, smart room controls, restaurant POS and kitchen display system.",
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+994-51-888-00-89",
+            "email": "info@ossaipro.com",
+            "contactType": "customer support",
+            "availableLanguage": ["Azerbaijani", "English", "Russian", "Turkish", "Arabic"]
+          },
+          "sameAs": ["https://www.ossaipro.com"]
+        }}
       />
 
       {/* Header */}

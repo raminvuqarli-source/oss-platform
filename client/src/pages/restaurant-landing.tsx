@@ -300,6 +300,20 @@ export default function RestaurantLanding() {
         title="Restaurant POS System — O.S.S"
         description="Standalone Restaurant POS — orders, kitchen display, QR menu, cashier & analytics. Starting at $29/month."
         path="/restaurant"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          "name": "O.S.S Restaurant POS",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web Browser",
+          "offers": { "@type": "AggregateOffer", "lowPrice": "29", "highPrice": "79", "priceCurrency": "USD" },
+          "featureList": ["Kitchen Display System (KDS)", "QR Digital Menu", "Waiter Management", "Cashier Dashboard", "Restaurant Analytics", "Real-time Order Tracking"],
+          "provider": {
+            "@type": "Organization",
+            "name": "O.S.S",
+            "url": "https://ossaipro.com"
+          }
+        }}
       />
 
       {/* Header */}

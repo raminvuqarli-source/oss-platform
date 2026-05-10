@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+Allow: /hotel
+Allow: /restaurant
+Allow: /login
+Allow: /register-hotel
+Allow: /register-restaurant
+Allow: /privacy-policy
+Allow: /terms-of-service
+
+Disallow: /dashboard
+Disallow: /demo
+Disallow: /oss-admin
+Disallow: /owner/
+Disallow: /marketing
+Disallow: /api/
+
+Sitemap: https://ossaipro.com/sitemap.xml
