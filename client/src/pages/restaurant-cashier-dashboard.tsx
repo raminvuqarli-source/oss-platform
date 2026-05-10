@@ -28,6 +28,7 @@ import { formatDistanceToNow } from "date-fns";
 import type { Locale } from "date-fns";
 import { az as azLocale, tr as trLocale, ru as ruLocale, ar as arLocale, fr as frLocale, de as deLocale, es as esLocale, nl as nlLocale } from "date-fns/locale";
 import { faIR } from "date-fns/locale/fa-IR";
+import { initOneSignal, requestNotificationPermission } from "@/lib/onesignal";
 
 const dateFnsLocaleMap: Record<string, Locale> = {
   az: azLocale, tr: trLocale, ru: ruLocale, ar: arLocale,
