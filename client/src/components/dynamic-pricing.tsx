@@ -105,8 +105,7 @@ export function DynamicPricingSection({ propertyId }: DynamicPricingSectionProps
   const { data: rules = [], isLoading } = useQuery<PricingRule[]>({
     queryKey: ["/api/pricing/rules", propertyId],
     queryFn: async () => {
-      const res = await fetch(`/api/pricing/rules/${propertyId}`, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to load");
+      const res = await apiRequest("GET", `/api/pricing/rules/${propertyId}`);
       return res.json();
     },
     enabled: !!propertyId,
@@ -289,9 +288,10 @@ function PricePreviewPanel({ propertyId, rulesCount }: { propertyId: string; rul
   const { data: units = [] } = useQuery<UnitOption[]>({
     queryKey: ["/api/properties", propertyId, "units"],
     queryFn: async () => {
-      const res = await fetch(`/api/properties/${propertyId}/units`, { credentials: "include" });
-      if (!res.ok) return [];
-      return res.json();
+      try {
+        const res = await apiRequest("GET", `/api/properties/${propertyId}/units`);
+        return res.json();
+      } catch { return []; }
     },
     enabled: !!propertyId,
   });
@@ -309,8 +309,7 @@ function PricePreviewPanel({ propertyId, rulesCount }: { propertyId: string; rul
     queryKey: ["/api/pricing/calculate", propertyId, selectedUnitId, checkIn, checkOut, rulesCount],
     queryFn: async () => {
       const params = new URLSearchParams({ propertyId, unitId: selectedUnitId, checkIn, checkOut });
-      const res = await fetch(`/api/pricing/calculate?${params}`, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to calculate");
+      const res = await apiRequest("GET", `/api/pricing/calculate?${params}`);
       return res.json();
     },
     enabled: !!selectedUnitId && !!propertyId,

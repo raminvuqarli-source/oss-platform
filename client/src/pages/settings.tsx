@@ -1080,8 +1080,7 @@ function AuditLogSection() {
   }>({
     queryKey: ["/api/audit-logs", queryParams.toString()],
     queryFn: async () => {
-      const res = await fetch(`/api/audit-logs?${queryParams.toString()}`, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed");
+      const res = await apiRequest("GET", `/api/audit-logs?${queryParams.toString()}`);
       return res.json();
     },
   });

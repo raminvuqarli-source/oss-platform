@@ -183,8 +183,7 @@ export default function RestaurantManager() {
   const { data: archivedOrders = [], isLoading: archiveLoading } = useQuery<PosOrder[]>({
     queryKey: ["/api/restaurant/orders", "delivered", archiveFilter],
     queryFn: async () => {
-      const res = await fetch("/api/restaurant/orders?kitchenStatus=delivered");
-      if (!res.ok) throw new Error("Failed");
+      const res = await apiRequest("GET", "/api/restaurant/orders?kitchenStatus=delivered");
       return res.json();
     },
     enabled: activeTab === "archive",

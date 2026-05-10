@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { initOneSignal, requestNotificationPermission } from "@/lib/onesignal";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, getDemoToken } from "@/lib/queryClient";
 import { useAuth } from "@/lib/auth-context";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -105,7 +105,10 @@ export default function RestaurantCleaner() {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const demoToken = getDemoToken();
+      const uploadHeaders: Record<string, string> = {};
+      if (demoToken) uploadHeaders["X-Demo-Token"] = demoToken;
+      const res = await fetch("/api/upload", { method: "POST", body: formData, credentials: "include", headers: uploadHeaders });
       if (res.ok) {
         const data = await res.json();
         setPhotoUrl(data.url || "");

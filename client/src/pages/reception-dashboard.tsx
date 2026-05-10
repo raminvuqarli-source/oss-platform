@@ -706,7 +706,7 @@ function RoomStatusPanel() {
       toast({ title: t('roomStatus.updated', 'Room status updated') });
     },
     onError: (error: any) => {
-      showErrorToast(error, toast);
+      showErrorToast(toast, error);
     },
   });
 

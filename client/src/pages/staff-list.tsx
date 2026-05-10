@@ -73,9 +73,10 @@ function InlineStaffChat({ staffId, staffName }: { staffId: string; staffName: s
   const { data: messages, isLoading } = useQuery<any[]>({
     queryKey: ["/api/chat/staff-dm", staffId],
     queryFn: async () => {
-      const res = await fetch(`/api/chat/staff-dm/${staffId}`, { credentials: "include" });
-      if (!res.ok) return [];
-      return res.json();
+      try {
+        const res = await apiRequest("GET", `/api/chat/staff-dm/${staffId}`);
+        return res.json();
+      } catch { return []; }
     },
     refetchInterval: 5000,
   });

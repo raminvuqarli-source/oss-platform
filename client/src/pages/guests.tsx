@@ -623,8 +623,7 @@ function GuestProfile({ guestId, onBack }: { guestId: string; onBack: () => void
   const { data, isLoading } = useQuery<GuestDetails>({
     queryKey: ["/api/users/guests", guestId, "details"],
     queryFn: async () => {
-      const res = await fetch(`/api/users/guests/${guestId}/details`, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch guest details");
+      const res = await apiRequest("GET", `/api/users/guests/${guestId}/details`);
       return res.json();
     },
   });
