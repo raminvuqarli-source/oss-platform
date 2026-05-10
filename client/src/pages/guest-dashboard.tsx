@@ -229,6 +229,8 @@ export default function GuestDashboard() {
     if (view === "checkin") { setOnlineCheckinOpen(true); return; }
     if (view === "prepare") { setPreCheckDialogOpen(true); return; }
 
+    if (!view) return;
+
     const refMap: Record<string, React.RefObject<HTMLDivElement | null>> = {
       services: servicesRef,
       messages: messagesRef,
@@ -237,10 +239,16 @@ export default function GuestDashboard() {
       restaurant: restaurantRef,
       "room-prep": roomPrepRef,
     };
-    const ref = view ? refMap[view] : null;
-    if (ref?.current) {
-      ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+
+    const tryScroll = (attempts = 0) => {
+      const ref = refMap[view];
+      if (ref?.current) {
+        ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else if (attempts < 10) {
+        setTimeout(() => tryScroll(attempts + 1), 150);
+      }
+    };
+    setTimeout(() => tryScroll(), 100);
   }, [searchString]);
 
   // Real-time WebSocket for instant notifications from reception

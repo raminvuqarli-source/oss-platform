@@ -370,10 +370,7 @@ function DashboardSidebar() {
           {
             label: t("nav.group.core", "Core"),
             items: [
-              { title: t("nav.myBooking", "My Booking"), icon: BedDouble, url: "/dashboard", testId: "nav-dashboard" },
-              { title: t("nav.services", "Services"), icon: Wrench, url: "/dashboard?view=services", testId: "nav-services" },
-              { title: t("nav.messages", "Messages"), icon: MessageSquare, url: "/dashboard?view=messages", testId: "nav-messages" },
-              { title: t("nav.smartRoom", "Smart Room"), icon: Zap, url: "/dashboard?view=room-controls", testId: "nav-room-controls", restricted: (user?.role === "guest" && !isDemoMode) || !isFeatureEnabled("smart_controls") },
+              { title: t("common.dashboard"), icon: Home, url: "/dashboard", testId: "nav-dashboard" },
               { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-notifications" },
             ],
           },
@@ -483,6 +480,7 @@ function DashboardSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
+        <div className="flex flex-col justify-center h-full py-2">
         {menuGroups.map((group) => (
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
@@ -543,6 +541,7 @@ function DashboardSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
+        </div>
       </SidebarContent>
 
       <SidebarFooter>
