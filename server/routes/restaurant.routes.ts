@@ -604,7 +604,7 @@ export function registerRestaurantRoutes(app: Express): void {
   });
 
   // ─── CLEANING TASKS ───────────────────────────────────────────────────
-  const CLEANING_ROLES = ["restaurant_cleaner", "restaurant_manager", "owner_admin", "admin", "restaurant_cashier"];
+  const CLEANING_ROLES = ["restaurant_cleaner", "waiter", "restaurant_manager", "owner_admin", "admin", "restaurant_cashier"];
 
   app.get("/api/restaurant/cleaning-tasks", requireRestaurantRole(...CLEANING_ROLES), async (req, res) => {
     try {
@@ -644,11 +644,13 @@ export function registerRestaurantRoutes(app: Express): void {
       });
 
       if (assignedToId) {
+        const assignedUser = await storage.getUser(assignedToId);
+        const pushUrl = assignedUser?.role === "waiter" ? "/restaurant/waiter" : "/restaurant/cleaner";
         sendPushNotification({
           userIds: [assignedToId],
-          title: "🧹 New Cleaning Task",
+          title: "📋 Yeni Tapşırıq",
           message: description + (location ? ` — ${location}` : ""),
-          url: "/restaurant/cleaner",
+          url: pushUrl,
           data: { type: "CLEANING_TASK_ASSIGNED", taskId: task.id },
         }).catch(err => logger.error({ err }, "Cleaning task assign push failed"));
       } else {
