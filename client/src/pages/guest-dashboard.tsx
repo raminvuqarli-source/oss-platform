@@ -316,6 +316,7 @@ export default function GuestDashboard() {
   const [idDocumentBase64, setIdDocumentBase64] = useState<string | null>(null);
   const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [legalTermsAccepted, setLegalTermsAccepted] = useState(false);
   
   const [orderFoodOpen, setOrderFoodOpen] = useState(false);
   const [selectedMenuItems, setSelectedMenuItems] = useState<Record<string, number>>({});
@@ -600,6 +601,7 @@ export default function GuestDashboard() {
       setOnlineCheckinOpen(false);
       setCheckinForm({ passportNumber: "", nationality: "", dateOfBirth: "", guestAddress: "", numberOfGuests: "", specialRequests: "" });
       setIdDocumentBase64(null);
+      setLegalTermsAccepted(false);
       clearSignatureCanvas();
       toast({
         title: t("guest.checkinSent"),
@@ -700,34 +702,25 @@ export default function GuestDashboard() {
   };
 
   const handleSubmitOnlineCheckin = () => {
-    console.log("[PRECHECK] Submit started");
-    console.log("[PRECHECK] booking:", booking?.id, "status:", booking?.status);
-    console.log("[PRECHECK] checkinForm:", JSON.stringify(checkinForm));
-    console.log("[PRECHECK] idDocumentBase64 length:", idDocumentBase64?.length || 0);
-
     if (!checkinForm.passportNumber || !checkinForm.nationality || !checkinForm.dateOfBirth) {
-      console.log("[PRECHECK] Validation failed: missing required fields");
       toast({ title: t('checkin.error', 'Error'), description: t('checkin.requiredFields', 'Passport number, nationality and date of birth are required.'), variant: "destructive" });
       return;
     }
     const signatureData = getSignatureBase64();
-    console.log("[PRECHECK] signatureData length:", signatureData?.length || 0);
     if (!signatureData) {
-      console.log("[PRECHECK] Validation failed: no signature");
       toast({ title: t('checkin.error', 'Error'), description: t('checkin.signatureRequired', 'Signature is required.'), variant: "destructive" });
       return;
     }
-
+    if (!legalTermsAccepted) {
+      toast({ title: t('checkin.error', 'Error'), description: t('checkin.legalTermsRequired', 'You must accept the legal terms before submitting.'), variant: "destructive" });
+      return;
+    }
     const payload = {
       ...checkinForm,
       guestSignatureBase64: signatureData,
       idDocumentBase64: idDocumentBase64 || undefined,
+      legalTermsAccepted: true as const,
     };
-    const payloadSize = JSON.stringify(payload).length;
-    console.log("[PRECHECK] Payload size:", payloadSize, "bytes (", (payloadSize / 1024).toFixed(1), "KB)");
-    console.log("[PRECHECK] POST URL:", `/api/bookings/${booking?.id}/precheck`);
-    console.log("[PRECHECK] Calling mutation.mutate now...");
-
     onlineCheckinMutation.mutate(payload);
   };
 
@@ -2234,15 +2227,36 @@ export default function GuestDashboard() {
                   {t('checkin.clearSignature', 'Clear')}
                 </Button>
               </div>
+
+              {/* Legal Terms */}
+              <div className="border rounded-lg p-4 bg-muted/40 space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('checkin.legalTermsTitle', 'Legal Declaration')}</p>
+                <div className="text-xs text-muted-foreground space-y-2 max-h-32 overflow-y-auto pr-1">
+                  <p>{t('checkin.legalTermsText1', 'I declare that all information provided in this online check-in form is accurate and true. I understand that my passport/ID document and personal details are being collected for the purposes of hotel registration and may be retained for legal compliance.')}</p>
+                  <p>{t('checkin.legalTermsText2', 'I accept full legal responsibility for the accuracy of the submitted information. I confirm that the identity document uploaded belongs to me personally and that I will be physically present at check-in.')}</p>
+                  <p>{t('checkin.legalTermsText3', 'My digital signature below serves as a legally binding confirmation of this declaration and replaces my physical signature on the hotel registration card.')}</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id="legal-terms-checkbox"
+                    checked={legalTermsAccepted}
+                    onCheckedChange={(v) => setLegalTermsAccepted(!!v)}
+                    data-testid="checkbox-legal-terms"
+                  />
+                  <label htmlFor="legal-terms-checkbox" className="text-sm cursor-pointer leading-snug">
+                    {t('checkin.legalTermsAccept', 'I have read and accept the above legal declaration. I take full responsibility for the accuracy of my submitted information.')}
+                  </label>
+                </div>
+              </div>
             </div>
           </DialogBody>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOnlineCheckinOpen(false)} data-testid="button-checkin-cancel">
+            <Button variant="outline" onClick={() => { setOnlineCheckinOpen(false); setLegalTermsAccepted(false); }} data-testid="button-checkin-cancel">
               {t('common.cancel', 'Cancel')}
             </Button>
             <Button
               onClick={handleSubmitOnlineCheckin}
-              disabled={onlineCheckinMutation.isPending}
+              disabled={onlineCheckinMutation.isPending || !legalTermsAccepted}
               data-testid="button-checkin-submit"
             >
               {onlineCheckinMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

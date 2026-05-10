@@ -336,6 +336,9 @@ async function runSafetyPatches(): Promise<void> {
     await client.query(`ALTER TABLE deleted_trial_accounts ADD COLUMN IF NOT EXISTS hotel_name varchar`);
     // Housekeeping task completion photo
     await client.query(`ALTER TABLE housekeeping_tasks ADD COLUMN IF NOT EXISTS completion_photo text`);
+    // Legal terms acceptance for precheck
+    await client.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS legal_terms_accepted boolean DEFAULT false`);
+    await client.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS legal_terms_accepted_at timestamptz`);
 
     // Fix standalone restaurant owners whose tenant_type incorrectly defaults to "hotel"
     // Approach 1: owner whose ALL properties are of type "restaurant"

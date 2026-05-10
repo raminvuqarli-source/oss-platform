@@ -88,9 +88,29 @@ export function StaffDmChat({
     onError: () => toast({ title: "Mesaj göndərilmədi", variant: "destructive" }),
   });
 
-  const peers = (staffUsers || []).filter(s =>
+  // Peers who can START a new conversation (filtered by allowed roles)
+  const allowedPeers = (staffUsers || []).filter(s =>
     s.id !== currentUser?.id && peerRoles.includes(s.role ?? "")
   );
+
+  // Also include anyone who has an EXISTING conversation with me, even if not in peerRoles
+  const conversationPeerIds = (conversations || []).map(c => c.peerId);
+  const extraPeers = (staffUsers || []).filter(s =>
+    s.id !== currentUser?.id &&
+    !peerRoles.includes(s.role ?? "") &&
+    conversationPeerIds.includes(s.id)
+  );
+
+  // Merge: existing conversation peers first (sorted by last message), then allowed new-conversation peers
+  const existingConvPeers = [...allowedPeers, ...extraPeers].filter(s =>
+    conversationPeerIds.includes(s.id)
+  ).sort((a, b) => {
+    const ca = conversations.find(c => c.peerId === a.id);
+    const cb = conversations.find(c => c.peerId === b.id);
+    return new Date(cb?.lastMessageAt ?? 0).getTime() - new Date(ca?.lastMessageAt ?? 0).getTime();
+  });
+  const newConvPeers = allowedPeers.filter(s => !conversationPeerIds.includes(s.id));
+  const peers = [...existingConvPeers, ...newConvPeers];
 
   const selectedPeer = staffUsers?.find(s => s.id === selectedId);
 

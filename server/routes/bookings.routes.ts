@@ -238,6 +238,7 @@ export function registerBookingRoutes(app: Express): void {
         specialRequests,
         guestSignatureBase64,
         idDocumentBase64,
+        legalTermsAccepted,
       } = req.body;
 
       logger.debug({
@@ -277,6 +278,8 @@ export function registerBookingRoutes(app: Express): void {
         specialRequests: specialRequests || null,
         guestSignatureBase64,
         idDocumentBase64: idDocumentBase64 || null,
+        legalTermsAccepted: legalTermsAccepted === true,
+        legalTermsAcceptedAt: legalTermsAccepted === true ? new Date() : null,
       });
 
       logger.info({ bookingId: id }, "Booking updated to precheck_submitted");

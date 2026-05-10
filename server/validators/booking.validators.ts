@@ -44,6 +44,7 @@ export const precheckSchema = z.object({
   specialRequests: z.string().nullable().optional(),
   guestSignatureBase64: z.string().min(1, "Digital signature is required"),
   idDocumentBase64: z.string().nullable().optional(),
+  legalTermsAccepted: z.literal(true, { errorMap: () => ({ message: "You must accept the legal terms" }) }),
 });
 
 export const roomSettingsSchema = z.object({

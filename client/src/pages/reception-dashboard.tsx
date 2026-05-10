@@ -62,6 +62,7 @@ import {
   BedDouble,
   Sparkles,
   Users2,
+  Printer,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { validatePhone } from "@/lib/validation";
@@ -3001,9 +3002,9 @@ export default function ReceptionDashboard() {
       <Dialog open={!!precheckDetailBooking} onOpenChange={(open) => { if (!open) setPrecheckDetailBooking(null); }}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Online Check-in Məlumatları</DialogTitle>
+            <DialogTitle>{t('dashboard.reception.precheckTitle', 'Online Check-in Məlumatları')}</DialogTitle>
             <DialogDescription>
-              Qonağın göndərdiyi check-in məlumatları
+              {t('dashboard.reception.precheckDesc', 'Qonağın göndərdiyi check-in məlumatları')}
             </DialogDescription>
           </DialogHeader>
           {precheckDetailBooking && (
@@ -3011,39 +3012,58 @@ export default function ReceptionDashboard() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
-                    <p className="text-muted-foreground text-xs">Otaq</p>
+                    <p className="text-muted-foreground text-xs">{t('dashboard.reception.room', 'Otaq')}</p>
                     <p className="font-medium">{getRoomLabel(precheckDetailBooking)}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground text-xs">Pasport nömrəsi</p>
+                    <p className="text-muted-foreground text-xs">{t('checkin.passportNumber', 'Pasport nömrəsi')}</p>
                     <p className="font-medium" data-testid="text-precheck-passport">{precheckDetailBooking.passportNumber || '—'}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground text-xs">Vətəndaşlıq</p>
+                    <p className="text-muted-foreground text-xs">{t('checkin.nationality', 'Vətəndaşlıq')}</p>
                     <p className="font-medium" data-testid="text-precheck-nationality">{precheckDetailBooking.nationality || '—'}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground text-xs">Doğum tarixi</p>
+                    <p className="text-muted-foreground text-xs">{t('checkin.dateOfBirth', 'Doğum tarixi')}</p>
                     <p className="font-medium" data-testid="text-precheck-dob">{precheckDetailBooking.dateOfBirth || '—'}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground text-xs">Ünvan</p>
+                    <p className="text-muted-foreground text-xs">{t('checkin.address', 'Ünvan')}</p>
                     <p className="font-medium">{precheckDetailBooking.guestAddress || '—'}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground text-xs">Qonaq sayı</p>
+                    <p className="text-muted-foreground text-xs">{t('checkin.numberOfGuests', 'Qonaq sayı')}</p>
                     <p className="font-medium">{precheckDetailBooking.numberOfGuests || '—'}</p>
                   </div>
                 </div>
+                {/* Legal terms acceptance status */}
+                <div className={`flex items-center gap-2 p-3 rounded-lg text-sm ${(precheckDetailBooking as any).legalTermsAccepted ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800'}`}>
+                  {(precheckDetailBooking as any).legalTermsAccepted ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium">{t('dashboard.reception.legalAccepted', 'Hüquqi şərtlər qəbul edilib')}</p>
+                        {(precheckDetailBooking as any).legalTermsAcceptedAt && (
+                          <p className="text-xs opacity-75">{new Date((precheckDetailBooking as any).legalTermsAcceptedAt).toLocaleString("az-AZ")}</p>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+                      <p className="font-medium">{t('dashboard.reception.legalNotAccepted', 'Hüquqi şərtlər qəbul edilməyib')}</p>
+                    </>
+                  )}
+                </div>
                 {precheckDetailBooking.specialRequests && (
                   <div>
-                    <p className="text-muted-foreground text-xs mb-1">Xüsusi istəklər</p>
+                    <p className="text-muted-foreground text-xs mb-1">{t('checkin.specialRequests', 'Xüsusi istəklər')}</p>
                     <p className="text-sm bg-muted p-2 rounded">{precheckDetailBooking.specialRequests}</p>
                   </div>
                 )}
                 {precheckDetailBooking.guestSignatureBase64 && (
                   <div>
-                    <p className="text-muted-foreground text-xs mb-1">İmza</p>
+                    <p className="text-muted-foreground text-xs mb-1">{t('checkin.signature', 'İmza')}</p>
                     <div className="border rounded p-2 bg-white">
                       <img
                         src={precheckDetailBooking.guestSignatureBase64}
@@ -3056,7 +3076,7 @@ export default function ReceptionDashboard() {
                 )}
                 {precheckDetailBooking.idDocumentBase64 && (
                   <div>
-                    <p className="text-muted-foreground text-xs mb-1">Şəxsiyyət vəsiqəsi</p>
+                    <p className="text-muted-foreground text-xs mb-1">{t('checkin.idDocument', 'Şəxsiyyət vəsiqəsi')}</p>
                     <div className="border rounded p-2">
                       <img
                         src={precheckDetailBooking.idDocumentBase64}
@@ -3070,10 +3090,49 @@ export default function ReceptionDashboard() {
               </div>
             </DialogBody>
           )}
-          <DialogFooter>
+          <DialogFooter className="flex-wrap gap-2">
             <Button variant="outline" onClick={() => setPrecheckDetailBooking(null)}>
               {t('common.close', 'Close')}
             </Button>
+            {precheckDetailBooking && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const b = precheckDetailBooking as any;
+                  const sigImg = b.guestSignatureBase64 ? `<img src="${b.guestSignatureBase64}" style="max-height:80px;display:block;margin:4px 0;" />` : '—';
+                  const idImg = b.idDocumentBase64 ? `<img src="${b.idDocumentBase64}" style="max-height:200px;display:block;margin:4px 0;" />` : '';
+                  const legalStatus = b.legalTermsAccepted
+                    ? `✅ ${t('dashboard.reception.legalAccepted', 'Hüquqi şərtlər qəbul edilib')} — ${b.legalTermsAcceptedAt ? new Date(b.legalTermsAcceptedAt).toLocaleString("az-AZ") : ''}`
+                    : `⚠️ ${t('dashboard.reception.legalNotAccepted', 'Hüquqi şərtlər qəbul edilməyib')}`;
+                  const doc = `
+                    <html><head><title>Check-in Arxiv</title>
+                    <style>body{font-family:Arial,sans-serif;padding:30px;font-size:13px;} h2{border-bottom:2px solid #333;padding-bottom:6px;} .row{display:flex;gap:40px;margin:8px 0;} .label{color:#666;font-size:11px;min-width:140px;} .val{font-weight:600;} .legal{background:#e8f5e9;border:1px solid #4caf50;border-radius:6px;padding:12px;margin:16px 0;}</style>
+                    </head><body>
+                    <h2>🏨 Hotel Online Check-in — Hüquqi Arxiv</h2>
+                    <div class="row"><span class="label">Qonaq adı:</span><span class="val">${b.guestName || '—'}</span></div>
+                    <div class="row"><span class="label">Otaq:</span><span class="val">${getRoomLabel(b)}</span></div>
+                    <div class="row"><span class="label">Pasport nömrəsi:</span><span class="val">${b.passportNumber || '—'}</span></div>
+                    <div class="row"><span class="label">Vətəndaşlıq:</span><span class="val">${b.nationality || '—'}</span></div>
+                    <div class="row"><span class="label">Doğum tarixi:</span><span class="val">${b.dateOfBirth || '—'}</span></div>
+                    <div class="row"><span class="label">Ünvan:</span><span class="val">${b.guestAddress || '—'}</span></div>
+                    <div class="row"><span class="label">Qonaq sayı:</span><span class="val">${b.numberOfGuests || '—'}</span></div>
+                    <div class="row"><span class="label">Gəliş tarixi:</span><span class="val">${b.checkInDate ? new Date(b.checkInDate).toLocaleDateString("az-AZ") : '—'}</span></div>
+                    <div class="row"><span class="label">Çıxış tarixi:</span><span class="val">${b.checkOutDate ? new Date(b.checkOutDate).toLocaleDateString("az-AZ") : '—'}</span></div>
+                    <div class="legal"><strong>${legalStatus}</strong></div>
+                    <div style="margin:16px 0"><span class="label">Rəqəmsal imza:</span>${sigImg}</div>
+                    ${idImg ? `<div style="margin:16px 0"><span class="label">Şəxsiyyət vəsiqəsi:</span>${idImg}</div>` : ''}
+                    <hr style="margin-top:30px"/>
+                    <p style="font-size:11px;color:#888;">Arxiv tarixi: ${new Date().toLocaleString("az-AZ")} — O.S.S Smart Hotel System</p>
+                    </body></html>`;
+                  const w = window.open("", "_blank");
+                  if (w) { w.document.write(doc); w.document.close(); w.print(); }
+                }}
+                data-testid="button-print-checkin-archive"
+              >
+                <Printer className="mr-2 h-4 w-4" />
+                {t('dashboard.reception.printArchive', 'Arxivi Çap Et')}
+              </Button>
+            )}
             <Button
               onClick={() => {
                 if (precheckDetailBooking) {
