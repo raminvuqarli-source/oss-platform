@@ -3572,6 +3572,7 @@
     "browseFile": "Parcourir",
     "dragDropFormats": "Formats supportés : .xlsx, .xls, .csv",
     "stockLevel": "Niveau de stock",
+    "allCategories": "Toutes les catégories",
     "noResults": "Aucun résultat trouvé",
     "addProductTitle": "Ajouter un Nouveau Produit",
     "addProductDesc": "Ajoutez manuellement ou importez depuis Excel",

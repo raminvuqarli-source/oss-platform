@@ -9,6 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -432,34 +439,53 @@ function ScopeItemList({
 }) {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
-  const filtered = items.filter(it =>
-    it.scope === scope &&
-    (it.name.toLowerCase().includes(search.toLowerCase()) ||
-      it.category.toLowerCase().includes(search.toLowerCase()))
-  );
+  const scopeItems = items.filter(it => it.scope === scope);
+  const categories = Array.from(new Set(scopeItems.map(it => it.category))).sort();
+
+  const filtered = scopeItems.filter(it => {
+    const matchSearch =
+      it.name.toLowerCase().includes(search.toLowerCase()) ||
+      it.category.toLowerCase().includes(search.toLowerCase());
+    const matchCategory = categoryFilter === "all" || it.category === categoryFilter;
+    return matchSearch && matchCategory;
+  });
 
   const critical = filtered.filter(it => it.currentStock <= it.criticalThreshold);
 
   return (
     <div className="space-y-3">
-      <div className="relative">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
-        <Input
-          className="pl-8"
-          placeholder={t("inventory.searchPlaceholder", "Məhsul axtar...")}
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          data-testid={`input-search-${scope}`}
-        />
-        {search && (
-          <button onClick={() => setSearch("")} className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground" data-testid="btn-clear-search">
-            <X className="h-4 w-4" />
-          </button>
-        )}
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Input
+            className="pl-8"
+            placeholder={t("inventory.searchPlaceholder", "Məhsul axtar...")}
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            data-testid={`input-search-${scope}`}
+          />
+          {search && (
+            <button onClick={() => setSearch("")} className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground" data-testid="btn-clear-search">
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        <Select value={categoryFilter} onValueChange={setCategoryFilter} data-testid={`select-category-${scope}`}>
+          <SelectTrigger className="w-[170px] shrink-0" data-testid={`trigger-category-${scope}`}>
+            <SelectValue placeholder={t("inventory.allCategories", "Bütün kateqoriyalar")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("inventory.allCategories", "Bütün kateqoriyalar")}</SelectItem>
+            {categories.map(cat => (
+              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      {critical.length > 0 && !search && (
+      {critical.length > 0 && !search && categoryFilter === "all" && (
         <div className="flex items-center gap-2 p-2.5 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30" data-testid={`alert-critical-${scope}`}>
           <AlertTriangle className="h-4 w-4 text-red-600 shrink-0" />
           <p className="text-xs text-red-700 dark:text-red-400">

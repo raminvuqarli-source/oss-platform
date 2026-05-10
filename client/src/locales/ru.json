@@ -3584,6 +3584,7 @@
     "browseFile": "Выбрать файл",
     "dragDropFormats": "Поддерживаемые форматы: .xlsx, .xls, .csv",
     "stockLevel": "Уровень запаса",
+    "allCategories": "Все категории",
     "noResults": "Результаты поиска не найдены",
     "addProductTitle": "Добавить новый товар",
     "addProductDesc": "Добавьте товар вручную или импортируйте из Excel",

@@ -3572,6 +3572,7 @@
     "browseFile": "Buscar archivo",
     "dragDropFormats": "Formatos compatibles: .xlsx, .xls, .csv",
     "stockLevel": "Nivel de stock",
+    "allCategories": "Todas las categorías",
     "noResults": "No se encontraron resultados",
     "addProductTitle": "Agregar Nuevo Producto",
     "addProductDesc": "Agregue un producto manualmente o impórtelo desde Excel",

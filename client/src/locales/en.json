@@ -3701,6 +3701,7 @@
     "browseFile": "Browse file",
     "dragDropFormats": "Supported formats: .xlsx, .xls, .csv",
     "stockLevel": "Stock level",
+    "allCategories": "All categories",
     "noResults": "No search results found",
     "addProductTitle": "Add New Product",
     "addProductDesc": "Add a product manually or import from an Excel file",
