@@ -1050,6 +1050,103 @@ export function registerRestaurantRoutes(app: Express): void {
     }
   });
 
+  // ─── CASHIER PAYMENTS ─────────────────────────────────────────────────
+
+  app.post("/api/cashier/payments", requireRestaurantRole("restaurant_cashier", ...MANAGER_ROLES), async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      const propertyId = await resolvePropertyId(user);
+      if (!propertyId) return res.status(400).json({ message: "No property linked" });
+
+      const { paymentType, amountCents, description, recipientName, recipientId, notes } = req.body;
+      if (!paymentType || !amountCents || !description) {
+        return res.status(400).json({ message: "paymentType, amountCents and description are required" });
+      }
+      if (!Number.isInteger(amountCents) || amountCents <= 0) {
+        return res.status(400).json({ message: "amountCents must be a positive integer" });
+      }
+
+      const payment = await storage.createCashierPayment({
+        tenantId: user.tenantId || user.ownerId || "",
+        propertyId,
+        cashierId: user.id,
+        cashierName: user.fullName || user.username || "Kassir",
+        paymentType,
+        amountCents,
+        description,
+        recipientName: recipientName || null,
+        recipientId: recipientId || null,
+        notes: notes || null,
+      });
+
+      // Notify managers + owners
+      const allStaff = await storage.getUsersByProperty(propertyId);
+      const managerIds = allStaff
+        .filter(u => MANAGER_ROLES.includes(u.role || ""))
+        .map(u => u.id);
+
+      const amountFormatted = (amountCents / 100).toFixed(2);
+      const typeLabels: Record<string, string> = {
+        salary: "Maaş", warehouse: "Anbar", utilities: "Kommunal",
+        cash_out: "Nağd verilmə", refund: "Geri qaytarma", tax: "Vergi",
+        transfer: "Köçürmə", rent: "Arenda",
+      };
+      const typeLabel = typeLabels[paymentType] || paymentType;
+
+      if (managerIds.length > 0) {
+        sendPushNotification({
+          userIds: managerIds,
+          title: `💸 Kassir Ödənişi — ${typeLabel}`,
+          message: `${payment.cashierName}: ${description} — ${amountFormatted} AZN${recipientName ? ` (${recipientName})` : ""}`,
+          url: "/restaurant/manager",
+          data: { type: "CASHIER_PAYMENT_CREATED", paymentId: payment.id, paymentType },
+        }).catch(err => logger.error({ err }, "Cashier payment push failed"));
+      }
+
+      res.status(201).json(payment);
+    } catch (err) {
+      logger.error({ err }, "Failed to create cashier payment");
+      res.status(500).json({ message: "Failed to create payment" });
+    }
+  });
+
+  app.get("/api/cashier/payments", requireRestaurantRole("restaurant_cashier", ...MANAGER_ROLES), async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      const propertyId = await resolvePropertyId(user);
+      if (!propertyId) return res.status(400).json({ message: "No property linked" });
+
+      const { paymentType, fromDate, toDate } = req.query as Record<string, string>;
+      const filters: { paymentType?: string; fromDate?: Date; toDate?: Date } = {};
+      if (paymentType) filters.paymentType = paymentType;
+      if (fromDate) filters.fromDate = new Date(fromDate);
+      if (toDate) filters.toDate = new Date(toDate);
+
+      const payments = await storage.getCashierPayments(propertyId, filters);
+      res.json(payments);
+    } catch (err) {
+      logger.error({ err }, "Failed to fetch cashier payments");
+      res.status(500).json({ message: "Failed to fetch payments" });
+    }
+  });
+
+  app.get("/api/cashier/payments/summary", requireRestaurantRole("restaurant_cashier", ...MANAGER_ROLES), async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      const propertyId = await resolvePropertyId(user);
+      if (!propertyId) return res.status(400).json({ message: "No property linked" });
+
+      const summary = await storage.getCashierPaymentSummary(propertyId);
+      res.json(summary);
+    } catch (err) {
+      logger.error({ err }, "Failed to fetch cashier payment summary");
+      res.status(500).json({ message: "Failed to fetch summary" });
+    }
+  });
+
   // Waiter: confirm a guest QR order (sends it to kitchen)
   app.patch("/api/restaurant/orders/:id/confirm", requireAuth, async (req, res) => {
     try {

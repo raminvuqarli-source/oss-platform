@@ -2420,6 +2420,29 @@ export const deletedTrialAccounts = pgTable("deleted_trial_accounts", {
 });
 export type DeletedTrialAccount = typeof deletedTrialAccounts.$inferSelect;
 
+// Cashier Payments — tracks all outgoing payments made by restaurant cashiers
+export type CashierPaymentType = "salary" | "warehouse" | "utilities" | "cash_out" | "refund" | "tax" | "transfer" | "rent";
+export const cashierPayments = pgTable("cashier_payments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull(),
+  propertyId: varchar("property_id").notNull(),
+  cashierId: varchar("cashier_id").notNull(),
+  cashierName: varchar("cashier_name"),
+  paymentType: varchar("payment_type").notNull(), // CashierPaymentType
+  amountCents: integer("amount_cents").notNull(),
+  recipientName: varchar("recipient_name"),
+  recipientId: varchar("recipient_id"),
+  description: text("description").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_cashier_payments_property_id").on(table.propertyId),
+  index("idx_cashier_payments_created_at").on(table.createdAt),
+]);
+export const insertCashierPaymentSchema = createInsertSchema(cashierPayments).omit({ id: true, createdAt: true });
+export type InsertCashierPayment = z.infer<typeof insertCashierPaymentSchema>;
+export type CashierPayment = typeof cashierPayments.$inferSelect;
+
 // Billing logs — tracks every add-on purchase and payment event per hotel/tenant
 export type BillingEventType = "whatsapp_package" | "channex_addon" | "subscription_renewal" | "manual_credit";
 export const billingLogs = pgTable("billing_logs", {

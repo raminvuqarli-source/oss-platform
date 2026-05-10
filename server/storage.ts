@@ -241,6 +241,9 @@ import {
   restaurantGuestMessages,
   type RestaurantGuestMessage,
   type InsertRestaurantGuestMessage,
+  cashierPayments,
+  type CashierPayment,
+  type InsertCashierPayment,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -678,6 +681,11 @@ export interface IStorage {
   updateHotelBilling(hotelId: string, updates: { isWhatsappEnabled?: boolean; whatsappBalance?: number; isChannexEnabled?: boolean; channexRoomCount?: number; channexAddonPrice?: number }): Promise<Hotel | undefined>;
   getAllHotelsAdmin(): Promise<Hotel[]>;
   decrementWhatsappBalance(hotelId: string): Promise<void>;
+
+  // Cashier Payments
+  createCashierPayment(data: InsertCashierPayment): Promise<CashierPayment>;
+  getCashierPayments(propertyId: string, filters?: { paymentType?: string; fromDate?: Date; toDate?: Date }): Promise<CashierPayment[]>;
+  getCashierPaymentSummary(propertyId: string): Promise<Record<string, number>>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3484,6 +3492,38 @@ export class DatabaseStorage implements IStorage {
     await db.update(hotels)
       .set({ whatsappBalance: sql`GREATEST(0, ${hotels.whatsappBalance} - 1)` })
       .where(eq(hotels.id, hotelId));
+  }
+
+  // ===================== CASHIER PAYMENTS =====================
+  async createCashierPayment(data: InsertCashierPayment): Promise<CashierPayment> {
+    const [p] = await db.insert(cashierPayments).values(data).returning();
+    return p;
+  }
+
+  async getCashierPayments(propertyId: string, filters?: { paymentType?: string; fromDate?: Date; toDate?: Date }): Promise<CashierPayment[]> {
+    const conditions = [eq(cashierPayments.propertyId, propertyId)];
+    if (filters?.paymentType) conditions.push(eq(cashierPayments.paymentType, filters.paymentType));
+    if (filters?.fromDate) conditions.push(gte(cashierPayments.createdAt, filters.fromDate));
+    if (filters?.toDate) conditions.push(lte(cashierPayments.createdAt, filters.toDate));
+    return db.select().from(cashierPayments)
+      .where(and(...conditions))
+      .orderBy(desc(cashierPayments.createdAt));
+  }
+
+  async getCashierPaymentSummary(propertyId: string): Promise<Record<string, number>> {
+    const rows = await db.select({
+      paymentType: cashierPayments.paymentType,
+      total: sql<number>`COALESCE(SUM(${cashierPayments.amountCents}), 0)`,
+    })
+    .from(cashierPayments)
+    .where(eq(cashierPayments.propertyId, propertyId))
+    .groupBy(cashierPayments.paymentType);
+
+    const result: Record<string, number> = {};
+    for (const row of rows) {
+      result[row.paymentType] = Number(row.total);
+    }
+    return result;
   }
 }
 

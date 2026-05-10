@@ -19,6 +19,8 @@ import {
   MessageSquare, ClipboardList, Plus, MapPin,
   Hourglass, Loader2, CheckCheck, Mail,
   ArrowLeft, DollarSign, CheckSquare,
+  Users, Package, Zap, HandCoins, RotateCcw, Receipt, Building2, Home,
+  PieChart, ListChecks,
 } from "lucide-react";
 import { StaffDmChat } from "@/components/staff-dm-chat";
 import { Input } from "@/components/ui/input";
@@ -107,6 +109,13 @@ export default function RestaurantCashierDashboard() {
   const [taskLocation, setTaskLocation] = useState("");
   const [taskAssignee, setTaskAssignee] = useState<string>("__none__");
 
+  // Cashier Payment form state
+  const [payType, setPayType] = useState<string>("");
+  const [payAmount, setPayAmount] = useState("");
+  const [payDesc, setPayDesc] = useState("");
+  const [payRecipient, setPayRecipient] = useState("");
+  const [payNotes, setPayNotes] = useState("");
+
   const { data: currentUser } = useQuery<{ tenantType?: string | null }>({ queryKey: ["/api/auth/me"] });
   const isHotelTenant = currentUser?.tenantType === "hotel";
 
@@ -126,6 +135,55 @@ export default function RestaurantCashierDashboard() {
   const { data: cleaningTasks = [], isLoading: tasksLoading } = useQuery<CleaningTask[]>({
     queryKey: ["/api/restaurant/cleaning-tasks"],
     refetchInterval: 20000,
+  });
+
+  // Cashier payment type config (icon + i18n key)
+  const PAYMENT_TYPES = [
+    { value: "salary",    icon: Users,       labelKey: "cashier.typeSalary",    color: "text-blue-500",   bg: "bg-blue-500/10" },
+    { value: "warehouse", icon: Package,     labelKey: "cashier.typeWarehouse",  color: "text-amber-500",  bg: "bg-amber-500/10" },
+    { value: "utilities", icon: Zap,         labelKey: "cashier.typeUtilities",  color: "text-yellow-500", bg: "bg-yellow-500/10" },
+    { value: "cash_out",  icon: HandCoins,   labelKey: "cashier.typeCashOut",    color: "text-orange-500", bg: "bg-orange-500/10" },
+    { value: "refund",    icon: RotateCcw,   labelKey: "cashier.typeRefund",     color: "text-rose-500",   bg: "bg-rose-500/10" },
+    { value: "tax",       icon: Receipt,     labelKey: "cashier.typeTax",        color: "text-purple-500", bg: "bg-purple-500/10" },
+    { value: "transfer",  icon: Building2,   labelKey: "cashier.typeTransfer",   color: "text-indigo-500", bg: "bg-indigo-500/10" },
+    { value: "rent",      icon: Home,        labelKey: "cashier.typeRent",       color: "text-teal-500",   bg: "bg-teal-500/10" },
+  ] as const;
+
+  type CashierPayment = {
+    id: string;
+    paymentType: string;
+    amountCents: number;
+    description: string;
+    recipientName: string | null;
+    cashierName: string | null;
+    notes: string | null;
+    createdAt: string;
+  };
+
+  const { data: cashierPaymentsList = [], isLoading: paymentsLoading, refetch: refetchPayments } = useQuery<CashierPayment[]>({
+    queryKey: ["/api/cashier/payments"],
+    refetchInterval: 30000,
+  });
+
+  const { data: paymentSummary = {} as Record<string, number> } = useQuery<Record<string, number>>({
+    queryKey: ["/api/cashier/payments/summary"],
+    refetchInterval: 60000,
+  });
+
+  const createPayment = useMutation({
+    mutationFn: (data: { paymentType: string; amountCents: number; description: string; recipientName?: string; notes?: string }) =>
+      apiRequest("POST", "/api/cashier/payments", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cashier/payments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/cashier/payments/summary"] });
+      setPayType("");
+      setPayAmount("");
+      setPayDesc("");
+      setPayRecipient("");
+      setPayNotes("");
+      toast({ title: t("cashier.paymentCreated") });
+    },
+    onError: () => toast({ title: t("cashier.paymentError"), variant: "destructive" }),
   });
 
   const createTask = useMutation({
@@ -305,6 +363,43 @@ export default function RestaurantCashierDashboard() {
           iconBg: "bg-orange-500/10", iconColor: "text-orange-500",
           action: () => navigate("tasks"),
           testId: "hub-task-status",
+        },
+      ],
+    },
+    {
+      label: t("cashier.tabPayments", "Xərclər & Ödənişlər"),
+      desc: t("cashier.paymentsDesc", "Maaş, arenda, vergi və s."),
+      headerIcon: DollarSign,
+      headerColor: "text-fuchsia-500",
+      items: [
+        {
+          icon: Plus,
+          label: t("cashier.newPayment", "Yeni Ödəniş"),
+          iconBg: "bg-fuchsia-500/10", iconColor: "text-fuchsia-500",
+          action: () => navigate("new_payment"),
+          testId: "hub-new-payment",
+        },
+        {
+          icon: ListChecks,
+          label: t("cashier.paymentHistory", "Ödəniş Tarixçəsi"),
+          badge: cashierPaymentsList.length > 0 ? cashierPaymentsList.length : undefined,
+          iconBg: "bg-violet-500/10", iconColor: "text-violet-500",
+          action: () => navigate("payment_history"),
+          testId: "hub-payment-history",
+        },
+        {
+          icon: PieChart,
+          label: t("cashier.paymentSummary", "Xərc Xülasəsi"),
+          iconBg: "bg-sky-500/10", iconColor: "text-sky-500",
+          action: () => navigate("payment_summary"),
+          testId: "hub-payment-summary",
+        },
+        {
+          icon: RefreshCw,
+          label: t("cashier.refresh", "Yenilə"),
+          iconBg: "bg-slate-500/10", iconColor: "text-slate-500",
+          action: () => { refetchPayments(); toast({ title: "Yeniləndi" }); },
+          testId: "hub-payment-refresh",
         },
       ],
     },
@@ -684,6 +779,244 @@ export default function RestaurantCashierDashboard() {
       );
     }
 
+    if (currentView === "new_payment") {
+      const canSubmit = payType && payAmount && parseFloat(payAmount) > 0 && payDesc.trim();
+      return (
+        <div className="space-y-4">
+          <Card>
+            <CardContent className="p-5 space-y-4">
+              <div className="flex items-center gap-2 mb-1">
+                <DollarSign className="h-4 w-4 text-fuchsia-500" />
+                <h3 className="font-semibold">{t("cashier.newPayment", "Yeni Ödəniş")}</h3>
+              </div>
+
+              {/* Payment type grid */}
+              <div>
+                <Label className="text-xs text-muted-foreground mb-2 block">{t("cashier.paymentTypeLabel")}</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {PAYMENT_TYPES.map(pt => {
+                    const Icon = pt.icon;
+                    const isSelected = payType === pt.value;
+                    return (
+                      <button
+                        key={pt.value}
+                        onClick={() => setPayType(pt.value)}
+                        data-testid={`btn-paytype-${pt.value}`}
+                        className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all ${
+                          isSelected
+                            ? "border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-950/30 shadow-sm"
+                            : "border-border/60 hover:bg-muted/50"
+                        }`}
+                      >
+                        <div className={`${pt.bg} p-1.5 rounded-lg shrink-0`}>
+                          <Icon className={`h-3.5 w-3.5 ${pt.color}`} />
+                        </div>
+                        <span className="text-xs font-medium leading-tight">{t(pt.labelKey)}</span>
+                        {isSelected && <CheckCircle2 className="h-3.5 w-3.5 text-fuchsia-500 ml-auto shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Amount */}
+              <div className="space-y-1.5">
+                <Label htmlFor="pay-amount">{t("cashier.amount", "Məbləğ (AZN)")}</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2.5 text-muted-foreground font-medium text-sm">₼</span>
+                  <Input
+                    id="pay-amount"
+                    data-testid="input-pay-amount"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder={t("cashier.amountPlaceholder", "Məs: 150.00")}
+                    value={payAmount}
+                    onChange={e => setPayAmount(e.target.value)}
+                    className="pl-7"
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="space-y-1.5">
+                <Label htmlFor="pay-desc">{t("cashier.descriptionLabel", "Təsvir")}</Label>
+                <Textarea
+                  id="pay-desc"
+                  data-testid="input-pay-desc"
+                  placeholder={t("cashier.descriptionPlaceholder")}
+                  value={payDesc}
+                  onChange={e => setPayDesc(e.target.value)}
+                  className="resize-none"
+                  rows={2}
+                />
+              </div>
+
+              {/* Recipient */}
+              <div className="space-y-1.5">
+                <Label htmlFor="pay-recipient">{t("cashier.recipientLabel", "Alan şəxs (ixtiyari)")}</Label>
+                <Input
+                  id="pay-recipient"
+                  data-testid="input-pay-recipient"
+                  placeholder={t("cashier.recipientPlaceholder")}
+                  value={payRecipient}
+                  onChange={e => setPayRecipient(e.target.value)}
+                />
+              </div>
+
+              {/* Notes */}
+              <div className="space-y-1.5">
+                <Label htmlFor="pay-notes">{t("cashier.notesLabel", "Qeydlər (ixtiyari)")}</Label>
+                <Input
+                  id="pay-notes"
+                  data-testid="input-pay-notes"
+                  placeholder={t("cashier.notesPlaceholder")}
+                  value={payNotes}
+                  onChange={e => setPayNotes(e.target.value)}
+                />
+              </div>
+
+              <Button
+                className="w-full"
+                disabled={!canSubmit || createPayment.isPending}
+                onClick={() => {
+                  if (!canSubmit) return;
+                  const amountCents = Math.round(parseFloat(payAmount) * 100);
+                  createPayment.mutate({
+                    paymentType: payType,
+                    amountCents,
+                    description: payDesc.trim(),
+                    recipientName: payRecipient.trim() || undefined,
+                    notes: payNotes.trim() || undefined,
+                  });
+                }}
+                data-testid="btn-submit-payment"
+              >
+                {createPayment.isPending
+                  ? <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                  : <CheckCircle2 className="h-4 w-4 mr-2" />}
+                {t("cashier.submitPayment", "Ödənişi Qeydə Al")}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
+    if (currentView === "payment_history") {
+      const getTypeConfig = (value: string) => PAYMENT_TYPES.find(pt => pt.value === value);
+      return (
+        <div className="space-y-2">
+          {paymentsLoading ? (
+            <div className="space-y-2">{[1,2,3,4].map(i => <Skeleton key={i} className="h-20 w-full" />)}</div>
+          ) : cashierPaymentsList.length === 0 ? (
+            <Card>
+              <CardContent className="p-10 text-center text-muted-foreground">
+                <DollarSign className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                <p className="font-medium">{t("cashier.noPayments", "Ödəniş yoxdur")}</p>
+              </CardContent>
+            </Card>
+          ) : (
+            cashierPaymentsList.map(payment => {
+              const cfg = getTypeConfig(payment.paymentType);
+              const Icon = cfg?.icon ?? DollarSign;
+              return (
+                <Card key={payment.id} data-testid={`cashier-payment-${payment.id}`}>
+                  <CardContent className="p-4 flex items-start gap-3">
+                    <div className={`${cfg?.bg ?? "bg-muted"} p-2 rounded-xl shrink-0 mt-0.5`}>
+                      <Icon className={`h-4 w-4 ${cfg?.color ?? "text-muted-foreground"}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold leading-tight truncate">{payment.description}</p>
+                          {payment.recipientName && (
+                            <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                              <Users className="h-3 w-3" />{payment.recipientName}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {formatDistanceToNow(new Date(payment.createdAt), { addSuffix: true, locale: dateFnsLocale })}
+                            {payment.cashierName ? ` · ${payment.cashierName}` : ""}
+                          </p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-base font-bold text-rose-600">-{fmtCents(payment.amountCents)}</p>
+                          <Badge variant="outline" className="text-[10px] mt-1">
+                            {t(`cashier.type${payment.paymentType.charAt(0).toUpperCase() + payment.paymentType.slice(1).replace(/_([a-z])/g, (_: string, c: string) => c.toUpperCase())}`, payment.paymentType)}
+                          </Badge>
+                        </div>
+                      </div>
+                      {payment.notes && (
+                        <p className="text-xs text-muted-foreground mt-1 italic">{payment.notes}</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
+        </div>
+      );
+    }
+
+    if (currentView === "payment_summary") {
+      const totalCents = Object.values(paymentSummary).reduce((a, b) => a + b, 0);
+      return (
+        <div className="space-y-4">
+          {/* Total card */}
+          <Card className="bg-gradient-to-br from-fuchsia-500/10 to-violet-500/10 border-fuchsia-200 dark:border-fuchsia-800">
+            <CardContent className="p-5 text-center">
+              <p className="text-xs text-muted-foreground mb-1">{t("cashier.totalExpenses", "Ümumi xərc")}</p>
+              <p className="text-3xl font-bold text-fuchsia-600">{fmtCents(totalCents)}</p>
+              <p className="text-xs text-muted-foreground mt-1">{cashierPaymentsList.length} {t("cashier.ordersCount", "qeyd")}</p>
+            </CardContent>
+          </Card>
+
+          {/* Per-type breakdown */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <PieChart className="h-4 w-4 text-sky-500" />
+                {t("cashier.summaryTitle", "Növlərə görə xərc")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0 space-y-3">
+              {PAYMENT_TYPES.map(pt => {
+                const cents = paymentSummary[pt.value] ?? 0;
+                const Icon = pt.icon;
+                const pct = totalCents > 0 ? Math.round((cents / totalCents) * 100) : 0;
+                return (
+                  <div key={pt.value} className="space-y-1" data-testid={`summary-row-${pt.value}`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className={`${pt.bg} p-1.5 rounded-lg`}>
+                          <Icon className={`h-3 w-3 ${pt.color}`} />
+                        </div>
+                        <span className="text-sm font-medium">{t(pt.labelKey)}</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-sm font-bold">{fmtCents(cents)}</span>
+                        <span className="text-xs text-muted-foreground ml-1.5">{pct}%</span>
+                      </div>
+                    </div>
+                    {cents > 0 && (
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${pt.color.replace("text-", "bg-")}`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
     if (currentView === "messages") {
       return (
         <StaffDmChat
@@ -703,6 +1036,9 @@ export default function RestaurantCashierDashboard() {
     history: t("cashier.tabHistory", "Tarixçə"),
     tasks: t("cashier.tabTasks", "Tapşırıqlar"),
     messages: t("cashier.tabMessages", "Mesajlar"),
+    new_payment: t("cashier.newPayment", "Yeni Ödəniş"),
+    payment_history: t("cashier.paymentHistory", "Ödəniş Tarixçəsi"),
+    payment_summary: t("cashier.paymentSummary", "Xərc Xülasəsi"),
   };
 
   return (
