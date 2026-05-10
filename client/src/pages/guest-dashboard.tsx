@@ -214,6 +214,7 @@ export default function GuestDashboard() {
   const { user, isDemoMode } = useAuth();
   const { toast } = useToast();
   const searchString = useSearch();
+  const currentView = new URLSearchParams(searchString).get("view") ?? "";
 
   const servicesRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -223,33 +224,10 @@ export default function GuestDashboard() {
   const roomPrepRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const params = new URLSearchParams(searchString);
-    const view = params.get("view");
-
-    if (view === "checkin") { setOnlineCheckinOpen(true); return; }
-    if (view === "prepare") { setPreCheckDialogOpen(true); return; }
-
-    if (!view) return;
-
-    const refMap: Record<string, React.RefObject<HTMLDivElement | null>> = {
-      services: servicesRef,
-      messages: messagesRef,
-      "room-controls": roomControlsRef,
-      "smart-extras": smartExtrasRef,
-      restaurant: restaurantRef,
-      "room-prep": roomPrepRef,
-    };
-
-    const tryScroll = (attempts = 0) => {
-      const ref = refMap[view];
-      if (ref?.current) {
-        ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      } else if (attempts < 10) {
-        setTimeout(() => tryScroll(attempts + 1), 150);
-      }
-    };
-    setTimeout(() => tryScroll(), 100);
-  }, [searchString]);
+    if (currentView === "checkin") setOnlineCheckinOpen(true);
+    if (currentView === "prepare") setPreCheckDialogOpen(true);
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [currentView]);
 
   // Real-time WebSocket for instant notifications from reception
   useEffect(() => {
@@ -947,6 +925,7 @@ export default function GuestDashboard() {
         </Card>
       )}
 
+      {currentView === "room-controls" && (
       <div ref={roomControlsRef}>
         <div className="flex items-center justify-between gap-4 mb-4">
           <h3 className="text-lg font-semibold">{t('dashboard.guest.roomControls')}</h3>
@@ -1319,6 +1298,8 @@ export default function GuestDashboard() {
         </div>
       </div>
 
+      )}
+      {currentView === "smart-extras" && (
       <div ref={smartExtrasRef}>
         <div className="flex items-center justify-between gap-4 mb-4">
           <h3 className="text-lg font-semibold">{t('smartExtras.title', 'Smart Extras')}</h3>
@@ -1433,7 +1414,9 @@ export default function GuestDashboard() {
         </div>
       </div>
 
+      )}
       {/* ─── RESTORAN BÖLMƏSI ──────────────────────────────────────── */}
+      {currentView === "restaurant" && (
       <div ref={restaurantRef}>
       <Card className="border-orange-200/60 dark:border-orange-800/40 bg-gradient-to-br from-orange-50/60 to-background dark:from-orange-950/20" data-testid="card-restaurant-section">
         <CardHeader className="pb-3">
@@ -1500,6 +1483,7 @@ export default function GuestDashboard() {
         </CardContent>
       </Card>
       </div>
+      )}
 
       {/* ─── SİFARİŞ DİALOQU ────────────────────────────────────── */}
       <Dialog open={orderFoodOpen} onOpenChange={(open) => {
@@ -1663,6 +1647,7 @@ export default function GuestDashboard() {
         </DialogContent>
       </Dialog>
 
+      {currentView === "services" && (
       <div ref={servicesRef}>
         <div className="flex items-center justify-between gap-4 mb-4">
           <h3 className="text-lg font-semibold">{t('dashboard.guest.smartAssistant')}</h3>
@@ -1797,7 +1782,9 @@ export default function GuestDashboard() {
           </Card>
         )}
       </div>
+      )}
 
+      {currentView === "room-prep" && (
       <div ref={roomPrepRef}>
         <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
           <h3 className="text-lg font-semibold">{t('roomPrep.title')}</h3>
@@ -1995,7 +1982,9 @@ export default function GuestDashboard() {
           </Card>
         )}
       </div>
+      )}
 
+      {currentView === "messages" && (
       <div ref={messagesRef}>
         <div className="flex items-center justify-between gap-4 mb-4">
           <h3 className="text-lg font-semibold">{t('dashboard.guest.chat')}</h3>
@@ -2081,6 +2070,7 @@ export default function GuestDashboard() {
           </CardContent>
         </Card>
       </div>
+      )}
 
       <Dialog open={preCheckDialogOpen} onOpenChange={setPreCheckDialogOpen}>
         <DialogContent className="sm:max-w-lg">
