@@ -2,9 +2,12 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
+import { navigate } from "wouter/use-browser-location";
 import {
   CalendarCheck, ListChecks, BellRing, BedDouble,
   CheckCircle2, ArrowRightLeft, User, Loader2, BedSingle,
+  CalendarDays, Users, Wallet, SprayCan, DoorOpen,
+  UtensilsCrossed, MessageSquare, Star, BarChart3,
 } from "lucide-react";
 import { ActionCard } from "@/components/action-card";
 import { BottomSheet } from "@/components/bottom-sheet";
@@ -570,36 +573,85 @@ export default function AdminActionDashboard() {
     },
   ];
 
+  const navLinks = [
+    { icon: CalendarDays, label: t("nav.calendar", "Calendar"), url: "/dashboard?view=calendar", accentColor: "bg-cyan-500", glowColor: "bg-cyan-500/6", testId: "nav-card-calendar" },
+    { icon: Users, label: t("nav.guests", "Guests"), url: "/guests", accentColor: "bg-emerald-500", glowColor: "bg-emerald-500/6", testId: "nav-card-guests" },
+    { icon: BarChart3, label: t("nav.staff", "Staff"), url: "/staff", accentColor: "bg-indigo-500", glowColor: "bg-indigo-500/6", testId: "nav-card-staff" },
+    { icon: Wallet, label: t("nav.finance", "Finance"), url: "/dashboard?view=finance", accentColor: "bg-yellow-500", glowColor: "bg-yellow-500/6", testId: "nav-card-finance" },
+    { icon: SprayCan, label: t("nav.housekeeping", "Housekeeping"), url: "/dashboard?view=housekeeping", accentColor: "bg-teal-500", glowColor: "bg-teal-500/6", testId: "nav-card-housekeeping" },
+    { icon: DoorOpen, label: t("nav.roomPrep", "Room Prep"), url: "/dashboard?view=room-prep", accentColor: "bg-rose-500", glowColor: "bg-rose-500/6", testId: "nav-card-room-prep" },
+    { icon: UtensilsCrossed, label: t("nav.restaurantManagement", "Restaurant"), url: "/restaurant/manager", accentColor: "bg-orange-500", glowColor: "bg-orange-500/6", testId: "nav-card-restaurant" },
+    { icon: MessageSquare, label: t("nav.guestMessages", "Guest Messages"), url: "/dashboard?view=messages", accentColor: "bg-purple-500", glowColor: "bg-purple-500/6", testId: "nav-card-messages" },
+    { icon: Star, label: t("staffPerformance.myRating", "My Rating"), url: "/dashboard?view=my-performance", accentColor: "bg-amber-500", glowColor: "bg-amber-500/6", testId: "nav-card-rating" },
+  ];
+
   return (
-    <>
-      {/* 2×2 Grid */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="grid grid-cols-2 gap-3"
-        data-testid="admin-action-grid"
-      >
-        {actions.map((action, i) => (
-          <motion.div
-            key={action.id}
-            initial={{ opacity: 0, scale: 0.94 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.25, delay: i * 0.055 }}
-          >
-            <ActionCard
-              icon={action.icon}
-              label={action.label}
-              description={action.description}
-              badge={action.badge}
-              accentColor={action.accentColor}
-              glowColor={action.glowColor}
-              onClick={() => setOpenPanel(action.id)}
-              testId={`action-card-${action.id}`}
-            />
-          </motion.div>
-        ))}
-      </motion.div>
+    <div className="space-y-6">
+      {/* Quick Actions — 2×2 Grid */}
+      <div>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+          {t("actionDash.quickActions", "Quick Actions")}
+        </p>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="grid grid-cols-2 gap-3"
+          data-testid="admin-action-grid"
+        >
+          {actions.map((action, i) => (
+            <motion.div
+              key={action.id}
+              initial={{ opacity: 0, scale: 0.94 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.25, delay: i * 0.055 }}
+            >
+              <ActionCard
+                icon={action.icon}
+                label={action.label}
+                description={action.description}
+                badge={action.badge}
+                accentColor={action.accentColor}
+                glowColor={action.glowColor}
+                onClick={() => setOpenPanel(action.id)}
+                testId={`action-card-${action.id}`}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+
+      {/* Navigation Links */}
+      <div>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+          {t("actionDash.management", "Management")}
+        </p>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          className="grid grid-cols-2 gap-3"
+          data-testid="admin-nav-grid"
+        >
+          {navLinks.map((link, i) => (
+            <motion.div
+              key={link.url}
+              initial={{ opacity: 0, scale: 0.94 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.22, delay: 0.1 + i * 0.04 }}
+            >
+              <ActionCard
+                icon={link.icon}
+                label={link.label}
+                accentColor={link.accentColor}
+                glowColor={link.glowColor}
+                onClick={() => navigate(link.url)}
+                testId={link.testId}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
 
       {/* Bottom Sheet Panel */}
       {openPanel && (
@@ -614,6 +666,6 @@ export default function AdminActionDashboard() {
           {panels[openPanel].content}
         </BottomSheet>
       )}
-    </>
+    </div>
   );
 }
