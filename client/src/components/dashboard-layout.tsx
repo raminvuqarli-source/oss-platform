@@ -39,7 +39,6 @@ import {
   Bell,
   Settings,
   LogOut,
-  Users,
   BarChart3,
   Inbox,
   User,
@@ -55,15 +54,12 @@ import {
   AlertTriangle,
   BedDouble,
   Wrench,
-  DoorOpen,
   CreditCard,
   Zap,
   Lock,
   Thermometer,
   Activity,
   Home,
-  Star,
-  SprayCan,
   ChefHat,
   UtensilsCrossed,
   Utensils,
@@ -238,25 +234,7 @@ function DashboardSidebar() {
             label: t("nav.group.core", "Core"),
             items: [
               { title: t("common.dashboard"), icon: Inbox, url: "/dashboard", testId: "nav-dashboard" },
-              { title: t("nav.calendar", "Calendar"), icon: CalendarDays, url: "/dashboard?view=calendar", testId: "nav-calendar" },
               { title: t("nav.guests", "Guests"), icon: UserCheck, url: "/guests", testId: "nav-guests" },
-            ],
-          },
-          {
-            label: t("nav.group.operations", "Operations"),
-            items: [
-              { title: t("nav.serviceRequests", "Service Requests"), icon: Wrench, url: "/dashboard?view=requests", testId: "nav-requests" },
-              { title: t("nav.tasks", "Tasks"), icon: ClipboardList, url: "/dashboard?view=tasks", testId: "nav-tasks" },
-              { title: t("nav.housekeeping", "Housekeeping"), icon: SprayCan, url: "/dashboard?view=housekeeping", testId: "nav-housekeeping" },
-              { title: t("nav.roomPrep", "Room Prep"), icon: DoorOpen, url: "/dashboard?view=room-prep", testId: "nav-room-prep" },
-              { title: t("nav.roomStatus", "Room Status"), icon: BedDouble, url: "/dashboard?view=room-status", testId: "nav-room-status" },
-              { title: t("staffPerformance.myRating", "My Rating"), icon: Star, url: "/dashboard?view=my-performance", testId: "nav-my-performance" },
-            ],
-          },
-          {
-            label: t("nav.group.communication", "Communication"),
-            items: [
-              { title: t("nav.guestMessages", "Guest Messages"), icon: MessageSquare, url: "/dashboard?view=messages", testId: "nav-messages" },
               { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-notifications" },
             ],
           },
@@ -273,22 +251,14 @@ function DashboardSidebar() {
           {
             label: t("nav.group.core", "Core"),
             items: [
-              { title: t("nav.rooms", "Rooms"), icon: BedDouble, url: "/dashboard", testId: "nav-hk-rooms" },
-              { title: t("nav.calendar", "Calendar"), icon: CalendarDays, url: "/dashboard?view=calendar", testId: "nav-hk-calendar" },
-            ],
-          },
-          {
-            label: t("nav.group.operations", "Operations"),
-            items: [
-              { title: t("nav.tasks", "Tasks"), icon: ClipboardList, url: "/dashboard?view=tasks", testId: "nav-hk-tasks" },
-              { title: t("staffPerformance.myRating", "My Rating"), icon: Star, url: "/dashboard?view=rating", testId: "nav-hk-rating" },
-            ],
-          },
-          {
-            label: t("nav.group.communication", "Communication"),
-            items: [
-              { title: t("nav.messages", "Messages"), icon: MessageSquare, url: "/dashboard?view=messages", testId: "nav-hk-messages" },
+              { title: t("common.dashboard"), icon: BedDouble, url: "/dashboard", testId: "nav-hk-rooms" },
               { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-hk-notifications" },
+            ],
+          },
+          {
+            label: t("nav.group.system", "System"),
+            items: [
+              { title: t("common.settings"), icon: Settings, url: "/settings", testId: "nav-settings" },
             ],
           },
         ];
@@ -300,34 +270,6 @@ function DashboardSidebar() {
             label: t("nav.group.core", "Core"),
             items: [
               { title: t("common.dashboard"), icon: BarChart3, url: "/dashboard", testId: "nav-dashboard" },
-              { title: t("nav.calendar", "Calendar"), icon: CalendarDays, url: "/dashboard?view=calendar", testId: "nav-calendar" },
-              { title: t("nav.guests", "Guests"), icon: UserCheck, url: "/guests", testId: "nav-guests" },
-              { title: t("nav.staff", "Staff"), icon: Users, url: "/staff", testId: "nav-staff" },
-            ],
-          },
-          {
-            label: t("nav.group.operations", "Operations"),
-            items: [
-              { title: t("nav.serviceRequests", "Service Requests"), icon: Wrench, url: "/dashboard?view=requests", testId: "nav-requests" },
-              { title: t("nav.tasks", "Tasks"), icon: ClipboardList, url: "/dashboard?view=tasks", testId: "nav-tasks" },
-              { title: t("nav.housekeeping", "Housekeeping"), icon: SprayCan, url: "/dashboard?view=housekeeping", testId: "nav-housekeeping" },
-              { title: t("nav.roomPrep", "Room Prep"), icon: DoorOpen, url: "/dashboard?view=room-prep", testId: "nav-room-prep" },
-              { title: t("nav.roomStatus", "Room Status"), icon: BedDouble, url: "/dashboard?view=room-status", testId: "nav-room-status" },
-              { title: t("nav.finance", "Finance"), icon: Wallet, url: "/dashboard?view=finance", testId: "nav-finance" },
-              { title: t("staffPerformance.myRating", "My Rating"), icon: Star, url: "/dashboard?view=my-performance", testId: "nav-my-performance" },
-            ],
-          },
-          {
-            label: t("nav.group.restaurant", "Restaurant"),
-            items: [
-              { title: t("nav.restaurantManagement", "Restaurant Management"), icon: UtensilsCrossed, url: "/restaurant/manager", testId: "nav-restaurant-manager" },
-              { title: t("nav.kitchenDisplay", "Kitchen Display (KDS)"), icon: ChefHat, url: "/restaurant/kitchen", testId: "nav-restaurant-kitchen" },
-            ],
-          },
-          {
-            label: t("nav.group.communication", "Communication"),
-            items: [
-              { title: t("nav.guestMessages", "Guest Messages"), icon: MessageSquare, url: "/dashboard?view=messages", testId: "nav-messages" },
               { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-notifications" },
             ],
           },
@@ -345,14 +287,13 @@ function DashboardSidebar() {
             label: t("nav.group.restaurant", "Restaurant"),
             items: [
               { title: t("nav.restaurantManagement", "Restaurant Management"), icon: UtensilsCrossed, url: "/restaurant/manager", testId: "nav-restaurant-manager" },
-              { title: t("nav.kitchenDisplay", "Kitchen Display (KDS)"), icon: ChefHat, url: "/restaurant/kitchen", testId: "nav-restaurant-kitchen" },
-              { title: t("nav.waiterView", "Waiter View"), icon: Utensils, url: "/restaurant/waiter", testId: "nav-restaurant-waiter" },
+              { title: t("nav.kitchenDisplay", "Kitchen"), icon: ChefHat, url: "/restaurant/kitchen", testId: "nav-restaurant-kitchen" },
+              { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-notifications" },
             ],
           },
           {
             label: t("nav.group.system", "System"),
             items: [
-              { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-notifications" },
               { title: t("common.settings"), icon: Settings, url: "/settings", testId: "nav-settings" },
             ],
           },
@@ -361,9 +302,9 @@ function DashboardSidebar() {
       case "kitchen_staff":
         return [
           {
-            label: t("nav.group.kitchen", "Kitchen"),
+            label: t("nav.group.core", "Core"),
             items: [
-              { title: t("nav.kitchenDisplay", "Kitchen Display (KDS)"), icon: ChefHat, url: "/restaurant/kitchen", testId: "nav-kitchen-display" },
+              { title: t("nav.kitchenDisplay", "Kitchen Display"), icon: ChefHat, url: "/restaurant/kitchen", testId: "nav-kitchen-display" },
             ],
           },
           {
@@ -377,15 +318,15 @@ function DashboardSidebar() {
       case "waiter":
         return [
           {
-            label: t("nav.group.restaurant", "Restaurant"),
+            label: t("nav.group.core", "Core"),
             items: [
               { title: t("nav.waiterOrders", "Orders"), icon: Utensils, url: "/restaurant/waiter", testId: "nav-waiter-orders" },
+              { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-notifications" },
             ],
           },
           {
             label: t("nav.group.system", "System"),
             items: [
-              { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-notifications" },
               { title: t("common.settings"), icon: Settings, url: "/settings", testId: "nav-settings" },
             ],
           },
@@ -394,7 +335,7 @@ function DashboardSidebar() {
       case "restaurant_cleaner":
         return [
           {
-            label: t("nav.group.cleaning", "Cleaning"),
+            label: t("nav.group.core", "Core"),
             items: [
               { title: t("nav.cleaningTasks", "Cleaning Tasks"), icon: Sparkles, url: "/restaurant/cleaner", testId: "nav-restaurant-cleaner" },
             ],
@@ -410,15 +351,15 @@ function DashboardSidebar() {
       case "restaurant_cashier":
         return [
           {
-            label: t("nav.group.cashier", "Cashier"),
+            label: t("nav.group.core", "Core"),
             items: [
               { title: t("nav.cashierTables", "Tables & Bills"), icon: Wallet, url: "/restaurant/cashier", testId: "nav-cashier-tables" },
+              { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-cashier-notifications" },
             ],
           },
           {
             label: t("nav.group.system", "System"),
             items: [
-              { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-cashier-notifications" },
               { title: t("common.settings"), icon: Settings, url: "/settings", testId: "nav-settings" },
             ],
           },
@@ -433,12 +374,12 @@ function DashboardSidebar() {
               { title: t("nav.services", "Services"), icon: Wrench, url: "/dashboard?view=services", testId: "nav-services" },
               { title: t("nav.messages", "Messages"), icon: MessageSquare, url: "/dashboard?view=messages", testId: "nav-messages" },
               { title: t("nav.smartRoom", "Smart Room"), icon: Zap, url: "/dashboard?view=room-controls", testId: "nav-room-controls", restricted: (user?.role === "guest" && !isDemoMode) || !isFeatureEnabled("smart_controls") },
+              { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-notifications" },
             ],
           },
           {
             label: t("nav.group.system", "System"),
             items: [
-              { title: t("common.notifications"), icon: Bell, url: "/notifications", badge: unreadCount, testId: "nav-notifications" },
               { title: t("common.settings"), icon: Settings, url: "/settings", testId: "nav-settings" },
             ],
           },
