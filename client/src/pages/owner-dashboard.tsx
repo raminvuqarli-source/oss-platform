@@ -6690,6 +6690,17 @@ export default function OwnerDashboard() {
         </Card>
       )}
 
+      {currentView && (
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group -mt-2"
+          data-testid="button-owner-back-to-hub"
+        >
+          <ChevronLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+          {t('common.back', 'Back')}
+        </button>
+      )}
+
       <div className="relative">
         {trialStatus?.isTrial && trialStatus.isExpired && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg" data-testid="trial-expired-overlay">

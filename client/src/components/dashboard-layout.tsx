@@ -838,6 +838,62 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   };
 
+  if (user.role === "owner_admin") {
+    return (
+      <div className="flex flex-col min-h-screen bg-background">
+        <header className="flex items-center justify-between gap-2 px-4 py-2.5 border-b shrink-0">
+          <a href="/" onClick={e => { e.preventDefault(); navigate("/"); }} className="flex items-center gap-2">
+            <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <Building2 className="size-4" />
+            </div>
+            <span className="font-semibold text-sm">O.S.S</span>
+          </a>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher user={user} />
+            <ThemeToggle />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-muted transition-colors" data-testid="owner-topbar-user-menu">
+                  <Avatar className="h-7 w-7 rounded-md">
+                    <AvatarFallback className="rounded-md text-xs bg-primary/10 text-primary">
+                      {user.fullName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <ChevronUp className="h-3.5 w-3.5 text-muted-foreground rotate-180" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="font-semibold text-sm truncate">{user.fullName}</span>
+                    <span className="text-xs text-muted-foreground truncate">@{user.username}</span>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer" data-testid="owner-menu-settings">
+                  <Settings className="mr-2 h-4 w-4" />
+                  {t("common.settings")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/notifications")} className="cursor-pointer" data-testid="owner-menu-notifications">
+                  <Bell className="mr-2 h-4 w-4" />
+                  {t("common.notifications")}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive cursor-pointer" data-testid="owner-menu-logout">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  {t("common.signOut")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </header>
+        <main className="flex-1 overflow-auto p-3 sm:p-6 pb-6">
+          {children}
+        </main>
+      </div>
+    );
+  }
+
   if (user.role === "guest") {
     return (
       <div className="flex flex-col min-h-screen bg-background">
