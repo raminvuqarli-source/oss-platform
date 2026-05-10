@@ -37,7 +37,13 @@ export function BottomSheet({
   }, [open]);
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        // Don't close BottomSheet if a modal/dialog is currently open on top
+        const openDialog = document.querySelector('[role="dialog"][data-state="open"]');
+        if (!openDialog) onClose();
+      }
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);

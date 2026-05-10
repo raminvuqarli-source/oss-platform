@@ -327,8 +327,12 @@ function AddUnitDialog({ propertyId, onSuccess }: { propertyId: string; onSucces
       resetForm();
       onSuccess();
     },
-    onError: () => {
-      toast({ title: t('errors.somethingWentWrong'), description: t('owner.failedToCreateSpace'), variant: "destructive" });
+    onError: (error: any) => {
+      if (isPlanLimitError(error)) {
+        toast({ title: t('errors.planLimit', 'Plan limiti'), description: error?.message || t('owner.failedToCreateSpace'), variant: "destructive" });
+      } else {
+        toast({ title: t('errors.somethingWentWrong'), description: error?.message || t('owner.failedToCreateSpace'), variant: "destructive" });
+      }
     },
   });
 
@@ -682,7 +686,7 @@ function PropertyUnitsPanel({ propertyId }: { propertyId: string }) {
   const { data: units, isLoading } = useQuery<Unit[]>({
     queryKey: ["/api/properties", propertyId, "units"],
     queryFn: async () => {
-      const res = await fetch(`/api/properties/${propertyId}/units`, { credentials: "include" });
+      const res = await apiRequest("GET", `/api/properties/${propertyId}/units`);
       if (!res.ok) throw new Error(t('errors.somethingWentWrong'));
       return res.json();
     },
@@ -691,9 +695,12 @@ function PropertyUnitsPanel({ propertyId }: { propertyId: string }) {
   const { data: doorActivity } = useQuery<Record<string, { opensToday: number; closesToday: number; currentlyLocked: boolean }>>({
     queryKey: ["/api/door-activity", propertyId],
     queryFn: async () => {
-      const res = await fetch(`/api/door-activity/${propertyId}`, { credentials: "include" });
-      if (!res.ok) return {};
-      return res.json();
+      try {
+        const res = await apiRequest("GET", `/api/door-activity/${propertyId}`);
+        return res.json();
+      } catch {
+        return {};
+      }
     },
     enabled: smartEnabled,
     refetchInterval: 30000,
@@ -1545,7 +1552,7 @@ function PropertyTeamPanel({ propertyId, onMessageStaff }: { propertyId: string;
   const { data, isLoading } = useQuery<{ staff: StaffMember[]; invitations: PendingInvitation[] }>({
     queryKey: ["/api/properties", propertyId, "staff"],
     queryFn: async () => {
-      const res = await fetch(`/api/properties/${propertyId}/staff`, { credentials: "include" });
+      const res = await apiRequest("GET", `/api/properties/${propertyId}/staff`);
       if (!res.ok) throw new Error(t('errors.somethingWentWrong'));
       return res.json();
     },
