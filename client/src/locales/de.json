@@ -2909,7 +2909,14 @@
     "startCleaning": "Wird gereinigt",
     "markReady": "BEREIT",
     "statusUpdated": "Zimmerstatus aktualisiert",
-    "error": "Ein Fehler ist aufgetreten"
+    "error": "Ein Fehler ist aufgetreten",
+    "roomsDesc": "View and update room statuses",
+    "tasksDesc": "Your assigned cleaning tasks",
+    "ratingDesc": "Performance and scores",
+    "calendarDesc": "Check-ins and check-outs",
+    "messagesDesc": "Chat with managers",
+    "title": "Housekeeping",
+    "subtitle": "Rooms, tasks, calendar and messages"
   },
   "rm": {
     "pageTitle": "Restaurantmanager",

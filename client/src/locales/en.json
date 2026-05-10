@@ -3032,7 +3032,14 @@
     "startCleaning": "Cleaning",
     "markReady": "READY",
     "statusUpdated": "Room status updated",
-    "error": "An error occurred"
+    "error": "An error occurred",
+    "roomsDesc": "View and update room statuses",
+    "tasksDesc": "Your assigned cleaning tasks",
+    "ratingDesc": "Performance and scores",
+    "calendarDesc": "Check-ins and check-outs",
+    "messagesDesc": "Chat with managers",
+    "title": "Housekeeping",
+    "subtitle": "Rooms, tasks, calendar and messages"
   },
   "rm": {
     "pageTitle": "Restaurant Manager",

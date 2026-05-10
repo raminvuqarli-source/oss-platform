@@ -2909,7 +2909,14 @@
     "startCleaning": "En nettoyage",
     "markReady": "PRÊT",
     "statusUpdated": "Statut de chambre mis à jour",
-    "error": "Une erreur s'est produite"
+    "error": "Une erreur s'est produite",
+    "roomsDesc": "View and update room statuses",
+    "tasksDesc": "Your assigned cleaning tasks",
+    "ratingDesc": "Performance and scores",
+    "calendarDesc": "Check-ins and check-outs",
+    "messagesDesc": "Chat with managers",
+    "title": "Housekeeping",
+    "subtitle": "Rooms, tasks, calendar and messages"
   },
   "rm": {
     "pageTitle": "Responsable du Restaurant",

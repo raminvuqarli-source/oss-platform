@@ -2909,7 +2909,14 @@
     "startCleaning": "جاري التنظيف",
     "markReady": "جاهز",
     "statusUpdated": "تم تحديث حالة الغرفة",
-    "error": "حدث خطأ"
+    "error": "حدث خطأ",
+    "roomsDesc": "View and update room statuses",
+    "tasksDesc": "Your assigned cleaning tasks",
+    "ratingDesc": "Performance and scores",
+    "calendarDesc": "Check-ins and check-outs",
+    "messagesDesc": "Chat with managers",
+    "title": "Housekeeping",
+    "subtitle": "Rooms, tasks, calendar and messages"
   },
   "rm": {
     "pageTitle": "مدير المطعم",

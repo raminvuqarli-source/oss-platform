@@ -2909,7 +2909,14 @@
     "startCleaning": "در حال نظافت",
     "markReady": "آماده",
     "statusUpdated": "وضعیت اتاق به‌روز شد",
-    "error": "خطایی رخ داد"
+    "error": "خطایی رخ داد",
+    "roomsDesc": "View and update room statuses",
+    "tasksDesc": "Your assigned cleaning tasks",
+    "ratingDesc": "Performance and scores",
+    "calendarDesc": "Check-ins and check-outs",
+    "messagesDesc": "Chat with managers",
+    "title": "Housekeeping",
+    "subtitle": "Rooms, tasks, calendar and messages"
   },
   "rm": {
     "pageTitle": "مدیر رستوران",

@@ -3004,7 +3004,14 @@
     "startCleaning": "Temizlənir",
     "markReady": "HAZIRDIR",
     "statusUpdated": "Otaq statusu yeniləndi",
-    "error": "Xəta baş verdi"
+    "error": "Xəta baş verdi",
+    "roomsDesc": "Otaq statuslarını görün və yeniləyin",
+    "tasksDesc": "Sizə təyin edilmiş təmizlik tapşırıqları",
+    "ratingDesc": "Performans və qiymətlər",
+    "calendarDesc": "Giriş və çıxış tarixləri",
+    "messagesDesc": "Müdirlərlə yazışın",
+    "title": "Təmizlik",
+    "subtitle": "Otaqlar, tapşırıqlar, təqvim və mesajlar"
   },
   "rm": {
     "pageTitle": "Restoran Meneceri",

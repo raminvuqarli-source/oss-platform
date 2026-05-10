@@ -2909,7 +2909,14 @@
     "startCleaning": "Bezig met schoonmaken",
     "markReady": "KLAAR",
     "statusUpdated": "Kamerstatus bijgewerkt",
-    "error": "Er is een fout opgetreden"
+    "error": "Er is een fout opgetreden",
+    "roomsDesc": "View and update room statuses",
+    "tasksDesc": "Your assigned cleaning tasks",
+    "ratingDesc": "Performance and scores",
+    "calendarDesc": "Check-ins and check-outs",
+    "messagesDesc": "Chat with managers",
+    "title": "Housekeeping",
+    "subtitle": "Rooms, tasks, calendar and messages"
   },
   "rm": {
     "pageTitle": "Restaurantmanager",

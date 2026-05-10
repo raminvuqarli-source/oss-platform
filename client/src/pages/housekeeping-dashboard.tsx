@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type ElementType } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearch } from "wouter";
 import { useTranslation } from "react-i18next";
+import { motion } from "framer-motion";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +31,8 @@ import {
   Calendar,
   CheckCircle,
   RefreshCw,
+  ChevronLeft,
+  Sparkles,
 } from "lucide-react";
 
 interface RoomUnit {
@@ -482,60 +485,189 @@ function HkMessagesView() {
   );
 }
 
-const VIEWS = [
-  { id: "rooms",    labelKey: "hkDash.rooms",    icon: BedDouble },
-  { id: "tasks",    labelKey: "hkDash.tasks",    icon: ClipboardList },
-  { id: "rating",   labelKey: "hkDash.rating",   icon: Star },
-  { id: "calendar", labelKey: "hkDash.calendar", icon: CalendarDays },
-  { id: "messages", labelKey: "hkDash.messages", icon: MessageSquare },
-];
+const VALID_VIEWS = ["rooms", "tasks", "rating", "calendar", "messages"];
+
+function HousekeepingHub({ onNavigate }: { onNavigate: (v: string) => void }) {
+  const { t } = useTranslation();
+
+  const { data: units } = useQuery<RoomUnit[]>({
+    queryKey: ["/api/units/status"],
+    refetchInterval: 30000,
+  });
+
+  const dirty   = (units || []).filter(u => u.status === "dirty").length;
+  const cleaning = (units || []).filter(u => u.status === "cleaning").length;
+  const ready   = (units || []).filter(u => u.status === "ready" || u.status === "available").length;
+
+  type HubItem = {
+    icon: ElementType;
+    label: string;
+    desc: string;
+    iconBg: string;
+    iconColor: string;
+    badge?: number;
+    view: string;
+    testId: string;
+  };
+
+  const items: HubItem[] = [
+    {
+      icon: BedDouble,
+      label: t("hkDash.rooms", "Rooms"),
+      desc: t("hkDash.roomsDesc", "View and update room statuses"),
+      iconBg: "bg-blue-500/10",
+      iconColor: "text-blue-500",
+      badge: dirty + cleaning > 0 ? dirty + cleaning : undefined,
+      view: "rooms",
+      testId: "hub-rooms",
+    },
+    {
+      icon: ClipboardList,
+      label: t("hkDash.tasks", "Tasks"),
+      desc: t("hkDash.tasksDesc", "Your assigned cleaning tasks"),
+      iconBg: "bg-violet-500/10",
+      iconColor: "text-violet-500",
+      view: "tasks",
+      testId: "hub-tasks",
+    },
+    {
+      icon: Star,
+      label: t("hkDash.rating", "My Rating"),
+      desc: t("hkDash.ratingDesc", "Performance and scores"),
+      iconBg: "bg-amber-500/10",
+      iconColor: "text-amber-500",
+      view: "rating",
+      testId: "hub-rating",
+    },
+    {
+      icon: CalendarDays,
+      label: t("hkDash.calendar", "Calendar"),
+      desc: t("hkDash.calendarDesc", "Check-ins and check-outs"),
+      iconBg: "bg-emerald-500/10",
+      iconColor: "text-emerald-500",
+      view: "calendar",
+      testId: "hub-calendar",
+    },
+    {
+      icon: MessageSquare,
+      label: t("hkDash.messages", "Messages"),
+      desc: t("hkDash.messagesDesc", "Chat with managers"),
+      iconBg: "bg-indigo-500/10",
+      iconColor: "text-indigo-500",
+      view: "messages",
+      testId: "hub-messages",
+    },
+  ];
+
+  return (
+    <div className="space-y-3 pb-4">
+      {/* KPI strip */}
+      <motion.div
+        className="grid grid-cols-3 gap-2 mb-2"
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28 }}
+      >
+        {[
+          { label: t("roomStatus.dirty", "Dirty"),    value: dirty,    color: "text-yellow-500" },
+          { label: t("roomStatus.cleaning", "Cleaning"), value: cleaning, color: "text-blue-500" },
+          { label: t("roomStatus.ready", "Ready"),    value: ready,    color: "text-green-500" },
+        ].map(stat => (
+          <div key={stat.label} className="rounded-xl border border-border/50 bg-card px-3 py-2.5 text-center">
+            <p className={`text-base font-bold ${stat.color}`}>{stat.value}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5 leading-none">{stat.label}</p>
+          </div>
+        ))}
+      </motion.div>
+
+      {/* Action group */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28, delay: 0.06 }}
+        className="rounded-2xl border border-border/50 bg-card overflow-hidden"
+      >
+        <div className="flex items-center gap-2.5 px-4 py-3 border-b border-border/40 bg-muted/30">
+          <Sparkles className="h-4 w-4 text-primary shrink-0" />
+          <div className="min-w-0">
+            <p className="font-semibold text-sm leading-none">{t("hkDash.title", "Housekeeping")}</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{t("hkDash.subtitle", "Rooms, tasks, calendar and messages")}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 divide-x divide-y divide-border/30" data-testid="hk-view-tabs">
+          {items.map(item => (
+            <button
+              key={item.testId}
+              onClick={() => onNavigate(item.view)}
+              data-testid={`hk-tab-${item.view}`}
+              className="relative flex items-center gap-2.5 px-3.5 py-3.5 text-left hover:bg-muted/50 active:bg-muted transition-colors group"
+            >
+              <div className={`${item.iconBg} p-2 rounded-lg shrink-0`}>
+                <item.icon className={`h-4 w-4 ${item.iconColor}`} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[12.5px] font-medium text-foreground leading-tight">{item.label}</p>
+                <p className="text-[10.5px] text-muted-foreground leading-tight mt-0.5 truncate">{item.desc}</p>
+              </div>
+              {item.badge !== undefined && item.badge > 0 && (
+                <span className="absolute top-2 right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center shadow-sm">
+                  {item.badge > 99 ? "99+" : item.badge}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
 
 export default function HousekeepingDashboard() {
   const { t } = useTranslation();
   const searchString = useSearch();
   const params = new URLSearchParams(searchString);
-  const viewParam = params.get("view") || "rooms";
+  const viewParam = params.get("view") ?? "";
+  const currentView = VALID_VIEWS.includes(viewParam) ? viewParam : "";
 
-  const currentView = VIEWS.find(v => v.id === viewParam) ? viewParam : "rooms";
-
-  const setView = (v: string) => {
-    const url = v === "rooms" ? "/dashboard" : `/dashboard?view=${v}`;
+  const navigate = (v: string) => {
+    const url = v ? `/dashboard?view=${v}` : "/dashboard";
     window.history.pushState({}, "", url);
     window.dispatchEvent(new PopStateEvent("popstate"));
   };
 
+  const goBack = () => navigate("");
+
+  const viewTitle: Record<string, string> = {
+    rooms:    t("hkDash.rooms",    "Rooms"),
+    tasks:    t("hkDash.tasks",    "Tasks"),
+    rating:   t("hkDash.rating",   "My Rating"),
+    calendar: t("hkDash.calendar", "Calendar"),
+    messages: t("hkDash.messages", "Messages"),
+  };
+
+  if (!currentView) {
+    return <HousekeepingHub onNavigate={navigate} />;
+  }
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="flex flex-col items-center py-6 px-4">
-        <nav
-          className="inline-flex items-center gap-1 p-1 rounded-2xl bg-muted/60 border border-border/50 shadow-sm flex-wrap justify-center"
-          data-testid="hk-view-tabs"
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={goBack}
+          className="gap-1.5 text-muted-foreground hover:text-foreground -ml-1"
+          data-testid="hk-btn-back"
         >
-          {VIEWS.map(v => {
-            const Icon = v.icon;
-            const active = currentView === v.id;
-            return (
-              <button
-                key={v.id}
-                onClick={() => setView(v.id)}
-                data-testid={`hk-tab-${v.id}`}
-                className={`
-                  flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-150
-                  ${active
-                    ? "bg-background text-foreground shadow-sm border border-border/60"
-                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-                  }
-                `}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                <span>{t(v.labelKey)}</span>
-              </button>
-            );
-          })}
-        </nav>
+          <ChevronLeft className="h-4 w-4" />
+          {t("common.back", "Back")}
+        </Button>
+        <span className="text-muted-foreground/40">·</span>
+        <span className="text-sm font-semibold">{viewTitle[currentView]}</span>
       </div>
 
-      <div className="px-4 pb-8 max-w-6xl mx-auto w-full" data-testid={`hk-view-content-${currentView}`}>
+      <div data-testid={`hk-view-content-${currentView}`}>
         {currentView === "rooms"    && <RoomsView />}
         {currentView === "tasks"    && <HousekeepingView />}
         {currentView === "rating"   && <StaffMyPerformance />}
