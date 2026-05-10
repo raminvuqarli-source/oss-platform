@@ -1,0 +1,30 @@
+🚀 Replit AI üçün Təkmilləşdirilmiş Anbar (Inventory) Promptu:
+"Sən çox əla irəliləyirsən! İndi isə 'Dashboard Hub' daxilində Anbar (Inventory) modulunun vizual interfeysini quraq. Arxa plana (backend məntiqinə) toxunmadan, yalnız UI komponentlərini 'Action-First' və 'Progressive Disclosure' məntiqi ilə dizayn et.
+
+Aşağıdakı 4 kritik tələbə mütləq əməl et:
+
+1. Üçlü Məntiqi Ayrılıq (Hotel, Hotel Restaurant, Standalone Restaurant):
+Anbar sistemi platformanın hər üç qolu üçün UI-da əlavə edilməlidir. Otel və Restoran modulları arasında mövcud olan məntiqi ayrılığı qoru.
+
+Owner (Sahibkar) panelində 'Anbar' (və ya Inventory) düyməsinə basdıqda açılan paneldə 3 aydın tab (və ya qrup) olsun: 'Otel Anbarı', 'Daxili Restoran Anbarı' və 'Müstəqil Restoran Anbarı'.
+
+Hər üçünün vizual idarəetmə prinsipi tamamilə eyni olacaq (Eyni siyahı və eyni əlavə etmə məntiqi).
+
+2. İşçi Rollarına (Staff Roles) İnteqrasiya:
+Anbar yalnız Owner və ya Admin üçün deyil, onu işlədən personalın 'Action-First' daşbordunda da görünməlidir:
+
+Housekeeping (Xadimə başçısı) Daşbordu: Otaq ləvazimatları və minibar məhsullarını görmək/saymaq üçün 'Anbar' (və ya Stok) düyməsi əlavə et.
+
+Restaurant Manager / Chef Daşbordu: Mətbəx və bar stokunu idarə etmək üçün onlara da anbar panelinə çıxış düyməsi əlavə et.
+
+3. '+ Yeni Məhsul' və Excel İnteqrasiyası:
+Anbar panelində nəzərəçarpan '+ Yeni Məhsul' düyməsi olsun. Kliklədikdə iki seçim verilsin:
+
+Əllə Əlavə Et: (Ad, Kateqoriya, Alış Vahidi, Sərfiyyat Vahidi, Kritik Hədd).
+
+Excel Import: Sürüşdür-burax (Drag & Drop) sahəsi.
+
+4. DİQQƏT: Tərcümələr və Dil Vəhdəti (i18n):
+Platformada dil dəyişəndə anbar daxilindəki bütün mətnlər (düymələr, başlıqlar, input placeholder-ləri, xəbərdarlıqlar) avtomatik tərcümə olunmalıdır. İnterfeysdə ingilis və azərbaycan dillərinin qarışmasına qətiyyən yol vermə. UI-da istifadə olunan dilləri sinxronlaşdır.
+
+Bütün bu yeni elementləri mövcud Dark Theme (Tünd mövzu) strukturunda, mürəkkəb cədvəllər olmadan səliqəli Kart və SidePanel şəklində tətbiq et və nəticəni göstər!"

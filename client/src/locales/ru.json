@@ -2824,7 +2824,28 @@
     "delivered": "✅ ДОСТАВЛЕНО",
     "allActiveOrders": "Все активные заказы",
     "teamLabel": "Команда",
-    "noTeamMembers": "Участники команды не найдены"
+    "noTeamMembers": "Участники команды не найдены",
+    "finance": {
+      "title": "Финансы ресторана",
+      "subtitle": "Выручка ресторана, статистика заказов и анализ платежей",
+      "today": "Сегодня",
+      "thisMonth": "Этот месяц",
+      "allTime": "За всё время",
+      "allTimeLabel": "итого за всё время",
+      "orders": "заказов",
+      "paymentBreakdown": "По типу оплаты",
+      "cash": "Наличные",
+      "card": "Карта",
+      "roomCharge": "Счёт номера",
+      "orderStatus": "Статус заказов",
+      "statusPending": "Ожидает",
+      "statusCooking": "Готовится",
+      "statusReady": "Готово",
+      "statusDelivered": "Доставлено",
+      "pendingSettlement": "заказов ожидают оплаты",
+      "dailyHistory": "История по дням",
+      "noData": "Финансовые данные не найдены"
+    }
   },
   "channex": {
     "newBookingReceived": "Новое бронирование получено",

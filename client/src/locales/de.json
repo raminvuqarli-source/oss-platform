@@ -2811,7 +2811,28 @@
     "delivered": "✅ GELIEFERT",
     "allActiveOrders": "Alle aktiven Bestellungen",
     "teamLabel": "Team",
-    "noTeamMembers": "Keine Teammitglieder gefunden"
+    "noTeamMembers": "Keine Teammitglieder gefunden",
+    "finance": {
+      "title": "Restaurant-Finanzen",
+      "subtitle": "Restaurant-Einnahmen, Bestellstatistiken und Zahlungsanalyse",
+      "today": "Heute",
+      "thisMonth": "Diesen Monat",
+      "allTime": "Gesamt",
+      "allTimeLabel": "Gesamtsumme",
+      "orders": "Bestellungen",
+      "paymentBreakdown": "Nach Zahlungsart",
+      "cash": "Bargeld",
+      "card": "Karte",
+      "roomCharge": "Zimmerrechnung",
+      "orderStatus": "Bestellstatus",
+      "statusPending": "Ausstehend",
+      "statusCooking": "In Zubereitung",
+      "statusReady": "Fertig",
+      "statusDelivered": "Geliefert",
+      "pendingSettlement": "Bestellungen warten auf Abrechnung",
+      "dailyHistory": "Tagesverlauf",
+      "noData": "Keine Finanzdaten gefunden"
+    }
   },
   "channex": {
     "newBookingReceived": "Neue Buchung erhalten",

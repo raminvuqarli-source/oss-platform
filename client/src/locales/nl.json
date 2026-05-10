@@ -2811,7 +2811,28 @@
     "delivered": "✅ AFGELEVERD",
     "allActiveOrders": "Alle actieve bestellingen",
     "teamLabel": "Team",
-    "noTeamMembers": "Geen teamleden gevonden"
+    "noTeamMembers": "Geen teamleden gevonden",
+    "finance": {
+      "title": "Restaurant Financiën",
+      "subtitle": "Restaurant inkomsten, bestellingsstatistieken en betalingsanalyse",
+      "today": "Vandaag",
+      "thisMonth": "Deze Maand",
+      "allTime": "Totaal",
+      "allTimeLabel": "totaal aller tijden",
+      "orders": "bestellingen",
+      "paymentBreakdown": "Per Betalingstype",
+      "cash": "Contant",
+      "card": "Kaart",
+      "roomCharge": "Kamerrekening",
+      "orderStatus": "Bestellingstatus",
+      "statusPending": "In afwachting",
+      "statusCooking": "In bereiding",
+      "statusReady": "Klaar",
+      "statusDelivered": "Afgeleverd",
+      "pendingSettlement": "bestellingen wachten op verrekening",
+      "dailyHistory": "Dagelijkse Geschiedenis",
+      "noData": "Geen financiële gegevens gevonden"
+    }
   },
   "channex": {
     "newBookingReceived": "Nieuwe boeking ontvangen",

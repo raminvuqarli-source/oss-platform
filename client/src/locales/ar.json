@@ -2811,7 +2811,28 @@
     "delivered": "✅ تم التسليم",
     "allActiveOrders": "جميع الطلبات النشطة",
     "teamLabel": "الفريق",
-    "noTeamMembers": "لم يتم العثور على أعضاء فريق"
+    "noTeamMembers": "لم يتم العثور على أعضاء فريق",
+    "finance": {
+      "title": "مالية المطعم",
+      "subtitle": "إيرادات المطعم وإحصائيات الطلبات وتحليل المدفوعات",
+      "today": "اليوم",
+      "thisMonth": "هذا الشهر",
+      "allTime": "الإجمالي",
+      "allTimeLabel": "إجمالي كل الأوقات",
+      "orders": "طلبات",
+      "paymentBreakdown": "حسب طريقة الدفع",
+      "cash": "نقداً",
+      "card": "بطاقة",
+      "roomCharge": "حساب الغرفة",
+      "orderStatus": "حالة الطلبات",
+      "statusPending": "قيد الانتظار",
+      "statusCooking": "قيد الطهي",
+      "statusReady": "جاهز",
+      "statusDelivered": "تم التسليم",
+      "pendingSettlement": "طلبات بانتظار التسوية",
+      "dailyHistory": "السجل اليومي",
+      "noData": "لم يتم العثور على بيانات مالية"
+    }
   },
   "channex": {
     "newBookingReceived": "تم استلام حجز جديد",

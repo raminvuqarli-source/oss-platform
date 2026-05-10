@@ -2811,7 +2811,28 @@
     "delivered": "✅ تحویل داده شد",
     "allActiveOrders": "تمام سفارش‌های فعال",
     "teamLabel": "تیم",
-    "noTeamMembers": "هیچ عضو تیمی پیدا نشد"
+    "noTeamMembers": "هیچ عضو تیمی پیدا نشد",
+    "finance": {
+      "title": "مالی رستوران",
+      "subtitle": "درآمد رستوران، آمار سفارشات و تحلیل پرداخت‌ها",
+      "today": "امروز",
+      "thisMonth": "این ماه",
+      "allTime": "کل",
+      "allTimeLabel": "مجموع کل",
+      "orders": "سفارش",
+      "paymentBreakdown": "بر اساس نوع پرداخت",
+      "cash": "نقدی",
+      "card": "کارت",
+      "roomCharge": "حساب اتاق",
+      "orderStatus": "وضعیت سفارشات",
+      "statusPending": "در انتظار",
+      "statusCooking": "در حال پخت",
+      "statusReady": "آماده",
+      "statusDelivered": "تحویل داده شد",
+      "pendingSettlement": "سفارش در انتظار تسویه",
+      "dailyHistory": "تاریخچه روزانه",
+      "noData": "داده مالی یافت نشد"
+    }
   },
   "channex": {
     "newBookingReceived": "رزرو جدید دریافت شد",

@@ -2824,7 +2824,28 @@
     "delivered": "✅ TESLİM EDİLDİ",
     "allActiveOrders": "Tüm aktif siparişler",
     "teamLabel": "Ekip",
-    "noTeamMembers": "Ekip üyesi bulunamadı"
+    "noTeamMembers": "Ekip üyesi bulunamadı",
+    "finance": {
+      "title": "Restoran Finansı",
+      "subtitle": "Restoran geliri, sipariş istatistikleri ve ödeme analizi",
+      "today": "Bugün",
+      "thisMonth": "Bu Ay",
+      "allTime": "Tüm Zamanlar",
+      "allTimeLabel": "toplam",
+      "orders": "sipariş",
+      "paymentBreakdown": "Ödeme Türüne Göre",
+      "cash": "Nakit",
+      "card": "Kart",
+      "roomCharge": "Oda Hesabı",
+      "orderStatus": "Sipariş Durumu",
+      "statusPending": "Bekliyor",
+      "statusCooking": "Pişiriliyor",
+      "statusReady": "Hazır",
+      "statusDelivered": "Teslim Edildi",
+      "pendingSettlement": "sipariş ödeme bekliyor",
+      "dailyHistory": "Günlük Geçmiş",
+      "noData": "Finansal veri bulunamadı"
+    }
   },
   "channex": {
     "newBookingReceived": "Yeni Rezervasyon Alındı",

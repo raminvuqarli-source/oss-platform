@@ -2811,7 +2811,28 @@
     "delivered": "✅ ENTREGADO",
     "allActiveOrders": "Todos los pedidos activos",
     "teamLabel": "Equipo",
-    "noTeamMembers": "No se encontraron miembros del equipo"
+    "noTeamMembers": "No se encontraron miembros del equipo",
+    "finance": {
+      "title": "Finanzas del Restaurante",
+      "subtitle": "Ingresos del restaurante, estadísticas de pedidos y análisis de pagos",
+      "today": "Hoy",
+      "thisMonth": "Este Mes",
+      "allTime": "Total General",
+      "allTimeLabel": "total acumulado",
+      "orders": "pedidos",
+      "paymentBreakdown": "Por Tipo de Pago",
+      "cash": "Efectivo",
+      "card": "Tarjeta",
+      "roomCharge": "Cargo a Habitación",
+      "orderStatus": "Estado de Pedidos",
+      "statusPending": "Pendiente",
+      "statusCooking": "En Cocina",
+      "statusReady": "Listo",
+      "statusDelivered": "Entregado",
+      "pendingSettlement": "pedidos pendientes de cobro",
+      "dailyHistory": "Historial Diario",
+      "noData": "No se encontraron datos financieros"
+    }
   },
   "channex": {
     "newBookingReceived": "Nueva reserva recibida",

@@ -2906,7 +2906,28 @@
     "delivered": "✅ TƏHVİL VERİLDİ",
     "allActiveOrders": "Bütün aktiv sifarişlər",
     "teamLabel": "Əkip",
-    "noTeamMembers": "Əkip üzvü tapılmadı"
+    "noTeamMembers": "Əkip üzvü tapılmadı",
+    "finance": {
+      "title": "Restoran Maliyyəsi",
+      "subtitle": "Restoran gəliri, sifariş statistikası və ödəniş analizi",
+      "today": "Bu gün",
+      "thisMonth": "Bu ay",
+      "allTime": "Ümumi",
+      "allTimeLabel": "bütün zamanlar",
+      "orders": "sifariş",
+      "paymentBreakdown": "Ödəniş növü üzrə",
+      "cash": "Nağd",
+      "card": "Kart",
+      "roomCharge": "Otaq hesabı",
+      "orderStatus": "Sifariş vəziyyəti",
+      "statusPending": "Gözləyir",
+      "statusCooking": "Bişirilir",
+      "statusReady": "Hazır",
+      "statusDelivered": "Çatdırıldı",
+      "pendingSettlement": "sifariş hesablaşma gözləyir",
+      "dailyHistory": "Günlük tarixçə",
+      "noData": "Maliyyə məlumatları tapılmadı"
+    }
   },
   "channex": {
     "newBookingReceived": "Yeni Rezervasiya Alındı",

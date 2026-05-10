@@ -2934,7 +2934,28 @@
     "delivered": "✅ DELIVERED",
     "allActiveOrders": "All active orders",
     "teamLabel": "Team",
-    "noTeamMembers": "No team members found"
+    "noTeamMembers": "No team members found",
+    "finance": {
+      "title": "Restaurant Finance",
+      "subtitle": "Restaurant revenue, order statistics and payment analysis",
+      "today": "Today",
+      "thisMonth": "This Month",
+      "allTime": "All Time",
+      "allTimeLabel": "all time total",
+      "orders": "orders",
+      "paymentBreakdown": "Payment Breakdown",
+      "cash": "Cash",
+      "card": "Card",
+      "roomCharge": "Room Charge",
+      "orderStatus": "Order Status",
+      "statusPending": "Pending",
+      "statusCooking": "Cooking",
+      "statusReady": "Ready",
+      "statusDelivered": "Delivered",
+      "pendingSettlement": "orders awaiting settlement",
+      "dailyHistory": "Daily History",
+      "noData": "No financial data found"
+    }
   },
   "channex": {
     "newBookingReceived": "New Booking Received",
