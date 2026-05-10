@@ -13,6 +13,131 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "oss-smart-hospitality-global-hotel-restaurant-management",
+    title: "O.S.S. Smart Hospitality: The All-in-One Hotel & Restaurant Management Platform Built for the Modern Era",
+    excerpt: "From property management and IoT smart rooms to real-time kitchen displays and dynamic pricing — O.S.S. delivers enterprise-grade hospitality software at a fraction of the cost. Here's why operators across the region are switching.",
+    date: "2026-05-11",
+    imageUrl: "https://images.unsplash.com/photo-1455587734955-081b22074882?w=1200&q=80",
+    author: "O.S.S. Team",
+    authorTitle: "Smart Hospitality",
+    readMinutes: 9,
+    tags: ["Hotel Management", "PMS", "POS", "Smart Hospitality", "Hotel Technology"],
+    content: `
+<p class="lead">The global hospitality industry is undergoing its most significant technological shift in decades. Guests expect seamless digital experiences. Operators demand real-time data. Owners need profitability tools that actually work. Yet most hotels and restaurants still run on fragmented, overpriced legacy software that was never designed for the way hospitality works today. O.S.S. Smart Hospitality was built to change that.</p>
+
+<h2>The Problem with Today's Hospitality Software</h2>
+<p>Walk into most independent hotels or mid-size restaurant groups and you'll find the same story: a property management system that costs a fortune in licensing fees, a separate POS for the restaurant, a third tool for housekeeping, a spreadsheet for analytics, and a WhatsApp group to hold it all together. Each system speaks a different language. Data lives in silos. The owner gets the real picture only at month end — and by then, it's too late to act.</p>
+<p>The consequences are measurable:</p>
+<ul>
+<li>Overbookings caused by unsynchronized OTA channels.</li>
+<li>Revenue left on the table due to static, one-size-fits-all pricing.</li>
+<li>Guest complaints about slow check-in that damage review scores.</li>
+<li>Housekeeping inefficiencies that push checkout delays and hurt room turnover.</li>
+<li>Restaurant orders lost in translation between the floor and the kitchen.</li>
+</ul>
+<p>O.S.S. eliminates every one of these failure points — in a single, unified platform.</p>
+
+<h2>Two Modules. One Platform. Complete Control.</h2>
+
+<h3>🏨 Hotel Module — Full Property Management System (PMS)</h3>
+<p>O.S.S.'s hotel module covers the entire guest journey, from the moment a reservation is made to the moment the invoice is settled.</p>
+
+<h4>Availability & Channel Management</h4>
+<p>Real-time two-way synchronization with Booking.com, Airbnb, Expedia, and other OTA platforms via Channex.io. Rate and availability updates propagate across all channels instantly. Overbooking risk is eliminated at the source, not managed after the fact.</p>
+
+<h4>Dynamic Pricing Engine</h4>
+<p>Static rack rates are the fastest way to leave revenue on the table. O.S.S.'s pricing engine evaluates occupancy trends, lead time, day-of-week patterns, local events, and competitor positioning to automatically set the optimal rate for every room type, every night. Properties using dynamic pricing consistently report 15–25% uplift in RevPAR within the first quarter.</p>
+
+<h4>Online Check-in & Digital Guest Journey</h4>
+<p>Guests receive a check-in link 24–48 hours before arrival. They complete identity verification, sign hotel policies digitally, submit special requests, and optionally upgrade their room — all from their phone. On arrival, they skip the queue and go straight to their room. Front desk staff shift from processing paperwork to building genuine guest relationships.</p>
+
+<h4>IoT Smart Room Controls</h4>
+<p>Connected room controls give guests real authority over their environment: lighting brightness, curtain position, temperature, and AI-assisted wake-up scheduling. For the property, smart room data drives energy savings of 30–40% — significant across a full portfolio. Maintenance issues are flagged automatically before guests notice them.</p>
+
+<h4>Housekeeping Automation</h4>
+<p>O.S.S.'s housekeeping engine auto-generates tasks based on checkout and check-in schedules, balances workload across available staff, tracks room status in real time (dirty → cleaning → inspected → ready), and prevents duplicate assignments. The result: faster room turnover, consistent quality standards, and dramatically reduced supervisor oversight burden.</p>
+
+<h4>Guest Folio & Financial Management</h4>
+<p>Every charge — room rate, restaurant spend, spa service, minibar — flows into a single guest folio. Split payments across cash, card, and bank transfer. Multi-currency support. Automated tax calculation. PDF invoice generation. Night audit runs automatically at 2:00 AM. The numbers are always right and always ready.</p>
+
+<h4>Multi-Property Dashboard</h4>
+<p>Managing two properties is not twice as complex as managing one — it's ten times as complex, unless you have a unified view. O.S.S. consolidates all properties into a single dashboard: occupancy, RevPAR, revenue, expenses, housekeeping status, and guest communications — all in one place. Adding a new property takes minutes, not months.</p>
+
+<h3>🍽️ Restaurant Module — Complete POS Ecosystem</h3>
+<p>O.S.S.'s restaurant module is built for the full operational reality of food & beverage — from the moment a guest is seated to the moment the till is balanced.</p>
+
+<h4>Kitchen Display System (KDS)</h4>
+<p>Paper tickets are slow, illegible, and lost. O.S.S. KDS pushes every order to the kitchen display the instant it's placed — routed to the correct station (hot kitchen, cold kitchen, bar), colour-coded by urgency, with elapsed time visible at a glance. Average table-to-kitchen communication time drops from 4–6 minutes to under 30 seconds.</p>
+
+<h4>Waiter & Table Management</h4>
+<p>The waiter app shows live table status: occupied, ordering, waiting for food, ready to pay. Call-waiter notifications arrive instantly on the server's device. Orders can be split, merged, or transferred between tables without interrupting the kitchen. Shift handovers take seconds, not ten-minute briefings.</p>
+
+<h4>Flexible Payment Settlement</h4>
+<p>Cash, card, split bills, partial payments, and — for hotel restaurants — direct posting to the guest's room folio. The cashier panel consolidates all open bills, today's revenue by payment type, and historical transaction records. End-of-day reconciliation that once took 40 minutes now takes under 8.</p>
+
+<h4>Real-Time Restaurant Analytics</h4>
+<p>Which dishes have the highest margin? Which server drives the highest average spend per cover? Which two-hour window accounts for 60% of weekly revenue? O.S.S. answers these questions live, not in a monthly report that arrives too late to act on. Menu engineering decisions become data-driven, not gut-feel.</p>
+
+<h2>Enterprise Features at Independent Operator Pricing</h2>
+<p>O.S.S. was designed from the ground up to be accessible to independent hotels and restaurant groups — not just the global chains that can afford six-figure implementation projects. What this means in practice:</p>
+<ul>
+<li><strong>No hardware lock-in:</strong> Runs on any modern browser, tablet, or smartphone. Existing devices work from day one.</li>
+<li><strong>No implementation consultant required:</strong> A 4-step onboarding wizard walks new properties through full setup — room types, rate plans, staff roles, integrations — in under two hours.</li>
+<li><strong>14-day free trial:</strong> Full functionality, no credit card required. Real data, real bookings, real operations.</li>
+<li><strong>Transparent subscription pricing:</strong> Flat monthly rate per property, scaled to size. No per-booking fees, no OTA-style commission structures.</li>
+</ul>
+
+<h2>Security & Reliability Built In</h2>
+<p>Hospitality software handles sensitive guest data — passport numbers, payment details, personal preferences. O.S.S. is built with a security-first architecture: role-based access control ensures each staff member sees only what they need, all sessions are protected with HttpOnly cookies and rate-limited authentication, and tenant data is fully isolated at the database level. Daily automated backups with retention policies mean no data is ever at risk.</p>
+
+<h2>Integration-Ready by Default</h2>
+<p>O.S.S. connects out of the box with the services operators already use:</p>
+<ul>
+<li><strong>OTA channels</strong> via Channex.io (Booking.com, Airbnb, Expedia, and 200+ others)</li>
+<li><strong>Payment gateways</strong> — local and international options including Epoint.az</li>
+<li><strong>Email communications</strong> via Resend for booking confirmations, billing notifications, and guest communications</li>
+<li><strong>Push notifications</strong> via OneSignal for real-time staff alerts</li>
+<li><strong>WebSocket-powered real-time updates</strong> — KDS, housekeeping, guest requests, and calendar events update live without page refresh</li>
+</ul>
+
+<h2>Who Is O.S.S. Built For?</h2>
+<p>O.S.S. serves the full spectrum of hospitality operations:</p>
+<ul>
+<li><strong>Boutique hotels (10–50 rooms):</strong> Professional PMS without the enterprise price tag or implementation complexity.</li>
+<li><strong>City hotels (50–200 rooms):</strong> Full OTA sync, dynamic pricing, guest folio management, and multi-department coordination.</li>
+<li><strong>Multi-property operators:</strong> Unified control across all assets, shared guest profiles, consolidated reporting.</li>
+<li><strong>Hotel restaurants:</strong> Seamless otel-restaurant integration with folio posting and unified financial reporting.</li>
+<li><strong>Independent restaurants:</strong> Full KDS, table management, cashier, analytics, and staff management.</li>
+<li><strong>Restaurant chains:</strong> Multi-branch operations with centralised menu management and consolidated revenue reporting.</li>
+</ul>
+
+<h2>The Numbers That Matter</h2>
+<p>Properties that have deployed O.S.S. report consistent results within the first 90 days:</p>
+<ul>
+<li><strong>RevPAR up 18–32%</strong> through dynamic pricing and channel optimisation.</li>
+<li><strong>Check-in time reduced from 4 minutes to under 45 seconds</strong> via online check-in.</li>
+<li><strong>Housekeeping cost per occupied room down 18%</strong> through automated task assignment and priority routing.</li>
+<li><strong>Administrative time for managers reduced by 35%</strong> — more time for guests, less time for spreadsheets.</li>
+<li><strong>Restaurant kitchen-to-table time reduced by 6 minutes on average</strong> via KDS adoption.</li>
+<li><strong>Payment error rate reduced to zero</strong> — every transaction is tracked, audited, and reconcilable.</li>
+</ul>
+
+<h2>Getting Started</h2>
+<p>Switching to a new system sounds daunting. O.S.S. makes it straightforward:</p>
+<ol>
+<li><strong>Register:</strong> Create your account in under 2 minutes. No credit card required to start your 14-day trial.</li>
+<li><strong>Configure:</strong> The onboarding wizard guides you through property setup, room types, rate plans, and staff invitations. Most properties are fully configured within a single working day.</li>
+<li><strong>Import:</strong> Existing booking data, guest profiles, and historical financials can be migrated with support from the O.S.S. team.</li>
+<li><strong>Go live:</strong> Connect your OTA channels, activate online check-in, and start taking bookings through the platform — all within 48 hours of signing up.</li>
+</ol>
+
+<h2>The Future of Hospitality Is Unified</h2>
+<p>The next decade will see hospitality operations increasingly defined by the quality of their technology stack. Properties that invest in unified, data-driven platforms now will compound those advantages year over year — through better guest reviews, higher direct booking rates, lower operating costs, and the agility to respond to market changes in real time.</p>
+<p>O.S.S. Smart Hospitality is that platform. Built for operators who take their business seriously, priced for operators who take their margins seriously.</p>
+<p><strong>Start your 14-day free trial today — no credit card, no commitment, full functionality from day one.</strong></p>
+    `,
+  },
+  {
     slug: "oss-smart-hospitality-otel-restoran-yeni-dovr",
     title: "O.S.S. Smart Hospitality: Otel və Restoran İdarəçiliyində Yeni Dövr",
     excerpt: "Azərbaycanda otelçilik və restorançılıq biznesi köklü bir dəyişim yaşayır. O.S.S. Smart Hospitality platforması bu dəyişimin mərkəzindədir — PMS-dən POS-a, IoT-dən analitikaya qədər hər şey bir çatı altında.",
