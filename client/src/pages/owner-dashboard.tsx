@@ -6304,7 +6304,7 @@ export default function OwnerDashboard() {
           </div>
         );
       case "inventory":
-        return <InventoryPanel mode="all" />;
+        return <InventoryPanel mode="hotel-only" />;
       default:
         return <OwnerActionGrid />;
     }
@@ -6405,7 +6405,6 @@ export default function OwnerDashboard() {
           { icon: Warehouse, label: t("inventory.title", "Anbar"), iconBg: "bg-cyan-500/10", iconColor: "text-cyan-500", action: () => navigate("/dashboard?view=inventory"), testId: "hub-inventory" },
           { icon: Building2, label: t("inventory.tabHotel", "Otel Anbarı"), iconBg: "bg-blue-500/10", iconColor: "text-blue-500", action: () => navigate("/dashboard?view=inventory"), testId: "hub-inventory-hotel" },
           { icon: UtensilsCrossed, label: t("inventory.tabHotelRestaurant", "Daxili Restoran"), iconBg: "bg-orange-500/10", iconColor: "text-orange-500", action: () => navigate("/dashboard?view=inventory"), testId: "hub-inventory-hr" },
-          { icon: ChefHat, label: t("inventory.tabStandaloneRestaurant", "Müstəqil Restoran"), iconBg: "bg-rose-500/10", iconColor: "text-rose-500", action: () => navigate("/dashboard?view=inventory"), testId: "hub-inventory-sr" },
         ],
       },
     ];

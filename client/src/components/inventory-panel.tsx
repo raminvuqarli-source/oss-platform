@@ -513,14 +513,14 @@ function ScopeItemList({
   );
 }
 
-type PanelMode = "all" | InventoryScope;
+type PanelMode = "all" | "hotel-only" | InventoryScope;
 
 export function InventoryPanel({ mode = "all" }: { mode?: PanelMode }) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [items, setItems] = useState<InventoryItem[]>(loadItems);
   const [activeScope, setActiveScope] = useState<InventoryScope>(
-    mode === "all" ? "hotel" : mode
+    mode === "all" || mode === "hotel-only" ? "hotel" : mode
   );
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editItem, setEditItem] = useState<InventoryItem | null>(null);
@@ -568,7 +568,11 @@ export function InventoryPanel({ mode = "all" }: { mode?: PanelMode }) {
     { value: "standalone-restaurant", label: t("inventory.tabStandaloneRestaurant", "Müstəqil Restoran Anbarı"), icon: Store },
   ];
 
-  const visibleScopes = mode === "all" ? scopes : scopes.filter(s => s.value === mode);
+  const visibleScopes = mode === "all"
+    ? scopes
+    : mode === "hotel-only"
+      ? scopes.filter(s => s.value === "hotel" || s.value === "hotel-restaurant")
+      : scopes.filter(s => s.value === mode);
 
   return (
     <div className="space-y-4" data-testid="inventory-panel">
