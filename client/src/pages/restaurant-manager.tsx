@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import { initOneSignal, requestNotificationPermission } from "@/lib/onesignal";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTranslation } from "react-i18next";
@@ -82,7 +83,7 @@ export default function RestaurantManager() {
   const isMobile = useIsMobile();
   const { user: authUser } = useAuth();
   const { fmt, symbol } = useCurrency();
-  const [activeTab, setActiveTab] = useState("orders");
+  const [activeTab, setActiveTab] = useState("");
 
   useEffect(() => {
     initOneSignal().then(() => requestNotificationPermission());
@@ -427,79 +428,181 @@ export default function RestaurantManager() {
   ];
   const tabs = allTabs.filter(tab => !tab.hotelOnly || isHotelTenant);
 
+  const hubGroups = [
+    {
+      title: t("rm.hubGroupOperations", "Operations"),
+      icon: <ShoppingBag className="h-4 w-4 text-primary" />,
+      color: "bg-primary/10",
+      items: [
+        { value: "orders", label: t("rm.tabOrders"), icon: <ShoppingBag className="h-5 w-5" />, iconBg: "bg-amber-100 dark:bg-amber-900", iconColor: "text-amber-700 dark:text-amber-300", desc: t("rm.hubDescOrders", "Active kitchen orders"), badge: activeOrders.length },
+        { value: "tables", label: t("rm.tabTables"), icon: <LayoutGrid className="h-5 w-5" />, iconBg: "bg-blue-100 dark:bg-blue-900", iconColor: "text-blue-700 dark:text-blue-300", desc: t("rm.hubDescTables", "Table status & QR"), badge: restaurantTables.filter(tb => tb.status === "occupied").length },
+        { value: "settlement", label: t("rm.tabSettlement"), icon: <CreditCard className="h-5 w-5" />, iconBg: "bg-rose-100 dark:bg-rose-900", iconColor: "text-rose-700 dark:text-rose-300", desc: t("rm.hubDescSettlement", "Pending payments"), badge: pendingSettlementOrders.length },
+        ...(isHotelTenant ? [{ value: "kabinetler", label: t("rm.tabRooms"), icon: <UtensilsCrossed className="h-5 w-5" />, iconBg: "bg-violet-100 dark:bg-violet-900", iconColor: "text-violet-700 dark:text-violet-300", desc: t("rm.hubDescRooms", "Room food orders"), badge: roomOrders.length }] : []),
+      ],
+    },
+    {
+      title: t("rm.hubGroupTeam", "Team"),
+      icon: <Users className="h-4 w-4 text-emerald-600" />,
+      color: "bg-emerald-50 dark:bg-emerald-950/30",
+      items: [
+        { value: "waiters", label: t("rm.tabWaiters"), icon: <Utensils className="h-5 w-5" />, iconBg: "bg-emerald-100 dark:bg-emerald-900", iconColor: "text-emerald-700 dark:text-emerald-300", desc: t("rm.hubDescWaiters", "Waiter assignments"), badge: waiters.length },
+        { value: "cleaning", label: t("rm.tabCleaning"), icon: <Sparkles className="h-5 w-5" />, iconBg: "bg-sky-100 dark:bg-sky-900", iconColor: "text-sky-700 dark:text-sky-300", desc: t("rm.hubDescCleaning", "Cleaning tasks"), badge: cleaningTasks.filter(c => c.status !== "done").length },
+        { value: "staff", label: t("rm.tabStaff"), icon: <Users className="h-5 w-5" />, iconBg: "bg-indigo-100 dark:bg-indigo-900", iconColor: "text-indigo-700 dark:text-indigo-300", desc: t("rm.hubDescStaff", "All restaurant staff"), badge: myRestaurantStaff.length },
+        { value: "performance", label: t("rm.tabPerformance"), icon: <BarChart2 className="h-5 w-5" />, iconBg: "bg-orange-100 dark:bg-orange-900", iconColor: "text-orange-700 dark:text-orange-300", desc: t("rm.hubDescPerformance", "Staff performance"), badge: 0 },
+      ],
+    },
+    {
+      title: t("rm.hubGroupBusiness", "Business"),
+      icon: <TrendingUp className="h-4 w-4 text-violet-600" />,
+      color: "bg-violet-50 dark:bg-violet-950/30",
+      items: [
+        { value: "menu", label: t("rm.tabMenu"), icon: <ChefHat className="h-5 w-5" />, iconBg: "bg-teal-100 dark:bg-teal-900", iconColor: "text-teal-700 dark:text-teal-300", desc: t("rm.hubDescMenu", "Categories & items"), badge: 0 },
+        { value: "finance", label: t("rm.tabFinance"), icon: <TrendingUp className="h-5 w-5" />, iconBg: "bg-green-100 dark:bg-green-900", iconColor: "text-green-700 dark:text-green-300", desc: t("rm.hubDescFinance", "Revenue & analytics"), badge: 0 },
+        { value: "archive", label: t("rm.tabArchive"), icon: <CalendarClock className="h-5 w-5" />, iconBg: "bg-slate-100 dark:bg-slate-800", iconColor: "text-slate-600 dark:text-slate-400", desc: t("rm.hubDescArchive", "Completed orders"), badge: 0 },
+        { value: "messages", label: t("rm.tabMessages"), icon: <MessageSquare className="h-5 w-5" />, iconBg: "bg-cyan-100 dark:bg-cyan-900", iconColor: "text-cyan-700 dark:text-cyan-300", desc: t("rm.hubDescMessages", "Staff messages"), badge: 0 },
+        { value: "billing", label: t("rm.tabBilling"), icon: <Banknote className="h-5 w-5" />, iconBg: "bg-yellow-100 dark:bg-yellow-900", iconColor: "text-yellow-700 dark:text-yellow-300", desc: t("rm.hubDescBilling", "Subscription & plan"), badge: (subStatus?.isTrial && (subStatus?.remainingDays ?? 99) <= 5) ? 1 : 0 },
+      ],
+    },
+  ];
+
+  const currentTabLabel = hubGroups.flatMap(g => g.items).find(i => i.value === activeTab)?.label ?? activeTab;
+
   return (
     <>
       <Helmet>
         <title>{t("rm.pageTitle")} | O.S.S</title>
       </Helmet>
-      <div className="space-y-4 pb-8" data-testid="restaurant-manager-dashboard">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary rounded-lg">
-            <ChefHat className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold">{t("rm.pageTitle")}</h1>
-            <p className="text-sm text-muted-foreground">{t("rm.subtitle")}</p>
-          </div>
-        </div>
+      <div className="pb-8" data-testid="restaurant-manager-dashboard">
 
-        {/* ── Stats Row ── */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Card data-testid="card-today-revenue">
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-emerald-600" /><span className="text-sm text-muted-foreground">{t("rm.todayRevenue")}</span></div>
-              <p className="text-2xl font-bold mt-1 text-emerald-600" data-testid="text-today-revenue">{fmt(analytics?.today?.revenueCents ?? 0)}</p>
-            </CardContent>
-          </Card>
-          <Card data-testid="card-today-orders">
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2"><ShoppingBag className="h-4 w-4 text-primary" /><span className="text-sm text-muted-foreground">{t("rm.todayOrders")}</span></div>
-              <p className="text-2xl font-bold mt-1" data-testid="text-today-orders">{analytics?.today?.orderCount ?? 0}</p>
-            </CardContent>
-          </Card>
-          <Card data-testid="card-active-orders">
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2"><Clock className="h-4 w-4 text-amber-600" /><span className="text-sm text-muted-foreground">{t("rm.active")}</span></div>
-              <p className="text-2xl font-bold mt-1" data-testid="text-active-orders">{activeOrders.length}</p>
-            </CardContent>
-          </Card>
-          <Card data-testid="card-pending-settlement">
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2"><CreditCard className="h-4 w-4 text-rose-600" /><span className="text-sm text-muted-foreground">{t("rm.pendingPayment")}</span></div>
-              <p className="text-2xl font-bold mt-1 text-rose-600" data-testid="text-pending-settlement">{analytics?.pendingSettlement ?? pendingSettlementOrders.length}</p>
-            </CardContent>
-          </Card>
-        </div>
+        {activeTab === "" ? (
+          /* ── HUB VIEW ── */
+          <div className="space-y-6">
+            {/* Header */}
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-primary rounded-xl">
+                <ChefHat className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold">{t("rm.pageTitle")}</h1>
+                <p className="text-sm text-muted-foreground">{t("rm.subtitle")}</p>
+              </div>
+            </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          {isMobile ? (
-            <Select value={activeTab} onValueChange={setActiveTab}>
-              <SelectTrigger className="w-full mb-3" data-testid="select-manager-tab">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {tabs.map(tab => (
-                  <SelectItem key={tab.value} value={tab.value}>
-                    <div className="flex items-center gap-2">
-                      {tab.icon}
-                      {tab.label}
-                      {tab.badge > 0 ? ` (${tab.badge})` : ""}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : (
-            <TabsList className="flex flex-wrap h-auto gap-1 w-full" data-testid="tabs-manager">
-              {tabs.map(tab => (
-                <TabsTrigger key={tab.value} value={tab.value} data-testid={`tab-manager-${tab.value}`}>
-                  {tab.icon}
-                  <span className="ml-1">{tab.label}</span>
-                  {tab.badge > 0 && <span className="ml-1">({tab.badge})</span>}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          )}
+            {/* KPI Strip */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Card data-testid="card-today-revenue">
+                <CardContent className="pt-4 pb-3">
+                  <div className="flex items-center gap-2 mb-1"><DollarSign className="h-4 w-4 text-emerald-600" /><span className="text-xs text-muted-foreground">{t("rm.todayRevenue")}</span></div>
+                  <p className="text-xl font-bold text-emerald-600" data-testid="text-today-revenue">{fmt(analytics?.today?.revenueCents ?? 0)}</p>
+                </CardContent>
+              </Card>
+              <Card data-testid="card-today-orders">
+                <CardContent className="pt-4 pb-3">
+                  <div className="flex items-center gap-2 mb-1"><ShoppingBag className="h-4 w-4 text-primary" /><span className="text-xs text-muted-foreground">{t("rm.todayOrders")}</span></div>
+                  <p className="text-xl font-bold" data-testid="text-today-orders">{analytics?.today?.orderCount ?? 0}</p>
+                </CardContent>
+              </Card>
+              <Card data-testid="card-active-orders">
+                <CardContent className="pt-4 pb-3">
+                  <div className="flex items-center gap-2 mb-1"><Clock className="h-4 w-4 text-amber-600" /><span className="text-xs text-muted-foreground">{t("rm.active")}</span></div>
+                  <p className="text-xl font-bold" data-testid="text-active-orders">{activeOrders.length}</p>
+                </CardContent>
+              </Card>
+              <Card data-testid="card-pending-settlement">
+                <CardContent className="pt-4 pb-3">
+                  <div className="flex items-center gap-2 mb-1"><CreditCard className="h-4 w-4 text-rose-600" /><span className="text-xs text-muted-foreground">{t("rm.pendingPayment")}</span></div>
+                  <p className="text-xl font-bold text-rose-600" data-testid="text-pending-settlement">{analytics?.pendingSettlement ?? pendingSettlementOrders.length}</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Grouped Hub Cards */}
+            {hubGroups.map((group, gi) => (
+              <motion.div
+                key={group.title}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: gi * 0.07 }}
+                className="rounded-2xl border bg-card shadow-sm overflow-hidden"
+              >
+                <div className={`flex items-center gap-2 px-4 py-3 border-b ${group.color}`}>
+                  {group.icon}
+                  <span className="text-sm font-semibold">{group.title}</span>
+                </div>
+                <div className={`grid divide-x divide-y ${group.items.length === 4 ? "grid-cols-2 md:grid-cols-4" : group.items.length === 5 ? "grid-cols-2 md:grid-cols-5" : "grid-cols-2 md:grid-cols-3"}`}>
+                  {group.items.map(item => (
+                    <button
+                      key={item.value}
+                      onClick={() => setActiveTab(item.value)}
+                      className="flex flex-col items-start gap-2 p-4 text-left hover:bg-muted/50 transition-colors focus:outline-none focus:bg-muted/50"
+                      data-testid={`hub-btn-${item.value}`}
+                    >
+                      <div className={`p-2 rounded-lg ${item.iconBg}`}>
+                        <span className={item.iconColor}>{item.icon}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-sm font-medium leading-tight">{item.label}</p>
+                          {item.badge > 0 && (
+                            <Badge variant="destructive" className="text-[10px] h-4 px-1.5 rounded-full">{item.badge}</Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5 leading-tight">{item.desc}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          /* ── CONTENT VIEW ── */
+          <div className="space-y-4">
+            {/* Back button + view title */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveTab("")}
+                className="gap-1.5 -ml-1"
+                data-testid="btn-back-to-hub"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                {t("common.back", "Back")}
+              </Button>
+              <span className="text-muted-foreground">/</span>
+              <span className="text-sm font-medium">{currentTabLabel}</span>
+            </div>
+
+            {/* Mini KPI strip */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Card data-testid="card-today-revenue">
+                <CardContent className="pt-4 pb-3">
+                  <div className="flex items-center gap-2 mb-1"><DollarSign className="h-4 w-4 text-emerald-600" /><span className="text-xs text-muted-foreground">{t("rm.todayRevenue")}</span></div>
+                  <p className="text-xl font-bold text-emerald-600" data-testid="text-today-revenue">{fmt(analytics?.today?.revenueCents ?? 0)}</p>
+                </CardContent>
+              </Card>
+              <Card data-testid="card-today-orders">
+                <CardContent className="pt-4 pb-3">
+                  <div className="flex items-center gap-2 mb-1"><ShoppingBag className="h-4 w-4 text-primary" /><span className="text-xs text-muted-foreground">{t("rm.todayOrders")}</span></div>
+                  <p className="text-xl font-bold" data-testid="text-today-orders">{analytics?.today?.orderCount ?? 0}</p>
+                </CardContent>
+              </Card>
+              <Card data-testid="card-active-orders">
+                <CardContent className="pt-4 pb-3">
+                  <div className="flex items-center gap-2 mb-1"><Clock className="h-4 w-4 text-amber-600" /><span className="text-xs text-muted-foreground">{t("rm.active")}</span></div>
+                  <p className="text-xl font-bold" data-testid="text-active-orders">{activeOrders.length}</p>
+                </CardContent>
+              </Card>
+              <Card data-testid="card-pending-settlement">
+                <CardContent className="pt-4 pb-3">
+                  <div className="flex items-center gap-2 mb-1"><CreditCard className="h-4 w-4 text-rose-600" /><span className="text-xs text-muted-foreground">{t("rm.pendingPayment")}</span></div>
+                  <p className="text-xl font-bold text-rose-600" data-testid="text-pending-settlement">{analytics?.pendingSettlement ?? pendingSettlementOrders.length}</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
 
           {/* ── Orders Tab ── */}
           <TabsContent value="orders" className="mt-4 space-y-2">
@@ -1541,7 +1644,9 @@ export default function RestaurantManager() {
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
+            </Tabs>
+          </div>
+        )}
       </div>
 
       {/* ── Add Table Dialog ── */}
