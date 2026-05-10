@@ -183,6 +183,14 @@ function MarketingProtectedRoute() {
   return <MarketingDashboard />;
 }
 
+// Standalone route: auth check only, NO DashboardLayout (component provides its own full-page layout)
+function StandaloneProtectedRoute({ component: Component }: { component: React.ComponentType }) {
+  const { user, isLoading } = useAuth();
+  if (isLoading) return <PageLoader />;
+  if (!user) return <Redirect to="/login" />;
+  return <Component />;
+}
+
 // Auth guard wrapper: redirects unauthenticated users, wraps content in DashboardLayout
 function ProtectedRoute({ component: Component, guardTrial = false, ownerOnly = false }: { component: React.ComponentType; guardTrial?: boolean; ownerOnly?: boolean }) {
   const { user, isLoading } = useAuth();
@@ -233,7 +241,7 @@ const publicRoutes = [
 ] as const;
 
 // Protected routes requiring authentication, wrapped in DashboardLayout
-const protectedRoutes: { path: string; component: React.ComponentType; guardTrial?: boolean }[] = [
+const protectedRoutes: { path: string; component: React.ComponentType; guardTrial?: boolean; standalone?: boolean }[] = [
   { path: "/dashboard", component: DashboardRouter },
   { path: "/notifications", component: Notifications, guardTrial: true },
   { path: "/settings", component: Settings, guardTrial: true },
@@ -243,7 +251,7 @@ const protectedRoutes: { path: string; component: React.ComponentType; guardTria
   { path: "/restaurant/waiter", component: WaiterView },
   { path: "/restaurant/manager", component: RestaurantManager },
   { path: "/restaurant/cleaner", component: RestaurantCleaner },
-  { path: "/restaurant/cashier", component: RestaurantCashier },
+  { path: "/restaurant/cashier", component: RestaurantCashier, standalone: true },
   { path: "/restaurant/bar", component: BarDashboard },
 ];
 
@@ -261,9 +269,11 @@ function Router() {
         <Route path="/register-restaurant">
           <RestaurantRegister />
         </Route>
-        {protectedRoutes.map(({ path, component: C, guardTrial }) => (
+        {protectedRoutes.map(({ path, component: C, guardTrial, standalone }) => (
           <Route key={path} path={path}>
-            <ProtectedRoute component={C} guardTrial={guardTrial} />
+            {standalone
+              ? <StandaloneProtectedRoute component={C} />
+              : <ProtectedRoute component={C} guardTrial={guardTrial} />}
           </Route>
         ))}
         <Route path="/owner/billing">
