@@ -1383,6 +1383,16 @@ export default function Settings() {
   const [showNewPw, setShowNewPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
 
+  const search = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : new URLSearchParams();
+  const currentView = search.get("view") || "";
+
+  const goToView = (view: string) => {
+    const url = view ? `/settings?view=${view}` : "/settings";
+    window.history.pushState({}, "", url);
+    window.dispatchEvent(new PopStateEvent("popstate"));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const changePasswordMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/auth/change-password", { currentPassword, newPassword });
@@ -1427,16 +1437,9 @@ export default function Settings() {
     setIsLoading(true);
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast({
-        title: t('toast.profileUpdated'),
-        description: t('toast.profileUpdatedDesc'),
-      });
-    } catch (error) {
-      toast({
-        title: t('toast.error'),
-        description: t('toast.profileError'),
-        variant: "destructive",
-      });
+      toast({ title: t('toast.profileUpdated'), description: t('toast.profileUpdatedDesc') });
+    } catch {
+      toast({ title: t('toast.error'), description: t('toast.profileError'), variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -1445,16 +1448,9 @@ export default function Settings() {
   const handleLogout = async () => {
     try {
       await logout();
-      toast({
-        title: t('toast.signedOut'),
-        description: t('toast.signedOutDesc'),
-      });
-    } catch (error) {
-      toast({
-        title: t('toast.error'),
-        description: t('toast.signOutError'),
-        variant: "destructive",
-      });
+      toast({ title: t('toast.signedOut'), description: t('toast.signedOutDesc') });
+    } catch {
+      toast({ title: t('toast.error'), description: t('toast.signOutError'), variant: "destructive" });
     }
   };
 
@@ -1470,241 +1466,402 @@ export default function Settings() {
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
-  return (
-    <div className="space-y-6 max-w-3xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5 text-muted-foreground" />
-            {t('settings.profile')}
-          </CardTitle>
-          <CardDescription>{t('settings.subtitle')}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarFallback className="text-lg">
-                {user?.fullName.split(" ").map((n) => n[0]).join("").toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="space-y-1">
-              <h3 className="font-semibold text-lg">{user?.fullName}</h3>
-              <p className="text-sm text-muted-foreground">@{user?.username}</p>
+  const BackButton = () => (
+    <button
+      onClick={() => goToView("")}
+      className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group mb-6"
+      data-testid="button-back-to-settings-hub"
+    >
+      <ChevronRight className="h-4 w-4 rotate-180 group-hover:-translate-x-0.5 transition-transform" />
+      {t('common.back', 'Back')}
+    </button>
+  );
+
+  type HubCard = {
+    view: string;
+    icon: typeof User;
+    label: string;
+    desc: string;
+    color: string;
+    iconBg: string;
+    ownerOnly?: boolean;
+    noRestaurant?: boolean;
+  };
+
+  const hubCards: HubCard[] = [
+    {
+      view: "profile",
+      icon: User,
+      label: t('settings.profile', 'Profile'),
+      desc: t('settings.subtitle', 'Manage your personal information'),
+      color: "hover:border-blue-400/60",
+      iconBg: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+    },
+    {
+      view: "appearance",
+      icon: Palette,
+      label: t('settings.appearance', 'Appearance'),
+      desc: t('settings.darkMode', 'Dark mode & display'),
+      color: "hover:border-violet-400/60",
+      iconBg: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
+    },
+    {
+      view: "notifications",
+      icon: Bell,
+      label: t('common.notifications', 'Notifications'),
+      desc: t('settings.getNotifiedAbout', 'Push, sound & email alerts'),
+      color: "hover:border-amber-400/60",
+      iconBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    },
+    {
+      view: "security",
+      icon: KeyRound,
+      label: t('settings.changePassword', 'Security'),
+      desc: t('settings.changePasswordDesc', 'Update your password'),
+      color: "hover:border-green-400/60",
+      iconBg: "bg-green-500/10 text-green-600 dark:text-green-400",
+    },
+    {
+      view: "billing",
+      icon: CreditCard,
+      label: t('billing.title', 'Billing'),
+      desc: t('billing.subtitle', 'Plans, payments & invoices'),
+      color: "hover:border-sky-400/60",
+      iconBg: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+      ownerOnly: true,
+    },
+    {
+      view: "usage",
+      icon: Activity,
+      label: t('billing.usageAndLimits', 'Usage & Limits'),
+      desc: t('billing.usageSubtitle', 'Monitor your plan limits'),
+      color: "hover:border-orange-400/60",
+      iconBg: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
+      ownerOnly: true,
+    },
+    {
+      view: "features",
+      icon: Shield,
+      label: t('billing.featureAccess', 'Features'),
+      desc: t('billing.featuresSubtitle', 'Active features on your plan'),
+      color: "hover:border-indigo-400/60",
+      iconBg: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
+      ownerOnly: true,
+    },
+    {
+      view: "audit",
+      icon: FileText,
+      label: t('billing.activityLog', 'Activity Log'),
+      desc: t('billing.auditSubtitle', 'Track all account activity'),
+      color: "hover:border-slate-400/60",
+      iconBg: "bg-slate-500/10 text-slate-600 dark:text-slate-400",
+      ownerOnly: true,
+    },
+    {
+      view: "pricing",
+      icon: Calculator,
+      label: t('dynamicPricing.title', 'Dynamic Pricing'),
+      desc: t('dynamicPricing.subtitle', 'Manage pricing rules'),
+      color: "hover:border-teal-400/60",
+      iconBg: "bg-teal-500/10 text-teal-600 dark:text-teal-400",
+      ownerOnly: true,
+      noRestaurant: true,
+    },
+  ];
+
+  const visibleCards = hubCards.filter(c => {
+    if (c.ownerOnly && !isOwner) return false;
+    if (c.noRestaurant && isRestaurantOnly) return false;
+    return true;
+  });
+
+  if (!currentView) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[70vh] px-4" data-testid="settings-hub">
+        <div className="w-full max-w-2xl space-y-6">
+          <div className="text-center space-y-1">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/10 mb-3">
+              <User className="h-6 w-6 text-primary" />
+            </div>
+            <h1 className="text-2xl font-bold">{t('settings.title', 'Settings')}</h1>
+            <p className="text-sm text-muted-foreground">
+              {user?.fullName && <span className="font-medium text-foreground">{user.fullName} · </span>}
               {getRoleBadge()}
-            </div>
+            </p>
           </div>
 
-          <Separator />
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {visibleCards.map((card) => {
+              const Icon = card.icon;
+              return (
+                <button
+                  key={card.view}
+                  onClick={() => goToView(card.view)}
+                  className={`group flex flex-col items-center gap-3 p-5 rounded-2xl border border-border bg-card text-center transition-all duration-200 hover:shadow-md ${card.color}`}
+                  data-testid={`button-settings-${card.view}`}
+                >
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${card.iconBg}`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">{card.label}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-tight">{card.desc}</p>
+                  </div>
+                </button>
+              );
+            })}
 
-          <div className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="fullName">{t('auth.fullName')}</Label>
-              <Input id="fullName" defaultValue={user?.fullName} data-testid="input-fullname" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="email">{t('auth.email')}</Label>
-              <Input id="email" type="email" defaultValue={user?.email || ""} placeholder="your@email.com" data-testid="input-email" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="phone">{t('auth.phone')}</Label>
-              <Input id="phone" type="tel" defaultValue={user?.phone || ""} placeholder="+1 (555) 000-0000" data-testid="input-phone" />
-            </div>
-          </div>
-
-          <Button onClick={handleSaveProfile} disabled={isLoading} data-testid="button-save-profile">
-            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-            {t('settings.saveChanges')}
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Palette className="h-5 w-5 text-muted-foreground" />
-            {t('settings.appearance')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {theme === "dark" ? <Moon className="h-5 w-5 text-muted-foreground" /> : <Sun className="h-5 w-5 text-muted-foreground" />}
+            <button
+              onClick={handleLogout}
+              className="group flex flex-col items-center gap-3 p-5 rounded-2xl border border-destructive/30 bg-card text-center transition-all duration-200 hover:border-destructive/70 hover:shadow-md"
+              data-testid="button-settings-logout"
+            >
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-destructive/10 text-destructive">
+                <LogOut className="h-5 w-5" />
+              </div>
               <div>
-                <p className="font-medium">{t('settings.darkMode')}</p>
-                <p className="text-sm text-muted-foreground">{theme === "dark" ? t('settings.currentlyOn') : t('settings.currentlyOff')}</p>
+                <p className="font-semibold text-sm text-destructive">{t('common.signOut', 'Sign Out')}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-tight">{t('settings.signOutDesc', 'Log out of your account')}</p>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto" data-testid="settings-view">
+      <BackButton />
+
+      {currentView === "profile" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5 text-muted-foreground" />
+              {t('settings.profile')}
+            </CardTitle>
+            <CardDescription>{t('settings.subtitle')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-16 w-16">
+                <AvatarFallback className="text-lg">
+                  {user?.fullName.split(" ").map((n) => n[0]).join("").toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="space-y-1">
+                <h3 className="font-semibold text-lg">{user?.fullName}</h3>
+                <p className="text-sm text-muted-foreground">@{user?.username}</p>
+                {getRoleBadge()}
               </div>
             </div>
-            <Switch checked={theme === "dark"} onCheckedChange={toggleTheme} data-testid="switch-dark-mode" />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="h-5 w-5 text-muted-foreground" />
-            {t('common.notifications')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Bell className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium">{t('settings.pushNotifications')}</p>
-                <p className="text-sm text-muted-foreground">{t('settings.getNotifiedAbout')}</p>
+            <Separator />
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="fullName">{t('auth.fullName')}</Label>
+                <Input id="fullName" defaultValue={user?.fullName} data-testid="input-fullname" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="email">{t('auth.email')}</Label>
+                <Input id="email" type="email" defaultValue={user?.email || ""} placeholder="your@email.com" data-testid="input-email" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="phone">{t('auth.phone')}</Label>
+                <Input id="phone" type="tel" defaultValue={user?.phone || ""} placeholder="+1 (555) 000-0000" data-testid="input-phone" />
               </div>
             </div>
-            <Switch checked={notificationsEnabled} onCheckedChange={setNotificationsEnabled} data-testid="switch-notifications" />
-          </div>
-          <Separator />
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Smartphone className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium">{t('settings.sound')}</p>
-                <p className="text-sm text-muted-foreground">{t('settings.playSoundForNotifications')}</p>
-              </div>
-            </div>
-            <Switch checked={soundEnabled} onCheckedChange={setSoundEnabled} data-testid="switch-sound" />
-          </div>
-          <Separator />
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Shield className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium">{t('settings.emailNotifications')}</p>
-                <p className="text-sm text-muted-foreground">{t('settings.receiveUpdatesViaEmail')}</p>
-              </div>
-            </div>
-            <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} data-testid="switch-email-notifications" />
-          </div>
-        </CardContent>
-      </Card>
-
-      {isOwner && (
-        <>
-          <Separator />
-          <h2 className="text-lg font-semibold text-muted-foreground">{t('billing.managerSettings')}</h2>
-
-          <OwnerSettingsSection title={t('billing.title')} icon={CreditCard} testId="settings-billing">
-            <BillingSection />
-          </OwnerSettingsSection>
-
-          <OwnerSettingsSection title={t('billing.usageAndLimits')} icon={Activity} testId="settings-usage">
-            <UsageSection />
-          </OwnerSettingsSection>
-
-          <OwnerSettingsSection title={t('billing.featureAccess')} icon={Shield} testId="settings-features">
-            <FeaturesSection />
-          </OwnerSettingsSection>
-
-          <OwnerSettingsSection title={t('billing.activityLog')} icon={FileText} testId="settings-audit">
-            <AuditLogSection />
-          </OwnerSettingsSection>
-
-          {!isRestaurantOnly && (
-            <OwnerSettingsSection title={t('dynamicPricing.title')} icon={Calculator} testId="settings-dynamic-pricing">
-              <DynamicPricingWrapper />
-            </OwnerSettingsSection>
-          )}
-        </>
+            <Button onClick={handleSaveProfile} disabled={isLoading} data-testid="button-save-profile">
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+              {t('settings.saveChanges')}
+            </Button>
+          </CardContent>
+        </Card>
       )}
 
-      {/* Change Password */}
-      <Card data-testid="card-change-password">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <KeyRound className="h-5 w-5 text-muted-foreground" />
-            {t('settings.changePassword', 'Change Password')}
-          </CardTitle>
-          <CardDescription>{t('settings.changePasswordDesc', 'Update your account password. You will need your current password to proceed.')}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="current-password">{t('settings.currentPassword', 'Current Password')}</Label>
-            <div className="relative">
-              <Input
-                id="current-password"
-                type={showCurrentPw ? "text" : "password"}
-                value={currentPassword}
-                onChange={e => setCurrentPassword(e.target.value)}
-                placeholder="••••••••"
-                data-testid="input-current-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowCurrentPw(v => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                data-testid="button-toggle-current-pw"
-              >
-                {showCurrentPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+      {currentView === "appearance" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Palette className="h-5 w-5 text-muted-foreground" />
+              {t('settings.appearance')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {theme === "dark" ? <Moon className="h-5 w-5 text-muted-foreground" /> : <Sun className="h-5 w-5 text-muted-foreground" />}
+                <div>
+                  <p className="font-medium">{t('settings.darkMode')}</p>
+                  <p className="text-sm text-muted-foreground">{theme === "dark" ? t('settings.currentlyOn') : t('settings.currentlyOff')}</p>
+                </div>
+              </div>
+              <Switch checked={theme === "dark"} onCheckedChange={toggleTheme} data-testid="switch-dark-mode" />
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="new-password">{t('settings.newPassword', 'New Password')}</Label>
-            <div className="relative">
-              <Input
-                id="new-password"
-                type={showNewPw ? "text" : "password"}
-                value={newPassword}
-                onChange={e => setNewPassword(e.target.value)}
-                placeholder="••••••••"
-                data-testid="input-new-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowNewPw(v => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                data-testid="button-toggle-new-pw"
-              >
-                {showNewPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="confirm-password">{t('settings.confirmPassword', 'Confirm New Password')}</Label>
-            <div className="relative">
-              <Input
-                id="confirm-password"
-                type={showConfirmPw ? "text" : "password"}
-                value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                data-testid="input-confirm-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPw(v => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                data-testid="button-toggle-confirm-pw"
-              >
-                {showConfirmPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-          </div>
-          <Button onClick={handleChangePassword} disabled={changePasswordMutation.isPending} data-testid="button-change-password">
-            {changePasswordMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}
-            {t('settings.changePassword', 'Change Password')}
-          </Button>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
-      <Card className="border-destructive/50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-destructive">
-            <LogOut className="h-5 w-5" />
-            {t('common.signOut')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Button variant="destructive" onClick={handleLogout} data-testid="button-logout">
-            <LogOut className="mr-2 h-4 w-4" />
-            {t('common.signOut')}
-          </Button>
-        </CardContent>
-      </Card>
+      {currentView === "notifications" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-muted-foreground" />
+              {t('common.notifications')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Bell className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="font-medium">{t('settings.pushNotifications')}</p>
+                  <p className="text-sm text-muted-foreground">{t('settings.getNotifiedAbout')}</p>
+                </div>
+              </div>
+              <Switch checked={notificationsEnabled} onCheckedChange={setNotificationsEnabled} data-testid="switch-notifications" />
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Smartphone className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="font-medium">{t('settings.sound')}</p>
+                  <p className="text-sm text-muted-foreground">{t('settings.playSoundForNotifications')}</p>
+                </div>
+              </div>
+              <Switch checked={soundEnabled} onCheckedChange={setSoundEnabled} data-testid="switch-sound" />
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Shield className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="font-medium">{t('settings.emailNotifications')}</p>
+                  <p className="text-sm text-muted-foreground">{t('settings.receiveUpdatesViaEmail')}</p>
+                </div>
+              </div>
+              <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} data-testid="switch-email-notifications" />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {currentView === "security" && (
+        <Card data-testid="card-change-password">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <KeyRound className="h-5 w-5 text-muted-foreground" />
+              {t('settings.changePassword', 'Change Password')}
+            </CardTitle>
+            <CardDescription>{t('settings.changePasswordDesc', 'Update your account password. You will need your current password to proceed.')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="current-password">{t('settings.currentPassword', 'Current Password')}</Label>
+              <div className="relative">
+                <Input
+                  id="current-password"
+                  type={showCurrentPw ? "text" : "password"}
+                  value={currentPassword}
+                  onChange={e => setCurrentPassword(e.target.value)}
+                  placeholder="••••••••"
+                  data-testid="input-current-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPw(v => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  data-testid="button-toggle-current-pw"
+                >
+                  {showCurrentPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-password">{t('settings.newPassword', 'New Password')}</Label>
+              <div className="relative">
+                <Input
+                  id="new-password"
+                  type={showNewPw ? "text" : "password"}
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                  placeholder="••••••••"
+                  data-testid="input-new-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPw(v => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  data-testid="button-toggle-new-pw"
+                >
+                  {showNewPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">{t('settings.confirmPassword', 'Confirm New Password')}</Label>
+              <div className="relative">
+                <Input
+                  id="confirm-password"
+                  type={showConfirmPw ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  data-testid="input-confirm-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPw(v => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  data-testid="button-toggle-confirm-pw"
+                >
+                  {showConfirmPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+            <Button onClick={handleChangePassword} disabled={changePasswordMutation.isPending} data-testid="button-change-password">
+              {changePasswordMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}
+              {t('settings.changePassword', 'Change Password')}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {isOwner && currentView === "billing" && (
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">{t('billing.title', 'Billing')}</h2>
+          <BillingSection />
+        </div>
+      )}
+
+      {isOwner && currentView === "usage" && (
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">{t('billing.usageAndLimits', 'Usage & Limits')}</h2>
+          <UsageSection />
+        </div>
+      )}
+
+      {isOwner && currentView === "features" && (
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">{t('billing.featureAccess', 'Feature Access')}</h2>
+          <FeaturesSection />
+        </div>
+      )}
+
+      {isOwner && currentView === "audit" && (
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">{t('billing.activityLog', 'Activity Log')}</h2>
+          <AuditLogSection />
+        </div>
+      )}
+
+      {isOwner && !isRestaurantOnly && currentView === "pricing" && (
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">{t('dynamicPricing.title', 'Dynamic Pricing')}</h2>
+          <DynamicPricingWrapper />
+        </div>
+      )}
     </div>
   );
 }
