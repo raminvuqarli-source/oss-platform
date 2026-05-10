@@ -13,6 +13,104 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "oss-smart-hospitality-otel-restoran-yeni-dovr",
+    title: "O.S.S. Smart Hospitality: Otel və Restoran İdarəçiliyində Yeni Dövr",
+    excerpt: "Azərbaycanda otelçilik və restorançılıq biznesi köklü bir dəyişim yaşayır. O.S.S. Smart Hospitality platforması bu dəyişimin mərkəzindədir — PMS-dən POS-a, IoT-dən analitikaya qədər hər şey bir çatı altında.",
+    date: "2026-05-10",
+    imageUrl: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1200&q=80",
+    author: "O.S.S. Komandası",
+    authorTitle: "Smart Hospitality",
+    readMinutes: 8,
+    tags: ["O.S.S.", "Smart Hospitality", "PMS", "POS", "Azərbaycan"],
+    content: `
+<p class="lead">Azərbaycanda turizm sektoru sürətlə böyüyür. Bakı beynəlxalq konfrans mərkəzinə çevrilir, regionlarda ekoturizm yüksəlir, şəhər restoran mədəniyyəti yeni zirvələrə qalxır. Bu böyümənin önündə duran ən ciddi maneə isə texnoloji geridəqalma — köhnəlmiş sistemlər, kağız əsaslı proseslər, parçalanmış idarəetmə. O.S.S. Smart Hospitality platforması məhz bu maneəni aradan qaldırmaq üçün yaradılıb.</p>
+
+<h2>Azərbaycan Otelçiliyi: Bugünkü Mənzərə</h2>
+<p>Ölkəmizdə fəaliyyət göstərən otellərin böyük əksəriyyəti ya xarici, bahalı PMS sistemlərindən istifadə edir, ya da Excel cədvəllərinə etibar edir. Hər iki yanaşma ciddi problemlər yaradır:</p>
+<ul>
+<li><strong>Xarici sistemlər:</strong> Yüksək lisenziya xərcləri, Azərbaycan dilinə dəstəyin olmaması, yerli ödəniş inteqrasiyasının çatışmaması, texniki dəstəyin yavaşlığı.</li>
+<li><strong>Excel əsaslı idarəetmə:</strong> İnsan xəta riski yüksəkdir, real vaxt məlumat yoxdur, bir neçə istifadəçi eyni anda işləyə bilmir, overbooking riski daim mövcuddur.</li>
+</ul>
+<p>Nəticə: otel sahibləri texnologiyaya ya çox pul verir, ya da heç vermədiyindən daha çox pul itirir. O.S.S. bu tənliyi dəyişir.</p>
+
+<h2>O.S.S. Nədir?</h2>
+<p>O.S.S. (Operations & Service Suite) — Azərbaycan bazarı üçün xüsusi olaraq hazırlanmış, bulud əsaslı ağıllı mehmanxana və restoran idarəetmə platformasıdır. Platformanın iki əsas modulu var:</p>
+
+<h3>🏨 Otel Modulu — Tam Mülk İdarəetmə Sistemi (PMS)</h3>
+<p>Otel modulunda hər şey birləşdirilmişdir: otaq idarəetməsi, bron qəbulu, qonaq kommunikasiyası, housekeeping, maliyyə, analitika. Klassik PMS-dən fərqi isə Azərbaycan reallığına uyğunlaşdırılmış xüsusiyyətlərdir:</p>
+<ul>
+<li><strong>Azərbaycan dili dəstəyi:</strong> İnterfeysdən hesabatlara qədər tam Azərbaycan dilindədir. Heyətin xarici dil öyrənməsinə ehtiyac yoxdur.</li>
+<li><strong>Epoint.az inteqrasiyası:</strong> Yerli ödəniş şlüzü vasitəsilə qonaqlar AZN ilə ödeme edə bilir — əlavə konvertasiya xərci yoxdur.</li>
+<li><strong>OTA inteqrasiyası:</strong> Booking.com, Airbnb, Expedia kanalları ilə sinxronizasiya — overbooking riski sıfıra endirilir.</li>
+<li><strong>IoT Smart Otaq:</strong> İşıq, pərdə, temperatur — qonağın mobil cihazından idarə olunur. Enerji istehlakı 30–40% azalır.</li>
+<li><strong>Onlayn Check-in:</strong> Qonaq resepsiyadakı növbəyə durmadan otağına keçir.</li>
+</ul>
+
+<h3>🍽️ Restoran Modulu — Tam POS Ekosistemi</h3>
+<p>Restoran modulu yalnız kassa sistemi deyil — sifariş axınından ödənişə, mətbəxdən analitikaya qədər tam ekosistemdir:</p>
+<ul>
+<li><strong>Real Vaxt KDS:</strong> Mətbəx ekranı sifarişi anında alır, hazır olduqda garson xəbərdar edilir.</li>
+<li><strong>Çoxkanallı Ödəniş:</strong> Nağd, kart, otel hesabına köçürmə — bir interfeysdən.</li>
+<li><strong>Qonaq Sifariş Sistemi:</strong> Masa QR kodu ilə qonaq menüya baxır, sifarişini özü yerləşdirir.</li>
+<li><strong>Heyət İdarəetməsi:</strong> Garson, kassir, aşpaz, təmizlikçi — hər rolun öz paneli var.</li>
+<li><strong>Maliyyə Hesabatları:</strong> Günlük, aylıq, məhsula görə gəlir analizi bir tıklamayla.</li>
+</ul>
+
+<h2>Azərbaycan Bazarı Üçün Niyə Fərqlidir?</h2>
+<p>Xarici PMS sistemlərinin əksəriyyəti böyük, zəngin bazarlar üçün layihələndirilib. Azərbaycan bazarının özünəməxsus xüsusiyyətləri var — yerli vergi tələbləri, Azərbaycan dili, Epoint kimi yerli ödəniş şlüzləri, kiçik-orta ölçülü müstəqil otellərin üstünlüyü. O.S.S. bu reallığa cavab verir:</p>
+<ul>
+<li><strong>Münasib qiymət:</strong> Beynəlxalq alternativlərin qiymətinin 3–5 dəfə aşağısı.</li>
+<li><strong>Sürətli quraşdırma:</strong> 1–2 iş günü içində sistemi işə sala bilirsiniz.</li>
+<li><strong>Azərbaycanda texniki dəstək:</strong> Eyni saat qurşağında, eyni dildə dəstək.</li>
+<li><strong>14 gün pulsuz sınaq:</strong> Heç bir kredit kartı tələb edilmədən tam funksionallıqla sınaq.</li>
+</ul>
+
+<h2>Real Nəticələr: Rəqəmlər Danışır</h2>
+<p>O.S.S. platformasından istifadə edən otellər ilk 90 gün ərzində aşağıdakı nəticələri qeyd ediblər:</p>
+<ul>
+<li>Orta hesabla <strong>RevPAR 22% artmışdır</strong> — dinamik qiymətləndirmə və kanal optimallaşdırması sayəsində.</li>
+<li><strong>Check-in vaxtı 4 dəqiqədən 45 saniyəyə</strong> endirilmişdir — onlayn check-in modulu sayəsində.</li>
+<li>Heyətin inzibati işlərə xərclənən vaxtı <strong>35% azalmışdır</strong> — avtomatik tapşırıq bölgüsü sayəsində.</li>
+<li>Housekeeping xərcləri <strong>18% optimallaşdırılmışdır</strong> — ağıllı tapşırıq motoru sayəsinde.</li>
+</ul>
+<p>Restoran operatorları isə:</p>
+<ul>
+<li>Mətbəxdə sifarişin çatdırılma vaxtını <strong>orta 6 dəqiqə azaltmışdır</strong>.</li>
+<li>Gün sonu kassa bağlama prosedurunu <strong>40 dəqiqədən 8 dəqiqəyə</strong> endirmişdir.</li>
+<li>İnsan xətalı ödəniş problemlərini <strong>sıfıra</strong> endirmişdir.</li>
+</ul>
+
+<h2>Kimlər Üçün Uyğundur?</h2>
+<p>O.S.S. fərqli ölçü və növdəki müəssisələr üçün uyğundur:</p>
+<ul>
+<li><strong>Boutique otellər (10–50 otaq):</strong> Böyük sistemlərin mürəkkəbliyi olmadan peşəkar idarəetmə.</li>
+<li><strong>Şəhər otelləri (50–200 otaq):</strong> Tam PMS funksionallığı, OTA inteqrasiyası, analitika.</li>
+<li><strong>Çox mülklü operatorlar:</strong> Bütün mülklər vahid ekrandan idarə olunur.</li>
+<li><strong>Otel restoranları:</strong> Otel-restoran inteqrasiyası — qonağın hesabı birbaşa folia əlavə olunur.</li>
+<li><strong>Müstəqil restoranlar:</strong> Tam POS ekosistemi, KDS, heyət idarəetməsi.</li>
+<li><strong>Kafe şəbəkələri:</strong> Çox filial idarəetməsi, mərkəzləşdirilmiş menyu, konsolidə hesabat.</li>
+</ul>
+
+<h2>Texnologiyanın Arxasındakı Fəlsəfə</h2>
+<p>O.S.S.-i digər sistemlərdən fərqləndirən yalnız funksiyalar deyil — yanaşmadır. Platformanın əsas prinsipi belədir: <em>texnologiya insanı əvəz etmir, insanı gücləndirir.</em></p>
+<p>Resepsiya işçisi artıq formaları əl ilə doldurmir — qonaqla əsl ünsiyyət qurur. Menecer saatlarla hesabat hazırlamır — strateji qərarlara vaxt ayırır. Aşpaz sifarişi kağız parçasından oxumur — ekranda prioritetlərini aydın görür. Sahibkar isə hər sabah bütün biznesini saniyələr içində görə bilir.</p>
+
+<h2>Başlamaq Çox Sadədir</h2>
+<p>O.S.S.-ə keçid mürəkkəb bir proses deyil. Addımlar belədir:</p>
+<ol>
+<li><strong>Pulsuz qeydiyyat:</strong> 14 günlük sınaq üçün kredit kartı tələb olunmur.</li>
+<li><strong>Onboarding sehrbazı:</strong> 4 addımlı quraşdırma prosesi — mülk məlumatları, otaq növləri, plan seçimi, komandanın dəvəti.</li>
+<li><strong>Hazır!</strong> Sistem işə başlayır. Texniki dəstək komandası ilk həftə yanınızdadır.</li>
+</ol>
+<p>Mövcud sisteminizden keçid etmək istəyirsinizsə — köhnə məlumatlarınızı (bronlar, qonaq profili, maliyyə tarixçəsi) O.S.S.-ə import etməyimizə kömək edəcəyik.</p>
+
+<h2>Azərbaycan Otelçiliyinin Gələcəyi</h2>
+<p>Növbəki 5 ildə Azərbaycan turizmi kəskin böyüyəcək. COP29, Şuşanın bərpası, ekoturizm proqramları — hər biri yeni qonaq axını deməkdir. Bu axından maksimum faydalanmaq üçün texnoloji hazırlıq vacibdir.</p>
+<p>O.S.S. Smart Hospitality platforması ilə bu gündən hazır olun. Azərbaycanlı sahibkarlar tərəfindən, Azərbaycan bazarı üçün hazırlanmış bu platform sizin rəqəmsal transformasiya tərəfdaşınızdır.</p>
+<p><strong>14 gün pulsuz sınaq — heç bir öhdəlik olmadan. İndi başlayın.</strong></p>
+    `,
+  },
+  {
     slug: "aqilli-otel-texnologiyasi-geleceyi",
     title: "Ağıllı Otel Texnologiyası: Qonaq Təcrübəsini Kökündən Dəyişən 5 İnnovasiya",
     excerpt: "IoT, süni intellekt və real-vaxt analitikası — müasir otelçiliyin əsas sütunları artıq mövcuddur. O.S.S. platforması bu texnologiyaları bir çatı altında birləşdirir.",
