@@ -18,7 +18,7 @@ import {
   MessageSquare, UtensilsCrossed, Bell, PartyPopper,
   Lightbulb, ClipboardList, CheckCircle, Sparkles,
   DoorOpen, Calendar, Loader2, Send, Coffee,
-  Car, SprayCan, Wrench, HelpCircle, ArrowRight, User,
+  Car, SprayCan, Wrench, HelpCircle, ArrowRight, User, Settings, LayoutDashboard,
 } from "lucide-react";
 
 const SERVICE_TYPES = [
@@ -442,6 +442,52 @@ export default function GuestActionDashboard() {
               />
             </motion.div>
           ))}
+        </motion.div>
+      </div>
+
+      <div>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+          {t("nav.group.system", "System")}
+        </p>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.18 }}
+          className="grid grid-cols-3 gap-3"
+          data-testid="guest-system-nav-grid"
+        >
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="flex flex-col items-center gap-2.5 p-4 rounded-2xl border border-border bg-card hover:border-primary/40 hover:shadow-md transition-all duration-200"
+            data-testid="nav-card-dashboard"
+          >
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-primary/10">
+              <LayoutDashboard className="h-5 w-5 text-primary" />
+            </div>
+            <span className="text-xs font-semibold text-center leading-tight">{t("common.dashboard", "Dashboard")}</span>
+          </button>
+
+          <button
+            onClick={() => navigate("/notifications")}
+            className="flex flex-col items-center gap-2.5 p-4 rounded-2xl border border-border bg-card hover:border-amber-400/50 hover:shadow-md transition-all duration-200"
+            data-testid="nav-card-notifications"
+          >
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-amber-500/10">
+              <Bell className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            </div>
+            <span className="text-xs font-semibold text-center leading-tight">{t("common.notifications", "Notifications")}</span>
+          </button>
+
+          <button
+            onClick={() => navigate("/settings")}
+            className="flex flex-col items-center gap-2.5 p-4 rounded-2xl border border-border bg-card hover:border-slate-400/50 hover:shadow-md transition-all duration-200"
+            data-testid="nav-card-settings"
+          >
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-500/10">
+              <Settings className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+            </div>
+            <span className="text-xs font-semibold text-center leading-tight">{t("common.settings", "Settings")}</span>
+          </button>
         </motion.div>
       </div>
 

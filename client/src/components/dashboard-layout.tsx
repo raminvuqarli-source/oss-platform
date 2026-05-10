@@ -838,6 +838,30 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   };
 
+  if (user.role === "guest") {
+    return (
+      <div className="flex flex-col min-h-screen bg-background">
+        <header className="flex items-center justify-between gap-2 px-4 py-2.5 border-b shrink-0">
+          <div className="flex items-center gap-2">
+            <a href="/" onClick={e => { e.preventDefault(); navigate("/"); }} className="flex items-center gap-2">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                <Building2 className="size-4" />
+              </div>
+              <span className="font-semibold text-sm">O.S.S</span>
+            </a>
+          </div>
+          <div className="flex items-center gap-1">
+            <LanguageSwitcher user={user} />
+            <ThemeToggle />
+          </div>
+        </header>
+        <main className="flex-1 overflow-auto p-3 sm:p-6 pb-6">
+          {children}
+        </main>
+      </div>
+    );
+  }
+
   const startOpen = typeof window !== "undefined" ? window.innerWidth >= 768 : true;
 
   return (
