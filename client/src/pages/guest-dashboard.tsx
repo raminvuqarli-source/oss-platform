@@ -54,6 +54,7 @@ import {
   XCircle,
   Bell,
   ArrowLeft,
+  ShieldCheck,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -70,6 +71,7 @@ const getServiceTypes = (t: any) => [
   { value: "housekeeping", label: t('services.housekeeping', 'Housekeeping'), icon: SprayCan, description: t('serviceDescriptions.housekeeping', 'Cleaning service') },
   { value: "maintenance", label: t('services.maintenance', 'Maintenance'), icon: Wrench, description: t('serviceDescriptions.maintenance', 'Technical issues') },
   { value: "concierge", label: t('services.guestExperienceServices', 'Guest Experience Services'), icon: HelpCircle, description: t('serviceDescriptions.concierge', 'Expert guest assistance') },
+  { value: "sober_driver", label: t('services.soberDriver', 'Ayıq Sürücü'), icon: ShieldCheck, description: t('serviceDescriptions.soberDriver', 'Safe designated driver service') },
 ];
 
 function RoomControlCard({

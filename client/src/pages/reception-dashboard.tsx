@@ -63,6 +63,7 @@ import {
   Sparkles,
   Users2,
   Printer,
+  ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { validatePhone } from "@/lib/validation";
@@ -90,6 +91,7 @@ const serviceIcons: Record<string, React.ElementType> = {
   housekeeping: SprayCan,
   maintenance: Wrench,
   concierge: HelpCircle,
+  sober_driver: ShieldCheck,
   other: HelpCircle,
 };
 

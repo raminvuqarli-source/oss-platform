@@ -1134,6 +1134,7 @@
     "parking": "Parken",
     "taxi": "Taxi",
     "concierge": "Gasterlebnis-Services",
+    "soberDriver": "Nüchterner Fahrer",
     "guestExperienceServices": "Gasterlebnis-Services",
     "maintenance": "Wartung",
     "coffee": "Kaffee/Tee",
@@ -1828,7 +1829,8 @@
     "roomService": "Speisen & Getränke",
     "housekeeping": "Reinigungsservice",
     "maintenance": "Technische Probleme",
-    "concierge": "Allgemeine Unterstützung"
+    "concierge": "Allgemeine Unterstützung",
+    "soberDriver": "Sicherer Fahrerservice"
   },
   "time": {
     "justNow": "Gerade eben",

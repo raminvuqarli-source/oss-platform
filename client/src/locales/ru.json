@@ -1141,6 +1141,7 @@
     "parking": "Парковка",
     "taxi": "Такси",
     "concierge": "Услуги впечатлений гостя",
+    "soberDriver": "Трезвый водитель",
     "guestExperienceServices": "Услуги впечатлений гостя",
     "maintenance": "Техническое обслуживание",
     "coffee": "Кофе/Чай",
@@ -1835,7 +1836,8 @@
     "roomService": "Еда и напитки",
     "housekeeping": "Уборка номера",
     "maintenance": "Технические вопросы",
-    "concierge": "Общая помощь"
+    "concierge": "Общая помощь",
+    "soberDriver": "Услуга трезвого водителя"
   },
   "time": {
     "justNow": "Только что",

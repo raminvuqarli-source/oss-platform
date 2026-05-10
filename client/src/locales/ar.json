@@ -1134,6 +1134,7 @@
     "parking": "موقف السيارات",
     "taxi": "سيارة أجرة",
     "concierge": "خدمات تجربة الضيف",
+    "soberDriver": "سائق مسؤول",
     "guestExperienceServices": "خدمات تجربة الضيف",
     "maintenance": "الصيانة",
     "coffee": "القهوة",
@@ -1828,7 +1829,8 @@
     "roomService": "أطعمة ومشروبات",
     "housekeeping": "خدمة التنظيف",
     "maintenance": "مشاكل تقنية",
-    "concierge": "مساعدة عامة"
+    "concierge": "مساعدة عامة",
+    "soberDriver": "خدمة سائق مسؤول وآمن"
   },
   "time": {
     "justNow": "الآن",

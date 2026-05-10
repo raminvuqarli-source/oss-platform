@@ -1134,6 +1134,7 @@
     "parking": "Parking",
     "taxi": "Taxi",
     "concierge": "Services d'Expérience Invité",
+    "soberDriver": "Chauffeur Désigné",
     "guestExperienceServices": "Services d'Expérience Invité",
     "maintenance": "Maintenance",
     "coffee": "Café / Thé",
@@ -1828,7 +1829,8 @@
     "roomService": "Restauration en chambre",
     "housekeeping": "Service de ménage",
     "maintenance": "Problèmes techniques",
-    "concierge": "Assistance générale"
+    "concierge": "Assistance générale",
+    "soberDriver": "Service de chauffeur désigné sûr"
   },
   "time": {
     "justNow": "À l'instant",

@@ -1147,6 +1147,7 @@
     "taxi": "Taxi",
     "concierge": "Guest Experience Services",
     "guestExperienceServices": "Guest Experience Services",
+    "soberDriver": "Sober Driver",
     "maintenance": "Maintenance",
     "coffee": "Coffee/Tea",
     "other": "Other",
@@ -1903,7 +1904,8 @@
     "roomService": "Food & drinks",
     "housekeeping": "Cleaning service",
     "maintenance": "Technical issues",
-    "concierge": "Expert guest assistance"
+    "concierge": "Expert guest assistance",
+    "soberDriver": "Safe designated driver service"
   },
   "time": {
     "justNow": "Just now",

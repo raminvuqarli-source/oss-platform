@@ -1134,6 +1134,7 @@
     "parking": "پارکینگ",
     "taxi": "تاکسی",
     "concierge": "خدمات تجربه مهمان",
+    "soberDriver": "راننده هشیار",
     "guestExperienceServices": "خدمات تجربه مهمان",
     "maintenance": "تعمیر و نگهداری",
     "coffee": "قهوه/چای",
@@ -1828,7 +1829,8 @@
     "roomService": "غذا و نوشیدنی",
     "housekeeping": "خدمات نظافت",
     "maintenance": "مشکلات فنی",
-    "concierge": "کمک‌رسانی عمومی"
+    "concierge": "کمک‌رسانی عمومی",
+    "soberDriver": "خدمات راننده هشیار و ایمن"
   },
   "time": {
     "justNow": "همین الان",

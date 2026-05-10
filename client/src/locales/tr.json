@@ -1141,6 +1141,7 @@
     "parking": "Otopark",
     "taxi": "Taksi",
     "concierge": "Konuk Deneyimi Hizmetleri",
+    "soberDriver": "Ayık Sürücü",
     "guestExperienceServices": "Konuk Deneyimi Hizmetleri",
     "maintenance": "Teknik Servis",
     "coffee": "Kahve/Çay",
@@ -1835,7 +1836,8 @@
     "roomService": "Yiyecek ve içecek",
     "housekeeping": "Temizlik hizmeti",
     "maintenance": "Teknik sorunlar",
-    "concierge": "Genel yardım"
+    "concierge": "Genel yardım",
+    "soberDriver": "Güvenli atanmış sürücü hizmeti"
   },
   "time": {
     "justNow": "Az önce",
