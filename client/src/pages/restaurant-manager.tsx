@@ -26,8 +26,9 @@ import {
   Sparkles, TrendingUp, Banknote, Wallet, CreditCard as CardIcon,
   ClipboardList, CheckSquare, Camera, MapPin, BarChart2, Trophy, Star,
   AlertTriangle, BadgeCheck, CalendarClock, RefreshCw, PhoneCall,
-  MessageSquare, Send, ArrowLeft, Printer,
+  MessageSquare, Send, ArrowLeft, Printer, Package,
 } from "lucide-react";
+import { InventoryPanel } from "@/components/inventory-panel";
 import { formatDistanceToNow } from "date-fns";
 import type { Locale } from "date-fns";
 import { az as azLocale, tr as trLocale, ru as ruLocale, ar as arLocale, fr as frLocale, de as deLocale, es as esLocale, nl as nlLocale } from "date-fns/locale";
@@ -454,6 +455,7 @@ export default function RestaurantManager() {
     { value: "messages", label: t("rm.tabMessages"), icon: <MessageSquare className="h-4 w-4" />, badge: 0, hotelOnly: false },
     { value: "archive", label: t("rm.tabArchive"), icon: <CalendarClock className="h-4 w-4" />, badge: 0, hotelOnly: false },
     { value: "billing", label: t("rm.tabBilling"), icon: <CreditCard className="h-4 w-4" />, badge: (subStatus?.isTrial && (subStatus?.remainingDays ?? 99) <= 5) ? 1 : 0, hotelOnly: false },
+    { value: "inventory", label: t("inventory.title", "Anbar"), icon: <Package className="h-4 w-4" />, badge: 0, hotelOnly: false },
   ];
   const tabs = allTabs.filter(tab => !tab.hotelOnly || isHotelTenant);
 
@@ -490,6 +492,7 @@ export default function RestaurantManager() {
         { value: "archive", label: t("rm.tabArchive"), icon: <CalendarClock className="h-5 w-5" />, iconBg: "bg-slate-100 dark:bg-slate-800", iconColor: "text-slate-600 dark:text-slate-400", desc: t("rm.hubDescArchive", "Completed orders"), badge: 0 },
         { value: "messages", label: t("rm.tabMessages"), icon: <MessageSquare className="h-5 w-5" />, iconBg: "bg-cyan-100 dark:bg-cyan-900", iconColor: "text-cyan-700 dark:text-cyan-300", desc: t("rm.hubDescMessages", "Staff messages"), badge: 0 },
         { value: "billing", label: t("rm.tabBilling"), icon: <Banknote className="h-5 w-5" />, iconBg: "bg-yellow-100 dark:bg-yellow-900", iconColor: "text-yellow-700 dark:text-yellow-300", desc: t("rm.hubDescBilling", "Subscription & plan"), badge: (subStatus?.isTrial && (subStatus?.remainingDays ?? 99) <= 5) ? 1 : 0 },
+        { value: "inventory", label: t("inventory.title", "Anbar"), icon: <Package className="h-5 w-5" />, iconBg: "bg-cyan-100 dark:bg-cyan-900", iconColor: "text-cyan-700 dark:text-cyan-300", desc: t("inventory.subtitle", "Stok idarəetmə sistemi"), badge: 0 },
       ],
     },
   ];
@@ -1683,6 +1686,11 @@ export default function RestaurantManager() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* ── Inventory Tab ── */}
+          <TabsContent value="inventory" className="mt-4">
+            <InventoryPanel mode={isHotelTenant ? "hotel-restaurant" : "standalone-restaurant"} />
           </TabsContent>
             </Tabs>
           </div>

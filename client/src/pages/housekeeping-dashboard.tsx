@@ -18,6 +18,7 @@ import { HousekeepingView } from "@/components/housekeeping-view";
 import { StaffMyPerformance } from "@/components/staff-my-performance";
 import { formatTimeAgo } from "@/lib/formatters";
 import type { Booking, ChatMessage, User } from "@shared/schema";
+import { InventoryPanel } from "@/components/inventory-panel";
 import {
   BedDouble,
   ClipboardList,
@@ -28,6 +29,7 @@ import {
   Activity,
   Send,
   Loader2,
+  Package,
   Calendar,
   CheckCircle,
   RefreshCw,
@@ -485,7 +487,7 @@ function HkMessagesView() {
   );
 }
 
-const VALID_VIEWS = ["rooms", "tasks", "rating", "calendar", "messages"];
+const VALID_VIEWS = ["rooms", "tasks", "rating", "calendar", "messages", "inventory"];
 
 function HousekeepingHub({ onNavigate }: { onNavigate: (v: string) => void }) {
   const { t } = useTranslation();
@@ -556,6 +558,15 @@ function HousekeepingHub({ onNavigate }: { onNavigate: (v: string) => void }) {
       iconColor: "text-indigo-500",
       view: "messages",
       testId: "hub-messages",
+    },
+    {
+      icon: Package,
+      label: t("inventory.title", "Anbar"),
+      desc: t("inventory.subtitle", "Stok idarəetmə sistemi"),
+      iconBg: "bg-cyan-500/10",
+      iconColor: "text-cyan-500",
+      view: "inventory",
+      testId: "hub-inventory",
     },
   ];
 
@@ -639,11 +650,12 @@ export default function HousekeepingDashboard() {
   const goBack = () => navigate("");
 
   const viewTitle: Record<string, string> = {
-    rooms:    t("hkDash.rooms",    "Rooms"),
-    tasks:    t("hkDash.tasks",    "Tasks"),
-    rating:   t("hkDash.rating",   "My Rating"),
-    calendar: t("hkDash.calendar", "Calendar"),
-    messages: t("hkDash.messages", "Messages"),
+    rooms:     t("hkDash.rooms",    "Rooms"),
+    tasks:     t("hkDash.tasks",    "Tasks"),
+    rating:    t("hkDash.rating",   "My Rating"),
+    calendar:  t("hkDash.calendar", "Calendar"),
+    messages:  t("hkDash.messages", "Messages"),
+    inventory: t("inventory.title", "Anbar"),
   };
 
   if (!currentView) {
@@ -668,11 +680,12 @@ export default function HousekeepingDashboard() {
       </div>
 
       <div data-testid={`hk-view-content-${currentView}`}>
-        {currentView === "rooms"    && <RoomsView />}
-        {currentView === "tasks"    && <HousekeepingView />}
-        {currentView === "rating"   && <StaffMyPerformance />}
-        {currentView === "calendar" && <HkCalendarView />}
-        {currentView === "messages" && <HkMessagesView />}
+        {currentView === "rooms"     && <RoomsView />}
+        {currentView === "tasks"     && <HousekeepingView />}
+        {currentView === "rating"    && <StaffMyPerformance />}
+        {currentView === "calendar"  && <HkCalendarView />}
+        {currentView === "messages"  && <HkMessagesView />}
+        {currentView === "inventory" && <InventoryPanel mode="hotel" />}
       </div>
     </div>
   );

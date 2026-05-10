@@ -88,6 +88,9 @@ import {
   PhoneCall,
   UserCheck,
   ChefHat,
+  Warehouse,
+  Search,
+  FileSpreadsheet,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SiWhatsapp } from "react-icons/si";
@@ -97,6 +100,7 @@ import { UpgradeModal } from "@/components/upgrade-modal";
 import { usePlanFeatures } from "@/hooks/use-plan-features";
 import { useChannexRealtime } from "@/hooks/use-channex-realtime";
 import type { ChannexBookingEvent } from "@/hooks/use-channex-realtime";
+import { InventoryPanel } from "@/components/inventory-panel";
 import type { Property, Unit, Device, Subscription, StaffInvitation, ServiceRequest, ChatMessage, Escalation, EscalationReply } from "@shared/schema";
 import { unitCategoryTypes, unitCategoryLabels, staffRoleLabels, type UnitCategory, type StaffRole, expenseCategories, revenueCategories, type EscalationStatus } from "@shared/schema";
 import { Textarea } from "@/components/ui/textarea";
@@ -6299,6 +6303,8 @@ export default function OwnerDashboard() {
             <RestaurantFinanceView />
           </div>
         );
+      case "inventory":
+        return <InventoryPanel mode="all" />;
       default:
         return <OwnerActionGrid />;
     }
@@ -6388,6 +6394,18 @@ export default function OwnerDashboard() {
           { icon: ChefHat, label: t("nav.kitchenDisplay", "Mətbəx (KDS)"), iconBg: "bg-orange-500/10", iconColor: "text-orange-500", action: () => navigate("/restaurant/kitchen"), testId: "hub-rest-kitchen" },
           { icon: Utensils, label: t("nav.waiterView", "Qarson Görünüşü"), iconBg: "bg-amber-500/10", iconColor: "text-amber-500", action: () => navigate("/restaurant/waiter"), testId: "hub-rest-waiter" },
           { icon: Wallet, label: t("nav.cashierTables", "Kassa"), iconBg: "bg-green-500/10", iconColor: "text-green-500", action: () => navigate("/restaurant/cashier"), testId: "hub-rest-cashier" },
+        ],
+      },
+      {
+        label: t("inventory.title", "Anbar"),
+        desc: t("inventory.subtitle", "Stok idarəetmə sistemi"),
+        headerIcon: Warehouse,
+        headerColor: "text-cyan-500",
+        items: [
+          { icon: Warehouse, label: t("inventory.title", "Anbar"), iconBg: "bg-cyan-500/10", iconColor: "text-cyan-500", action: () => navigate("/dashboard?view=inventory"), testId: "hub-inventory" },
+          { icon: Building2, label: t("inventory.tabHotel", "Otel Anbarı"), iconBg: "bg-blue-500/10", iconColor: "text-blue-500", action: () => navigate("/dashboard?view=inventory"), testId: "hub-inventory-hotel" },
+          { icon: UtensilsCrossed, label: t("inventory.tabHotelRestaurant", "Daxili Restoran"), iconBg: "bg-orange-500/10", iconColor: "text-orange-500", action: () => navigate("/dashboard?view=inventory"), testId: "hub-inventory-hr" },
+          { icon: ChefHat, label: t("inventory.tabStandaloneRestaurant", "Müstəqil Restoran"), iconBg: "bg-rose-500/10", iconColor: "text-rose-500", action: () => navigate("/dashboard?view=inventory"), testId: "hub-inventory-sr" },
         ],
       },
     ];
