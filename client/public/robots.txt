@@ -15,4 +15,4 @@ Disallow: /owner/
 Disallow: /marketing
 Disallow: /api/
 
-Sitemap: https://ossaipro.com/sitemap.xml
+Sitemap: https://ossaiproapp.com/sitemap.xml
